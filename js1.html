@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조건문, 반복문 테스트</title>
+</head>
+<body>
+    <h1>과제</h1>
+    <button onclick="loginLoop('')">로그인</button>
+<script>
+        function loginLoop(nameTemp = '') {
+            let newName = prompt('당신의 이름은 무엇입니까?', nameTemp);
+            if (newName == undefined) {
+                alert('로그인 안 할 거면 이 버튼을 누르지나 말지...');
+                return;
+            }
+            if (newName.length > 6) {
+                alert('로그인 성공!');
+                return newName;
+            }
+            newName.length == 0 ? alert("이름이 없는 사람에게 로그인 권한을 줄 수는 없습니다.") : alert('너무 짧다는 생각이 들지는 않으신지요? 다시 입력할 기회를 드리지요.');
+            return loginLoop(newName);
+        }
+    </script>
+</body>
+</html>
