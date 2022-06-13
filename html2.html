@@ -1,0 +1,102 @@
+<html lang="ko">
+<head>
+    <title>태그 배워보기</title>
+</head>
+<body>
+    <header>
+        <h1>오늘은 태그를 한 번 배워보겠습니다.</h1>
+    </header>
+    <main>
+        <article>
+            <h2>&lt;table&gt;</h2>
+            <p>table 요소는 행과 열로 이루어진 표를 만드는 것이다.</p>
+            <details>
+                <summary>속성</summary>
+                <p><s>그런 거 없다. css는 장식인가?</s></p>
+            </details>
+            <details>
+                <summary>하위 요소</summary>
+                <section>
+                    <h3>&lt;caption&gt;</h3>
+                    <p>표의 제목이다. 맹인을 우롱하고 싶으면 안적어도 된다...</p>
+                </section>
+                <section>
+                    <h3>&lt;thead&gt;, &lt;tbody&gt;, &lt;tfoot&gt;</h3>
+                    <p>표의 머릿글, 본문, 바닥글이다. 없는 건 자유지만 이상하게 잘렸다면 내 팔자려니 하면 된다.</p>
+                </section>
+                <section>
+                    <h3>&lt;colgroup&gt;</h3>
+                    <p><s>맹인한테 어차피 보이지도 않는 걸 왜 내가 가르쳐 줘야 하나?</s></p>
+                </section>
+                <section>
+                    <h3>&lt;tr&gt;</h3>
+                    <p>행을 선언한다. 하나만 선언하면 센스리더를 바보로 만들 수 있겠지...</p>
+                </section>
+                <section>
+                    <h3>&lt;th&gt;</h3>
+                    <p>행 내에 열 한 칸을 선언하고 그 칸은 행 제목 또는 열 제목으로 삼는다. 열 제목인지 행 제목인지는 scope 속성으로 지정하던지 말던지...</p>
+                </section>
+                <section>
+                    <h3>&lt;td&gt;</h3>
+                    <p>행 내에 열 한 칸을 선언한다. colspan, rowspan 속성을 남발하여 훌륭한 스파게티를 만들 수 있으리라.</p>
+                </section>
+            </details>
+            <details>
+                <summary>표 생성기.</summary>
+                <form action="">
+                    <fieldset>
+                        <legend>표 제목</legend>
+                        <label for="t_name">제목을 입력하십시오.</label>
+                        <input type="text" id="t_name">
+                    </fieldset>
+                    <fieldset>
+                        <legend>표 크기</legend>
+                        <label for="t_col">행을 입력하십시오.</label>
+                        <input type="number" id="t_col">
+                        <label for="t_row">열을 입력하십시오.</label>
+                        <input type="number" id="t_row">
+                    </fieldset>
+                    <fieldset>
+                        <legend>제출</legend>
+                        <a role="button" href="#" onclick="createTable();">생성</a>
+                    </fieldset>
+                </form>
+            </details>
+            <div id="t_result"></div>
+        </article>
+    </main>
+    <footer>
+        <p>&copy; ajackpot</p>
+    </footer>
+    <script>
+        let createTable = function() {
+            let t_col = Number(document.getElementById('t_col').value);
+            if (isNaN(t_col)) return;
+            let t_row = Number(document.getElementById('t_row').value);
+            if (isNaN(t_row)) return;
+            let t_name = String(document.getElementById('t_name').value);
+            if (!t_name) return;
+            document.getElementById('t_name').value = undefined;
+            document.getElementById('t_col').value = undefined;
+            document.getElementById('t_row').value = undefined;
+            let result = '<h2>결과</h2><table><caption>' + t_name + '</caption>';
+                for (let i = 0; i <= t_col; i++) {
+                    result += '<tr>';
+                    for (let j = 0; j <= t_row; j++) {
+                        if (j == 0) {
+                            if (i == 0) result += '<td></td>';
+                            else result += '<th scope="row">' + i + '행</th>';
+                        }
+                        else {
+                            if (i == 0) result += '<th scope="col">' + j + '열</th>';
+                            else result += '<td>' + (((i - 1) * t_row) + j) + '</td>';
+                        }
+                    }
+                    result += '</tr>';
+                }
+            result += '</table>';
+            document.getElementById('t_result').innerHTML = result;
+        }
+    </script>
+</body>
+</html>
