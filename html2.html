@@ -79,23 +79,33 @@
             document.getElementById('t_name').value = undefined;
             document.getElementById('t_col').value = undefined;
             document.getElementById('t_row').value = undefined;
+            let startTime = new Date();
             let result = '<h2>결과</h2><table><caption>' + t_name + '</caption>';
-                for (let i = 0; i <= t_col; i++) {
-                    result += '<tr>';
-                    for (let j = 0; j <= t_row; j++) {
-                        if (j == 0) {
-                            if (i == 0) result += '<td></td>';
-                            else result += '<th scope="row">' + i + '행</th>';
-                        }
-                        else {
-                            if (i == 0) result += '<th scope="col">' + j + '열</th>';
-                            else result += '<td>' + (((i - 1) * t_row) + j) + '</td>';
-                        }
+            let open_tr = '<tr>';
+            let close_tr = '</tr>';
+            let open_th_col = '<th scope="col">';
+            let close_th_col = '열</th>';
+            let open_th_row = '<th scope="row">';
+            let close_th_row = '행</th>';
+            let open_td = '<td>';
+            let close_td = '</td>';
+            for (let i = 0; i <= t_col; i++) {
+                result += open_tr;
+                for (let j = 0; j <= t_row; j++) {
+                    if (j == 0) {
+                        if (i == 0) result += '<td></td>';
+                        else result += open_th_row + i + close_th_row;
                     }
-                    result += '</tr>';
+                    else {
+                        if (i == 0) result += open_th_col + j + close_th_col;
+                        else result += open_td + (((i - 1) * t_row) + j) + close_td;
+                    }
                 }
-            result += '</table>';
-            document.getElementById('t_result').innerHTML = result;
+                result += close_tr;
+            }
+            document.getElementById('t_result').innerHTML = result + '</table>';
+            let endTime = new Date();
+        alert(Number(endTime - startTime) + "밀리초가 걸렸습니다. 결과를 확인해보세요.  ");
         }
     </script>
 </body>
