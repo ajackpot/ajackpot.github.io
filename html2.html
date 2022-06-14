@@ -91,6 +91,7 @@
             let close_td = '</td>';
             for (let i = 0; i <= t_col; i++) {
                 result += open_tr;
+                let current_col = (i - 1) * t_row;
                 for (let j = 0; j <= t_row; j++) {
                     if (j == 0) {
                         if (i == 0) result += '<td></td>';
@@ -98,7 +99,7 @@
                     }
                     else {
                         if (i == 0) result += open_th_col + j + close_th_col;
-                        else result += open_td + (((i - 1) * t_row) + j) + close_td;
+                        else result += open_td + (current_col + j) + close_td;
                     }
                 }
                 result += close_tr;
