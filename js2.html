@@ -1,0 +1,81 @@
+  <!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>몇 가지 알고리즘</title>
+</head>
+<body>
+  <form action="">
+    <label for="numArray">쉼표로 구분하여 숫자 입력</label>
+    <input type="text" id="numArray">
+    <button onClick="getMaxMinNum();">최대/최소값 출력</button>
+  </form>
+  <form action="">
+    <label for="str1">원본 텍스트</label>
+    <input type="text" id="str1">
+    <label for="str2">찾을 문자열</label>
+    <input type="text" id="str2">
+    <button onClick="getChars();">글자수 출력</button>
+  </form>
+  <form action="">
+    <label for="num1">첫번째 숫자</label>
+    <input type="number" id="num1">
+    <label for="num2">두번째 숫자</label>
+    <input type="number" id="num2">
+    <button onClick="plusInt();">첫번째 숫자부터 두번째 숫자까지 더하기</button>
+  </form>
+  <form action="">
+    <label for="tArray">문자열을 입력하세요.</label>
+    <input type="text" id="tArray">
+    <button onClick="getStrReverse();">글자 뒤집기</button>
+  </form>
+<script>
+function getMaxMinNum() {
+  // 입력창에 있는 값 가져와서 자동으로 배열로 바꾸기
+  let numArray = document.getElementById("numArray").value.split(',');
+  // 결과 변수 선언
+  // 첫번째값 대입.
+  let maxNum = Number(numArray[0]);
+  let minNum = Number(numArray[0]);
+  for (let i=1;i<numArray.length;i++) {
+    // 최대값
+    if (maxNum < Number(numArray[i])) {
+      maxNum = numArray[i];
+    }
+
+    // 최소값
+    else if (minNum > Number(numArray[i])) {
+      minNum = numArray[i];
+    }
+  }
+  // 출력
+  alert("최대값은 "+maxNum+",최소값은 "+minNum);
+}
+
+function getChars() {
+  let inputStr1 = document.getElementById("str1").value;
+  let inputStr2 = document.getElementById("str2").value;
+  let strCnt = 0;
+  for (ch of inputStr1) {
+    if (inputStr2 === ch) strCnt++;
+  }
+  alert(strCnt + '개 찾았습니다.');
+}
+
+function plusInt() {
+  let num1 = Number(document.getElementById("num1").value);
+  let num2 = Number(document.getElementById("num2").value);
+  alert('결과는 ' + ((num1 + num2) * 0.5 * (Math.abs(num1 - num2) + 1)) + '입니다.');
+}
+
+function getStrReverse() {
+  let inputStr = document.getElementById("tArray").value;
+  let result = "";
+  for (i = inputStr.length - 1; i >= 0; i--) {
+    result += inputStr[i];
+  }
+  alert(result);
+}
+</script>
+</body>
+</html>
