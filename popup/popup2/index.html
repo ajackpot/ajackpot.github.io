@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - inert dialog</title>
+  <link rel='stylesheet' href='https://codepen.io/web-dot-dev/pen/VwWxBgV/54c079f4ba2f7cf20163b8bd89280de2.css'>
+<link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'><link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<main>
+  <h1>Dialog Demo</h1>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto recusandae amet, rerum quasi quaerat ipsum nam earum vitae distinctio deleniti. Rerum earum excepturi ab, totam tenetur fuga praesentium illum repudiandae.</p>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto recusandae amet, rerum quasi quaerat ipsum nam earum vitae distinctio deleniti. Rerum earum excepturi ab, totam tenetur fuga praesentium illum repudiandae.</p>
+  
+  
+  <!-- Dialog Button -->
+  <button onclick="window.dialog.showModal();">
+    Open Dialog
+  </button>
+</main>
+
+<!-- Dialog Popup -->
+<dialog id="dialog" class="">
+  <h2>Hello.</h2>
+  <p>I'm a dialog element that is open.</p>
+  <p>The rest of the page is inert while I'm open - try clicking anywhere else on the page to test.</p>
+  <button onclick="window.dialog.close();" aria-label="close" class="x">❌</button>
+</dialog>
+<!-- partial -->
+  <script src='https://code.jquery.com/jquery-1.10.2.js'></script>
+<script src='https://code.jquery.com/ui/1.10.4/jquery-ui.js'></script>
+</body>
+</html>
