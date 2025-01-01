@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>alert 역할 테스트</title>
+  <meta charset="utf-8">
+  <style>
+.hidden {
+  display: none;
+}
+.alert3:empty {
+  display: none;
+}
+.visually-hidden {
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+  position: absolute;
+}
+  </style>
+</head>
+<body>
+  <h1>예제 1) display: none 속성 제거하기</h1>
+  <div role="alert" id="content1" class="hidden">1번 경보입니다.</div>
+  <button id="button1">1번 경보 띄우기</button>
+  <h1>예제 2) 내부 텍스트 조작하기</h1>
+  <div role="alert" id="content2">2번 경보 메시지 영역</div>
+  <button id="button2">2번 경보 띄우기</button>
+  <h1>예제 3) CSS 선택자를 이용하여 자동으로 사라지게 한 경보 메시지</h1>
+  <div role="alert" id="content3" class="alert3"></div>
+  <button id="button3">3번 경보 띄우기</button>
+  <h1>예제 4) 시각적으로 숨겨진 요소 내부 텍스트 조작하기</h1>
+  <div role="alert" id="content4" class="visually-hidden">4번 경보 메시지 영역</div>
+  <button id="button4">4번 경보 띄우기</button>
+  <h1>예제 5) 평범한 div 요소에 alert 역할 추가하기</h1>
+  <div id="content5">5번 경보입니다.</div>
+  <button id="button5">5번 경보 띄우기</button>
+</body>
+<script>
+  let timeoutID;
+  const alertMessage1 = document.getElementById("content1");
+  const btnAlert1 = document.getElementById("button1");
+  btnAlert1.addEventListener("click", showAlert1);
+  const alertMessage2 = document.getElementById("content2");
+  const btnAlert2 = document.getElementById("button2");
+  btnAlert2.addEventListener("click", showAlert2);
+  const alertMessage3 = document.getElementById("content3");
+  const btnAlert3 = document.getElementById("button3");
+  btnAlert3.addEventListener("click", showAlert3);
+  const alertMessage4 = document.getElementById("content4");
+  const btnAlert4 = document.getElementById("button4");
+  btnAlert4.addEventListener("click", showAlert4);
+  const alertMessage5 = document.getElementById("content5");
+  const btnAlert5 = document.getElementById("button5");
+  btnAlert5.addEventListener("click", showAlert5);
+
+  function showAlert1() {
+    alertMessage1.classList.remove("hidden");
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(() => {
+      alertMessage1.classList.add("hidden");
+    }, 3000);
+  }
+
+  function showAlert2() {
+    alertMessage2.textContent = "";
+    alertMessage2.textContent = "2번 경보입니다.";
+  }
+
+  function showAlert3() {
+    alertMessage3.innerHTML = "3번 경보입니다.";
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(() => {
+      alertMessage3.innerHTML = "";
+    }, 3000);
+  }
+
+  function showAlert4() {
+    alertMessage4.textContent = "";
+    alertMessage4.textContent = "4번 경보입니다.";
+  }
+
+  function showAlert5() {
+    alertMessage5.setAttribute("role", "alert");
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(() => {
+      alertMessage5.removeAttribute("role");
+    }, 3000);
+  }
+</script>
+</html>
