@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>과일 검색 결과</title>
+</head>
+<body>
+  <h1>과일 검색 결과</h1>
+  <input type="text" id="searchInput" placeholder="과일 이름 영어로 입력">
+  <button id="searchBtn">검색</button>
+  <div id="results"></div>
+
+  <script>
+    // 과일 데이터베이스 (30개 이상의 유명 과일)
+    const fruits = [
+      "Apple", "Banana", "Orange", "Strawberry", "Kiwi", "Pineapple", "Mango",
+      "Papaya", "Watermelon", "Grape", "Cherry", "Peach", "Pear", "Plum",
+      "Grapefruit", "Lemon", "Lime", "Blueberry", "Raspberry", "Blackberry",
+      "Pomegranate", "Apricot", "Coconut", "Fig", "Guava", "Melon", "Cranberry",
+      "Tangerine", "Cantaloupe", "Dragonfruit"
+    ];
+
+    // URL에서 쿼리 파라미터를 가져오는 함수
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param) || "";
+    }
+
+    // 첫번째 페이지에서 전달받은 값을 검색 필드에 설정
+    const query = getQueryParam("q");
+    document.getElementById("searchInput").value = query;
+
+    // 과일 검색 함수
+    function searchFruits() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+      // 과일 이름에 검색어가 포함되어 있는지 필터링
+      const filteredFruits = fruits.filter(fruit => fruit.toLowerCase().includes(searchTerm));
+      
+      if (filteredFruits.length > 0) {
+        const ul = document.createElement("ul");
+        filteredFruits.forEach(fruit => {
+          const li = document.createElement("li");
+          li.textContent = fruit;
+          ul.appendChild(li);
+        });
+        resultsDiv.appendChild(ul);
+      } else {
+        resultsDiv.textContent = "검색 결과가 없습니다.";
+      }
+    }
+
+    // 페이지 로드시 쿼리 값이 있으면 자동으로 검색 수행
+    if(query) {
+      searchFruits();
+    }
+
+    // 검색 버튼 클릭 시 검색 실행
+    document.getElementById("searchBtn").addEventListener("click", searchFruits);
+  </script>
+</body>
+</html>
