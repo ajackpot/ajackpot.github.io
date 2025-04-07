@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보조기기 구매 신청</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 300px;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>보조기기 구매 신청</h1>
+  <p>
+    국가 장애인 지원 센터에서는 새로 출시된 보조기기 '헬퍼봇'을 장애인 분들에게 보급합니다.
+    아래 신청 양식을 작성하여 보조기기 구매 신청을 진행해 주세요.
+  </p>
+  <form>
+    <!-- 이름 입력란 -->
+    <div class="form-group">
+      <label for="name">이름</label>
+      <input type="text" id="name" name="name" placeholder="이름을 입력하세요">
+    </div>
+    <!-- 연락처 입력란 -->
+    <div class="form-group">
+      <label for="contact">연락처 (이메일/전화번호)</label>
+      <input type="text" id="contact" name="contact" placeholder="이메일 또는 전화번호를 입력하세요">
+    </div>
+    <!-- 거주 주소 입력란 -->
+    <div class="form-group">
+      <label for="residentialAddress">거주 주소</label>
+      <input type="text" id="residentialAddress" name="residentialAddress" placeholder="거주 주소를 입력하세요">
+    </div>
+    <!-- 보조기기 수령 주소 입력란 -->
+    <div class="form-group">
+      <label for="deliveryAddress">보조기기 수령 주소</label>
+      <input type="text" id="deliveryAddress" name="deliveryAddress" placeholder="수령 주소를 입력하세요">
+    </div>
+    <!-- '거주 주소로 설정' 확인란 -->
+    <div class="form-group">
+      <input type="checkbox" id="sameAsResidential" name="sameAsResidential">
+      <label for="sameAsResidential">거주 주소로 설정</label>
+    </div>
+    <!-- 구매 신청 사유 입력란 -->
+    <div class="form-group">
+      <label for="reason">구매 신청 사유</label>
+      <textarea id="reason" name="reason" placeholder="구매 신청 사유를 입력하세요" rows="4"></textarea>
+    </div>
+    <button type="submit">신청하기</button>
+  </form>
+  <script>
+    const residentialAddress = document.getElementById('residentialAddress');
+    const deliveryAddress = document.getElementById('deliveryAddress');
+    const sameAsResidential = document.getElementById('sameAsResidential');
+
+    // 체크 상태 변경 시 동작 구현
+    sameAsResidential.addEventListener('change', function() {
+      if (this.checked) {
+        // 체크된 경우: 거주 주소 값을 수령 주소에 복사 및 동기화
+        deliveryAddress.value = residentialAddress.value;
+        residentialAddress.addEventListener('input', syncAddresses);
+      } else {
+        // 체크 해제된 경우: 수령 주소 값 삭제 및 동기화 이벤트 제거
+        deliveryAddress.value = '';
+        residentialAddress.removeEventListener('input', syncAddresses);
+      }
+    });
+
+    function syncAddresses() {
+      deliveryAddress.value = residentialAddress.value;
+    }
+  </script>
+</body>
+</html>
