@@ -1,0 +1,385 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --panel-border: #d7dce7;
+  --text: #1d2433;
+  --muted: #5f6b83;
+  --accent: #2458e7;
+  --accent-soft: #dce6ff;
+  --square-light: #f0d9b5;
+  --square-dark: #b58863;
+  --square-selected: #0f8bff;
+  --square-legal: rgba(30, 144, 255, 0.28);
+  --shadow: 0 10px 30px rgba(20, 32, 60, 0.08);
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+input,
+select,
+dialog {
+  border-radius: 12px;
+}
+
+button,
+input,
+select {
+  border: 1px solid #b8c1d4;
+  background: #fff;
+  color: var(--text);
+  padding: 0.72rem 0.9rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover,
+select:hover,
+input:hover {
+  border-color: #8da0d0;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.square-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button[disabled],
+input[disabled],
+select[disabled] {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: #f0f3fa;
+}
+
+.app-header {
+  padding: 1.5rem clamp(1rem, 3vw, 2rem) 0.5rem;
+}
+
+.app-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.app-header p {
+  margin: 0;
+  max-width: 70rem;
+  color: var(--muted);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(17rem, 22rem) minmax(25rem, 1fr) minmax(18rem, 24rem);
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 2rem;
+  align-items: start;
+}
+
+.panel,
+.sub-panel,
+.board-region {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.panel {
+  padding: 1rem;
+}
+
+.panel > h2,
+.sub-panel > h3,
+.board-region > h2 {
+  margin-top: 0;
+}
+
+.controls-panel,
+.info-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+.stack-form,
+.stack-form fieldset {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.stack-form fieldset {
+  border: 1px solid var(--panel-border);
+  padding: 1rem;
+}
+
+.stack-form legend {
+  font-weight: 700;
+  padding-inline: 0.35rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.checkbox-row input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  padding: 0;
+}
+
+.helper-text,
+.hint-text,
+.selection-summary,
+.empty-state {
+  color: var(--muted);
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.action-buttons button {
+  flex: 1 1 9rem;
+}
+
+.board-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.board-region {
+  padding: 1rem;
+}
+
+.chess-board {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.chess-board caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+
+.board-axis {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.92rem;
+  padding: 0.25rem;
+}
+
+.board-cell {
+  padding: 0.12rem;
+}
+
+.square-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: clamp(3.2rem, 7vw, 5.3rem);
+  padding: 0.25rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.square-light {
+  background: var(--square-light);
+}
+
+.square-dark {
+  background: var(--square-dark);
+}
+
+.square-symbol {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1;
+}
+
+.square-coordinate {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(29, 36, 51, 0.78);
+}
+
+.square-piece-text {
+  display: none;
+}
+
+.square-selected {
+  border-color: var(--square-selected);
+  box-shadow: inset 0 0 0 999px rgba(36, 88, 231, 0.15);
+}
+
+.square-legal {
+  box-shadow: inset 0 0 0 999px var(--square-legal);
+}
+
+.square-legal::after {
+  content: '';
+  position: absolute;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: rgba(29, 36, 51, 0.25);
+}
+
+.square-selected.square-legal::after {
+  background: rgba(36, 88, 231, 0.65);
+}
+
+.status-panel,
+.sub-panel {
+  padding: 1rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.status-grid.compact-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.status-grid dt {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.status-grid dd {
+  margin: 0;
+  min-height: 1.4rem;
+  color: var(--muted);
+}
+
+.move-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.move-history-table th,
+.move-history-table td {
+  border-bottom: 1px solid #e4e8f1;
+  padding: 0.45rem 0.35rem;
+  text-align: left;
+}
+
+.move-history-table th {
+  font-weight: 700;
+}
+
+.promotion-form {
+  display: grid;
+  gap: 1rem;
+  min-width: min(32rem, 92vw);
+}
+
+.promotion-form fieldset {
+  border: 1px solid var(--panel-border);
+  padding: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.promotion-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.promotion-form input[type='radio'] {
+  margin: 0;
+}
+
+dialog {
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  padding: 1.2rem;
+}
+
+dialog::backdrop {
+  background: rgba(14, 19, 34, 0.42);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1180px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .controls-panel,
+  .info-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .status-grid,
+  .status-grid.compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons button {
+    flex-basis: 100%;
+  }
+}
