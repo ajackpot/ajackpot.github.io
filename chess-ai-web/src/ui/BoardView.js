@@ -61,6 +61,8 @@ export class BoardView {
   }
 
   update({ game, selectedSquare, legalDestinations, orientation, engineThinking, focusSquare }) {
+    const boardHadFocus = this.wrapper.contains(document.activeElement);
+
     if (orientation) {
       this.setOrientation(orientation);
     }
@@ -111,7 +113,7 @@ export class BoardView {
     }
 
     this.table.setAttribute('aria-busy', engineThinking ? 'true' : 'false');
-    if (focusSquare && this.squareButtons.get(focusSquare)) {
+    if (boardHadFocus && focusSquare && this.squareButtons.get(focusSquare)) {
       this.squareButtons.get(focusSquare).focus();
       this.lastFocusedSquare = focusSquare;
     }
