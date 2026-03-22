@@ -17,6 +17,13 @@ function joinCoords(coords) {
   return coords.join(', ');
 }
 
+function joinNames(names) {
+  if (!Array.isArray(names) || names.length === 0) {
+    return '없음';
+  }
+  return names.join(' / ');
+}
+
 export function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -95,7 +102,8 @@ export function formatResolvedOptionsList(options) {
   }
 
   return [
-    { label: '프리셋', value: options.label ?? options.presetKey ?? '알 수 없음' },
+    { label: '난이도 프리셋', value: options.label ?? options.presetKey ?? '알 수 없음' },
+    { label: '스타일 프리셋', value: options.styleLabel ?? options.styleKey ?? '알 수 없음' },
     { label: '최대 탐색 깊이', value: String(options.maxDepth) },
     { label: '수 읽기 제한 시간', value: `${options.timeLimitMs}ms` },
     { label: '후반 완전 탐색 시작 빈칸 수', value: String(options.exactEndgameEmpties) },
@@ -103,9 +111,15 @@ export function formatResolvedOptionsList(options) {
     { label: '초근접 수 무작위성 범위', value: String(options.randomness) },
     { label: '전이표 최대 엔트리 수', value: String(options.maxTableEntries) },
     { label: '기동성 배율', value: String(options.mobilityScale) },
+    { label: '잠재 기동성 배율', value: String(options.potentialMobilityScale) },
+    { label: '코너 배율', value: String(options.cornerScale) },
+    { label: '코너 인접 위험 배율', value: String(options.cornerAdjacencyScale) },
     { label: '안정성 배율', value: String(options.stabilityScale) },
     { label: '프런티어 배율', value: String(options.frontierScale) },
     { label: '위치 배율', value: String(options.positionalScale) },
+    { label: '패리티 배율', value: String(options.parityScale) },
+    { label: '돌 수 배율', value: String(options.discScale) },
+    { label: '위험 칸 패널티 배율', value: String(options.riskPenaltyScale) },
   ];
 }
 
@@ -113,8 +127,9 @@ export function formatEngineSummaryLine(options) {
   if (!options) {
     return '엔진 설정 정보가 없습니다.';
   }
-  const label = options.label ?? options.presetKey ?? '알 수 없음';
-  return `${label} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하`;
+  const presetLabel = options.label ?? options.presetKey ?? '알 수 없음';
+  const styleLabel = options.styleLabel ?? options.styleKey ?? '알 수 없음';
+  return `${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하`;
 }
 
 export function formatSearchSummary(result) {
@@ -127,14 +142,25 @@ export function formatSearchSummary(result) {
   }
 
   const best = result.bestMoveCoord ? `추천 ${result.bestMoveCoord}` : (result.didPass ? '패스' : '결과 없음');
+  const elapsed = result.stats?.elapsedMs ?? 0;
+
+  if (result.source === 'opening-book') {
+    const names = result.bookHit?.chosenNames ?? result.bookHit?.matchedNames ?? result.bookHit?.topNames ?? [];
+    const candidateCount = result.bookHit?.candidateCount ?? 0;
+    return `${best}, 오프닝북 직선택, 대표 계열 ${joinNames(names)}, 후보 ${candidateCount}개, 시간 ${elapsed}ms.`;
+  }
+
   const depth = result.stats?.completedDepth ?? 0;
   const nodes = result.stats?.nodes ?? 0;
-  const elapsed = result.stats?.elapsedMs ?? 0;
+  const ttHits = result.stats?.ttHits ?? 0;
   const score = Number.isFinite(result.score) ? result.score : 0;
   const pv = Array.isArray(result.principalVariation) && result.principalVariation.length > 0
     ? result.principalVariation.map((index) => indexToCoord(index)).join(' → ')
     : '없음';
-  return `${best}, 평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, 시간 ${elapsed}ms, 주 변형 ${pv}.`;
+  const bookNote = result.bookHit
+    ? ` 오프닝북 참고 ${joinNames(result.bookHit.matchedNames?.length ? result.bookHit.matchedNames : result.bookHit.topNames)}.`
+    : '';
+  return `${best}, 평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
 }
 
 export function formatStateAnnouncement(state) {

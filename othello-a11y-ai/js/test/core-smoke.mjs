@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { GameState } from '../core/game-state.js';
 import { SearchEngine } from '../ai/search-engine.js';
 import { Evaluator } from '../ai/evaluator.js';
+import { lookupOpeningBook, getOpeningBookSummary } from '../ai/opening-book.js';
+import { resolveEngineOptions } from '../ai/presets.js';
 
 function coordinatesOfLegalMoves(state) {
   return state.getLegalMoves().map((move) => move.coord).sort();
@@ -44,6 +46,34 @@ function runEvaluatorTests() {
   assert.notEqual(progressedScore, initialScore, 'A changed position should usually change the evaluation.');
 }
 
+function runOpeningBookTests() {
+  const summary = getOpeningBookSummary();
+  assert.equal(summary.seedLineCount, 99, 'Compact opening book should expose the expected number of seed lines.');
+  assert.ok(summary.positionCount > 300, 'Opening book should expand into a few hundred reachable positions.');
+  assert.ok(summary.maxDepthPly >= 12, 'Opening book should cover a meaningful portion of the opening.');
+
+  const initial = GameState.initial();
+  const initialHit = lookupOpeningBook(initial);
+  assert.ok(initialHit, 'Initial position should be present in the opening book.');
+  assert.equal(initialHit.candidateCount, 4, 'Initial position should expose all four standard first moves.');
+
+  const diagonalState = initial.applyMove(initial.getLegalMoves().find((move) => move.coord === 'D3').index).state;
+  const diagonalHit = lookupOpeningBook(diagonalState);
+  assert.ok(diagonalHit, 'Symmetric early openings should also be found in the opening book.');
+}
+
+function runPresetResolutionTests() {
+  const balanced = resolveEngineOptions('strong', {}, 'balanced');
+  const aggressive = resolveEngineOptions('strong', {}, 'aggressive');
+  const fortress = resolveEngineOptions('strong', {}, 'fortress');
+
+  assert.equal(balanced.styleKey, 'balanced');
+  assert.equal(aggressive.styleKey, 'aggressive');
+  assert.ok(aggressive.mobilityScale > balanced.mobilityScale, 'Aggressive style should raise mobility emphasis.');
+  assert.ok(fortress.stabilityScale > balanced.stabilityScale, 'Fortress style should raise stability emphasis.');
+  assert.ok(fortress.randomness <= aggressive.randomness, 'Fortress style should stay at least as deterministic as aggressive.');
+}
+
 function runSearchTests() {
   const engine = new SearchEngine({
     presetKey: 'custom',
@@ -59,16 +89,43 @@ function runSearchTests() {
   const legalMoveIndices = new Set(initial.getLegalMoveIndices());
 
   assert.ok(legalMoveIndices.has(result.bestMoveIndex), 'Engine must return a legal move.');
-  assert.ok(result.stats.completedDepth >= 1, 'Engine should complete at least one iteration.');
-  assert.ok(result.analyzedMoves.length > 0, 'Engine should analyze root moves.');
+  assert.equal(result.source, 'opening-book', 'Initial position should be served directly from the opening book.');
+  assert.equal(result.stats.bookHits, 1, 'Opening book lookup should be recorded in the stats.');
+  assert.equal(result.stats.bookMoves, 1, 'Direct opening book moves should be recorded in the stats.');
+  assert.ok(result.analyzedMoves.length > 0, 'Opening book result should expose candidate moves.');
 
   const midgame = playDeterministicPly(GameState.initial(), 17);
-  const midgameResult = engine.findBestMove(midgame, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5 });
+  const midgameResult = engine.findBestMove(midgame, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5, styleKey: 'fortress' });
   assert.ok(new Set(midgame.getLegalMoveIndices()).has(midgameResult.bestMoveIndex));
+  assert.equal(midgameResult.source, 'search', 'Later positions should still fall back to full search.');
+  assert.ok(midgameResult.stats.completedDepth >= 1, 'Full-search positions should complete at least one iteration.');
   assert.ok(midgameResult.analyzedMoves.length > 0);
 
+  const sizeBeforeUpdate = engine.transpositionTable.size;
+  engine.updateOptions({
+    presetKey: engine.options.presetKey,
+    styleKey: engine.options.styleKey,
+    maxDepth: engine.options.maxDepth,
+    timeLimitMs: engine.options.timeLimitMs,
+    exactEndgameEmpties: engine.options.exactEndgameEmpties,
+    aspirationWindow: engine.options.aspirationWindow,
+    randomness: engine.options.randomness,
+  });
+  assert.equal(engine.transpositionTable.size, sizeBeforeUpdate, 'Updating with equivalent options should preserve the transposition table.');
+
+  engine.updateOptions({
+    presetKey: 'custom',
+    maxDepth: 5,
+    timeLimitMs: 500,
+    exactEndgameEmpties: 8,
+    aspirationWindow: 40,
+    randomness: 0,
+    styleKey: 'aggressive',
+  });
+  assert.equal(engine.transpositionTable.size, 0, 'Changing evaluation style should invalidate the transposition table.');
+
   const forcedPass = playDeterministicPly(GameState.initial(), 18);
-  const passResult = engine.findBestMove(forcedPass, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5 });
+  const passResult = engine.findBestMove(forcedPass, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5, styleKey: 'balanced' });
   assert.equal(passResult.didPass, true);
   assert.equal(passResult.bestMoveIndex, null);
 }
@@ -76,6 +133,8 @@ function runSearchTests() {
 function run() {
   runCoreRuleTests();
   runEvaluatorTests();
+  runOpeningBookTests();
+  runPresetResolutionTests();
   runSearchTests();
   console.log('core-smoke: all assertions passed');
 }

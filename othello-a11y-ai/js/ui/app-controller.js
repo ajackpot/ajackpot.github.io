@@ -1,4 +1,4 @@
-import { ENGINE_PRESETS, resolveEngineOptions } from '../ai/presets.js';
+import { ENGINE_PRESETS, ENGINE_STYLE_PRESETS, resolveEngineOptions } from '../ai/presets.js';
 import { GameState } from '../core/game-state.js';
 import { indexToCoord } from '../core/bitboard.js';
 import { BoardView } from './board-view.js';
@@ -30,6 +30,7 @@ function createDefaultSettings() {
   return {
     humanColor: 'black',
     presetKey: 'strong',
+    styleKey: 'balanced',
     showLegalHints: true,
     customInputs,
   };
@@ -125,7 +126,7 @@ export class AppController {
   }
 
   getResolvedOptions() {
-    return resolveEngineOptions(this.settings.presetKey, this.settings.customInputs);
+    return resolveEngineOptions(this.settings.presetKey, this.settings.customInputs, this.settings.styleKey);
   }
 
   getAiColor() {
@@ -262,7 +263,11 @@ export class AppController {
     }
 
     const searchStartHash = this.currentState.hashKey();
-    const options = this.getResolvedOptions();
+    const options = {
+      presetKey: this.settings.presetKey,
+      styleKey: this.settings.styleKey,
+      ...this.settings.customInputs,
+    };
     this.aiBusy = true;
     this.errorText = '';
     this.render({ restoreBoardFocus: true });
@@ -364,7 +369,8 @@ export class AppController {
       <div class="status-block">
         <h3>엔진 요약</h3>
         <p>${escapeHtml(formatEngineSummaryLine(resolvedOptions))}</p>
-        <p>${escapeHtml(ENGINE_PRESETS[resolvedOptions.presetKey]?.description ?? '')}</p>
+        <p><strong>난이도:</strong> ${escapeHtml(ENGINE_PRESETS[resolvedOptions.presetKey]?.description ?? '')}</p>
+        <p><strong>스타일:</strong> ${escapeHtml(ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? resolvedOptions.styleDescription ?? '')}</p>
       </div>
 
       <div class="status-block">

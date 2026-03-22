@@ -1,4 +1,4 @@
-import { CUSTOM_ENGINE_FIELDS, ENGINE_PRESETS } from '../ai/presets.js';
+import { CUSTOM_ENGINE_FIELDS, ENGINE_PRESETS, ENGINE_STYLE_PRESETS } from '../ai/presets.js';
 import { escapeHtml } from './formatters.js';
 
 export class SettingsPanelView {
@@ -19,6 +19,7 @@ export class SettingsPanelView {
     this.container.innerHTML = this.buildMarkup(initialSettings);
     this.form = this.container.querySelector('form');
     this.presetSelect = this.container.querySelector('#preset-select');
+    this.styleSelect = this.container.querySelector('#style-select');
     this.customFieldset = this.container.querySelector('#custom-options-fieldset');
     this.undoButton = this.container.querySelector('#undo-button');
     this.engineSummaryOutput = this.container.querySelector('#engine-summary-output');
@@ -54,6 +55,10 @@ export class SettingsPanelView {
       <option value="${key}" ${initialSettings.presetKey === key ? 'selected' : ''}>${escapeHtml(preset.label)}</option>
     `).join('');
 
+    const styleOptions = Object.entries(ENGINE_STYLE_PRESETS).map(([key, preset]) => `
+      <option value="${key}" ${initialSettings.styleKey === key ? 'selected' : ''}>${escapeHtml(preset.label)}</option>
+    `).join('');
+
     const customFields = CUSTOM_ENGINE_FIELDS.map((field) => {
       const value = initialSettings.customInputs[field.key] ?? ENGINE_PRESETS.custom[field.key];
       return `
@@ -76,7 +81,7 @@ export class SettingsPanelView {
     return `
       <form class="settings-form" aria-describedby="settings-help-text">
         <p id="settings-help-text" class="subtle-text">
-          난이도 프리셋은 즉시 반영됩니다. 사용자 지정 수치는 “사용자 지정”일 때만 활성화되고 적용됩니다.
+          난이도와 스타일은 즉시 반영됩니다. 사용자 지정 수치는 “사용자 지정”일 때만 활성화되고 적용됩니다.
         </p>
 
         <fieldset>
@@ -93,6 +98,16 @@ export class SettingsPanelView {
             <label for="preset-select">난이도 프리셋</label>
             <select id="preset-select" name="presetKey">
               ${presetOptions}
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>엔진 스타일 / 성격</legend>
+          <div class="field-row">
+            <label for="style-select">스타일 프리셋</label>
+            <select id="style-select" name="styleKey">
+              ${styleOptions}
             </select>
           </div>
           <p id="engine-summary-output" class="subtle-text" role="status" aria-live="polite" aria-atomic="true"></p>
@@ -133,6 +148,7 @@ export class SettingsPanelView {
     return {
       humanColor: formData.get('humanColor') === 'white' ? 'white' : 'black',
       presetKey: formData.get('presetKey') || 'strong',
+      styleKey: formData.get('styleKey') || 'balanced',
       showLegalHints: this.form.querySelector('[name="showLegalHints"]').checked,
       customInputs,
     };
@@ -145,7 +161,7 @@ export class SettingsPanelView {
       control.disabled = !isCustom;
     }
     this.customStateNote.textContent = isCustom
-      ? '사용자 지정 프리셋이 켜져 있습니다. 아래 입력값이 엔진에 적용됩니다.'
+      ? '사용자 지정 프리셋이 켜져 있습니다. 아래 입력값에 스타일 보정이 추가로 적용됩니다.'
       : '현재는 사용자 지정이 꺼져 있습니다. 아래 입력값은 잠시 보관만 되며 엔진에는 적용되지 않습니다.';
   }
 

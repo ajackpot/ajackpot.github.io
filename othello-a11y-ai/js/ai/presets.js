@@ -1,3 +1,115 @@
+const SCALE_FIELD_KEYS = Object.freeze([
+  'mobilityScale',
+  'potentialMobilityScale',
+  'cornerScale',
+  'cornerAdjacencyScale',
+  'stabilityScale',
+  'frontierScale',
+  'positionalScale',
+  'parityScale',
+  'discScale',
+  'riskPenaltyScale',
+]);
+
+const BASE_ENGINE_DEFAULTS = Object.freeze({
+  maxDepth: 6,
+  timeLimitMs: 1500,
+  exactEndgameEmpties: 10,
+  aspirationWindow: 50,
+  randomness: 0,
+  maxTableEntries: 200000,
+  mobilityScale: 1,
+  potentialMobilityScale: 1,
+  cornerScale: 1,
+  cornerAdjacencyScale: 1,
+  stabilityScale: 1,
+  frontierScale: 1,
+  positionalScale: 1,
+  parityScale: 1,
+  discScale: 1,
+  riskPenaltyScale: 1,
+});
+
+export const DEFAULT_STYLE_KEY = 'balanced';
+
+export const ENGINE_STYLE_PRESETS = Object.freeze({
+  balanced: {
+    label: '균형형',
+    description: '기본 엔진 감각을 유지하는 표준 성향입니다.',
+    mobilityScale: 1,
+    potentialMobilityScale: 1,
+    cornerScale: 1,
+    cornerAdjacencyScale: 1,
+    stabilityScale: 1,
+    frontierScale: 1,
+    positionalScale: 1,
+    parityScale: 1,
+    discScale: 1,
+    riskPenaltyScale: 1,
+    randomnessBonus: 0,
+  },
+  aggressive: {
+    label: '공격형',
+    description: '기동성과 판 흔들기를 더 중시하고 위험을 조금 더 감수합니다.',
+    mobilityScale: 1.25,
+    potentialMobilityScale: 1.25,
+    cornerScale: 1.02,
+    cornerAdjacencyScale: 0.85,
+    stabilityScale: 0.9,
+    frontierScale: 0.85,
+    positionalScale: 0.9,
+    parityScale: 1,
+    discScale: 1.15,
+    riskPenaltyScale: 0.75,
+    randomnessBonus: 10,
+  },
+  fortress: {
+    label: '봉쇄형',
+    description: '상대 기동성 억제, 프런티어 관리, 안정성을 더 강하게 추구합니다.',
+    mobilityScale: 1.18,
+    potentialMobilityScale: 1.25,
+    cornerScale: 1.08,
+    cornerAdjacencyScale: 1.18,
+    stabilityScale: 1.3,
+    frontierScale: 1.25,
+    positionalScale: 1.05,
+    parityScale: 1.05,
+    discScale: 0.85,
+    riskPenaltyScale: 1.15,
+    randomnessBonus: 0,
+  },
+  positional: {
+    label: '포지션형',
+    description: '코너와 위치 감각, 코너 인접 위험 회피를 더 강하게 반영합니다.',
+    mobilityScale: 0.95,
+    potentialMobilityScale: 0.9,
+    cornerScale: 1.15,
+    cornerAdjacencyScale: 1.35,
+    stabilityScale: 1.1,
+    frontierScale: 0.95,
+    positionalScale: 1.35,
+    parityScale: 1,
+    discScale: 0.85,
+    riskPenaltyScale: 1.3,
+    randomnessBonus: 0,
+  },
+  chaotic: {
+    label: '변칙형',
+    description: '가까운 후보 수 사이에서 더 다양한 선택을 하고 위험 관리 비중을 낮춥니다.',
+    mobilityScale: 1.08,
+    potentialMobilityScale: 1.15,
+    cornerScale: 0.95,
+    cornerAdjacencyScale: 0.6,
+    stabilityScale: 0.78,
+    frontierScale: 0.75,
+    positionalScale: 0.72,
+    parityScale: 0.9,
+    discScale: 1.1,
+    riskPenaltyScale: 0.55,
+    randomnessBonus: 35,
+  },
+});
+
 export const ENGINE_PRESETS = Object.freeze({
   beginner: {
     label: '입문',
@@ -65,9 +177,15 @@ export const ENGINE_PRESETS = Object.freeze({
     randomness: 0,
     maxTableEntries: 200000,
     mobilityScale: 1,
+    potentialMobilityScale: 1,
+    cornerScale: 1,
+    cornerAdjacencyScale: 1,
     stabilityScale: 1,
     frontierScale: 1,
     positionalScale: 1,
+    parityScale: 1,
+    discScale: 1,
+    riskPenaltyScale: 1,
   },
 });
 
@@ -129,6 +247,30 @@ export const CUSTOM_ENGINE_FIELDS = Object.freeze([
     step: 0.05,
   },
   {
+    key: 'potentialMobilityScale',
+    label: '잠재 기동성 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
+    key: 'cornerScale',
+    label: '코너 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
+    key: 'cornerAdjacencyScale',
+    label: '코너 인접 위험 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
     key: 'stabilityScale',
     label: '안정성 가중치 배율',
     type: 'number',
@@ -147,6 +289,30 @@ export const CUSTOM_ENGINE_FIELDS = Object.freeze([
   {
     key: 'positionalScale',
     label: '위치 테이블 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
+    key: 'parityScale',
+    label: '패리티 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
+    key: 'discScale',
+    label: '돌 수 가중치 배율',
+    type: 'number',
+    min: 0.2,
+    max: 2.5,
+    step: 0.05,
+  },
+  {
+    key: 'riskPenaltyScale',
+    label: '위험 칸 패널티 배율',
     type: 'number',
     min: 0.2,
     max: 2.5,
@@ -171,23 +337,42 @@ function sanitizeValue(field, value, fallback) {
   return Number(clamped.toFixed(2));
 }
 
-export function resolveEngineOptions(presetKey, customInputs = {}) {
-  const preset = ENGINE_PRESETS[presetKey] ?? ENGINE_PRESETS.casual;
-  if (presetKey !== 'custom') {
-    return {
-      presetKey,
-      ...preset,
-    };
-  }
+function clampScale(value) {
+  return Number(Math.min(4.5, Math.max(0.1, value)).toFixed(2));
+}
 
-  const resolved = {
-    presetKey,
-    ...ENGINE_PRESETS.custom,
+function applyStyle(baseOptions, styleKey) {
+  const resolvedStyleKey = ENGINE_STYLE_PRESETS[styleKey] ? styleKey : DEFAULT_STYLE_KEY;
+  const style = ENGINE_STYLE_PRESETS[resolvedStyleKey];
+  const styled = {
+    ...baseOptions,
+    styleKey: resolvedStyleKey,
+    styleLabel: style.label,
+    styleDescription: style.description,
   };
 
-  for (const field of CUSTOM_ENGINE_FIELDS) {
-    resolved[field.key] = sanitizeValue(field, customInputs[field.key], resolved[field.key]);
+  for (const key of SCALE_FIELD_KEYS) {
+    styled[key] = clampScale((baseOptions[key] ?? 1) * (style[key] ?? 1));
   }
 
-  return resolved;
+  styled.randomness = Math.max(0, Math.round((baseOptions.randomness ?? 0) + (style.randomnessBonus ?? 0)));
+  return styled;
+}
+
+export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DEFAULT_STYLE_KEY) {
+  const resolvedPresetKey = ENGINE_PRESETS[presetKey] ? presetKey : 'casual';
+  const preset = ENGINE_PRESETS[resolvedPresetKey];
+  const resolved = {
+    ...BASE_ENGINE_DEFAULTS,
+    presetKey: resolvedPresetKey,
+    ...preset,
+  };
+
+  if (resolvedPresetKey === 'custom') {
+    for (const field of CUSTOM_ENGINE_FIELDS) {
+      resolved[field.key] = sanitizeValue(field, customInputs[field.key], resolved[field.key]);
+    }
+  }
+
+  return applyStyle(resolved, styleKey);
 }

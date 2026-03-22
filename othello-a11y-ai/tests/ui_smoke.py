@@ -73,6 +73,11 @@ async def main() -> None:
         assert await page.locator('button[data-board-index]').count() == 64
 
         assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is True
+        assert await page.input_value('#style-select') == 'balanced'
+        await page.select_option('#style-select', 'chaotic')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '변칙형' in summary_text
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)
         assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False

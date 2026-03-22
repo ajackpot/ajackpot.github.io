@@ -3,7 +3,6 @@ import {
   clamp,
   CORNER_INDICES,
   C_SQUARE_INDICES,
-  DIRECTIONS,
   FULL_BOARD,
   neighbors,
   popcount,
@@ -20,9 +19,14 @@ import { legalMovesBitboard, PLAYER_COLORS } from '../core/rules.js';
 
 const DEFAULT_EVALUATION_OPTIONS = Object.freeze({
   mobilityScale: 1,
+  potentialMobilityScale: 1,
+  cornerScale: 1,
+  cornerAdjacencyScale: 1,
   stabilityScale: 1,
   frontierScale: 1,
   positionalScale: 1,
+  parityScale: 1,
+  discScale: 1,
 });
 
 const CORNER_ADJACENCY_GROUPS = Object.freeze([
@@ -209,14 +213,14 @@ export class Evaluator {
     const parity = parityScore(state);
 
     const mobilityWeight = lerp(135, 35, phase) * this.options.mobilityScale;
-    const potentialMobilityWeight = lerp(55, 12, phase);
-    const cornersWeight = 850;
-    const cornerAdjacencyWeight = lerp(300, 90, phase);
+    const potentialMobilityWeight = lerp(55, 12, phase) * this.options.potentialMobilityScale;
+    const cornersWeight = 850 * this.options.cornerScale;
+    const cornerAdjacencyWeight = lerp(300, 90, phase) * this.options.cornerAdjacencyScale;
     const frontierWeight = lerp(80, 20, phase) * this.options.frontierScale;
     const positionalWeight = lerp(14, 8, phase) * this.options.positionalScale;
     const stabilityWeight = lerp(120, 320, phase) * this.options.stabilityScale;
-    const parityWeight = empties <= 14 ? lerp(25, 80, 1 - (empties / 14)) : 0;
-    const discWeight = empties <= 18 ? lerp(12, 120, 1 - (empties / 18)) : 0;
+    const parityWeight = (empties <= 14 ? lerp(25, 80, 1 - (empties / 14)) : 0) * this.options.parityScale;
+    const discWeight = (empties <= 18 ? lerp(12, 120, 1 - (empties / 18)) : 0) * this.options.discScale;
 
     const weighted = (
       (mobility * mobilityWeight)

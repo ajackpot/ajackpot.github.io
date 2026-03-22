@@ -1,16 +1,36 @@
 import {
-  bitFromIndex,
   CORNER_INDICES,
   POSITIONAL_WEIGHTS,
-  X_SQUARE_INDICES,
-  C_SQUARE_INDICES,
 } from '../core/bitboard.js';
 import { GameState } from '../core/game-state.js';
 import { Evaluator, getPositionalRisk } from './evaluator.js';
-import { ENGINE_PRESETS, resolveEngineOptions } from './presets.js';
+import {
+  lookupOpeningBook,
+  OPENING_BOOK_ADVISORY_MAX_PLY,
+  OPENING_BOOK_DIRECT_USE_MAX_PLY,
+} from './opening-book.js';
+import {
+  DEFAULT_STYLE_KEY,
+  ENGINE_PRESETS,
+  ENGINE_STYLE_PRESETS,
+  resolveEngineOptions,
+} from './presets.js';
 
 const INFINITY = 10 ** 9;
 const DEFAULT_PRESET_KEY = 'strong';
+const TABLE_RELEVANT_OPTION_KEYS = Object.freeze([
+  'exactEndgameEmpties',
+  'mobilityScale',
+  'potentialMobilityScale',
+  'cornerScale',
+  'cornerAdjacencyScale',
+  'stabilityScale',
+  'frontierScale',
+  'positionalScale',
+  'parityScale',
+  'discScale',
+  'riskPenaltyScale',
+]);
 
 class SearchTimeoutError extends Error {
   constructor(message = 'Search timed out.') {
@@ -53,22 +73,99 @@ function chooseRandomBest(scoredMoves, randomness) {
   return pool[0];
 }
 
+function resolveOptionsFromInput(engineOptions = {}, fallbackPresetKey = DEFAULT_PRESET_KEY, fallbackStyleKey = DEFAULT_STYLE_KEY) {
+  const presetKey = engineOptions.presetKey ?? fallbackPresetKey;
+  const styleKey = engineOptions.styleKey ?? fallbackStyleKey;
+  return resolveEngineOptions(presetKey, engineOptions, styleKey);
+}
+
+function optionsShallowEqual(left, right) {
+  if (left === right) {
+    return true;
+  }
+  if (!left || !right) {
+    return false;
+  }
+
+  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
+  for (const key of keys) {
+    if (left[key] !== right[key]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function tableSemanticsChanged(left, right) {
+  if (!left || !right) {
+    return true;
+  }
+
+  for (const key of TABLE_RELEVANT_OPTION_KEYS) {
+    if (left[key] !== right[key]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function shouldKeepExistingTableEntry(existing, incoming) {
+  if (!existing) {
+    return false;
+  }
+
+  const existingDepth = existing.depth ?? 0;
+  const incomingDepth = incoming.depth ?? 0;
+
+  if (incomingDepth > existingDepth) {
+    return false;
+  }
+  if (incomingDepth === existingDepth) {
+    return existing.flag === 'exact' && incoming.flag !== 'exact';
+  }
+  if (existing.flag === 'exact') {
+    return true;
+  }
+  return existingDepth >= incomingDepth + 3;
+}
+
+function bookOrderingBonus(weight) {
+  return Math.round(Math.log2(Math.max(1, weight) + 1) * 90_000);
+}
+
+function bookSelectionBonus(weight) {
+  return Math.round(Math.log2(Math.max(1, weight) + 1) * 120_000);
+}
+
 export class SearchEngine {
   constructor(engineOptions = {}) {
-    const presetKey = engineOptions.presetKey ?? DEFAULT_PRESET_KEY;
-    this.options = resolveEngineOptions(presetKey, engineOptions);
+    this.options = resolveOptionsFromInput(engineOptions);
     this.evaluator = new Evaluator(this.options);
     this.transpositionTable = new Map();
     this.killerMoves = [];
     this.historyHeuristic = Array.from({ length: 2 }, () => Array(64).fill(0));
+    this.searchGeneration = 0;
     this.resetStats();
   }
 
   updateOptions(engineOptions = {}) {
-    const presetKey = engineOptions.presetKey ?? this.options.presetKey ?? DEFAULT_PRESET_KEY;
-    this.options = resolveEngineOptions(presetKey, engineOptions);
-    this.evaluator = new Evaluator(this.options);
-    this.trimTranspositionTable(true);
+    const nextOptions = resolveOptionsFromInput(
+      engineOptions,
+      this.options?.presetKey ?? DEFAULT_PRESET_KEY,
+      this.options?.styleKey ?? DEFAULT_STYLE_KEY,
+    );
+
+    const optionsChanged = !optionsShallowEqual(this.options, nextOptions);
+    const shouldResetTable = tableSemanticsChanged(this.options, nextOptions);
+
+    this.options = nextOptions;
+    if (optionsChanged) {
+      this.evaluator = new Evaluator(this.options);
+    }
+    if (shouldResetTable) {
+      this.transpositionTable.clear();
+    }
+    this.trimTranspositionTable();
   }
 
   resetStats() {
@@ -77,14 +174,43 @@ export class SearchEngine {
       cutoffs: 0,
       ttHits: 0,
       ttStores: 0,
+      ttEvictions: 0,
       completedDepth: 0,
       elapsedMs: 0,
+      bookHits: 0,
+      bookMoves: 0,
     };
   }
 
   trimTranspositionTable(forceClear = false) {
-    if (forceClear || this.transpositionTable.size > this.options.maxTableEntries) {
+    if (forceClear) {
+      const removed = this.transpositionTable.size;
       this.transpositionTable.clear();
+      if (this.stats) {
+        this.stats.ttEvictions += removed;
+      }
+      return;
+    }
+
+    const maxEntries = Math.max(1000, Math.floor(this.options.maxTableEntries ?? 1000));
+    if (this.transpositionTable.size <= maxEntries) {
+      return;
+    }
+
+    const batchSize = Math.max(64, Math.floor(maxEntries * 0.12));
+    const targetSize = Math.max(0, maxEntries - batchSize);
+    let removed = 0;
+    while (this.transpositionTable.size > targetSize) {
+      const oldestKey = this.transpositionTable.keys().next().value;
+      if (oldestKey === undefined) {
+        break;
+      }
+      this.transpositionTable.delete(oldestKey);
+      removed += 1;
+    }
+
+    if (this.stats) {
+      this.stats.ttEvictions += removed;
     }
   }
 
@@ -94,19 +220,145 @@ export class SearchEngine {
     }
   }
 
+  shouldUseOpeningBookDirect(state, bookHit) {
+    if (!bookHit || bookHit.candidateCount === 0) {
+      return false;
+    }
+    return state.moveHistory.length <= OPENING_BOOK_DIRECT_USE_MAX_PLY;
+  }
+
+  describeBookHit(bookHit, selectedMoveIndex = null, usedDirectly = false) {
+    const matchedCandidate = Number.isInteger(selectedMoveIndex)
+      ? bookHit.candidates.find((candidate) => candidate.moveIndex === selectedMoveIndex) ?? null
+      : null;
+
+    return {
+      usedDirectly,
+      depthPly: bookHit.depthPly,
+      candidateCount: bookHit.candidateCount,
+      totalWeight: bookHit.totalWeight,
+      topNames: bookHit.topNames.map((entry) => entry.name),
+      matchedMoveCoord: matchedCandidate?.coord ?? null,
+      matchedMoveWeight: matchedCandidate?.weight ?? 0,
+      matchedNames: matchedCandidate ? matchedCandidate.topNames.map((entry) => entry.name) : [],
+    };
+  }
+
+  scoreMoveForBookSelection(state, move, popularityWeight) {
+    let score = bookSelectionBonus(popularityWeight);
+
+    if (CORNER_INDICES.includes(move.index)) {
+      score += Math.round(650_000 * (this.options.cornerScale ?? 1));
+    }
+
+    score += Math.round(POSITIONAL_WEIGHTS[move.index] * 1400 * (this.options.positionalScale ?? 1));
+    score += move.flipCount * 25;
+
+    const riskPenaltyScale = this.options.riskPenaltyScale ?? 1;
+    const riskType = getPositionalRisk(move.index);
+    if (riskType === 'x-square') {
+      score -= Math.round(240_000 * riskPenaltyScale);
+    } else if (riskType === 'c-square') {
+      score -= Math.round(135_000 * riskPenaltyScale);
+    }
+
+    const outcome = state.applyMove(move.index);
+    if (outcome) {
+      const opponentMoves = outcome.state.getLegalMoves();
+      score -= opponentMoves.length * Math.round(1600 * (this.options.mobilityScale ?? 1));
+      const opponentCornerReplies = opponentMoves.filter((candidate) => CORNER_INDICES.includes(candidate.index)).length;
+      score -= opponentCornerReplies * Math.round(240_000 * (this.options.cornerAdjacencyScale ?? 1));
+    }
+
+    return score;
+  }
+
+  selectOpeningBookMove(state, legalMoves, bookHit) {
+    const legalMoveMap = new Map(legalMoves.map((move) => [move.index, move]));
+    const scoredCandidates = bookHit.candidates
+      .map((candidate) => {
+        const move = legalMoveMap.get(candidate.moveIndex);
+        if (!move) {
+          return null;
+        }
+
+        const score = this.scoreMoveForBookSelection(state, move, candidate.weight);
+        return {
+          index: candidate.moveIndex,
+          coord: candidate.coord,
+          score,
+          weight: candidate.weight,
+          topNames: candidate.topNames.map((entry) => entry.name),
+          flipCount: move.flipCount,
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => {
+        if (right.score !== left.score) {
+          return right.score - left.score;
+        }
+        if (right.weight !== left.weight) {
+          return right.weight - left.weight;
+        }
+        return left.coord.localeCompare(right.coord);
+      });
+
+    if (scoredCandidates.length === 0) {
+      return null;
+    }
+
+    return {
+      scoredCandidates,
+      chosen: chooseRandomBest(scoredCandidates, this.options.randomness) ?? scoredCandidates[0],
+    };
+  }
+
+  createOpeningBookResult(state, legalMoves, bookHit, startedAt) {
+    const selection = this.selectOpeningBookMove(state, legalMoves, bookHit);
+    if (!selection) {
+      return null;
+    }
+
+    this.stats.bookMoves += 1;
+    this.stats.elapsedMs = Math.round(now() - startedAt);
+
+    return {
+      bestMoveIndex: selection.chosen.index,
+      bestMoveCoord: selection.chosen.coord,
+      score: selection.chosen.score,
+      principalVariation: [selection.chosen.index],
+      analyzedMoves: selection.scoredCandidates.map((candidate) => ({
+        index: candidate.index,
+        coord: candidate.coord,
+        score: candidate.score,
+        weight: candidate.weight,
+        flipCount: candidate.flipCount,
+      })),
+      didPass: false,
+      stats: { ...this.stats },
+      options: { ...this.options },
+      source: 'opening-book',
+      bookHit: {
+        ...this.describeBookHit(bookHit, selection.chosen.index, true),
+        chosenNames: selection.chosen.topNames,
+      },
+    };
+  }
+
   findBestMove(state, overrides = {}) {
     if (!(state instanceof GameState)) {
       throw new TypeError('findBestMove expects a GameState instance.');
     }
 
     if (Object.keys(overrides).length > 0) {
-      this.updateOptions({ ...this.options, ...overrides });
+      this.updateOptions(overrides);
     }
 
     this.resetStats();
     this.trimTranspositionTable();
     const startedAt = now();
     this.deadlineMs = startedAt + this.options.timeLimitMs;
+    this.searchGeneration += 1;
 
     const legalMoves = state.getLegalMoves();
     if (legalMoves.length === 0) {
@@ -119,8 +371,23 @@ export class SearchEngine {
         didPass: !state.isTerminal(),
         stats: { ...this.stats, elapsedMs: Math.round(now() - startedAt) },
         options: { ...this.options },
+        source: 'search',
       };
       return result;
+    }
+
+    const bookHit = state.moveHistory.length <= OPENING_BOOK_ADVISORY_MAX_PLY
+      ? lookupOpeningBook(state)
+      : null;
+
+    if (bookHit) {
+      this.stats.bookHits += 1;
+      if (this.shouldUseOpeningBookDirect(state, bookHit)) {
+        const bookResult = this.createOpeningBookResult(state, legalMoves, bookHit, startedAt);
+        if (bookResult) {
+          return bookResult;
+        }
+      }
     }
 
     const fallback = {
@@ -132,6 +399,7 @@ export class SearchEngine {
       didPass: false,
       stats: { ...this.stats },
       options: { ...this.options },
+      source: 'search',
     };
 
     let lastCompleted = null;
@@ -146,12 +414,12 @@ export class SearchEngine {
         if (aspirationWindow > 0 && lastCompleted) {
           const alpha = previousScore - aspirationWindow;
           const beta = previousScore + aspirationWindow;
-          result = this.searchRoot(state, depth, alpha, beta);
+          result = this.searchRoot(state, depth, alpha, beta, bookHit);
           if (result.score <= alpha || result.score >= beta) {
-            result = this.searchRoot(state, depth, -INFINITY, INFINITY);
+            result = this.searchRoot(state, depth, -INFINITY, INFINITY, bookHit);
           }
         } else {
-          result = this.searchRoot(state, depth, -INFINITY, INFINITY);
+          result = this.searchRoot(state, depth, -INFINITY, INFINITY, bookHit);
         }
 
         lastCompleted = result;
@@ -173,17 +441,25 @@ export class SearchEngine {
     return {
       ...finalResult,
       bestMoveIndex: selectedMove,
-      bestMoveCoord: selectedMove === null || selectedMove === undefined ? null : state.getLegalMoves().find((move) => move.index === selectedMove)?.coord ?? null,
+      bestMoveCoord: selectedMove === null || selectedMove === undefined
+        ? null
+        : legalMoves.find((move) => move.index === selectedMove)?.coord ?? null,
       stats: { ...this.stats },
       options: { ...this.options },
+      source: 'search',
+      ...(bookHit ? { bookHit: this.describeBookHit(bookHit, selectedMove, false) } : {}),
     };
   }
 
-  searchRoot(state, depth, alpha, beta) {
+  searchRoot(state, depth, alpha, beta, bookHit = null) {
     const alphaStart = alpha;
     const betaStart = beta;
     const ttEntry = this.lookupTransposition(state);
-    const moves = this.orderMoves(state, state.getLegalMoves(), 0, ttEntry?.bestMoveIndex);
+    const ttMoveIndex = this.selectTableMoveForOrdering(ttEntry, depth);
+    const bookWeights = bookHit
+      ? new Map(bookHit.candidates.map((candidate) => [candidate.moveIndex, candidate.weight]))
+      : null;
+    const moves = this.orderMoves(state, state.getLegalMoves(), 0, ttMoveIndex, bookWeights);
 
     let bestScore = -INFINITY;
     let bestMoveIndex = null;
@@ -308,7 +584,8 @@ export class SearchEngine {
       };
     }
 
-    const orderedMoves = this.orderMoves(state, legalMoves, ply, ttEntry?.bestMoveIndex);
+    const ttMoveIndex = this.selectTableMoveForOrdering(ttEntry, tableDepth);
+    const orderedMoves = this.orderMoves(state, legalMoves, ply, ttMoveIndex);
     let bestScore = -INFINITY;
     let bestMoveIndex = null;
     let bestPv = [];
@@ -377,11 +654,40 @@ export class SearchEngine {
     return this.transpositionTable.get(state.hashKey()) ?? null;
   }
 
-  storeTransposition(state, entry) {
-    if (this.transpositionTable.size >= this.options.maxTableEntries) {
-      this.trimTranspositionTable(true);
+  selectTableMoveForOrdering(ttEntry, requestedDepth) {
+    if (!ttEntry || !Number.isInteger(ttEntry.bestMoveIndex)) {
+      return null;
     }
-    this.transpositionTable.set(state.hashKey(), entry);
+    if (ttEntry.flag === 'exact') {
+      return ttEntry.bestMoveIndex;
+    }
+    if (requestedDepth <= 2) {
+      return ttEntry.bestMoveIndex;
+    }
+
+    const minimumDepth = Math.max(2, requestedDepth - 2);
+    return ttEntry.depth >= minimumDepth ? ttEntry.bestMoveIndex : null;
+  }
+
+  storeTransposition(state, entry) {
+    const key = state.hashKey();
+    const existing = this.transpositionTable.get(key);
+    if (shouldKeepExistingTableEntry(existing, entry)) {
+      return;
+    }
+
+    if (existing) {
+      this.transpositionTable.delete(key);
+    }
+
+    if (this.transpositionTable.size >= this.options.maxTableEntries) {
+      this.trimTranspositionTable();
+    }
+
+    this.transpositionTable.set(key, {
+      ...entry,
+      generation: this.searchGeneration,
+    });
     this.stats.ttStores += 1;
   }
 
@@ -409,19 +715,24 @@ export class SearchEngine {
     }
     const bucket = this.historyHeuristic[colorIndex(color)];
     bucket[moveIndex] += depth * depth;
+    if (bucket[moveIndex] > 2_000_000) {
+      for (let index = 0; index < bucket.length; index += 1) {
+        bucket[index] = Math.floor(bucket[index] / 2);
+      }
+    }
   }
 
-  orderMoves(state, moves, ply, ttMoveIndex = null) {
+  orderMoves(state, moves, ply, ttMoveIndex = null, bookWeights = null) {
     const ordered = moves.map((move) => ({
       ...move,
-      orderingScore: this.scoreMoveForOrdering(state, move, ply, ttMoveIndex),
+      orderingScore: this.scoreMoveForOrdering(state, move, ply, ttMoveIndex, bookWeights),
     }));
 
     ordered.sort((left, right) => right.orderingScore - left.orderingScore);
     return ordered;
   }
 
-  scoreMoveForOrdering(state, move, ply, ttMoveIndex) {
+  scoreMoveForOrdering(state, move, ply, ttMoveIndex, bookWeights = null) {
     let score = 0;
 
     if (move.index === ttMoveIndex) {
@@ -430,6 +741,10 @@ export class SearchEngine {
 
     if (CORNER_INDICES.includes(move.index)) {
       score += 5_000_000;
+    }
+
+    if (bookWeights?.has(move.index)) {
+      score += bookOrderingBonus(bookWeights.get(move.index));
     }
 
     if (this.killerMoves[ply]?.[0] === move.index) {
@@ -442,24 +757,41 @@ export class SearchEngine {
     score += POSITIONAL_WEIGHTS[move.index] * 1000;
     score += move.flipCount * 30;
 
+    const riskPenaltyScale = this.options.riskPenaltyScale ?? 1;
     const riskType = getPositionalRisk(move.index);
     if (riskType === 'x-square') {
-      score -= 150_000;
+      score -= Math.round(150_000 * riskPenaltyScale);
     } else if (riskType === 'c-square') {
-      score -= 80_000;
+      score -= Math.round(80_000 * riskPenaltyScale);
+    }
+
+    if (ply <= 1) {
+      const outcome = state.applyMove(move.index);
+      if (outcome) {
+        const opponentMoves = outcome.state.getLegalMoves().length;
+        score -= opponentMoves * Math.round(1200 * (this.options.mobilityScale ?? 1));
+      }
     }
 
     return score;
   }
 }
 
-export function createEngine(presetKey = DEFAULT_PRESET_KEY, customInputs = {}) {
-  const options = resolveEngineOptions(presetKey, customInputs);
+export function createEngine(presetKey = DEFAULT_PRESET_KEY, customInputs = {}, styleKey = DEFAULT_STYLE_KEY) {
+  const options = resolveEngineOptions(presetKey, customInputs, styleKey);
   return new SearchEngine(options);
 }
 
 export function listAvailablePresets() {
   return Object.entries(ENGINE_PRESETS).map(([key, preset]) => ({
+    key,
+    label: preset.label,
+    description: preset.description,
+  }));
+}
+
+export function listAvailableStyles() {
+  return Object.entries(ENGINE_STYLE_PRESETS).map(([key, preset]) => ({
     key,
     label: preset.label,
     description: preset.description,

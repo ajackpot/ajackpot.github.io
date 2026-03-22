@@ -87,6 +87,11 @@ async def main() -> None:
         assert await page.locator('button[data-board-index="26"]').get_attribute('aria-label') == '둘 수 있는 빈칸 C4'
         assert await page.locator('button[data-board-index="0"]').get_attribute('aria-label') == '빈칸 A1'
         assert await page.evaluate('Boolean(window.__accessibleOthelloApp)') is True
+        assert await page.input_value('#style-select') == 'balanced'
+        await page.select_option('#style-select', 'chaotic')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '변칙형' in summary_text
 
         await page.locator('button[data-board-index="26"]').focus()
         await page.keyboard.press('ArrowRight')
