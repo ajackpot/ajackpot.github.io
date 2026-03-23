@@ -106,7 +106,6 @@ export class BoardRenderer {
         button.dataset.row = String(square.rowIndex);
         button.dataset.col = String(square.colIndex);
         button.setAttribute('aria-label', square.accessibleName);
-        button.setAttribute('aria-describedby', 'board-help');
         button.setAttribute('aria-pressed', String(square.selected));
 
         const symbol = document.createElement('span');
