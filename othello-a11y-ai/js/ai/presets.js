@@ -30,7 +30,13 @@ const BASE_ENGINE_DEFAULTS = Object.freeze({
   riskPenaltyScale: 1,
 });
 
+const LEGACY_PRESET_ALIASES = Object.freeze({
+  casual: 'beginner',
+  strong: 'expert',
+});
+
 export const DEFAULT_STYLE_KEY = 'balanced';
+export const DEFAULT_PRESET_KEY = 'normal';
 
 export const ENGINE_STYLE_PRESETS = Object.freeze({
   balanced: {
@@ -120,56 +126,60 @@ export const ENGINE_PRESETS = Object.freeze({
     aspirationWindow: 0,
     randomness: 220,
     maxTableEntries: 40000,
-    mobilityScale: 0.9,
-    stabilityScale: 0.7,
-    frontierScale: 0.8,
-    positionalScale: 0.9,
   },
-  casual: {
+  easy: {
+    label: '쉬움',
+    description: '입문보다 한 단계 더 읽되 아직은 비교적 가볍고 실수를 남겨 두는 난이도입니다.',
+    maxDepth: 3,
+    timeLimitMs: 300,
+    exactEndgameEmpties: 6,
+    aspirationWindow: 30,
+    randomness: 140,
+    maxTableEntries: 65000,
+  },
+  normal: {
     label: '보통',
     description: '기본 탐색과 평가를 사용하는 일반 플레이 난이도입니다.',
     maxDepth: 4,
     timeLimitMs: 500,
-    exactEndgameEmpties: 6,
+    exactEndgameEmpties: 8,
     aspirationWindow: 60,
     randomness: 60,
     maxTableEntries: 90000,
-    mobilityScale: 1,
-    stabilityScale: 1,
-    frontierScale: 1,
-    positionalScale: 1,
   },
-  strong: {
-    label: '강함',
-    description: '깊은 탐색과 더 적극적인 후반 정확 탐색을 수행합니다.',
+  hard: {
+    label: '어려움',
+    description: '깊은 탐색과 적극적인 후반 정확 탐색을 수행합니다.',
     maxDepth: 6,
     timeLimitMs: 1400,
     exactEndgameEmpties: 10,
     aspirationWindow: 55,
     randomness: 0,
     maxTableEntries: 180000,
-    mobilityScale: 1.1,
-    stabilityScale: 1.15,
-    frontierScale: 1,
-    positionalScale: 1,
   },
   expert: {
-    label: '최상',
-    description: '브라우저 정적 앱 범위에서 가능한 한 강하게 탐색합니다.',
+    label: '전문가',
+    description: '매우 깊은 탐색과 더 적극적인 후반 정확 탐색을 수행합니다.',
     maxDepth: 8,
-    timeLimitMs: 2600,
+    timeLimitMs: 3900,
     exactEndgameEmpties: 12,
     aspirationWindow: 45,
     randomness: 0,
     maxTableEntries: 260000,
-    mobilityScale: 1.2,
-    stabilityScale: 1.25,
-    frontierScale: 1.05,
-    positionalScale: 1,
+  },
+  impossible: {
+    label: '불가능',
+    description: '10초 이상 생각하는 무거운 옵션이지만, 정적 브라우저 앱 안에서 가장 강한 퍼포먼스를 내도록 조정한 최상위 난이도입니다.',
+    maxDepth: 10,
+    timeLimitMs: 12000,
+    exactEndgameEmpties: 16,
+    aspirationWindow: 35,
+    randomness: 0,
+    maxTableEntries: 420000,
   },
   custom: {
     label: '사용자 지정',
-    description: '아래 수치를 직접 입력하여 엔진 동작을 조절합니다.',
+    description: '아래 수치를 직접 입력하여 엔진 동작을 조절합니다. 사용자 지정에서는 스타일 프리셋이 적용되지 않습니다.',
     maxDepth: 6,
     timeLimitMs: 1500,
     exactEndgameEmpties: 10,
@@ -341,6 +351,13 @@ function clampScale(value) {
   return Number(Math.min(4.5, Math.max(0.1, value)).toFixed(2));
 }
 
+function resolvePresetKey(presetKey) {
+  if (ENGINE_PRESETS[presetKey]) {
+    return presetKey;
+  }
+  return LEGACY_PRESET_ALIASES[presetKey] ?? DEFAULT_PRESET_KEY;
+}
+
 function applyStyle(baseOptions, styleKey) {
   const resolvedStyleKey = ENGINE_STYLE_PRESETS[styleKey] ? styleKey : DEFAULT_STYLE_KEY;
   const style = ENGINE_STYLE_PRESETS[resolvedStyleKey];
@@ -349,6 +366,7 @@ function applyStyle(baseOptions, styleKey) {
     styleKey: resolvedStyleKey,
     styleLabel: style.label,
     styleDescription: style.description,
+    styleApplied: true,
   };
 
   for (const key of SCALE_FIELD_KEYS) {
@@ -359,9 +377,21 @@ function applyStyle(baseOptions, styleKey) {
   return styled;
 }
 
+function applyCustomStyleBypass(baseOptions, styleKey) {
+  const resolvedStyleKey = ENGINE_STYLE_PRESETS[styleKey] ? styleKey : DEFAULT_STYLE_KEY;
+  const selectedStyle = ENGINE_STYLE_PRESETS[resolvedStyleKey];
+  return {
+    ...baseOptions,
+    styleKey: resolvedStyleKey,
+    styleLabel: '미적용',
+    styleDescription: `사용자 지정 난이도에서는 직접 입력한 수치가 그대로 적용되므로 선택된 스타일 프리셋(${selectedStyle.label})은 적용하지 않습니다.`,
+    styleApplied: false,
+  };
+}
+
 export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DEFAULT_STYLE_KEY) {
-  const resolvedPresetKey = ENGINE_PRESETS[presetKey] ? presetKey : 'casual';
-  const preset = ENGINE_PRESETS[resolvedPresetKey];
+  const resolvedPresetKey = resolvePresetKey(presetKey);
+  const preset = ENGINE_PRESETS[resolvedPresetKey] ?? ENGINE_PRESETS[DEFAULT_PRESET_KEY];
   const resolved = {
     ...BASE_ENGINE_DEFAULTS,
     presetKey: resolvedPresetKey,
@@ -372,6 +402,7 @@ export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DE
     for (const field of CUSTOM_ENGINE_FIELDS) {
       resolved[field.key] = sanitizeValue(field, customInputs[field.key], resolved[field.key]);
     }
+    return applyCustomStyleBypass(resolved, styleKey);
   }
 
   return applyStyle(resolved, styleKey);

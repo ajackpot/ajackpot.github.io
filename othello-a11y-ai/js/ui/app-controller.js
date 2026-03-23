@@ -29,7 +29,7 @@ function createDefaultSettings() {
 
   return {
     humanColor: 'black',
-    presetKey: 'strong',
+    presetKey: 'normal',
     styleKey: 'balanced',
     showLegalHints: true,
     customInputs,
@@ -53,6 +53,7 @@ export class AppController {
     this.searchResult = null;
     this.aiBusy = false;
     this.errorText = '';
+    this.engineMetricsExpanded = false;
     this.engineClient = new EngineClient();
 
     this.buildShell();
@@ -70,6 +71,7 @@ export class AppController {
       onUndo: () => this.handleUndo(),
       onReadStatus: () => this.handleReadStatus(),
     });
+    this.statusContainer.addEventListener('click', (event) => this.handleStatusContainerClick(event));
 
     this.render();
   }
@@ -190,6 +192,20 @@ export class AppController {
   handleReadStatus() {
     this.announcer.announce(
       `사람 ${PLAYER_NAMES[this.settings.humanColor]}, AI ${PLAYER_NAMES[this.getAiColor()]}. ${formatStateAnnouncement(this.currentState)}`,
+    );
+  }
+
+  handleStatusContainerClick(event) {
+    const toggleButton = event.target.closest('#engine-metrics-toggle-button');
+    if (!toggleButton) {
+      return;
+    }
+
+    this.engineMetricsExpanded = !this.engineMetricsExpanded;
+    this.renderStatusPanel();
+    this.statusContainer.querySelector('#engine-metrics-toggle-button')?.focus();
+    this.announcer.announce(
+      this.engineMetricsExpanded ? '사용 중인 엔진 수치를 펼쳤습니다.' : '사용 중인 엔진 수치를 접었습니다.',
     );
   }
 
@@ -351,6 +367,7 @@ export class AppController {
     const resolvedList = formatResolvedOptionsList(resolvedOptions).map((entry) => `
       <li><strong>${escapeHtml(entry.label)}:</strong> ${escapeHtml(entry.value)}</li>
     `).join('');
+    const engineMetricsToggleLabel = this.engineMetricsExpanded ? '사용 중인 엔진 수치 접기' : '사용 중인 엔진 수치 펼치기';
 
     this.statusContainer.innerHTML = `
       <div class="status-block">
@@ -370,14 +387,25 @@ export class AppController {
         <h3>엔진 요약</h3>
         <p>${escapeHtml(formatEngineSummaryLine(resolvedOptions))}</p>
         <p><strong>난이도:</strong> ${escapeHtml(ENGINE_PRESETS[resolvedOptions.presetKey]?.description ?? '')}</p>
-        <p><strong>스타일:</strong> ${escapeHtml(ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? resolvedOptions.styleDescription ?? '')}</p>
+        <p><strong>스타일:</strong> ${escapeHtml(resolvedOptions.styleDescription ?? ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? '')}</p>
       </div>
 
       <div class="status-block">
-        <h3>사용 중인 엔진 수치</h3>
-        <ul class="compact-list">
-          ${resolvedList}
-        </ul>
+        <div class="status-block-header">
+          <h3>사용 중인 엔진 수치</h3>
+          <button
+            type="button"
+            id="engine-metrics-toggle-button"
+            class="section-toggle-button"
+            aria-expanded="${this.engineMetricsExpanded ? 'true' : 'false'}"
+            aria-controls="engine-metrics-collapsible-panel"
+          >${engineMetricsToggleLabel}</button>
+        </div>
+        <div id="engine-metrics-collapsible-panel" class="collapsible-panel" ${this.engineMetricsExpanded ? '' : 'hidden'}>
+          <ul class="compact-list">
+            ${resolvedList}
+          </ul>
+        </div>
       </div>
 
       <div class="status-block">

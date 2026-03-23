@@ -87,11 +87,44 @@ async def main() -> None:
         assert await page.locator('button[data-board-index="26"]').get_attribute('aria-label') == '둘 수 있는 빈칸 C4'
         assert await page.locator('button[data-board-index="0"]').get_attribute('aria-label') == '빈칸 A1'
         assert await page.evaluate('Boolean(window.__accessibleOthelloApp)') is True
+        assert await page.evaluate("document.querySelector('#settings-collapsible-panel').hidden") is True
+        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is True
+        assert await page.locator('#new-game-button').is_visible() is True
+        assert await page.locator('#undo-button').is_visible() is True
+        assert await page.locator('#read-status-button').is_visible() is True
+
+        await page.locator('#settings-toggle-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#settings-collapsible-panel').hidden") is False
+        preset_values = await page.eval_on_selector_all('#preset-select option', 'options => options.map((option) => option.value)')
+        assert preset_values == ['beginner', 'easy', 'normal', 'hard', 'expert', 'impossible', 'custom']
+
         assert await page.input_value('#style-select') == 'balanced'
         await page.select_option('#style-select', 'chaotic')
         await page.wait_for_timeout(50)
         summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
         assert '변칙형' in summary_text
+
+        await page.select_option('#preset-select', 'custom')
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False
+        assert await page.evaluate("document.querySelector('#style-select').disabled") is True
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '미적용' in summary_text
+
+        await page.fill('#custom-maxDepth', '9')
+        await page.select_option('#preset-select', 'easy')
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#style-select').disabled") is False
+        await page.select_option('#preset-select', 'custom')
+        await page.wait_for_timeout(50)
+        assert await page.input_value('#custom-maxDepth') == '9'
+
+        await page.locator('#engine-metrics-toggle-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is False
+        engine_metrics_text = (await page.locator('#engine-metrics-collapsible-panel').text_content()) or ''
+        assert '최대 탐색 깊이' in engine_metrics_text
 
         await page.locator('button[data-board-index="26"]').focus()
         await page.keyboard.press('ArrowRight')
@@ -104,21 +137,11 @@ async def main() -> None:
         await page.wait_for_function("document.querySelectorAll('.move-log-list li').length >= 2", timeout=10000)
         assert await page.locator('.move-log-list li').count() == 2
         assert await page.evaluate("document.activeElement?.getAttribute('data-board-index')") == '26'
+        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is False
 
         await page.locator('#undo-button').click()
         await page.wait_for_timeout(120)
         assert await page.locator('.move-log-list li').count() == 0
-
-        await page.select_option('#preset-select', 'custom')
-        await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False
-        await page.fill('#custom-maxDepth', '9')
-        await page.select_option('#preset-select', 'beginner')
-        await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is True
-        await page.select_option('#preset-select', 'custom')
-        await page.wait_for_timeout(50)
-        assert await page.input_value('#custom-maxDepth') == '9'
 
         await page.locator('input[name="humanColor"][value="white"]').check()
         await page.locator('#new-game-button').click()

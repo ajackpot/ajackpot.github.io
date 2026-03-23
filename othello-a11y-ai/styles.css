@@ -300,6 +300,38 @@ main.app-shell {
   border-top: 1px solid var(--panel-border);
 }
 
+.status-block-header,
+.section-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-block-header {
+  margin-bottom: 8px;
+}
+
+.section-toggle-button {
+  width: auto;
+  padding: 0.55rem 0.9rem;
+  background: color-mix(in srgb, var(--panel-bg) 75%, var(--accent) 25%);
+}
+
+.section-toggle-button[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--panel-bg) 66%, var(--accent) 34%);
+}
+
+.collapsible-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.collapsible-panel[hidden] {
+  display: none;
+}
+
 .summary-list,
 .compact-list,
 .move-log-list {
@@ -314,6 +346,10 @@ main.app-shell {
 .settings-form {
   display: grid;
   gap: 14px;
+}
+
+.settings-form p {
+  margin: 0;
 }
 
 .settings-form fieldset {
