@@ -30,13 +30,7 @@ const BASE_ENGINE_DEFAULTS = Object.freeze({
   riskPenaltyScale: 1,
 });
 
-const LEGACY_PRESET_ALIASES = Object.freeze({
-  casual: 'beginner',
-  strong: 'expert',
-});
-
 export const DEFAULT_STYLE_KEY = 'balanced';
-export const DEFAULT_PRESET_KEY = 'normal';
 
 export const ENGINE_STYLE_PRESETS = Object.freeze({
   balanced: {
@@ -119,7 +113,7 @@ export const ENGINE_STYLE_PRESETS = Object.freeze({
 export const ENGINE_PRESETS = Object.freeze({
   beginner: {
     label: '입문',
-    description: '얕은 탐색과 약간의 무작위성을 섞어 부담을 줄인 난이도입니다.',
+    description: '얕은 탐색과 큰 무작위성을 섞어 부담을 크게 줄인 가장 가벼운 난이도입니다.',
     maxDepth: 2,
     timeLimitMs: 160,
     exactEndgameEmpties: 4,
@@ -129,11 +123,11 @@ export const ENGINE_PRESETS = Object.freeze({
   },
   easy: {
     label: '쉬움',
-    description: '입문보다 한 단계 더 읽되 아직은 비교적 가볍고 실수를 남겨 두는 난이도입니다.',
+    description: '입문보다 한 수 더 깊게 읽되, 여전히 여유 있는 무작위성을 남겨 둔 가벼운 난이도입니다.',
     maxDepth: 3,
-    timeLimitMs: 300,
+    timeLimitMs: 280,
     exactEndgameEmpties: 6,
-    aspirationWindow: 30,
+    aspirationWindow: 70,
     randomness: 140,
     maxTableEntries: 65000,
   },
@@ -169,7 +163,7 @@ export const ENGINE_PRESETS = Object.freeze({
   },
   impossible: {
     label: '불가능',
-    description: '10초 이상 생각하는 무거운 옵션이지만, 정적 브라우저 앱 안에서 가장 강한 퍼포먼스를 내도록 조정한 최상위 난이도입니다.',
+    description: '10초 이상 생각할 수 있지만, 이 정적 브라우저 앱 안에서는 가장 강한 퍼포먼스를 목표로 합니다.',
     maxDepth: 10,
     timeLimitMs: 12000,
     exactEndgameEmpties: 16,
@@ -179,7 +173,7 @@ export const ENGINE_PRESETS = Object.freeze({
   },
   custom: {
     label: '사용자 지정',
-    description: '아래 수치를 직접 입력하여 엔진 동작을 조절합니다. 사용자 지정에서는 스타일 프리셋이 적용되지 않습니다.',
+    description: '아래 수치를 직접 입력하여 엔진 동작을 조절합니다.',
     maxDepth: 6,
     timeLimitMs: 1500,
     exactEndgameEmpties: 10,
@@ -351,22 +345,15 @@ function clampScale(value) {
   return Number(Math.min(4.5, Math.max(0.1, value)).toFixed(2));
 }
 
-function resolvePresetKey(presetKey) {
-  if (ENGINE_PRESETS[presetKey]) {
-    return presetKey;
-  }
-  return LEGACY_PRESET_ALIASES[presetKey] ?? DEFAULT_PRESET_KEY;
-}
-
 function applyStyle(baseOptions, styleKey) {
   const resolvedStyleKey = ENGINE_STYLE_PRESETS[styleKey] ? styleKey : DEFAULT_STYLE_KEY;
   const style = ENGINE_STYLE_PRESETS[resolvedStyleKey];
   const styled = {
     ...baseOptions,
+    styleApplied: true,
     styleKey: resolvedStyleKey,
     styleLabel: style.label,
     styleDescription: style.description,
-    styleApplied: true,
   };
 
   for (const key of SCALE_FIELD_KEYS) {
@@ -377,21 +364,19 @@ function applyStyle(baseOptions, styleKey) {
   return styled;
 }
 
-function applyCustomStyleBypass(baseOptions, styleKey) {
-  const resolvedStyleKey = ENGINE_STYLE_PRESETS[styleKey] ? styleKey : DEFAULT_STYLE_KEY;
-  const selectedStyle = ENGINE_STYLE_PRESETS[resolvedStyleKey];
+function disableStyle(baseOptions) {
   return {
     ...baseOptions,
-    styleKey: resolvedStyleKey,
-    styleLabel: '미적용',
-    styleDescription: `사용자 지정 난이도에서는 직접 입력한 수치가 그대로 적용되므로 선택된 스타일 프리셋(${selectedStyle.label})은 적용하지 않습니다.`,
     styleApplied: false,
+    styleKey: null,
+    styleLabel: '적용 안 함',
+    styleDescription: '난이도가 “사용자 지정”이면 입력한 수치가 그대로 적용되어 스타일 프리셋은 적용되지 않습니다.',
   };
 }
 
 export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DEFAULT_STYLE_KEY) {
-  const resolvedPresetKey = resolvePresetKey(presetKey);
-  const preset = ENGINE_PRESETS[resolvedPresetKey] ?? ENGINE_PRESETS[DEFAULT_PRESET_KEY];
+  const resolvedPresetKey = ENGINE_PRESETS[presetKey] ? presetKey : 'normal';
+  const preset = ENGINE_PRESETS[resolvedPresetKey];
   const resolved = {
     ...BASE_ENGINE_DEFAULTS,
     presetKey: resolvedPresetKey,
@@ -402,7 +387,7 @@ export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DE
     for (const field of CUSTOM_ENGINE_FIELDS) {
       resolved[field.key] = sanitizeValue(field, customInputs[field.key], resolved[field.key]);
     }
-    return applyCustomStyleBypass(resolved, styleKey);
+    return disableStyle(resolved);
   }
 
   return applyStyle(resolved, styleKey);

@@ -63,28 +63,40 @@ function runOpeningBookTests() {
 }
 
 function runPresetResolutionTests() {
-  const balanced = resolveEngineOptions('expert', {}, 'balanced');
-  const aggressive = resolveEngineOptions('expert', {}, 'aggressive');
-  const fortress = resolveEngineOptions('expert', {}, 'fortress');
+  const beginner = resolveEngineOptions('beginner', {}, 'balanced');
   const easy = resolveEngineOptions('easy', {}, 'balanced');
+  const balanced = resolveEngineOptions('hard', {}, 'balanced');
+  const aggressive = resolveEngineOptions('hard', {}, 'aggressive');
+  const fortress = resolveEngineOptions('hard', {}, 'fortress');
+  const expert = resolveEngineOptions('expert', {}, 'balanced');
   const impossible = resolveEngineOptions('impossible', {}, 'balanced');
-  const custom = resolveEngineOptions('custom', { maxDepth: '9', exactEndgameEmpties: '14', mobilityScale: '1.4' }, 'aggressive');
+  const custom = resolveEngineOptions('custom', {
+    maxDepth: 7,
+    randomness: 5,
+    mobilityScale: 1.4,
+    riskPenaltyScale: 1.1,
+  }, 'aggressive');
 
+  assert.equal(easy.presetKey, 'easy');
+  assert.equal(easy.maxDepth, 3, 'Easy should sit between beginner and normal at depth 3.');
+  assert.equal(easy.exactEndgameEmpties, 6, 'Easy should begin exact endgame search from 6 empties.');
+  assert.ok(beginner.timeLimitMs < easy.timeLimitMs, 'Easy should think longer than beginner.');
+  assert.ok(easy.randomness < beginner.randomness, 'Easy should be less random than beginner.');
+  assert.equal(impossible.presetKey, 'impossible');
+  assert.equal(impossible.maxDepth, 10, 'Impossible should target depth 10.');
+  assert.equal(impossible.exactEndgameEmpties, 16, 'Impossible should extend exact search to 16 empties.');
+  assert.ok(impossible.timeLimitMs > 10000, 'Impossible should reserve a heavy think time budget.');
+  assert.ok(impossible.timeLimitMs > expert.timeLimitMs, 'Impossible should think longer than expert.');
+  assert.ok(impossible.maxTableEntries > expert.maxTableEntries, 'Impossible should allocate a larger transposition table budget.');
   assert.equal(balanced.styleKey, 'balanced');
   assert.equal(aggressive.styleKey, 'aggressive');
   assert.ok(aggressive.mobilityScale > balanced.mobilityScale, 'Aggressive style should raise mobility emphasis.');
   assert.ok(fortress.stabilityScale > balanced.stabilityScale, 'Fortress style should raise stability emphasis.');
   assert.ok(fortress.randomness <= aggressive.randomness, 'Fortress style should stay at least as deterministic as aggressive.');
-  assert.equal(easy.maxDepth, 3, 'Easy preset should sit between beginner and normal depth.');
-  assert.equal(easy.exactEndgameEmpties, 6, 'Easy preset should start exact endgame search at 6 empties.');
-  assert.equal(impossible.maxDepth, 10, 'Impossible preset should use depth 10.');
-  assert.equal(impossible.exactEndgameEmpties, 16, 'Impossible preset should start exact endgame search at 16 empties.');
-  assert.ok(impossible.timeLimitMs >= 10000, 'Impossible preset should allow a 10s+ think time.');
-  assert.equal(custom.maxDepth, 9, 'Custom numeric inputs should override preset defaults.');
-  assert.equal(custom.exactEndgameEmpties, 14, 'Custom endgame threshold should be sanitized and applied.');
-  assert.equal(custom.mobilityScale, 1.4, 'Custom scale values should remain untouched by style presets.');
-  assert.equal(custom.styleLabel, '미적용', 'Custom preset should bypass style presets.');
-  assert.equal(custom.styleApplied, false, 'Custom preset should explicitly report style bypass.');
+  assert.equal(custom.styleKey, null);
+  assert.equal(custom.styleApplied, false);
+  assert.equal(custom.mobilityScale, 1.4, 'Custom inputs should bypass style-based scaling.');
+  assert.equal(custom.randomness, 5, 'Custom randomness should bypass style-based randomness bonuses.');
 }
 
 function runSearchTests() {
@@ -108,7 +120,7 @@ function runSearchTests() {
   assert.ok(result.analyzedMoves.length > 0, 'Opening book result should expose candidate moves.');
 
   const midgame = playDeterministicPly(GameState.initial(), 17);
-  const midgameResult = engine.findBestMove(midgame, { presetKey: 'hard', styleKey: 'fortress' });
+  const midgameResult = engine.findBestMove(midgame, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5, styleKey: 'fortress' });
   assert.ok(new Set(midgame.getLegalMoveIndices()).has(midgameResult.bestMoveIndex));
   assert.equal(midgameResult.source, 'search', 'Later positions should still fall back to full search.');
   assert.ok(midgameResult.stats.completedDepth >= 1, 'Full-search positions should complete at least one iteration.');
@@ -127,10 +139,15 @@ function runSearchTests() {
   assert.equal(engine.transpositionTable.size, sizeBeforeUpdate, 'Updating with equivalent options should preserve the transposition table.');
 
   engine.updateOptions({
-    presetKey: 'hard',
+    presetKey: 'custom',
+    maxDepth: 5,
+    timeLimitMs: 500,
+    exactEndgameEmpties: engine.options.exactEndgameEmpties,
+    aspirationWindow: engine.options.aspirationWindow,
+    randomness: 0,
     styleKey: 'aggressive',
   });
-  assert.equal(engine.transpositionTable.size, 0, 'Changing evaluation style should invalidate the transposition table.');
+  assert.equal(engine.transpositionTable.size, sizeBeforeUpdate, 'Style changes should be ignored while custom difficulty is active.');
 
   const forcedPass = playDeterministicPly(GameState.initial(), 18);
   const passResult = engine.findBestMove(forcedPass, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5, styleKey: 'balanced' });

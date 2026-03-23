@@ -71,49 +71,51 @@ async def main() -> None:
 
         assert await page.locator('table.board-table').count() == 1
         assert await page.locator('button[data-board-index]').count() == 64
-
-        assert await page.evaluate("document.querySelector('#settings-collapsible-panel').hidden") is True
-        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is True
+        assert await page.evaluate("document.querySelector('#settings-collapsible-content').hidden") is True
         assert await page.locator('#new-game-button').is_visible() is True
-        assert await page.locator('#undo-button').is_visible() is True
-        assert await page.locator('#read-status-button').is_visible() is True
+        assert await page.evaluate("document.querySelector('#engine-metrics-content').hidden") is True
+
+        await page.locator('#engine-metrics-toggle-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#engine-metrics-content').hidden") is False
 
         await page.locator('#settings-toggle-button').click()
         await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#settings-collapsible-panel').hidden") is False
-        preset_values = await page.eval_on_selector_all('#preset-select option', 'options => options.map((option) => option.value)')
+        assert await page.evaluate("document.querySelector('#settings-collapsible-content').hidden") is False
+
+        preset_values = await page.evaluate("Array.from(document.querySelectorAll('#preset-select option')).map((option) => option.value)")
         assert preset_values == ['beginner', 'easy', 'normal', 'hard', 'expert', 'impossible', 'custom']
 
+        await page.select_option('#preset-select', 'easy')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '쉬움' in summary_text and '깊이 3' in summary_text and '6칸 이하' in summary_text
+
+        await page.select_option('#preset-select', 'impossible')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '불가능' in summary_text and '깊이 10' in summary_text and '16칸 이하' in summary_text
+        status_text = (await page.locator('#status-container').text_content()) or ''
+        assert '10초 이상 생각할 수 있지만' in status_text
+        assert '가장 강한 퍼포먼스를 목표로 합니다' in status_text
+
+        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is True
         assert await page.input_value('#style-select') == 'balanced'
-        assert await page.evaluate("document.querySelector('#style-select').disabled") is False
         await page.select_option('#style-select', 'chaotic')
         await page.wait_for_timeout(50)
         summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
         assert '변칙형' in summary_text
-
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)
         assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False
         assert await page.evaluate("document.querySelector('#style-select').disabled") is True
-        style_note = (await page.locator('#style-state-note').text_content()) or ''
-        assert '비활성화' in style_note
+        assert await page.input_value('#style-select') == 'chaotic'
         summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
-        assert '미적용' in summary_text
-
-        await page.fill('#custom-maxDepth', '9')
-        await page.select_option('#preset-select', 'easy')
+        assert '스타일 적용 안 함' in summary_text
+        await page.select_option('#preset-select', 'beginner')
         await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is True
         assert await page.evaluate("document.querySelector('#style-select').disabled") is False
-        await page.select_option('#preset-select', 'custom')
-        await page.wait_for_timeout(50)
-        assert await page.input_value('#custom-maxDepth') == '9'
-
-        await page.locator('#engine-metrics-toggle-button').click()
-        await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is False
-        engine_metrics_text = (await page.locator('#engine-metrics-collapsible-panel').text_content()) or ''
-        assert '최대 탐색 깊이' in engine_metrics_text
+        assert await page.input_value('#style-select') == 'chaotic'
 
         assert await page.locator('button[data-board-index="35"]').get_attribute('aria-label') == '검은 돌 D5'
         assert await page.locator('button[data-board-index="26"]').get_attribute('aria-label') == '둘 수 있는 빈칸 C4'
@@ -130,7 +132,6 @@ async def main() -> None:
         await page.wait_for_function("document.querySelectorAll('.move-log-list li').length >= 2", timeout=10000)
         assert await page.locator('.move-log-list li').count() == 2
         assert await page.evaluate("document.activeElement?.getAttribute('data-board-index')") == '26'
-        assert await page.evaluate("document.querySelector('#engine-metrics-collapsible-panel').hidden") is False
 
         await page.locator('#undo-button').click()
         await page.wait_for_timeout(100)

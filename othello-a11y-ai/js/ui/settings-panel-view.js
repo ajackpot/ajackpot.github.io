@@ -19,29 +19,30 @@ export class SettingsPanelView {
 
     this.container.innerHTML = this.buildMarkup(initialSettings);
     this.form = this.container.querySelector('form');
-    this.settingsToggleButton = this.container.querySelector('#settings-toggle-button');
-    this.settingsPanel = this.container.querySelector('#settings-collapsible-panel');
     this.presetSelect = this.container.querySelector('#preset-select');
     this.styleSelect = this.container.querySelector('#style-select');
+    this.styleFieldset = this.container.querySelector('#style-preset-fieldset');
     this.customFieldset = this.container.querySelector('#custom-options-fieldset');
     this.undoButton = this.container.querySelector('#undo-button');
     this.engineSummaryOutput = this.container.querySelector('#engine-summary-output');
     this.customStateNote = this.container.querySelector('#custom-state-note');
     this.styleStateNote = this.container.querySelector('#style-state-note');
+    this.settingsToggleButton = this.container.querySelector('#settings-toggle-button');
+    this.settingsContent = this.container.querySelector('#settings-collapsible-content');
 
     this.form.addEventListener('input', () => {
-      this.syncControlAvailability();
+      this.syncCustomFieldAvailability();
       this.onSettingsChange(this.readSettings());
     });
 
     this.form.addEventListener('change', () => {
-      this.syncControlAvailability();
+      this.syncCustomFieldAvailability();
       this.onSettingsChange(this.readSettings());
     });
 
     this.settingsToggleButton.addEventListener('click', () => {
       this.settingsExpanded = !this.settingsExpanded;
-      this.syncSettingsExpandedState();
+      this.syncSettingsSectionVisibility();
     });
 
     this.container.querySelector('#new-game-button').addEventListener('click', () => {
@@ -56,8 +57,8 @@ export class SettingsPanelView {
       this.onReadStatus();
     });
 
-    this.syncSettingsExpandedState();
-    this.syncControlAvailability();
+    this.syncCustomFieldAvailability();
+    this.syncSettingsSectionVisibility();
   }
 
   buildMarkup(initialSettings) {
@@ -91,18 +92,19 @@ export class SettingsPanelView {
     return `
       <form class="settings-form">
         <div class="section-toggle-row">
+          <h3 id="settings-controls-title">설정</h3>
           <button
             type="button"
             id="settings-toggle-button"
             class="section-toggle-button"
+            aria-controls="settings-collapsible-content"
             aria-expanded="false"
-            aria-controls="settings-collapsible-panel"
           >설정 펼치기</button>
         </div>
 
-        <div id="settings-collapsible-panel" class="collapsible-panel" hidden>
+        <div id="settings-collapsible-content" class="collapsible-content" hidden>
           <p id="settings-help-text" class="subtle-text">
-            난이도와 스타일은 즉시 반영됩니다. 사용자 지정 수치는 “사용자 지정”일 때만 활성화되고 적용되며, 이때 스타일 프리셋은 적용되지 않습니다.
+            난이도와 스타일은 즉시 반영됩니다. 다만 “사용자 지정” 난이도에서는 아래 입력값이 우선하며 스타일 프리셋은 잠시 비활성화됩니다.
           </p>
 
           <fieldset>
@@ -123,11 +125,11 @@ export class SettingsPanelView {
             </div>
           </fieldset>
 
-          <fieldset>
+          <fieldset id="style-preset-fieldset">
             <legend>엔진 스타일 / 성격</legend>
             <div class="field-row">
               <label for="style-select">스타일 프리셋</label>
-              <select id="style-select" name="styleKey" aria-describedby="style-state-note engine-summary-output">
+              <select id="style-select" name="styleKey">
                 ${styleOptions}
               </select>
             </div>
@@ -161,47 +163,43 @@ export class SettingsPanelView {
   }
 
   readSettings() {
+    const formData = new FormData(this.form);
     const customInputs = {};
     for (const field of CUSTOM_ENGINE_FIELDS) {
       const control = this.form.querySelector(`[name="${field.key}"]`);
-      customInputs[field.key] = control ? control.value : ENGINE_PRESETS.custom[field.key];
+      customInputs[field.key] = control ? control.value : formData.get(field.key);
     }
 
-    const selectedHumanColor = this.form.querySelector('input[name="humanColor"]:checked')?.value;
-
     return {
-      humanColor: selectedHumanColor === 'white' ? 'white' : 'black',
-      presetKey: this.presetSelect.value || 'normal',
-      styleKey: this.styleSelect.value || 'balanced',
+      humanColor: formData.get('humanColor') === 'white' ? 'white' : 'black',
+      presetKey: formData.get('presetKey') || 'normal',
+      styleKey: this.styleSelect?.value || 'balanced',
       showLegalHints: this.form.querySelector('[name="showLegalHints"]').checked,
       customInputs,
     };
   }
 
-  syncSettingsExpandedState() {
-    const expanded = this.settingsExpanded;
-    this.settingsPanel.hidden = !expanded;
-    this.settingsToggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    this.settingsToggleButton.textContent = expanded ? '설정 접기' : '설정 펼치기';
-  }
-
-  syncControlAvailability() {
+  syncCustomFieldAvailability() {
     const isCustom = this.presetSelect.value === 'custom';
     this.customFieldset.disabled = !isCustom;
     for (const control of this.customFieldset.querySelectorAll('input, select')) {
       control.disabled = !isCustom;
     }
-
-    this.styleSelect.disabled = isCustom;
-    this.styleSelect.setAttribute('aria-disabled', isCustom ? 'true' : 'false');
-
     this.customStateNote.textContent = isCustom
-      ? '사용자 지정 프리셋이 켜져 있습니다. 아래 입력값이 그대로 적용되며 스타일 프리셋은 비활성화됩니다.'
+      ? '사용자 지정 프리셋이 켜져 있습니다. 아래 입력값이 그대로 엔진에 적용됩니다.'
       : '현재는 사용자 지정이 꺼져 있습니다. 아래 입력값은 잠시 보관만 되며 엔진에는 적용되지 않습니다.';
 
+    this.styleFieldset.disabled = isCustom;
+    this.styleSelect.disabled = isCustom;
     this.styleStateNote.textContent = isCustom
-      ? '사용자 지정 난이도에서는 직접 입력한 수치가 우선하므로 스타일 프리셋 선택 상자가 비활성화됩니다.'
-      : '스타일 프리셋은 사용자 지정이 아닌 난이도에서만 평가 성향을 보정합니다.';
+      ? '난이도가 “사용자 지정”이면 사용자 지정 수치가 우선하므로 스타일 프리셋은 비활성화됩니다. 선택값은 보관되며 다른 난이도로 바꾸면 다시 적용됩니다.'
+      : '선택한 스타일 프리셋은 현재 난이도 설정 위에 추가 성향 보정을 적용합니다.';
+  }
+
+  syncSettingsSectionVisibility() {
+    this.settingsContent.hidden = !this.settingsExpanded;
+    this.settingsToggleButton.setAttribute('aria-expanded', String(this.settingsExpanded));
+    this.settingsToggleButton.textContent = this.settingsExpanded ? '설정 접기' : '설정 펼치기';
   }
 
   setResolvedOptionsSummary(text) {

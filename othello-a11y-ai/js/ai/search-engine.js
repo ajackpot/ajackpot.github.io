@@ -10,7 +10,6 @@ import {
   OPENING_BOOK_DIRECT_USE_MAX_PLY,
 } from './opening-book.js';
 import {
-  DEFAULT_PRESET_KEY,
   DEFAULT_STYLE_KEY,
   ENGINE_PRESETS,
   ENGINE_STYLE_PRESETS,
@@ -18,6 +17,7 @@ import {
 } from './presets.js';
 
 const INFINITY = 10 ** 9;
+const DEFAULT_PRESET_KEY = 'normal';
 const TABLE_RELEVANT_OPTION_KEYS = Object.freeze([
   'exactEndgameEmpties',
   'mobilityScale',

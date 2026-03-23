@@ -128,7 +128,9 @@ export function formatEngineSummaryLine(options) {
     return '엔진 설정 정보가 없습니다.';
   }
   const presetLabel = options.label ?? options.presetKey ?? '알 수 없음';
-  const styleLabel = options.styleLabel ?? options.styleKey ?? '알 수 없음';
+  const styleLabel = options.styleApplied === false
+    ? '스타일 적용 안 함'
+    : options.styleLabel ?? options.styleKey ?? '알 수 없음';
   return `${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하`;
 }
 
