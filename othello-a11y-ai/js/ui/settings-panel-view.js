@@ -154,7 +154,7 @@ export class SettingsPanelView {
         </div>
 
         <div class="button-stack">
-          <button type="button" id="new-game-button">현재 설정으로 새 게임 시작</button>
+          <button type="button" id="new-game-button">새 게임 시작하기</button>
           <button type="button" id="undo-button">직전 사람 차례로 무르기</button>
           <button type="button" id="read-status-button">현재 상태 다시 읽기</button>
         </div>
