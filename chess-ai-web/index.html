@@ -1,189 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>접근 가능한 체스 AI 웹 앱</title>
-    <link rel="stylesheet" href="./src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>접근 가능한 MCTS 체스</title>
+    <link rel="stylesheet" href="./styles/app.css" />
   </head>
   <body>
-    <header class="app-header">
-      <div>
-        <h1>접근 가능한 체스 AI</h1>
+    <a class="skip-link" href="#main-content">본문으로 바로가기</a>
+    <header class="page-header">
+      <div class="page-header__inner">
+        <h1>접근 가능한 MCTS 체스</h1>
         <p>
-          Stockfish 대신 브라우저 전용 탐색 엔진 <strong>Astra</strong>를 사용합니다.
-          표 형태 체스판, 순차 탐색, aria-live 안내, 사용자 지정 난이도 조절을 제공합니다.
+          브라우저 안에서 동작하는 PUCT/MCTS 기반 체스 AI와 대국할 수 있습니다.
+          Tab만으로 체스판의 모든 칸을 순차 탐색할 수 있고, 기물 선택/해제/이동/잡기
+          상황은 라이브 리전으로 안내됩니다.
         </p>
       </div>
     </header>
 
-    <main class="app-shell">
-      <section class="panel controls-panel" aria-labelledby="controls-heading">
-        <h2 id="controls-heading">게임 및 AI 설정</h2>
-        <form id="engine-form" class="stack-form">
-          <fieldset>
-            <legend>대국 환경</legend>
-
-            <label for="engine-side">AI가 둘 색</label>
-            <select id="engine-side" name="engine-side">
-              <option value="black" selected>흑</option>
-              <option value="white">백</option>
-              <option value="both">양쪽 모두</option>
-              <option value="none">안 함</option>
-            </select>
-
-            <label for="board-orientation">보드 방향</label>
-            <select id="board-orientation" name="board-orientation">
-              <option value="white" selected>백 기준 보기</option>
-              <option value="black">흑 기준 보기</option>
-            </select>
-
-            <label for="engine-preset">엔진 난이도</label>
-            <select id="engine-preset" name="engine-preset">
-              <option value="beginner">입문</option>
-              <option value="casual">보통</option>
-              <option value="strong" selected>강함</option>
-              <option value="expert">최상</option>
-              <option value="custom">사용자 지정</option>
-            </select>
-
-            <label class="checkbox-row" for="use-opening-book">
-              <input id="use-opening-book" name="use-opening-book" type="checkbox" checked />
-              시작책 사용
-            </label>
-
-            <p id="preset-description" class="helper-text">
-              강함: 일반 브라우저 환경에서 균형 좋은 강한 설정입니다. 사용자 지정 파라미터는 사용자 지정 난이도에서만 적용됩니다.
-            </p>
-          </fieldset>
-
-          <fieldset>
-            <legend>사용자 지정 파라미터</legend>
-            <p class="helper-text">
-              아래 숫자 입력은 <strong>사용자 지정</strong> 난이도일 때만 적용됩니다.
-            </p>
-
-            <label for="move-time-ms">생각 시간 (밀리초)</label>
-            <input id="move-time-ms" name="move-time-ms" data-custom-only="true" type="number" min="100" max="15000" step="50" value="1200" disabled />
-
-            <label for="max-depth">최대 깊이</label>
-            <input id="max-depth" name="max-depth" data-custom-only="true" type="number" min="1" max="8" step="1" value="4" disabled />
-
-            <label for="candidate-pool">상위 후보군 크기</label>
-            <input id="candidate-pool" name="candidate-pool" data-custom-only="true" type="number" min="1" max="8" step="1" value="2" disabled />
-
-            <label for="skill-noise">무작위성 (센티폰)</label>
-            <input id="skill-noise" name="skill-noise" data-custom-only="true" type="number" min="0" max="300" step="5" value="25" disabled />
-
-            <label for="quiescence-depth">전술 탐색 깊이</label>
-            <input id="quiescence-depth" name="quiescence-depth" data-custom-only="true" type="number" min="2" max="14" step="1" value="8" disabled />
-          </fieldset>
-
-          <div class="action-buttons" aria-label="게임 동작 버튼 그룹">
-            <button id="new-game-button" type="button">새 게임</button>
-            <button id="undo-button" type="button">한 턴 무르기</button>
-            <button id="clear-selection-button" type="button">선택 해제</button>
-          </div>
-
-          <p id="engine-thinking-status" role="status" aria-atomic="true">AI가 대기 중입니다.</p>
-        </form>
+    <main id="main-content" class="layout">
+      <section class="board-panel" aria-labelledby="board-heading">
+        <div class="section-header">
+          <h2 id="board-heading">체스판</h2>
+          <p id="board-help" class="section-help">
+            Tab으로 칸을 순차 이동하고, Enter 또는 Space로 선택 및 이동을 실행할 수 있습니다.
+            방향키로도 보드 안에서 포커스를 움직일 수 있습니다.
+          </p>
+        </div>
+        <div id="board-container" class="board-container" aria-describedby="board-help"></div>
       </section>
 
-      <section class="panel board-panel" aria-labelledby="play-heading">
-        <h2 id="play-heading">대국 영역</h2>
-        <div id="board-container"></div>
+      <aside class="sidebar">
+        <section class="card" aria-labelledby="controls-heading">
+          <div class="section-header">
+            <h2 id="controls-heading">대국 설정</h2>
+            <p class="section-help">기본 난이도는 프리셋으로 제어되며, 직접 파라미터 입력은 “사용자 지정”일 때만 적용됩니다.</p>
+          </div>
 
-        <section class="status-panel" aria-labelledby="status-heading">
-          <h2 id="status-heading">현재 상태</h2>
+          <form id="control-form" class="control-form">
+            <div class="form-row">
+              <label for="player-color">내 색상</label>
+              <select id="player-color" name="playerColor" aria-label="내 색상">
+                <option value="w">백</option>
+                <option value="b">흑</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="difficulty">난이도</label>
+              <select id="difficulty" name="difficulty" aria-label="엔진 난이도">
+                <option value="beginner">입문</option>
+                <option value="normal" selected>보통</option>
+                <option value="strong">강함</option>
+                <option value="veryStrong">매우 강함</option>
+                <option value="custom">사용자 지정</option>
+              </select>
+            </div>
+
+            <fieldset id="custom-fieldset" class="custom-fieldset">
+              <legend>사용자 지정 엔진 파라미터</legend>
+
+              <div class="form-row">
+                <label for="time-budget-ms">생각 시간 (ms)</label>
+                <input id="time-budget-ms" name="timeBudgetMs" type="number" min="50" max="10000" step="10" />
+              </div>
+
+              <div class="form-row">
+                <label for="max-simulations">최대 시뮬레이션 수</label>
+                <input id="max-simulations" name="maxSimulations" type="number" min="20" max="20000" step="10" />
+              </div>
+
+              <div class="form-row">
+                <label for="cpuct">탐험 계수 (PUCT c<sub>puct</sub>)</label>
+                <input id="cpuct" name="cpuct" type="number" min="0.2" max="4" step="0.05" />
+              </div>
+
+              <div class="form-row">
+                <label for="root-temperature">루트 온도</label>
+                <input id="root-temperature" name="rootTemperature" type="number" min="0" max="2" step="0.05" />
+              </div>
+
+              <div class="form-row">
+                <label for="tactical-depth">전술 확인 깊이</label>
+                <input id="tactical-depth" name="tacticalDepth" type="number" min="0" max="3" step="1" />
+              </div>
+
+              <div class="form-row">
+                <label for="widening-base">초기 확장 자식 수</label>
+                <input id="widening-base" name="wideningBase" type="number" min="1" max="32" step="1" />
+              </div>
+
+              <div class="form-row">
+                <label for="widening-scale">확장 증가율</label>
+                <input id="widening-scale" name="wideningScale" type="number" min="0" max="10" step="0.1" />
+              </div>
+            </fieldset>
+
+            <div class="action-row">
+              <button id="new-game-button" type="button">새 게임 시작</button>
+              <button id="undo-button" type="button">한 턴 되돌리기</button>
+              <button id="force-ai-button" type="button">AI 착수</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="promotion-heading" id="promotion-section" hidden>
+          <div class="section-header">
+            <h2 id="promotion-heading">프로모션 선택</h2>
+            <p class="section-help" id="promotion-help">승진할 기물을 선택하십시오.</p>
+          </div>
+          <div class="promotion-buttons" role="group" aria-labelledby="promotion-heading" aria-describedby="promotion-help">
+            <button type="button" data-promotion="q" aria-label="퀸으로 승진">퀸</button>
+            <button type="button" data-promotion="r" aria-label="룩으로 승진">룩</button>
+            <button type="button" data-promotion="b" aria-label="비숍으로 승진">비숍</button>
+            <button type="button" data-promotion="n" aria-label="나이트로 승진">나이트</button>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="status-heading">
+          <div class="section-header">
+            <h2 id="status-heading">대국 상태</h2>
+          </div>
           <dl class="status-grid">
             <div>
-              <dt>차례</dt>
-              <dd id="turn-status">현재 차례: 백</dd>
+              <dt>현재 차례</dt>
+              <dd id="turn-status">-</dd>
             </div>
             <div>
-              <dt>게임 상태</dt>
-              <dd id="game-status-text">백 차례입니다.</dd>
-            </div>
-          </dl>
-        </section>
-      </section>
-
-      <aside class="panel info-panel" aria-labelledby="info-heading">
-        <h2 id="info-heading">분석 및 기보</h2>
-
-        <section id="engine-info-root" class="sub-panel" aria-labelledby="engine-info-heading">
-          <h3 id="engine-info-heading">엔진 분석 정보</h3>
-          <dl class="status-grid compact-grid">
-            <div>
-              <dt>상태</dt>
-              <dd id="engine-status-text">대기 중</dd>
+              <dt>대국 상태</dt>
+              <dd id="game-status">-</dd>
             </div>
             <div>
-              <dt>깊이</dt>
-              <dd id="engine-depth">-</dd>
+              <dt>엔진 상태</dt>
+              <dd id="engine-status">대기 중</dd>
             </div>
             <div>
-              <dt>평가</dt>
-              <dd id="engine-score">-</dd>
+              <dt>난이도</dt>
+              <dd id="difficulty-status">보통</dd>
             </div>
             <div>
-              <dt>노드 수</dt>
-              <dd id="engine-nodes">-</dd>
+              <dt>시뮬레이션 수</dt>
+              <dd id="engine-simulations">-</dd>
             </div>
             <div>
-              <dt>초당 노드</dt>
-              <dd id="engine-nps">-</dd>
+              <dt>최종 평가</dt>
+              <dd id="engine-evaluation">-</dd>
             </div>
-            <div class="full-width">
-              <dt>주요 수순</dt>
-              <dd id="engine-pv">-</dd>
+            <div class="status-grid__wide">
+              <dt>주요 후보수</dt>
+              <dd id="engine-candidates">-</dd>
+            </div>
+            <div class="status-grid__wide">
+              <dt>엔진 설정</dt>
+              <dd id="engine-config">-</dd>
             </div>
           </dl>
         </section>
 
-        <section class="sub-panel" aria-labelledby="move-history-heading">
-          <h3 id="move-history-heading">기보</h3>
-          <div id="move-history-root">
-            <p class="empty-state">아직 진행된 수가 없습니다.</p>
+        <section class="card" aria-labelledby="move-log-heading">
+          <div class="section-header">
+            <h2 id="move-log-heading">기보</h2>
           </div>
+          <ol id="move-log" class="move-log"></ol>
         </section>
       </aside>
     </main>
 
-    <div id="live-region" class="visually-hidden" role="status" aria-atomic="true"></div>
+    <div id="live-region" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <dialog id="promotion-dialog" aria-labelledby="promotion-title" aria-describedby="promotion-description">
-      <form method="dialog" class="promotion-form">
-        <h2 id="promotion-title">승격 기물 선택</h2>
-        <p id="promotion-description">승격할 기물을 선택하십시오.</p>
-
-        <fieldset>
-          <legend>승격할 기물</legend>
-          <label for="promotion-q">
-            <input id="promotion-q" type="radio" name="promotion-piece" value="q" checked />
-            퀸
-          </label>
-          <label for="promotion-r">
-            <input id="promotion-r" type="radio" name="promotion-piece" value="r" />
-            룩
-          </label>
-          <label for="promotion-b">
-            <input id="promotion-b" type="radio" name="promotion-piece" value="b" />
-            비숍
-          </label>
-          <label for="promotion-n">
-            <input id="promotion-n" type="radio" name="promotion-piece" value="n" />
-            나이트
-          </label>
-        </fieldset>
-
-        <div class="action-buttons" aria-label="승격 대화상자 버튼 그룹">
-          <button id="promotion-confirm-button" type="submit">승격 적용</button>
-          <button id="promotion-cancel-button" type="button">취소</button>
-        </div>
-      </form>
-    </dialog>
-
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/app.js"></script>
   </body>
 </html>

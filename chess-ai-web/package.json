@@ -1,0 +1,14 @@
+{
+  "name": "chess-mcts-webapp",
+  "version": "1.0.0",
+  "description": "Static-hostable accessible chess web app with a PUCT/MCTS-driven browser AI.",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 4173",
+    "test:smoke": "node ./tests/smoke.mjs",
+    "test:agent": "node ./tests/agent.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.52.0"
+  }
+}

@@ -1,51 +1,45 @@
-export const TT_FLAG = Object.freeze({
-  EXACT: 'exact',
-  LOWER: 'lower',
-  UPPER: 'upper',
-});
-
 export class TranspositionTable {
-  constructor(maxEntries = 80000) {
+  constructor(maxEntries = 60000) {
     this.maxEntries = maxEntries;
-    this.table = new Map();
-  }
-
-  clear() {
-    this.table.clear();
-  }
-
-  get size() {
-    return this.table.size;
-  }
-
-  get fillRatio() {
-    return this.table.size / this.maxEntries;
+    this.entries = new Map();
   }
 
   get(key) {
-    return this.table.get(key);
+    const entry = this.entries.get(key);
+    if (!entry) {
+      return null;
+    }
+    entry.lastAccess = performance.now();
+    return entry;
   }
 
-  set(key, entry) {
-    const existing = this.table.get(key);
-    if (existing && existing.depth > entry.depth) {
-      return;
+  set(key, value) {
+    if (this.entries.size >= this.maxEntries) {
+      this.evictOldest();
     }
+    this.entries.set(key, {
+      ...value,
+      lastAccess: performance.now(),
+    });
+  }
 
-    this.table.set(key, { ...entry, age: performance.now() });
+  evictOldest() {
+    let oldestKey = null;
+    let oldestAccess = Infinity;
 
-    if (this.table.size <= this.maxEntries) {
-      return;
-    }
-
-    const pruneCount = Math.floor(this.maxEntries * 0.15);
-    const keys = this.table.keys();
-    for (let index = 0; index < pruneCount; index += 1) {
-      const oldestKey = keys.next().value;
-      if (!oldestKey) {
-        break;
+    for (const [key, entry] of this.entries) {
+      if (entry.lastAccess < oldestAccess) {
+        oldestAccess = entry.lastAccess;
+        oldestKey = key;
       }
-      this.table.delete(oldestKey);
     }
+
+    if (oldestKey !== null) {
+      this.entries.delete(oldestKey);
+    }
+  }
+
+  clear() {
+    this.entries.clear();
   }
 }
