@@ -11,6 +11,7 @@ import { legalMovesBitboard } from '../core/rules.js';
 import { Evaluator, MoveOrderingEvaluator } from '../ai/evaluator.js';
 import { lookupOpeningBook, getOpeningBookSummary } from '../ai/opening-book.js';
 import { resolveEngineOptions } from '../ai/presets.js';
+import { formatSearchSummary } from '../ui/formatters.js';
 
 function coordinatesOfLegalMoves(state) {
   return state.getLegalMoves().map((move) => move.coord).sort();
@@ -246,6 +247,30 @@ function runEvaluatorTests() {
   assert.ok(
     safeFeatures.cornerPattern > riskyFeatures.cornerPattern,
     'Owning a corner should improve the corner-pattern score compared with lingering near an empty corner.',
+  );
+
+  const cornerAccessState = createStateFromMoveSequence('D3 C3 B3 B2 C4 A3');
+  const cornerAccessBlackFeatures = evaluator.explainFeatures(cornerAccessState, 'black');
+  const cornerAccessWhiteFeatures = evaluator.explainFeatures(cornerAccessState, 'white');
+  assert.equal(
+    cornerAccessBlackFeatures.cornerAccess,
+    100,
+    'The evaluator should report an uncontested immediate corner as the maximum corner-access advantage.',
+  );
+  assert.deepEqual(
+    cornerAccessBlackFeatures.cornerMoves,
+    ['A1'],
+    'The feature breakdown should expose the exact corner move available to the side with access.',
+  );
+  assert.deepEqual(
+    cornerAccessBlackFeatures.opponentCornerMoves,
+    [],
+    'The feature breakdown should show when the opponent has no immediate corner reply.',
+  );
+  assert.equal(
+    cornerAccessWhiteFeatures.cornerAccess,
+    -100,
+    'Corner-access reporting should remain zero-sum from the opposite perspective.',
   );
 
   const mixedFullEdge = createStateFromBitboards({
@@ -690,6 +715,80 @@ function runSearchTests() {
     'Cached pass-node values should match the searched negamax result.',
   );
 
+  const subtreeExactBoundaryState = createStateFromMoveSequence(
+    'F5 F6 E6 D6 C5 E3 E7 C7 D3 F4 D7 D8 F8 C8 F3 C6 G4 E8 B8 C4 B6 B4 A3 C3 D2 B5 F7 B3 A6 A4 A5 E2 D1 C1 B1 E1 F1 F2 G1 C2 A2 G6 G5',
+  );
+  assert.equal(
+    subtreeExactBoundaryState.currentPlayer,
+    'white',
+    'The subtree exact-boundary regression setup should hand the move to white.',
+  );
+  assert.equal(
+    subtreeExactBoundaryState.getEmptyCount(),
+    17,
+    'The subtree exact-boundary regression setup should sit one ply above the configured exact window.',
+  );
+  const subtreeExactBoundaryEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 1,
+    timeLimitMs: 1000,
+    exactEndgameEmpties: 16,
+    aspirationWindow: 0,
+    randomness: 0,
+  });
+  subtreeExactBoundaryEngine.solveSmallExact = () => {
+    throw new Error('The exact small-solver must stay disabled while the root is still above the exact boundary.');
+  };
+  const subtreeExactBoundaryResult = subtreeExactBoundaryEngine.findBestMove(subtreeExactBoundaryState, {
+    presetKey: 'custom',
+    maxDepth: 1,
+    timeLimitMs: 1000,
+    exactEndgameEmpties: 16,
+    aspirationWindow: 0,
+    randomness: 0,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    subtreeExactBoundaryResult.stats.completedDepth,
+    1,
+    'A one-ply search one empty above the exact boundary should still complete normally.',
+  );
+  assert.ok(
+    Number.isFinite(subtreeExactBoundaryResult.score),
+    'Root positions above the exact boundary should never fall back to the internal ±infinity sentinel.',
+  );
+
+  const fallbackOnlyEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 500,
+    exactEndgameEmpties: 8,
+    aspirationWindow: 40,
+    randomness: 0,
+  });
+  fallbackOnlyEngine.runIterativeDeepening = () => null;
+  const fallbackOnlyResult = fallbackOnlyEngine.findBestMove(midgame, {
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 500,
+    exactEndgameEmpties: 8,
+    aspirationWindow: 40,
+    randomness: 0,
+    styleKey: 'balanced',
+  });
+  assert.ok(
+    Number.isFinite(fallbackOnlyResult.score),
+    'Search fallback results should report a bounded heuristic score instead of the internal ±infinity sentinel.',
+  );
+  assert.ok(
+    fallbackOnlyResult.analyzedMoves.length > 0,
+    'Search fallback results should still expose scored candidate moves.',
+  );
+  assert.ok(
+    fallbackOnlyResult.analyzedMoves.every((move) => Number.isFinite(move.score)),
+    'Fallback candidate scores should stay finite so the UI never announces sentinel values.',
+  );
+
   const nearEndgame = playDeterministicallyUntilEmptyCount(GameState.initial(), 4);
   assert.equal(nearEndgame.getEmptyCount(), 4, 'Small endgame regression setup should reach four empties.');
   const exactScore = bruteForceExactScore(nearEndgame);
@@ -709,6 +808,72 @@ function runSearchTests() {
   assert.ok(
     nearEndgameResult.stats.smallSolverCalls > 0,
     'Near-terminal exact search should route through the specialized small-endgame solver.',
+  );
+
+  const exactOneShotEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 16,
+    randomness: 0,
+  });
+  exactOneShotEngine.runIterativeDeepening = () => {
+    throw new Error('Exact-root searches should bypass iterative deepening and use a single direct solve.');
+  };
+  const exactOneShotResult = exactOneShotEngine.findBestMove(nearEndgame, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 4,
+    exactEndgameEmpties: 16,
+    randomness: 0,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    exactOneShotResult.searchMode,
+    'exact-endgame',
+    'Exact-root results should expose an explicit exact-endgame search mode for the UI.',
+  );
+  assert.equal(
+    exactOneShotResult.isExactResult,
+    true,
+    'Completed exact-root searches should mark their reported score as exact.',
+  );
+  assert.match(
+    formatSearchSummary(exactOneShotResult),
+    /정확 끝내기/,
+    'The UI search summary should explicitly label exact-root searches as exact endgames.',
+  );
+
+  const exactFallbackEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 16,
+    randomness: 0,
+  });
+  exactFallbackEngine.runSingleDepthSearch = () => null;
+  const exactFallbackResult = exactFallbackEngine.findBestMove(nearEndgame, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 4,
+    exactEndgameEmpties: 16,
+    randomness: 0,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    exactFallbackResult.searchMode,
+    'exact-endgame',
+    'Exact-root fallback results should preserve the exact-endgame mode marker.',
+  );
+  assert.equal(
+    exactFallbackResult.isExactResult,
+    false,
+    'Fallback results should not claim that an exact solve finished.',
+  );
+  assert.match(
+    formatSearchSummary(exactFallbackResult),
+    /정확 끝내기 미완료/,
+    'The UI summary should distinguish incomplete exact-root attempts from finished exact solves.',
   );
 
   assert.equal(

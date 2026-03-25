@@ -535,6 +535,10 @@ export class SearchEngine {
       stats: { ...this.stats },
       options: { ...this.options },
       source: 'opening-book',
+      searchMode: 'opening-book',
+      isExactResult: false,
+      rootEmptyCount: state.getEmptyCount(),
+      exactThreshold: this.options.exactEndgameEmpties,
       bookHit: {
         ...this.describeBookHit(bookHit, selection.chosen.index, true),
         chosenNames: selection.chosen.topNames,
@@ -542,8 +546,58 @@ export class SearchEngine {
     };
   }
 
-  searchForcedPassRoot(passedState, depth, alpha, beta) {
-    const childResult = this.negamax(passedState, Math.max(0, depth - 1), -beta, -alpha, 1);
+  buildRootFallback(state, legalMoves, bookWeights = null) {
+    const orderedMoves = this.orderMoves(state, legalMoves, 0, 1, null, bookWeights);
+    const analyzedMoves = [];
+
+    for (const move of orderedMoves) {
+      const outcome = move.orderingOutcome ?? state.applyMoveFast(move.index, move.flips ?? null);
+      if (!outcome) {
+        continue;
+      }
+
+      let fallbackState = outcome;
+      if (!fallbackState.isTerminal() && fallbackState.getSearchMoves().length === 0) {
+        fallbackState = fallbackState.passTurnFast();
+      }
+
+      const score = fallbackState.isTerminal()
+        ? this.evaluator.evaluateTerminal(fallbackState, state.currentPlayer)
+        : this.evaluator.evaluate(fallbackState, state.currentPlayer);
+
+      analyzedMoves.push({
+        index: move.index,
+        coord: move.coord,
+        score,
+        principalVariation: [move.index],
+        flipCount: move.flipCount,
+      });
+    }
+
+    analyzedMoves.sort((left, right) => right.score - left.score);
+    const bestMove = analyzedMoves[0] ?? {
+      index: legalMoves[0].index,
+      coord: legalMoves[0].coord,
+      score: this.evaluator.evaluate(state, state.currentPlayer),
+      principalVariation: [legalMoves[0].index],
+      flipCount: legalMoves[0].flipCount,
+    };
+
+    return {
+      bestMoveIndex: bestMove.index,
+      bestMoveCoord: bestMove.coord,
+      score: bestMove.score,
+      principalVariation: [...bestMove.principalVariation],
+      analyzedMoves,
+      didPass: false,
+      stats: { ...this.stats },
+      options: { ...this.options },
+      source: 'search',
+    };
+  }
+
+  searchForcedPassRoot(passedState, depth, alpha, beta, rootExactEndgame) {
+    const childResult = this.negamax(passedState, Math.max(0, depth - 1), -beta, -alpha, 1, rootExactEndgame);
     return {
       bestMoveIndex: null,
       score: -childResult.score,
@@ -588,6 +642,20 @@ export class SearchEngine {
     return lastCompleted;
   }
 
+  runSingleDepthSearch(depth, searchAtDepth) {
+    try {
+      this.checkDeadline();
+      const result = searchAtDepth(depth, -INFINITY, INFINITY);
+      this.stats.completedDepth = depth;
+      return result;
+    } catch (error) {
+      if (error instanceof SearchTimeoutError) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   findBestMove(state, overrides = {}) {
     if (!(state instanceof GameState)) {
       throw new TypeError('findBestMove expects a GameState instance.');
@@ -602,6 +670,9 @@ export class SearchEngine {
     this.trimTranspositionTable();
     const startedAt = now();
     this.deadlineMs = startedAt + this.options.timeLimitMs;
+    const rootEmptyCount = state.getEmptyCount();
+    const rootExactEndgame = rootEmptyCount <= this.options.exactEndgameEmpties;
+    const rootSearchMode = rootExactEndgame ? 'exact-endgame' : 'depth-limited';
 
     const legalMoves = state.getLegalMoves();
     if (legalMoves.length === 0) {
@@ -616,6 +687,10 @@ export class SearchEngine {
           stats: { ...this.stats, elapsedMs: Math.round(now() - startedAt) },
           options: { ...this.options },
           source: 'search',
+          searchMode: 'terminal',
+          isExactResult: true,
+          rootEmptyCount,
+          exactThreshold: this.options.exactEndgameEmpties,
         };
       }
 
@@ -623,7 +698,7 @@ export class SearchEngine {
       const fallback = {
         bestMoveIndex: null,
         bestMoveCoord: null,
-        score: -this.evaluator.evaluate(passedState),
+        score: this.evaluator.evaluate(passedState, state.currentPlayer),
         principalVariation: [],
         analyzedMoves: [],
         didPass: true,
@@ -632,15 +707,23 @@ export class SearchEngine {
         source: 'search',
       };
 
-      const finalResult = this.runIterativeDeepening((depth, alpha, beta) => (
-        this.searchForcedPassRoot(passedState, depth, alpha, beta)
-      )) ?? fallback;
+      const finalResult = rootExactEndgame
+        ? this.runSingleDepthSearch(this.options.maxDepth, (depth, alpha, beta) => (
+          this.searchForcedPassRoot(passedState, depth, alpha, beta, rootExactEndgame)
+        )) ?? fallback
+        : this.runIterativeDeepening((depth, alpha, beta) => (
+          this.searchForcedPassRoot(passedState, depth, alpha, beta, rootExactEndgame)
+        )) ?? fallback;
       this.stats.elapsedMs = Math.round(now() - startedAt);
       return {
         ...finalResult,
         stats: { ...this.stats },
         options: { ...this.options },
         source: 'search',
+        searchMode: rootSearchMode,
+        isExactResult: rootExactEndgame && finalResult !== fallback,
+        rootEmptyCount,
+        exactThreshold: this.options.exactEndgameEmpties,
       };
     }
 
@@ -661,22 +744,18 @@ export class SearchEngine {
     const bookWeights = bookHit
       ? new Map(bookHit.candidates.map((candidate) => [candidate.moveIndex, candidate.weight]))
       : null;
+    const fallback = this.buildRootFallback(state, legalMoves, bookWeights);
 
-    const fallback = {
-      bestMoveIndex: legalMoves[0].index,
-      bestMoveCoord: legalMoves[0].coord,
-      score: -INFINITY,
-      principalVariation: [legalMoves[0].index],
-      analyzedMoves: legalMoves.map((move) => ({ index: move.index, coord: move.coord, score: -INFINITY })),
-      didPass: false,
-      stats: { ...this.stats },
-      options: { ...this.options },
-      source: 'search',
-    };
-
-    const finalResult = this.runIterativeDeepening((depth, alpha, beta) => (
-      this.searchRoot(state, legalMoves, depth, alpha, beta, bookWeights)
-    )) ?? fallback;
+    const finalResult = rootExactEndgame
+      // Exact root search does not need iterative deepening. Run the full exact solve once
+      // at the configured top depth so move-ordering heuristics still see the late-game
+      // depth horizon, but avoid repeating the exact tree for depths 1..maxDepth.
+      ? this.runSingleDepthSearch(this.options.maxDepth, (depth, alpha, beta) => (
+        this.searchRoot(state, legalMoves, depth, alpha, beta, bookWeights, rootExactEndgame)
+      )) ?? fallback
+      : this.runIterativeDeepening((depth, alpha, beta) => (
+        this.searchRoot(state, legalMoves, depth, alpha, beta, bookWeights, rootExactEndgame)
+      )) ?? fallback;
     const chosen = chooseRandomBest(finalResult.analyzedMoves, this.options.randomness) ?? finalResult.analyzedMoves[0] ?? null;
     const selectedMove = chosen?.index ?? finalResult.bestMoveIndex;
     const selectedCoord = chosen?.coord ?? (
@@ -699,11 +778,15 @@ export class SearchEngine {
       stats: { ...this.stats },
       options: { ...this.options },
       source: 'search',
+      searchMode: rootSearchMode,
+      isExactResult: rootExactEndgame && finalResult !== fallback,
+      rootEmptyCount,
+      exactThreshold: this.options.exactEndgameEmpties,
       ...(bookHit ? { bookHit: this.describeBookHit(bookHit, selectedMove, false) } : {}),
     };
   }
 
-  searchRoot(state, rootMoves, depth, alpha, beta, bookWeights = null) {
+  searchRoot(state, rootMoves, depth, alpha, beta, bookWeights = null, rootExactEndgame = false) {
     const alphaStart = alpha;
     const betaStart = beta;
     const ttEntry = this.lookupTransposition(state);
@@ -719,7 +802,7 @@ export class SearchEngine {
       this.stats.ttFirstSearches += 1;
       const preferredOutcome = state.applyMoveFast(preferredMove.index, preferredMove.flips ?? null);
       if (preferredOutcome) {
-        const preferredChild = this.negamax(preferredOutcome, depth - 1, -beta, -alpha, 1);
+        const preferredChild = this.negamax(preferredOutcome, depth - 1, -beta, -alpha, 1, rootExactEndgame);
         const preferredScore = -preferredChild.score;
         const preferredPrincipalVariation = [preferredMove.index, ...preferredChild.principalVariation];
         analyzedMoves.push({
@@ -771,11 +854,11 @@ export class SearchEngine {
 
       let childResult;
       if (orderedMoveIndex === 0 && !preferredMove) {
-        childResult = this.negamax(outcome, depth - 1, -beta, -alpha, 1);
+        childResult = this.negamax(outcome, depth - 1, -beta, -alpha, 1, rootExactEndgame);
       } else {
-        childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, 1);
+        childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, 1, rootExactEndgame);
         if (-childResult.score > alpha && -childResult.score < beta) {
-          childResult = this.negamax(outcome, depth - 1, -beta, -alpha, 1);
+          childResult = this.negamax(outcome, depth - 1, -beta, -alpha, 1, rootExactEndgame);
         }
       }
 
@@ -825,13 +908,15 @@ export class SearchEngine {
     };
   }
 
-  negamax(state, depth, alpha, beta, ply) {
+  negamax(state, depth, alpha, beta, ply, rootExactEndgame = false) {
     this.checkDeadline();
     this.stats.nodes += 1;
 
     const empties = state.getEmptyCount();
-    const exactEndgame = empties <= this.options.exactEndgameEmpties;
-    const tableDepth = exactEndgame ? empties + 1 : depth;
+    // Propagate the root decision instead of re-triggering exact search mid-tree. This
+    // keeps positions above the configured boundary depth-limited for the whole search.
+    const exactEndgame = rootExactEndgame;
+    const tableDepth = exactEndgame ? empties + 1 : Math.max(0, depth);
     const alphaStart = alpha;
     const betaStart = beta;
 
@@ -889,7 +974,7 @@ export class SearchEngine {
       }
 
       const passed = state.passTurnFast();
-      const childResult = this.negamax(passed, Math.max(0, depth - 1), -beta, -alpha, ply + 1);
+      const childResult = this.negamax(passed, Math.max(0, depth - 1), -beta, -alpha, ply + 1, rootExactEndgame);
       const score = -childResult.score;
       const flag = this.computeTableFlag(score, alphaStart, betaStart);
       this.storeTransposition(state, {
@@ -921,7 +1006,7 @@ export class SearchEngine {
       this.stats.ttFirstSearches += 1;
       const preferredOutcome = state.applyMoveFast(preferredMove.index, preferredMove.flips ?? null);
       if (preferredOutcome) {
-        const preferredChild = this.negamax(preferredOutcome, depth - 1, -beta, -alpha, ply + 1);
+        const preferredChild = this.negamax(preferredOutcome, depth - 1, -beta, -alpha, ply + 1, rootExactEndgame);
         bestScore = -preferredChild.score;
         bestMoveIndex = preferredMove.index;
         bestPv = [preferredMove.index, ...preferredChild.principalVariation];
@@ -961,29 +1046,29 @@ export class SearchEngine {
       let childResult;
       let score;
       if (orderedMoveIndex === 0 && !preferredMove) {
-        childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1);
+        childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1, rootExactEndgame);
         score = -childResult.score;
       } else if (this.shouldApplyLateMoveReduction(state, move, ply, depth, orderedMoveIndex, exactEndgame)) {
         const reduction = this.lateMoveReduction(depth, orderedMoveIndex);
         this.stats.lmrReductions += 1;
-        childResult = this.negamax(outcome, Math.max(0, depth - 1 - reduction), -alpha - 1, -alpha, ply + 1);
+        childResult = this.negamax(outcome, Math.max(0, depth - 1 - reduction), -alpha - 1, -alpha, ply + 1, rootExactEndgame);
         score = -childResult.score;
 
         if (score > alpha) {
           this.stats.lmrReSearches += 1;
-          childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, ply + 1);
+          childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, ply + 1, rootExactEndgame);
           score = -childResult.score;
           if (score > alpha && score < beta) {
             this.stats.lmrFullReSearches += 1;
-            childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1);
+            childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1, rootExactEndgame);
             score = -childResult.score;
           }
         }
       } else {
-        childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, ply + 1);
+        childResult = this.negamax(outcome, depth - 1, -alpha - 1, -alpha, ply + 1, rootExactEndgame);
         score = -childResult.score;
         if (score > alpha && score < beta) {
-          childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1);
+          childResult = this.negamax(outcome, depth - 1, -beta, -alpha, ply + 1, rootExactEndgame);
           score = -childResult.score;
         }
       }

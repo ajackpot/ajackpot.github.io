@@ -41,6 +41,9 @@
 - `implementation/impl-stage-05-exact-endgame-small-solver.md`
 - `implementation/impl-stage-06-search-overhead-reduction-and-tt-first-search.md`
 - `implementation/impl-stage-12-packed-hash-key-optimization.md`
+- `implementation/impl-stage-13-evaluator-corner-access-and-audit-tuning.md`
+- `implementation/impl-stage-14-root-exact-endgame-boundary-and-fallback-hardening.md`
+- `implementation/impl-stage-15-exact-root-single-shot-and-ui-mode-annotation.md`
 
 ### 검토
 - `review/review-stage-03-engine-audit.md`
@@ -53,6 +56,9 @@
 - `review/review-stage-10-exact-window-ordering-profile-retuning.md`
 - `review/review-stage-11-15-16-bucket-17-18-pre-exact-profile-experiment.md`
 - `review/review-stage-12-external-engine-technique-survey-and-adoption-candidates.md`
+- `review/review-stage-13-traditional-evaluator-audit.md`
+- `review/review-stage-14-late-game-boundary-bug-audit.md`
+- `review/review-stage-15-exact-root-ux-and-overhead-audit.md`
 
 ### 기능
 - `features/feature-opening-book-integration.md`

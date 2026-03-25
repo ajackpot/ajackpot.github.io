@@ -156,12 +156,27 @@ export function formatSearchSummary(result) {
   const nodes = result.stats?.nodes ?? 0;
   const ttHits = result.stats?.ttHits ?? 0;
   const score = Number.isFinite(result.score) ? result.score : 0;
+  const rootEmptyCount = Number.isInteger(result.rootEmptyCount) ? result.rootEmptyCount : null;
   const pv = Array.isArray(result.principalVariation) && result.principalVariation.length > 0
     ? result.principalVariation.map((index) => indexToCoord(index)).join(' → ')
     : '없음';
   const bookNote = result.bookHit
     ? ` 오프닝북 참고 ${joinNames(result.bookHit.matchedNames?.length ? result.bookHit.matchedNames : result.bookHit.topNames)}.`
     : '';
+
+  if (result.searchMode === 'terminal') {
+    return `대국 종료 상태, 평가 ${score}, 시간 ${elapsed}ms.`;
+  }
+
+  if (result.searchMode === 'exact-endgame') {
+    const emptyCountText = rootEmptyCount === null ? '' : `현재 빈칸 ${rootEmptyCount}칸, `;
+    if (result.isExactResult) {
+      return `${best}, 정확 끝내기, ${emptyCountText}평가 ${score}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+    }
+
+    return `${best}, 정확 끝내기 미완료로 휴리스틱 대체, ${emptyCountText}평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+  }
+
   return `${best}, 평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
 }
 

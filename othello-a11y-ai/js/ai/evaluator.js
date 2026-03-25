@@ -106,6 +106,7 @@ const CORNER_PATTERN_INDICES = Object.freeze([
   [56, 57, 58, 48, 49, 50, 40, 41, 42],
   [63, 62, 61, 55, 54, 53, 47, 46, 45],
 ]);
+const CORNER_MASK = CORNER_INDICES.reduce((mask, index) => mask | INDEX_BITS[index], 0n);
 
 const EDGE_ANCHORED_RUN_BONUS = Object.freeze([0, 0, 6, 12, 20, 30, 42, 56, 72]);
 const EDGE_EMPTY_CORNER_EXPOSURE_PENALTY = Object.freeze([0, 4, 10, 18]);
@@ -431,10 +432,23 @@ function potentialMobilityScore(player, opponent, empty) {
   return normalizeDifference(myPotential, oppPotential);
 }
 
-function actualMobilityScore(player, opponent) {
-  const myMoves = popcount(legalMovesBitboard(player, opponent));
-  const oppMoves = popcount(legalMovesBitboard(opponent, player));
-  return normalizeDifference(myMoves, oppMoves);
+function actualMobilityScoreFromMoveCounts(myMoveCount, opponentMoveCount) {
+  return normalizeDifference(myMoveCount, opponentMoveCount);
+}
+
+function countCornerMoves(moveBitboard) {
+  return popcount(moveBitboard & CORNER_MASK);
+}
+
+function cornerAccessScoreFromMoveBitboards(myMovesBitboard, opponentMovesBitboard) {
+  return normalizeDifference(
+    countCornerMoves(myMovesBitboard),
+    countCornerMoves(opponentMovesBitboard),
+  );
+}
+
+function coordsForCornerMoves(moveBitboard) {
+  return bitsToCoords(moveBitboard & CORNER_MASK);
 }
 
 function cornerScore(player, opponent) {
@@ -715,22 +729,25 @@ export class Evaluator {
     const empties = state.getEmptyCount();
     const phase = clamp((64 - empties) / 64, 0, 1);
 
-    const mobility = actualMobilityScore(player, opponent);
+    const myMovesBitboard = legalMovesBitboard(player, opponent);
+    const opponentMovesBitboard = legalMovesBitboard(opponent, player);
+    const myMoveCount = popcount(myMovesBitboard);
+    const opponentMoveCount = popcount(opponentMovesBitboard);
+    const mobility = actualMobilityScoreFromMoveCounts(myMoveCount, opponentMoveCount);
     const potentialMobility = potentialMobilityScore(player, opponent, empty);
     const corners = cornerScore(player, opponent);
+    const cornerAccess = cornerAccessScoreFromMoveBitboards(myMovesBitboard, opponentMovesBitboard);
     const cornerAdjacency = cornerAdjacencyScore(player, opponent);
     const frontier = frontierScore(player, opponent, empty);
     const positional = positionalScore(player, opponent);
     const edgePatterns = edgePatternScore(player, opponent);
     const cornerPatterns = cornerPatternScore(player, opponent);
     const stability = stabilityScore(player, opponent, empties);
-    const discDiff = discDifferentialScore(player, opponent);
-    const parityBreakdown = describeParityHeuristic(state, color);
-    const parity = parityBreakdown.score;
 
     const mobilityWeight = lerp(135, 35, phase) * this.options.mobilityScale;
     const potentialMobilityWeight = lerp(55, 12, phase) * this.options.potentialMobilityScale;
     const cornersWeight = 850 * this.options.cornerScale;
+    const cornerAccessWeight = lerp(200, 650, phase) * this.options.cornerScale;
     const cornerAdjacencyWeight = lerp(300, 90, phase) * this.options.cornerAdjacencyScale;
     const frontierWeight = lerp(80, 20, phase) * this.options.frontierScale;
     const positionalWeight = lerp(14, 8, phase) * this.options.positionalScale;
@@ -740,10 +757,14 @@ export class Evaluator {
     const parityWeight = (empties <= 14 ? lerp(25, 80, 1 - (empties / 14)) : 0) * this.options.parityScale;
     const discWeight = (empties <= 18 ? lerp(12, 120, 1 - (empties / 18)) : 0) * this.options.discScale;
 
+    const discDiff = discWeight > 0 ? discDifferentialScore(player, opponent) : 0;
+    const parity = parityWeight > 0 ? describeParityHeuristic(state, color).score : 0;
+
     const weighted = (
       (mobility * mobilityWeight)
       + (potentialMobility * potentialMobilityWeight)
       + (corners * cornersWeight)
+      + (cornerAccess * cornerAccessWeight)
       + (cornerAdjacency * cornerAdjacencyWeight)
       + (frontier * frontierWeight)
       + (positional * positionalWeight)
@@ -769,13 +790,21 @@ export class Evaluator {
     const { player, opponent } = perspectiveBoards;
     const empty = FULL_BOARD & ~(player | opponent);
     const empties = state.getEmptyCount();
+    const myMovesBitboard = legalMovesBitboard(player, opponent);
+    const opponentMovesBitboard = legalMovesBitboard(opponent, player);
     const stableCounts = stabilityCounts(player, opponent, empties);
     const parityBreakdown = describeParityHeuristic(state, color, { includeRegionBreakdown: true });
 
     return {
-      mobility: actualMobilityScore(player, opponent),
+      mobility: actualMobilityScoreFromMoveCounts(
+        popcount(myMovesBitboard),
+        popcount(opponentMovesBitboard),
+      ),
       potentialMobility: potentialMobilityScore(player, opponent, empty),
       corners: cornerScore(player, opponent),
+      cornerAccess: cornerAccessScoreFromMoveBitboards(myMovesBitboard, opponentMovesBitboard),
+      cornerMoves: coordsForCornerMoves(myMovesBitboard),
+      opponentCornerMoves: coordsForCornerMoves(opponentMovesBitboard),
       cornerAdjacency: cornerAdjacencyScore(player, opponent),
       frontier: frontierScore(player, opponent, empty),
       positional: positionalScore(player, opponent),
@@ -792,7 +821,7 @@ export class Evaluator {
       parityOddRegions: parityBreakdown.oddRegions,
       parityEvenRegions: parityBreakdown.evenRegions,
       currentPlayer: color,
-      legalMoves: bitsToCoords(legalMovesBitboard(player, opponent)),
+      legalMoves: bitsToCoords(myMovesBitboard),
     };
   }
 }
