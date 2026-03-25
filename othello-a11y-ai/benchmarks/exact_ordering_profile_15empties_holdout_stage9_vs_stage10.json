@@ -1,0 +1,76 @@
+{
+  "baseline": {
+    "meanNodes": 137207.0,
+    "meanMs": 8357.0,
+    "runs": [
+      {
+        "seed": 3,
+        "nodes": 148992,
+        "ms": 9332,
+        "bestMove": "A6",
+        "score": -120000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      },
+      {
+        "seed": 33,
+        "nodes": 99999,
+        "ms": 6177,
+        "bestMove": "H4",
+        "score": -160000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      },
+      {
+        "seed": 34,
+        "nodes": 162630,
+        "ms": 9562,
+        "bestMove": "H8",
+        "score": -260000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      }
+    ]
+  },
+  "candidate": {
+    "meanNodes": 111949.33333333333,
+    "meanMs": 6617.0,
+    "runs": [
+      {
+        "seed": 3,
+        "nodes": 108206,
+        "ms": 6461,
+        "bestMove": "A6",
+        "score": -120000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      },
+      {
+        "seed": 33,
+        "nodes": 118061,
+        "ms": 7154,
+        "bestMove": "H4",
+        "score": -160000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      },
+      {
+        "seed": 34,
+        "nodes": 109581,
+        "ms": 6236,
+        "bestMove": "H8",
+        "score": -260000,
+        "depth": 4,
+        "orderingEvalCalls": 12
+      }
+    ]
+  },
+  "comparison": {
+    "nodeDelta": -25257.66666666667,
+    "nodeDeltaPct": -18.40843883086626,
+    "msDelta": -1740.0,
+    "msDeltaPct": -20.820868732798846,
+    "scoreAgreement": 3,
+    "moveAndScoreAgreement": 3
+  }
+}

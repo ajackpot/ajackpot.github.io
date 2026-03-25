@@ -1,0 +1,70 @@
+{
+  "benchmark": "ordering-search-14-empties-unlimited-stage8-vs-stage9",
+  "configuration": {
+    "seeds": [
+      104,
+      105
+    ],
+    "maxDepth": 4,
+    "exactEndgameEmpties": 16,
+    "timeLimitMs": "manual-unlimited"
+  },
+  "stage8": {
+    "meanNodes": 92764,
+    "meanMs": 8262.790939499999,
+    "meanOrderingEvalCalls": 22.5
+  },
+  "stage9": {
+    "meanNodes": 59988.5,
+    "meanMs": 5327.7525565,
+    "meanOrderingEvalCalls": 22.5
+  },
+  "rows": [
+    {
+      "seed": 104,
+      "stage8": {
+        "seed": 104,
+        "empties": 14,
+        "ms": 15020.425299999999,
+        "nodes": 166927,
+        "orderingEvalCalls": 30,
+        "completedDepth": 4,
+        "bestMoveCoord": "A8",
+        "score": -80000
+      },
+      "stage9": {
+        "seed": 104,
+        "empties": 14,
+        "ms": 9167.316311999999,
+        "nodes": 102079,
+        "orderingEvalCalls": 30,
+        "completedDepth": 4,
+        "bestMoveCoord": "A8",
+        "score": -80000
+      }
+    },
+    {
+      "seed": 105,
+      "stage8": {
+        "seed": 105,
+        "empties": 14,
+        "ms": 1505.1565789999986,
+        "nodes": 18601,
+        "orderingEvalCalls": 15,
+        "completedDepth": 4,
+        "bestMoveCoord": "A8",
+        "score": -20000
+      },
+      "stage9": {
+        "seed": 105,
+        "empties": 14,
+        "ms": 1488.1888010000002,
+        "nodes": 17898,
+        "orderingEvalCalls": 15,
+        "completedDepth": 4,
+        "bestMoveCoord": "A8",
+        "score": -20000
+      }
+    }
+  ]
+}

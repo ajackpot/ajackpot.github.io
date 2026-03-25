@@ -1,0 +1,183 @@
+{
+  "benchmark": "holdout-ordering-quality-10-to-13-empties-stage7-vs-stage8",
+  "seedOffsets": [
+    13,
+    14,
+    15,
+    16
+  ],
+  "empties": [
+    10,
+    11,
+    12,
+    13
+  ],
+  "stage7Top1ExactMatchRate": 0.375,
+  "stage8Top1ExactMatchRate": 0.5,
+  "stage7MeanTopRank": 4.1875,
+  "stage8MeanTopRank": 3.375,
+  "stage7MeanTopRegret": 68125,
+  "stage8MeanTopRegret": 49375,
+  "rows": [
+    {
+      "seed": 10013,
+      "empties": 10,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 10014,
+      "empties": 10,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 10015,
+      "empties": 10,
+      "stage7TopRank": 3,
+      "stage8TopRank": 3,
+      "stage7TopRegret": 20000,
+      "stage8TopRegret": 20000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 10016,
+      "empties": 10,
+      "stage7TopRank": 4,
+      "stage8TopRank": 4,
+      "stage7TopRegret": 60000,
+      "stage8TopRegret": 60000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 11013,
+      "empties": 11,
+      "stage7TopRank": 6,
+      "stage8TopRank": 6,
+      "stage7TopRegret": 200000,
+      "stage8TopRegret": 200000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 11014,
+      "empties": 11,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 11015,
+      "empties": 11,
+      "stage7TopRank": 7,
+      "stage8TopRank": 5,
+      "stage7TopRegret": 60000,
+      "stage8TopRegret": 40000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 11016,
+      "empties": 11,
+      "stage7TopRank": 8,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 20000,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 12013,
+      "empties": 12,
+      "stage7TopRank": 7,
+      "stage8TopRank": 7,
+      "stage7TopRegret": 90000,
+      "stage8TopRegret": 90000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 12014,
+      "empties": 12,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 12015,
+      "empties": 12,
+      "stage7TopRank": 4,
+      "stage8TopRank": 4,
+      "stage7TopRegret": 140000,
+      "stage8TopRegret": 140000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 12016,
+      "empties": 12,
+      "stage7TopRank": 8,
+      "stage8TopRank": 8,
+      "stage7TopRegret": 140000,
+      "stage8TopRegret": 140000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    },
+    {
+      "seed": 13013,
+      "empties": 13,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 13014,
+      "empties": 13,
+      "stage7TopRank": 1,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 0,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": true,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 13015,
+      "empties": 13,
+      "stage7TopRank": 5,
+      "stage8TopRank": 1,
+      "stage7TopRegret": 260000,
+      "stage8TopRegret": 0,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": true
+    },
+    {
+      "seed": 13016,
+      "empties": 13,
+      "stage7TopRank": 9,
+      "stage8TopRank": 9,
+      "stage7TopRegret": 100000,
+      "stage8TopRegret": 100000,
+      "stage7Top1Exact": false,
+      "stage8Top1Exact": false
+    }
+  ]
+}

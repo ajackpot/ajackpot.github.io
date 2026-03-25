@@ -11,6 +11,9 @@
   - transposition table
   - killer / history move ordering
   - 후반 exact search
+  - 10~14빈칸 구간의 exact teacher 기반 bucketed late move ordering 평가기
+  - exact window에서는 generic history/positional/flip ordering을 거의 제거하고 trained ordering 신호를 더 강하게 쓰는 late ordering profile
+  - 15~18빈칸 구간의 보수적 경량 fallback ordering 평가기
   - 단계별 평가 함수(기동성, 잠재 기동성, 코너, 코너 인접 위험, 프런티어, 위치 가중치, 안정성 근사, 패리티, 돌 수)
   - 대칭 중복을 제거한 99개 seed line 기반 소형 오프닝북
 - 난이도와 별도로 고를 수 있는 엔진 스타일/성격 프리셋
@@ -28,6 +31,11 @@
 ## 파일 구조
 - `index.html`: 정적 진입점
 - `styles.css`: 반응형 / 고대비 친화 스타일
+- `docs/reports/README.md`: 구현/검토 보고서 규칙과 인덱스
+- `docs/reports/templates/REPORT_TEMPLATE.md`: 새 보고서 템플릿
+- `docs/reports/implementation/`: 실제 코드 반영 단계 보고서
+- `docs/reports/review/`: 실험/검토 단계 보고서
+- `docs/reports/features/`: 기능 단위 보충 문서
 - `js/main.js`: 부트스트랩
 - `js/core/bitboard.js`: 비트보드 유틸리티와 좌표 변환
 - `js/core/rules.js`: 합법 수 생성과 뒤집기 계산
@@ -47,6 +55,11 @@
 - `js/test/core-smoke.mjs`: 규칙/평가/엔진 스모크 테스트
 - `tests/ui_smoke.py`: 번들 기반 브라우저 UI 스모크 테스트
 - `tests/virtual_host_smoke.py`: 원본 ES 모듈 그래프 로드 스모크 테스트
+
+## 문서/리포트 관리
+- 구현/검토 보고서는 루트가 아니라 `docs/reports/` 아래에 모아 두었습니다.
+- 새 문서는 `docs/reports/templates/REPORT_TEMPLATE.md`를 기준으로 작성하는 것을 권장합니다.
+- 파일명은 소문자 kebab-case와 두 자리 Stage 번호를 사용합니다.
 
 ## 접근성 설계 요약
 - 보드는 `<table>`로 렌더링됩니다.
@@ -78,6 +91,13 @@ python3 -m http.server 8000
 ### 1. 코어 엔진 스모크 테스트
 ```bash
 node js/test/core-smoke.mjs
+```
+
+### 1.5. Perft 회귀 테스트
+오델로 규칙 엔진의 합법 수 생성 / 뒤집기 / 패스 처리 검증용입니다. 기본은 깊이 8까지, `--full`을 붙이면 깊이 9까지 확인합니다.
+```bash
+node js/test/perft.mjs
+node js/test/perft.mjs --full
 ```
 
 ### 2. 브라우저 UI 스모크 테스트
@@ -119,6 +139,17 @@ python3 tests/virtual_host_smoke.py
 - Robert Gatliff의 이름 있는 오프닝 카탈로그를 바탕으로, 대칭 중복을 제거한 99개 seed line을 사용한 소형 오프닝북을 추가했습니다.
 - 오프닝북은 초기~초중반에 즉시 수를 제안하고, 그 이후 구간에서도 루트 수 정렬 참고 정보로 함께 사용할 수 있습니다.
 - 최근 AI 탐색 요약에 오프닝북 사용 여부와 대표 계열을 표시합니다.
+- 안정성 평가는 코너/가득 찬 변 위주 근사에서, 후반부에 내부 안정 돌까지 보수적으로 전파하는 iterative stability 근사로 확장했습니다.
+- `explainFeatures()`는 안정 돌 수(`stableDiscs`, `opponentStableDiscs`)도 함께 노출하여 디버깅과 회귀 점검에 활용할 수 있습니다.
+- 패스 노드와 종료 노드도 전이표에 저장하여, 같은 패스 국면을 다시 읽을 때 재사용되도록 했습니다.
+- 코어 스모크 테스트에 내부 안정성 회귀와 패스 노드 전이표 회귀를 추가했습니다.
+- 평가 함수의 패턴 평균/패리티 보간/최종 점수 반올림을 대칭 반올림으로 바꿔, 모든 관점에서 평가가 완전 제로섬을 유지하도록 수정했습니다.
+- `js/test/perft.mjs`를 추가하여 초기 국면 Perft(깊이 1~8, 선택적으로 9) 회귀 검증을 자동화했습니다.
+- 후반부 ordering은 10~14빈칸 구간에서 exact root 결과를 teacher로 삼아 맞춘 bucketed late-ordering 가중치를 우선 사용하고, 그보다 이른 15~18빈칸 구간에서는 기존의 보수적 경량 fallback 평가기를 사용합니다.
+- ordering evaluator는 **실제 child empties**를 기준으로 late bucket을 고르므로, 14→13이나 13→12처럼 경계에 걸친 수 직후에도 적절한 bucket/parity 문맥이 즉시 반영됩니다.
+- exact endgame 창 안에서는 generic history/positional/flip ordering 비중을 사실상 제거하고, trained ordering / 상대 기동성 억제 / 코너 응수 억제 / 지역 패리티 쪽을 더 강하게 반영하는 late ordering profile을 따로 사용합니다.
+- Stage 9 벤치마크에서는 13빈칸 exact-search 평균 노드가 줄었고, 14빈칸 exact-search에서는 같은 정답 수/점수를 유지한 채 평균 노드와 시간이 더 크게 줄었습니다.
+- 다만 8빈칸 이하의 매우 작은 exact 구간에서는 여전히 오히려 노이즈가 될 수 있어 비활성화합니다.
 
 ## 현재 한계와 비고
 - 이 프로젝트는 GitHub Pages용 순수 브라우저 JS 앱이므로, 네이티브 Othello 엔진이 쓰는 대형 opening book, SIMD 최적화, pattern-based evaluation, Multi-ProbCut 같은 기법을 그대로 이식하기는 어렵습니다.

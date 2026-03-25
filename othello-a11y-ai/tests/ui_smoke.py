@@ -139,6 +139,28 @@ async def main() -> None:
         status_text = await page.locator('#status-container').text_content()
         assert '현재 차례: 흑' in status_text
 
+        await page.fill('#position-sequence-input', 'c4c3')
+        await page.locator('#start-from-sequence-button').click()
+        await page.wait_for_timeout(80)
+        assert await page.locator('.move-log-list li').count() == 2
+        status_text = await page.locator('#status-container').text_content()
+        assert '현재 차례: 흑' in status_text
+        assert await page.locator('button[data-board-index="18"]').get_attribute('aria-label') == '흰 돌 C3'
+        live_text = (await page.locator('#live-region').text_content()) or ''
+        assert '2수 위치' in live_text
+
+        await page.fill('#position-sequence-input', 'pass')
+        await page.locator('#start-from-sequence-button').click()
+        await page.wait_for_timeout(50)
+        live_text = (await page.locator('#live-region').text_content()) or ''
+        assert '포지션을 시작하지 못했습니다' in live_text
+        status_text = await page.locator('#status-container').text_content()
+        assert '오류:' in status_text
+
+        await page.locator('#new-game-button').click()
+        await page.wait_for_timeout(80)
+        assert await page.locator('.move-log-list li').count() == 0
+
         await page.locator('input[name="humanColor"][value="white"]').check()
         await page.locator('#new-game-button').click()
         await page.wait_for_function("document.querySelectorAll('.move-log-list li').length >= 1", timeout=10000)
@@ -146,6 +168,14 @@ async def main() -> None:
         assert await page.locator('.move-log-list li').count() == 1
         live_text = (await page.locator('#live-region').text_content()) or ''
         assert '흑' in live_text and '착수' in live_text
+
+        await page.locator('#undo-button').click()
+        await page.wait_for_function("document.querySelectorAll('.move-log-list li').length === 0", timeout=5000)
+        await page.wait_for_function("document.querySelectorAll('.move-log-list li').length >= 1", timeout=10000)
+        await page.wait_for_timeout(120)
+        assert await page.locator('.move-log-list li').count() == 1
+        status_text = (await page.locator('#status-container').text_content()) or ''
+        assert '현재 차례: 백' in status_text
 
         await browser.close()
 

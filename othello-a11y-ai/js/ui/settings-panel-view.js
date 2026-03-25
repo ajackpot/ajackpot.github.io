@@ -9,12 +9,14 @@ export class SettingsPanelView {
     onNewGame,
     onUndo,
     onReadStatus,
+    onStartFromSequence,
   }) {
     this.container = container;
     this.onSettingsChange = onSettingsChange;
     this.onNewGame = onNewGame;
     this.onUndo = onUndo;
     this.onReadStatus = onReadStatus;
+    this.onStartFromSequence = onStartFromSequence;
     this.settingsExpanded = false;
 
     this.container.innerHTML = this.buildMarkup(initialSettings);
@@ -23,6 +25,8 @@ export class SettingsPanelView {
     this.styleSelect = this.container.querySelector('#style-select');
     this.styleFieldset = this.container.querySelector('#style-preset-fieldset');
     this.customFieldset = this.container.querySelector('#custom-options-fieldset');
+    this.positionSequenceInput = this.container.querySelector('#position-sequence-input');
+    this.startFromSequenceButton = this.container.querySelector('#start-from-sequence-button');
     this.undoButton = this.container.querySelector('#undo-button');
     this.engineSummaryOutput = this.container.querySelector('#engine-summary-output');
     this.customStateNote = this.container.querySelector('#custom-state-note');
@@ -30,12 +34,18 @@ export class SettingsPanelView {
     this.settingsToggleButton = this.container.querySelector('#settings-toggle-button');
     this.settingsContent = this.container.querySelector('#settings-collapsible-content');
 
-    this.form.addEventListener('input', () => {
+    this.form.addEventListener('input', (event) => {
+      if (event.target?.closest('[data-ignore-settings-change="true"]')) {
+        return;
+      }
       this.syncCustomFieldAvailability();
       this.onSettingsChange(this.readSettings());
     });
 
-    this.form.addEventListener('change', () => {
+    this.form.addEventListener('change', (event) => {
+      if (event.target?.closest('[data-ignore-settings-change="true"]')) {
+        return;
+      }
       this.syncCustomFieldAvailability();
       this.onSettingsChange(this.readSettings());
     });
@@ -47,6 +57,10 @@ export class SettingsPanelView {
 
     this.container.querySelector('#new-game-button').addEventListener('click', () => {
       this.onNewGame();
+    });
+
+    this.startFromSequenceButton.addEventListener('click', () => {
+      this.onStartFromSequence?.(this.positionSequenceInput?.value ?? '');
     });
 
     this.undoButton.addEventListener('click', () => {
@@ -149,6 +163,29 @@ export class SettingsPanelView {
             <legend>표시 옵션</legend>
             <div class="checkbox-row">
               <label><input type="checkbox" name="showLegalHints" ${initialSettings.showLegalHints ? 'checked' : ''}> 합법 수 시각 표시</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>특정 포지션에서 시작</legend>
+            <p id="position-sequence-help" class="subtle-text">
+              예: C4 C3 D6 C5 또는 c4c3d6c5. 쉼표와 줄바꿈도 사용할 수 있으며, 정말 필요한 경우에만 pass 또는 패스를 넣을 수 있습니다.
+            </p>
+            <div class="sequence-import-grid" data-ignore-settings-change="true">
+              <label for="position-sequence-input">수순 입력</label>
+              <textarea
+                id="position-sequence-input"
+                class="sequence-input"
+                rows="4"
+                spellcheck="false"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-describedby="position-sequence-help"
+                data-ignore-settings-change="true"
+              ></textarea>
+            </div>
+            <div class="sequence-actions button-stack" data-ignore-settings-change="true">
+              <button type="button" id="start-from-sequence-button" data-ignore-settings-change="true">입력된 수순에서 시작하기</button>
             </div>
           </fieldset>
         </div>

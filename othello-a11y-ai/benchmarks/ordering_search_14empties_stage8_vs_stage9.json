@@ -1,0 +1,49 @@
+{
+  "benchmark": "ordering-search-14-empties-stage8-vs-stage9",
+  "configuration": {
+    "seeds": [
+      104,
+      105
+    ],
+    "maxDepth": 4,
+    "exactEndgameEmpties": 16
+  },
+  "stage8": {
+    "meanNodes": 90597.5,
+    "meanMs": 8256.896184,
+    "meanOrderingEvalCalls": 7.5
+  },
+  "stage9": {
+    "meanNodes": 59988.5,
+    "meanMs": 5451.925163,
+    "meanOrderingEvalCalls": 22.5
+  },
+  "rows": [
+    {
+      "seed": 104,
+      "stage8Nodes": 162594,
+      "stage8Ms": 15001.165191,
+      "stage8OrderingEvalCalls": 0,
+      "stage8BestMoveCoord": "A2",
+      "stage8Score": -1000000000,
+      "stage9Nodes": 102079,
+      "stage9Ms": 9373.195193,
+      "stage9OrderingEvalCalls": 30,
+      "stage9BestMoveCoord": "A8",
+      "stage9Score": -80000
+    },
+    {
+      "seed": 105,
+      "stage8Nodes": 18601,
+      "stage8Ms": 1512.6271769999985,
+      "stage8OrderingEvalCalls": 15,
+      "stage8BestMoveCoord": "A8",
+      "stage8Score": -20000,
+      "stage9Nodes": 17898,
+      "stage9Ms": 1530.6551330000002,
+      "stage9OrderingEvalCalls": 15,
+      "stage9BestMoveCoord": "A8",
+      "stage9Score": -20000
+    }
+  ]
+}

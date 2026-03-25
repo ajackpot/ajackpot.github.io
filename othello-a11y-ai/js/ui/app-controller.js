@@ -1,5 +1,5 @@
 import { ENGINE_PRESETS, ENGINE_STYLE_PRESETS, resolveEngineOptions } from '../ai/presets.js';
-import { GameState } from '../core/game-state.js';
+import { GameState, createStateHistoryFromMoveSequence } from '../core/game-state.js';
 import { indexToCoord } from '../core/bitboard.js';
 import { BoardView } from './board-view.js';
 import { EngineClient, SearchCanceledError } from './engine-client.js';
@@ -54,6 +54,7 @@ export class AppController {
     this.aiBusy = false;
     this.errorText = '';
     this.engineMetricsExpanded = false;
+    this.aiTurnToken = 0;
     this.engineClient = new EngineClient();
 
     this.buildShell();
@@ -70,6 +71,7 @@ export class AppController {
       onNewGame: () => this.handleNewGame(),
       onUndo: () => this.handleUndo(),
       onReadStatus: () => this.handleReadStatus(),
+      onStartFromSequence: (sequenceText) => this.handleStartFromSequence(sequenceText),
     });
 
     this.render();
@@ -135,6 +137,8 @@ export class AppController {
   }
 
   cancelAiTurn() {
+    this.aiTurnToken += 1;
+
     if (!this.aiBusy) {
       return;
     }
@@ -168,6 +172,42 @@ export class AppController {
     this.maybeStartAiTurn();
   }
 
+  handleStartFromSequence(sequenceText) {
+    const trimmedSequence = String(sequenceText ?? '').trim();
+    if (!trimmedSequence) {
+      this.errorText = '불러올 수순을 입력해 주세요. 예: C4 C3 D6 C5';
+      this.render({ restoreBoardFocus: true });
+      this.announcer.announce(this.errorText);
+      return;
+    }
+
+    this.cancelAiTurn();
+
+    try {
+      const history = createStateHistoryFromMoveSequence(trimmedSequence);
+      this.stateHistory = history;
+      this.currentState = history[history.length - 1];
+      this.searchResult = null;
+      this.errorText = '';
+      this.boardView.lastFocusedIndex = this.currentState.lastAction?.type === 'move'
+        ? this.currentState.lastAction.index
+        : 0;
+      this.render({ restoreBoardFocus: true });
+
+      const moveCount = this.currentState.moveHistory.length;
+      this.announcer.announce(
+        `입력한 수순 ${moveCount}수 위치에서 새 게임을 시작했습니다. ${formatStateAnnouncement(this.currentState)}`,
+      );
+      this.maybeStartAiTurn();
+    } catch (error) {
+      this.searchResult = null;
+      const detail = error instanceof Error ? error.message : '알 수 없는 오류입니다.';
+      this.errorText = `입력한 수순으로 포지션을 시작하지 못했습니다. ${detail}`;
+      this.render({ restoreBoardFocus: true });
+      this.announcer.announce(this.errorText);
+    }
+  }
+
   handleUndo() {
     if (this.stateHistory.length <= 1) {
       this.announcer.announce('되돌릴 수 있는 수가 없습니다.');
@@ -184,8 +224,18 @@ export class AppController {
     }
 
     this.currentState = this.stateHistory[this.stateHistory.length - 1];
+    const restoredHumanTurn = this.currentState.currentPlayer === this.settings.humanColor;
+
     this.render({ restoreBoardFocus: true });
-    this.announcer.announce(`직전 사람 차례로 되돌렸습니다. ${formatStateAnnouncement(this.currentState)}`);
+    this.announcer.announce(
+      `${restoredHumanTurn
+        ? '직전 사람 차례로 되돌렸습니다.'
+        : '가장 가까운 이전 상태로 되돌렸습니다. 상대 차례이면 곧 다시 진행됩니다.'} ${formatStateAnnouncement(this.currentState)}`,
+    );
+
+    if (!restoredHumanTurn && !this.currentState.isTerminal()) {
+      this.maybeStartAiTurn();
+    }
   }
 
   handleReadStatus() {
@@ -264,20 +314,31 @@ export class AppController {
     }
 
     const searchStartHash = this.currentState.hashKey();
+    const searchStartState = this.currentState;
     const options = {
       presetKey: this.settings.presetKey,
       styleKey: this.settings.styleKey,
       ...this.settings.customInputs,
     };
+    const turnToken = this.aiTurnToken + 1;
+    this.aiTurnToken = turnToken;
     this.aiBusy = true;
     this.errorText = '';
     this.render({ restoreBoardFocus: true });
 
     try {
       await nextAnimationFrame();
+      if (turnToken !== this.aiTurnToken) {
+        return;
+      }
+
       await wait(140);
-      const result = await this.engineClient.search(this.currentState, options);
-      if (!this.aiBusy) {
+      if (turnToken !== this.aiTurnToken) {
+        return;
+      }
+
+      const result = await this.engineClient.search(searchStartState, options);
+      if (turnToken !== this.aiTurnToken || !this.aiBusy) {
         return;
       }
 

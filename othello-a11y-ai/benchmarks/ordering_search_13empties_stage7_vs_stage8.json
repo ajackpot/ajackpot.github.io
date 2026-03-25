@@ -1,0 +1,80 @@
+{
+  "benchmark": "late-search-cost-13-empties-stage7-vs-stage8",
+  "seeds": [
+    31,
+    32,
+    33,
+    34
+  ],
+  "repeatCount": 2,
+  "stage7MeanNodes": 17788.75,
+  "stage8MeanNodes": 17788.75,
+  "stage7MeanMs": 1160.375,
+  "stage8MeanMs": 1123.875,
+  "stage7MeanOrderingEvalCalls": 13.5,
+  "stage8MeanOrderingEvalCalls": 13.5,
+  "bestMoveAgreement": 4,
+  "scoreAgreement": 4,
+  "rows": [
+    {
+      "seed": 31,
+      "empties": 13,
+      "stage7BestMoveCoord": "D8",
+      "stage8BestMoveCoord": "D8",
+      "bestMoveAgreement": true,
+      "stage7MeanNodes": 6805,
+      "stage8MeanNodes": 6805,
+      "stage7MeanMs": 577,
+      "stage8MeanMs": 555.5,
+      "stage7MeanOrderingEvalCalls": 21,
+      "stage8MeanOrderingEvalCalls": 21,
+      "stage7Score": 180000,
+      "stage8Score": 180000
+    },
+    {
+      "seed": 32,
+      "empties": 13,
+      "stage7BestMoveCoord": "H3",
+      "stage8BestMoveCoord": "H3",
+      "bestMoveAgreement": true,
+      "stage7MeanNodes": 25478,
+      "stage8MeanNodes": 25478,
+      "stage7MeanMs": 1628.5,
+      "stage8MeanMs": 1545.5,
+      "stage7MeanOrderingEvalCalls": 21,
+      "stage8MeanOrderingEvalCalls": 21,
+      "stage7Score": -180000,
+      "stage8Score": -180000
+    },
+    {
+      "seed": 33,
+      "empties": 13,
+      "stage7BestMoveCoord": "G6",
+      "stage8BestMoveCoord": "G6",
+      "bestMoveAgreement": true,
+      "stage7MeanNodes": 18175,
+      "stage8MeanNodes": 18175,
+      "stage7MeanMs": 1192.5,
+      "stage8MeanMs": 1146,
+      "stage7MeanOrderingEvalCalls": 6,
+      "stage8MeanOrderingEvalCalls": 6,
+      "stage7Score": -180000,
+      "stage8Score": -180000
+    },
+    {
+      "seed": 34,
+      "empties": 13,
+      "stage7BestMoveCoord": "H8",
+      "stage8BestMoveCoord": "H8",
+      "bestMoveAgreement": true,
+      "stage7MeanNodes": 20697,
+      "stage8MeanNodes": 20697,
+      "stage7MeanMs": 1243.5,
+      "stage8MeanMs": 1248.5,
+      "stage7MeanOrderingEvalCalls": 6,
+      "stage8MeanOrderingEvalCalls": 6,
+      "stage7Score": -340000,
+      "stage8Score": -340000
+    }
+  ]
+}

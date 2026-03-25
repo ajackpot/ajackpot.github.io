@@ -1,0 +1,167 @@
+{
+  "benchmark": "stage12-packed-hash-repeated-search-benchmark",
+  "options": {
+    "presetKey": "custom",
+    "maxDepth": 5,
+    "timeLimitMs": 1800,
+    "exactEndgameEmpties": 12,
+    "aspirationWindow": 40,
+    "randomness": 0,
+    "styleKey": "balanced"
+  },
+  "emptyCount": 18,
+  "hashBenchmark": {
+    "baseline": {
+      "iterations": 300000,
+      "elapsedMs": 77.976742,
+      "sink": 0
+    },
+    "candidate": {
+      "iterations": 300000,
+      "elapsedMs": 56.65205099999997,
+      "sink": 0
+    },
+    "deltaMs": -21.32469100000003,
+    "deltaPct": -27.347501899989652,
+    "states": 16
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "runs": {
+        "baseline": {
+          "positions": 12,
+          "meanElapsedMs": 226.16666666666666,
+          "meanWallClockMs": 226.22781383333339,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        },
+        "candidate": {
+          "positions": 12,
+          "meanElapsedMs": 222.66666666666666,
+          "meanWallClockMs": 222.67658599999982,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        }
+      }
+    },
+    {
+      "round": 2,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "runs": {
+        "candidate": {
+          "positions": 12,
+          "meanElapsedMs": 215.08333333333334,
+          "meanWallClockMs": 215.13523125000037,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        },
+        "baseline": {
+          "positions": 12,
+          "meanElapsedMs": 216.83333333333334,
+          "meanWallClockMs": 216.83735125000007,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        }
+      }
+    },
+    {
+      "round": 3,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "runs": {
+        "baseline": {
+          "positions": 12,
+          "meanElapsedMs": 219.58333333333334,
+          "meanWallClockMs": 219.6936077500004,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        },
+        "candidate": {
+          "positions": 12,
+          "meanElapsedMs": 214.75,
+          "meanWallClockMs": 214.77755158333366,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        }
+      }
+    },
+    {
+      "round": 4,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "runs": {
+        "candidate": {
+          "positions": 12,
+          "meanElapsedMs": 212.91666666666666,
+          "meanWallClockMs": 212.86847950000023,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        },
+        "baseline": {
+          "positions": 12,
+          "meanElapsedMs": 213.91666666666666,
+          "meanWallClockMs": 213.96681974999925,
+          "meanNodes": 1985.4166666666667,
+          "meanTtHits": 175.5,
+          "meanCutoffs": 375.0833333333333,
+          "meanCompletedDepth": 5
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "baseline": {
+      "positions": 48,
+      "meanElapsedMs": 219.125,
+      "meanWallClockMs": 219.1813981458333,
+      "meanNodes": 1985.4166666666667,
+      "meanTtHits": 175.5,
+      "meanCutoffs": 375.0833333333333,
+      "meanCompletedDepth": 5
+    },
+    "candidate": {
+      "positions": 48,
+      "meanElapsedMs": 216.35416666666666,
+      "meanWallClockMs": 216.3644620833335,
+      "meanNodes": 1985.4166666666667,
+      "meanTtHits": 175.5,
+      "meanCutoffs": 375.0833333333333,
+      "meanCompletedDepth": 5
+    },
+    "comparison": {
+      "elapsedMsDelta": -2.770833333333343,
+      "elapsedMsDeltaPct": -1.2644989541738016,
+      "wallClockMsDelta": -2.816936062499792,
+      "wallClockMsDeltaPct": -1.2852076345573502,
+      "nodeDelta": 0,
+      "nodeDeltaPct": 0,
+      "completedDepthDelta": 0
+    }
+  }
+}
