@@ -1,0 +1,94 @@
+{
+  "baseline": {
+    "meanNodes": 17302.25,
+    "meanMs": 1009.0,
+    "runs": [
+      {
+        "seed": 31,
+        "nodes": 6883,
+        "ms": 489,
+        "bestMove": "D8",
+        "score": 180000,
+        "depth": 4,
+        "orderingEvalCalls": 21
+      },
+      {
+        "seed": 32,
+        "nodes": 22190,
+        "ms": 1287,
+        "bestMove": "H3",
+        "score": -180000,
+        "depth": 4,
+        "orderingEvalCalls": 21
+      },
+      {
+        "seed": 33,
+        "nodes": 18448,
+        "ms": 1041,
+        "bestMove": "G6",
+        "score": -180000,
+        "depth": 4,
+        "orderingEvalCalls": 6
+      },
+      {
+        "seed": 34,
+        "nodes": 21688,
+        "ms": 1219,
+        "bestMove": "H8",
+        "score": -340000,
+        "depth": 4,
+        "orderingEvalCalls": 6
+      }
+    ]
+  },
+  "candidate": {
+    "meanNodes": 15854.5,
+    "meanMs": 914.0,
+    "runs": [
+      {
+        "seed": 31,
+        "nodes": 7016,
+        "ms": 497,
+        "bestMove": "D8",
+        "score": 180000,
+        "depth": 4,
+        "orderingEvalCalls": 21
+      },
+      {
+        "seed": 32,
+        "nodes": 22149,
+        "ms": 1236,
+        "bestMove": "H3",
+        "score": -180000,
+        "depth": 4,
+        "orderingEvalCalls": 21
+      },
+      {
+        "seed": 33,
+        "nodes": 13707,
+        "ms": 768,
+        "bestMove": "B3",
+        "score": -180000,
+        "depth": 4,
+        "orderingEvalCalls": 6
+      },
+      {
+        "seed": 34,
+        "nodes": 20546,
+        "ms": 1155,
+        "bestMove": "H8",
+        "score": -340000,
+        "depth": 4,
+        "orderingEvalCalls": 6
+      }
+    ]
+  },
+  "comparison": {
+    "nodeDelta": -1447.75,
+    "nodeDeltaPct": -8.367408863009151,
+    "msDelta": -95.0,
+    "msDeltaPct": -9.415262636273535,
+    "scoreAgreement": 4,
+    "moveAndScoreAgreement": 3
+  }
+}

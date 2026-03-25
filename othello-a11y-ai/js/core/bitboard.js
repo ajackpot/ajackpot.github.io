@@ -166,6 +166,27 @@ export function neighbors(bitboard) {
   ) & FULL_BOARD;
 }
 
+export function connectedRegions(bitboard, expand = neighbors) {
+  const regions = [];
+  let remaining = bitboard & FULL_BOARD;
+
+  while (remaining !== 0n) {
+    const seed = remaining & -remaining;
+    let region = 0n;
+    let frontier = seed;
+
+    while (frontier !== 0n) {
+      region |= frontier;
+      frontier = expand(frontier) & remaining & ~region;
+    }
+
+    regions.push(region);
+    remaining &= ~region;
+  }
+
+  return regions;
+}
+
 export function formatBitboard(bitboard) {
   const rows = [];
   for (let row = 0; row < BOARD_SIZE; row += 1) {

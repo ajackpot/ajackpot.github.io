@@ -8,12 +8,18 @@ import {
 } from './bitboard.js';
 import {
   applyMoveBit,
+  applyMoveBitWithFlips,
   getDiscCounts,
   getInitialBoards,
   isTerminalPosition,
   listLegalMoveDetails,
+  listLegalSearchMoves,
   PLAYER_COLORS,
 } from './rules.js';
+
+const HASH_WHITE_SHIFT = 64n;
+const HASH_PLAYER_SHIFT = 128n;
+const HASH_WHITE_TO_MOVE_BIT = 1n << HASH_PLAYER_SHIFT;
 
 export class GameState {
   constructor({
@@ -32,6 +38,11 @@ export class GameState {
     this.ply = ply;
     this.moveHistory = moveHistory;
     this.lastAction = lastAction;
+
+    this._emptyBitboard = undefined;
+    this._emptyCount = undefined;
+    this._discCounts = undefined;
+    this._hashKey = undefined;
   }
 
   static initial() {
@@ -113,6 +124,11 @@ export class GameState {
     }));
   }
 
+  getSearchMoves(color = this.currentPlayer) {
+    const { player, opponent } = this.getPlayerBoards(color);
+    return listLegalSearchMoves(player, opponent);
+  }
+
   getLegalMoveIndices(color = this.currentPlayer) {
     return this.getLegalMoves(color).map((move) => move.index);
   }
@@ -164,6 +180,30 @@ export class GameState {
     };
   }
 
+  applyMoveFast(index, precomputedFlips = null) {
+    const moveBit = bitFromIndex(index);
+    const color = this.currentPlayer;
+    const opponentColor = this.getOpponentColor(color);
+    const { player, opponent } = this.getPlayerBoards(color);
+    const result = precomputedFlips === null
+      ? applyMoveBit(moveBit, player, opponent)
+      : applyMoveBitWithFlips(moveBit, precomputedFlips, player, opponent);
+
+    if (!result) {
+      return null;
+    }
+
+    return new GameState({
+      black: color === PLAYER_COLORS.BLACK ? result.player : result.opponent,
+      white: color === PLAYER_COLORS.WHITE ? result.player : result.opponent,
+      currentPlayer: opponentColor,
+      consecutivePasses: 0,
+      ply: this.ply + 1,
+      moveHistory: this.moveHistory,
+      lastAction: null,
+    });
+  }
+
   passTurn() {
     const action = {
       type: 'pass',
@@ -181,8 +221,23 @@ export class GameState {
     });
   }
 
+  passTurnFast() {
+    return new GameState({
+      black: this.black,
+      white: this.white,
+      currentPlayer: this.getOpponentColor(this.currentPlayer),
+      consecutivePasses: this.consecutivePasses + 1,
+      ply: this.ply + 1,
+      moveHistory: this.moveHistory,
+      lastAction: null,
+    });
+  }
+
   getDiscCounts() {
-    return getDiscCounts(this.black, this.white);
+    if (!this._discCounts) {
+      this._discCounts = getDiscCounts(this.black, this.white);
+    }
+    return this._discCounts;
   }
 
   getDiscDifferential(color = this.currentPlayer) {
@@ -193,11 +248,17 @@ export class GameState {
   }
 
   getEmptyBitboard() {
-    return FULL_BOARD & ~(this.black | this.white);
+    if (this._emptyBitboard === undefined) {
+      this._emptyBitboard = FULL_BOARD & ~(this.black | this.white);
+    }
+    return this._emptyBitboard;
   }
 
   getEmptyCount() {
-    return popcount(this.getEmptyBitboard());
+    if (this._emptyCount === undefined) {
+      this._emptyCount = popcount(this.getEmptyBitboard());
+    }
+    return this._emptyCount;
   }
 
   getOccupiedCount() {
@@ -220,41 +281,178 @@ export class GameState {
   }
 
   hashKey() {
-    return `${this.black.toString(16)}/${this.white.toString(16)}/${this.currentPlayer}`;
+    if (this._hashKey === undefined) {
+      this._hashKey = this.black
+        | (this.white << HASH_WHITE_SHIFT)
+        | (this.currentPlayer === PLAYER_COLORS.WHITE ? HASH_WHITE_TO_MOVE_BIT : 0n);
+    }
+    return this._hashKey;
   }
 }
 
-export function createStateFromMoveSequence(sequence) {
-  let state = GameState.initial();
-  for (const move of sequence) {
-    if (typeof move !== 'string') {
-      throw new Error('Move sequence entries must be coordinate strings.');
+function tokenizeCompactMoveSequence(compactSequence) {
+  const tokens = [];
+  let cursor = 0;
+  while (cursor < compactSequence.length) {
+    const currentChar = compactSequence[cursor];
+    if (/\s|[,;/|]/.test(currentChar)) {
+      cursor += 1;
+      continue;
     }
 
-    if (move.toLowerCase() === 'pass') {
+    const remaining = compactSequence.slice(cursor);
+    const passMatch = /^(pass|패스)/i.exec(remaining);
+    if (passMatch) {
+      tokens.push(passMatch[1]);
+      cursor += passMatch[0].length;
+      continue;
+    }
+
+    const coordMatch = /^[a-h][1-8]/i.exec(remaining);
+    if (coordMatch) {
+      tokens.push(coordMatch[0]);
+      cursor += coordMatch[0].length;
+      continue;
+    }
+
+    throw new Error(`Could not parse the move sequence near "${remaining.slice(0, 8)}".`);
+  }
+
+  return tokens;
+}
+
+function normalizeMoveToken(token) {
+  if (typeof token !== 'string') {
+    throw new Error('Move sequence entries must be coordinate strings.');
+  }
+
+  const trimmed = token.trim();
+  if (!trimmed) {
+    throw new Error('Move sequence contains an empty token.');
+  }
+
+  if (/^(pass|패스)$/i.test(trimmed)) {
+    return 'pass';
+  }
+
+  const coord = trimmed.toUpperCase();
+  if (coordToIndex(coord) < 0) {
+    throw new Error(`Invalid coordinate: ${token}`);
+  }
+  return coord;
+}
+
+function normalizeMoveSequenceInput(sequence) {
+  if (Array.isArray(sequence)) {
+    return sequence.map(normalizeMoveToken);
+  }
+
+  if (typeof sequence !== 'string') {
+    throw new Error('Move sequence must be a string or an array of coordinate strings.');
+  }
+
+  const trimmed = sequence.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const rawTokens = /[\s,;/|]/.test(trimmed)
+    ? trimmed.split(/[\s,;/|]+/).filter(Boolean)
+    : tokenizeCompactMoveSequence(trimmed);
+
+  return rawTokens.map(normalizeMoveToken);
+}
+
+export function createStateHistoryFromMoveSequence(sequence) {
+  const moves = normalizeMoveSequenceInput(sequence);
+  let state = GameState.initial();
+  const history = [state];
+
+  for (let stepIndex = 0; stepIndex < moves.length; stepIndex += 1) {
+    const move = moves[stepIndex];
+
+    if (state.isTerminal()) {
+      throw new Error(`Cannot apply step ${stepIndex + 1} (${move}) because the game is already over.`);
+    }
+
+    if (move === 'pass') {
+      const legalMoves = state.getLegalMoves();
+      if (legalMoves.length > 0) {
+        throw new Error(`Illegal pass at step ${stepIndex + 1}; legal moves are ${legalMoves.map((candidate) => candidate.coord).join(', ')}.`);
+      }
+
       state = state.passTurn();
+      history.push(state);
       continue;
     }
 
     const index = coordToIndex(move);
-    if (index < 0) {
-      throw new Error(`Invalid coordinate: ${move}`);
-    }
-
     const outcome = state.applyMove(index);
     if (!outcome) {
-      throw new Error(`Illegal move in sequence: ${move}`);
+      throw new Error(`Illegal move at step ${stepIndex + 1}: ${move}`);
     }
+
     state = outcome.state;
+    history.push(state);
   }
-  return state;
+
+  return history;
 }
 
-export function createStateFromBitboards({ black, white, currentPlayer = PLAYER_COLORS.BLACK }) {
+export function createStateFromMoveSequence(sequence) {
+  const history = createStateHistoryFromMoveSequence(sequence);
+  return history[history.length - 1];
+}
+
+function coerceBitboard(value, label) {
+  let bitboard;
+  try {
+    bitboard = typeof value === 'bigint' ? value : BigInt(value);
+  } catch (error) {
+    throw new Error(`${label} bitboard must be coercible to BigInt.`);
+  }
+
+  if (bitboard < 0n) {
+    throw new Error(`${label} bitboard cannot be negative.`);
+  }
+  if ((bitboard & ~FULL_BOARD) !== 0n) {
+    throw new Error(`${label} bitboard contains squares outside the 8×8 board.`);
+  }
+
+  return bitboard;
+}
+
+function validateCurrentPlayer(currentPlayer) {
+  if (currentPlayer !== PLAYER_COLORS.BLACK && currentPlayer !== PLAYER_COLORS.WHITE) {
+    throw new Error(`Invalid current player: ${currentPlayer}`);
+  }
+}
+
+export function createStateFromBitboards({
+  black,
+  white,
+  currentPlayer = PLAYER_COLORS.BLACK,
+  consecutivePasses = 0,
+  ply = 1,
+  moveHistory = [],
+  lastAction = null,
+}) {
+  const normalizedBlack = coerceBitboard(black, 'Black');
+  const normalizedWhite = coerceBitboard(white, 'White');
+  validateCurrentPlayer(currentPlayer);
+
+  if ((normalizedBlack & normalizedWhite) !== 0n) {
+    throw new Error('Black and white bitboards overlap.');
+  }
+
   return new GameState({
-    black: typeof black === 'bigint' ? black : BigInt(black),
-    white: typeof white === 'bigint' ? white : BigInt(white),
+    black: normalizedBlack,
+    white: normalizedWhite,
     currentPlayer,
+    consecutivePasses,
+    ply,
+    moveHistory: [...moveHistory],
+    lastAction,
   });
 }
 

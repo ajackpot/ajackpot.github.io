@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-03-25T00:00:00Z",
+  "description": "Regression reproduction for the reported late-game boundary bug. The same three white-to-move positions are searched with preset=impossible, style=balanced, maxDepth=10, timeLimitMs=12000, exactEndgameEmpties=16.",
+  "cases": [
+    {
+      "label": "before_move_40_white_to_move_after_black_g1",
+      "moveNumber": 40,
+      "empties": 21,
+      "beforeFix": {
+        "bestMoveCoord": "C2",
+        "score": 32658,
+        "completedDepth": 4,
+        "elapsedMs": 12000,
+        "nodes": 162658,
+        "principalVariation": ["C2", "A2", "G6", "G5"]
+      },
+      "afterFix": {
+        "bestMoveCoord": "C2",
+        "score": 86391,
+        "completedDepth": 10,
+        "elapsedMs": 11931,
+        "nodes": 112451,
+        "principalVariation": ["C2", "A2", "B7", "A7", "A6", "B2", "G6", "G7", "A1", "H7"]
+      }
+    },
+    {
+      "label": "before_move_42_white_to_move_after_black_a2",
+      "moveNumber": 42,
+      "empties": 19,
+      "beforeFix": {
+        "bestMoveCoord": "G6",
+        "score": 32658,
+        "completedDepth": 2,
+        "elapsedMs": 12000,
+        "nodes": 156352,
+        "principalVariation": ["G6", "G5"]
+      },
+      "afterFix": {
+        "bestMoveCoord": "B7",
+        "score": 84940,
+        "completedDepth": 9,
+        "elapsedMs": 12000,
+        "nodes": 118467,
+        "principalVariation": ["B7", "A7", "A6", "B2", "G5", "H6", "H7"]
+      }
+    },
+    {
+      "label": "before_move_44_white_to_move_after_black_g5",
+      "moveNumber": 44,
+      "empties": 17,
+      "beforeFix": {
+        "bestMoveCoord": "G2",
+        "score": -1000000000,
+        "completedDepth": 0,
+        "elapsedMs": 12000,
+        "nodes": 159566,
+        "principalVariation": ["G2"]
+      },
+      "afterFix": {
+        "bestMoveCoord": "G7",
+        "score": 135605,
+        "completedDepth": 10,
+        "elapsedMs": 6955,
+        "nodes": 73258,
+        "principalVariation": ["G7", "H5", "H7", "B7", "A7", "A6", "A1", "B2", "H3", "H4"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "benchmark": "prototype-lightweight-ordering-exact-8-empties",
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "baselineTop1ExactMatchRate": 0.4166666666666667,
+  "candidateTop1ExactMatchRate": 0.4166666666666667,
+  "baselineMeanTopRank": 2.1666666666666665,
+  "candidateMeanTopRank": 2.5833333333333335,
+  "baselineMeanTopRegret": 7.583333333333333,
+  "candidateMeanTopRegret": 7.416666666666667,
+  "rows": [
+    {
+      "seed": 1,
+      "baselineTopRank": 2,
+      "candidateTopRank": 2,
+      "baselineTopRegret": 2,
+      "candidateTopRegret": 2
+    },
+    {
+      "seed": 2,
+      "baselineTopRank": 5,
+      "candidateTopRank": 5,
+      "baselineTopRegret": 48,
+      "candidateTopRegret": 48
+    },
+    {
+      "seed": 3,
+      "baselineTopRank": 1,
+      "candidateTopRank": 1,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 4,
+      "baselineTopRank": 4,
+      "candidateTopRank": 4,
+      "baselineTopRegret": 16,
+      "candidateTopRegret": 16
+    },
+    {
+      "seed": 5,
+      "baselineTopRank": 2,
+      "candidateTopRank": 2,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 6,
+      "baselineTopRank": 1,
+      "candidateTopRank": 7,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 2
+    },
+    {
+      "seed": 7,
+      "baselineTopRank": 4,
+      "candidateTopRank": 4,
+      "baselineTopRegret": 19,
+      "candidateTopRegret": 19
+    },
+    {
+      "seed": 8,
+      "baselineTopRank": 1,
+      "candidateTopRank": 1,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 9,
+      "baselineTopRank": 1,
+      "candidateTopRank": 1,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 10,
+      "baselineTopRank": 2,
+      "candidateTopRank": 1,
+      "baselineTopRegret": 4,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 11,
+      "baselineTopRank": 1,
+      "candidateTopRank": 1,
+      "baselineTopRegret": 0,
+      "candidateTopRegret": 0
+    },
+    {
+      "seed": 12,
+      "baselineTopRank": 2,
+      "candidateTopRank": 2,
+      "baselineTopRegret": 2,
+      "candidateTopRegret": 2
+    }
+  ]
+}

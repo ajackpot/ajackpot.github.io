@@ -1,8 +1,19 @@
+function now() {
+  if (typeof globalThis.performance?.now === 'function') {
+    return globalThis.performance.now();
+  }
+  return Date.now();
+}
+
 export class LiveRegionAnnouncer {
   constructor(region) {
     this.region = region;
-    this.token = 0;
-    this.timer = null;
+    this.variantIndex = 0;
+    this.suffixes = ['\u2060', '\u2063'];
+    this.recentMessages = [];
+    this.lastAnnouncementAt = 0;
+    this.mergeWindowMs = 1200;
+    this.maxRecentMessages = 2;
   }
 
   announce(message) {
@@ -15,20 +26,16 @@ export class LiveRegionAnnouncer {
       return;
     }
 
-    this.token += 1;
-    const token = this.token;
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
+    const currentTime = now();
+    if ((currentTime - this.lastAnnouncementAt) <= this.mergeWindowMs) {
+      this.recentMessages = [...this.recentMessages, text].slice(-this.maxRecentMessages);
+    } else {
+      this.recentMessages = [text];
     }
+    this.lastAnnouncementAt = currentTime;
 
-    this.region.textContent = '';
-    this.timer = setTimeout(() => {
-      if (token !== this.token) {
-        return;
-      }
-      this.region.textContent = text;
-      this.timer = null;
-    }, 40);
+    const suffix = this.suffixes[this.variantIndex % this.suffixes.length];
+    this.variantIndex += 1;
+    this.region.textContent = `${this.recentMessages.join(' ')}${suffix}`;
   }
 }

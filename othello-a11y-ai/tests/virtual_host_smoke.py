@@ -147,6 +147,16 @@ async def main() -> None:
         await page.wait_for_timeout(120)
         assert await page.locator('.move-log-list li').count() == 0
 
+        await page.fill('#position-sequence-input', 'c4c3')
+        await page.locator('#start-from-sequence-button').click()
+        await page.wait_for_timeout(80)
+        assert await page.locator('.move-log-list li').count() == 2
+        status_text = await page.locator('#status-container').text_content()
+        assert '현재 차례: 흑' in status_text
+        assert await page.locator('button[data-board-index="18"]').get_attribute('aria-label') == '흰 돌 C3'
+        live_text = (await page.locator('#live-region').text_content()) or ''
+        assert '2수 위치' in live_text
+
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)
         assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False
@@ -159,6 +169,9 @@ async def main() -> None:
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)
         assert await page.input_value('#custom-maxDepth') == '9'
+
+        await page.select_option('#preset-select', 'normal')
+        await page.wait_for_timeout(50)
 
         await page.locator('input[name="humanColor"][value="white"]').check()
         await page.locator('#new-game-button').click()

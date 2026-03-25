@@ -156,12 +156,37 @@ export function formatSearchSummary(result) {
   const nodes = result.stats?.nodes ?? 0;
   const ttHits = result.stats?.ttHits ?? 0;
   const score = Number.isFinite(result.score) ? result.score : 0;
+  const rootEmptyCount = Number.isInteger(result.rootEmptyCount) ? result.rootEmptyCount : null;
+  const rootAnalyzedMoveCount = Number.isInteger(result.rootAnalyzedMoveCount) ? result.rootAnalyzedMoveCount : null;
+  const rootLegalMoveCount = Number.isInteger(result.rootLegalMoveCount) ? result.rootLegalMoveCount : null;
   const pv = Array.isArray(result.principalVariation) && result.principalVariation.length > 0
     ? result.principalVariation.map((index) => indexToCoord(index)).join(' → ')
     : '없음';
   const bookNote = result.bookHit
     ? ` 오프닝북 참고 ${joinNames(result.bookHit.matchedNames?.length ? result.bookHit.matchedNames : result.bookHit.topNames)}.`
     : '';
+
+  if (result.searchMode === 'terminal') {
+    return `대국 종료 상태, 평가 ${score}, 시간 ${elapsed}ms.`;
+  }
+
+  if (result.searchMode === 'exact-endgame') {
+    const emptyCountText = rootEmptyCount === null ? '' : `현재 빈칸 ${rootEmptyCount}칸, `;
+    if (result.isExactResult) {
+      return `${best}, 정확 끝내기, ${emptyCountText}평가 ${score}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+    }
+
+    const partialRootText = rootAnalyzedMoveCount === null || rootLegalMoveCount === null
+      ? ''
+      : `, 검토 루트 수 ${rootAnalyzedMoveCount}/${rootLegalMoveCount}`;
+
+    if (result.searchCompletion === 'partial-timeout') {
+      return `${best}, 정확 끝내기 시간 만료로 현재까지 최선 수 반환, ${emptyCountText}평가 ${score}${partialRootText}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+    }
+
+    return `${best}, 정확 끝내기 미완료로 휴리스틱 대체, ${emptyCountText}평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+  }
+
   return `${best}, 평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
 }
 

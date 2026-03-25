@@ -92,25 +92,62 @@ export function applyMoveBit(moveBit, player, opponent) {
   };
 }
 
-export function listLegalMoveDetails(player, opponent) {
+export function applyMoveBitWithFlips(moveBit, flips, player, opponent) {
+  if (flips === 0n || (moveBit & (player | opponent)) !== 0n) {
+    return null;
+  }
+
+  return {
+    player: player | moveBit | flips,
+    opponent: opponent & ~flips,
+    flips,
+  };
+}
+
+function buildLegalMoveRecords(
+  player,
+  opponent,
+  {
+    includeFlippedIndices = false,
+    includeCornerFlag = false,
+  } = {},
+) {
   const legalMoves = legalMovesBitboard(player, opponent);
   const details = [];
 
   for (const index of bitsToIndices(legalMoves)) {
     const moveBit = bitFromIndex(index);
     const flips = computeFlips(moveBit, player, opponent);
-    details.push({
+    const detail = {
       index,
       bit: moveBit,
       flips,
       flipCount: popcount(flips),
-      flippedIndices: bitsToIndices(flips),
-      isCorner: CORNER_BITS.includes(moveBit),
-    });
+    };
+
+    if (includeFlippedIndices) {
+      detail.flippedIndices = bitsToIndices(flips);
+    }
+    if (includeCornerFlag) {
+      detail.isCorner = CORNER_BITS.includes(moveBit);
+    }
+
+    details.push(detail);
   }
 
   details.sort((left, right) => left.index - right.index);
   return details;
+}
+
+export function listLegalSearchMoves(player, opponent) {
+  return buildLegalMoveRecords(player, opponent);
+}
+
+export function listLegalMoveDetails(player, opponent) {
+  return buildLegalMoveRecords(player, opponent, {
+    includeFlippedIndices: true,
+    includeCornerFlag: true,
+  });
 }
 
 export function getDiscCounts(black, white) {
