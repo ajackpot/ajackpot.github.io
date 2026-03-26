@@ -150,8 +150,13 @@ python3 tests/virtual_host_smoke.py
 - exact endgame 창 안에서는 generic history/positional/flip ordering 비중을 사실상 제거하고, trained ordering / 상대 기동성 억제 / 코너 응수 억제 / 지역 패리티 쪽을 더 강하게 반영하는 late ordering profile을 따로 사용합니다.
 - Stage 9 벤치마크에서는 13빈칸 exact-search 평균 노드가 줄었고, 14빈칸 exact-search에서는 같은 정답 수/점수를 유지한 채 평균 노드와 시간이 더 크게 줄었습니다.
 - 다만 8빈칸 이하의 매우 작은 exact 구간에서는 여전히 오히려 노이즈가 될 수 있어 비활성화합니다.
+- Stage 25에서는 **실제 인게임 경로에 닿지 않거나 기본값이 꺼진 채 성능 이득이 없던 실험 토글**을 정리했습니다.
+- `search-engine.js`에서는 `stabilityCutoff*` 계열과 `exactFastestCutFirstOrdering` 경로를 제거하고, 채택된 exact fastest-first / ETC / WLD pre-exact 경로만 남겼습니다.
+- `evaluator.js`의 `describeStableDiscBounds()`는 런타임 pruning이 아니라 회귀/분석용 보조 함수로만 유지합니다.
+- `docs/reports/README.md`는 누락된 Stage 목록을 보완했고, 비채택 실험은 문서로 남기되 실제 코드에서는 제거할 수 있다는 운영 원칙을 명시했습니다.
 
 ## 현재 한계와 비고
 - 이 프로젝트는 GitHub Pages용 순수 브라우저 JS 앱이므로, 네이티브 Othello 엔진이 쓰는 대형 opening book, SIMD 최적화, pattern-based evaluation, Multi-ProbCut 같은 기법을 그대로 이식하기는 어렵습니다.
 - 따라서 오프닝북은 브라우저 정적 앱에 맞춘 소형 책 형태로 넣었고, 고빈도 이름 있는 오프닝과 그 대칭/전치 계열을 우선 반영했습니다.
 - pattern-based learned evaluation, 대형 토너먼트 기보 기반 book expansion, Multi-ProbCut 같은 요소는 여전히 다음 단계 확장 후보입니다.
+- 일부 Stage 보고서는 과거 실험을 보존하기 위한 역사 문서이므로, 보고서에 등장하는 비채택 토글이 현재 코드에 그대로 남아 있지는 않을 수 있습니다.

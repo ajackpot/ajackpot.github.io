@@ -609,6 +609,19 @@ function stabilityScore(player, opponent, emptyCount) {
   return normalizeDifference(stableCounts.player, stableCounts.opponent);
 }
 
+// Conservative stable-disc bounds are kept as an evaluator-level diagnostic helper.
+// They are currently used by regression checks and analysis tooling, not by the shipped
+// runtime search path.
+export function describeStableDiscBounds(player, opponent, emptyCount = popcount(FULL_BOARD & ~(player | opponent))) {
+  const stableCounts = stabilityCounts(player, opponent, emptyCount);
+  return {
+    playerStableDiscs: stableCounts.player,
+    opponentStableDiscs: stableCounts.opponent,
+    lowerBound: (stableCounts.player * 2) - 64,
+    upperBound: 64 - (stableCounts.opponent * 2),
+  };
+}
+
 function discDifferentialScore(player, opponent) {
   return normalizeDifference(popcount(player), popcount(opponent));
 }

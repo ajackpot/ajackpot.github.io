@@ -8,7 +8,7 @@ import {
 import { bitFromIndex, FULL_BOARD, popcount } from '../core/bitboard.js';
 import { SearchEngine } from '../ai/search-engine.js';
 import { legalMovesBitboard } from '../core/rules.js';
-import { Evaluator, MoveOrderingEvaluator } from '../ai/evaluator.js';
+import { Evaluator, MoveOrderingEvaluator, describeStableDiscBounds } from '../ai/evaluator.js';
 import { lookupOpeningBook, getOpeningBookSummary } from '../ai/opening-book.js';
 import { resolveEngineOptions } from '../ai/presets.js';
 import { formatSearchSummary } from '../ui/formatters.js';
@@ -142,6 +142,31 @@ function bruteForceExactScore(state) {
     bestScore = Math.max(bestScore, -bruteForceExactScore(outcome.state));
   }
   return bestScore;
+}
+
+function classifyOutcomeFromScore(score) {
+  if (score > 0) {
+    return 'win';
+  }
+  if (score < 0) {
+    return 'loss';
+  }
+  return 'draw';
+}
+
+function findSeededStateWithMinimumLegalMoves(targetEmptyCount, minimumLegalMoves = 2, maxSeed = 120) {
+  for (let seed = 1; seed <= maxSeed; seed += 1) {
+    const state = playSeededRandomUntilEmptyCount(targetEmptyCount, seed);
+    if (state.getEmptyCount() !== targetEmptyCount) {
+      continue;
+    }
+
+    if (state.getLegalMoves().length >= minimumLegalMoves) {
+      return state;
+    }
+  }
+
+  return null;
 }
 
 function captureSearchTimeoutErrorInstance(engine) {
@@ -721,6 +746,103 @@ function runSearchTests() {
     'Table trimming should remove a significant stale batch once the entry budget is exceeded.',
   );
 
+  const etcWindowState = GameState.initial();
+  const etcWindowMoves = etcWindowState.getSearchMoves();
+  assert.ok(etcWindowMoves.length >= 2, 'The ETC regression setup should expose at least two legal moves.');
+
+  const etcFailHighEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 200,
+    randomness: 0,
+  });
+  const etcFailHighChild = etcWindowState.applyMoveFast(etcWindowMoves[0].index, etcWindowMoves[0].flips ?? null);
+  assert.ok(etcFailHighChild, 'The ETC fail-high regression child should be legal.');
+  etcFailHighEngine.storeTransposition(etcFailHighChild, {
+    depth: 2,
+    value: -30000,
+    flag: 'upper',
+    bestMoveIndex: null,
+  });
+  const etcFailHigh = etcFailHighEngine.applyEnhancedTranspositionCutoff(
+    etcWindowState,
+    etcWindowMoves,
+    3,
+    -10000,
+    10000,
+    1,
+    false,
+  );
+  assert.ok(etcFailHigh, 'The ETC helper should activate on root-child regression nodes.');
+  assert.equal(etcFailHigh.cutoff, true, 'A strong child upper-bound should produce a conservative ETC fail-high cutoff.');
+  assert.equal(etcFailHigh.score, 30000, 'The ETC fail-high cutoff should negate the child upper-bound into a parent lower-bound.');
+  assert.equal(etcFailHigh.bestMoveIndex, etcWindowMoves[0].index, 'A fail-high ETC cutoff should remember the move that produced the proven lower-bound.');
+
+  const etcFailLowEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 200,
+    randomness: 0,
+  });
+  const failLowChildValues = [20000, 15000, 18000, 22000];
+  for (let index = 0; index < etcWindowMoves.length; index += 1) {
+    const move = etcWindowMoves[index];
+    const child = etcWindowState.applyMoveFast(move.index, move.flips ?? null);
+    assert.ok(child, 'The ETC fail-low regression children should all be legal.');
+    etcFailLowEngine.storeTransposition(child, {
+      depth: 2,
+      value: failLowChildValues[index % failLowChildValues.length],
+      flag: 'lower',
+      bestMoveIndex: null,
+    });
+  }
+  const etcFailLow = etcFailLowEngine.applyEnhancedTranspositionCutoff(
+    etcWindowState,
+    etcWindowMoves,
+    3,
+    -10000,
+    5000,
+    1,
+    false,
+  );
+  assert.ok(etcFailLow, 'The ETC helper should return metadata for the fail-low regression setup as well.');
+  assert.equal(etcFailLow.cutoff, true, 'A full set of child lower-bounds should allow conservative ETC fail-low pruning.');
+  assert.equal(etcFailLow.score, -15000, 'The ETC fail-low cutoff should use the strongest parent upper-bound induced by the child lower-bounds.');
+  assert.equal(etcFailLow.bestMoveIndex, null, 'A fail-low ETC cutoff should not invent a best move when only an upper-bound is known.');
+
+  const etcActivityState = playDeterministicPly(GameState.initial(), 20);
+  const etcActivityEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 5,
+    timeLimitMs: 1000,
+    exactEndgameEmpties: 8,
+    aspirationWindow: 40,
+    randomness: 0,
+  });
+  const etcActivityResult = etcActivityEngine.findBestMove(etcActivityState, {
+    presetKey: 'custom',
+    maxDepth: 5,
+    timeLimitMs: 1000,
+    exactEndgameEmpties: 8,
+    aspirationWindow: 40,
+    randomness: 0,
+    styleKey: 'balanced',
+  });
+  assert.ok(etcActivityResult.stats.etcNodes > 0, 'Iterative deepening should activate ETC on at least some root-adjacent or late regression nodes.');
+  assert.ok(etcActivityResult.stats.etcChildTableHits > 0, 'The ETC activity regression should find child TT entries generated earlier in the search.');
+  assert.ok(etcActivityResult.stats.etcExactNodes > 0, 'Depth-limited / exact ETC activity should be counted in the exact ETC bucket.');
+  assert.equal(etcActivityResult.stats.etcWldNodes, 0, 'Ordinary negamax regressions should not increment the WLD ETC bucket.');
+
+  const etcDisabledOptionsEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 200,
+    randomness: 0,
+    enhancedTranspositionCutoff: false,
+  });
+  assert.equal(etcDisabledOptionsEngine.options.enhancedTranspositionCutoff, false, 'Explicit ETC disabling should survive option resolution for the ordinary negamax path.');
+  assert.equal(etcDisabledOptionsEngine.options.enhancedTranspositionCutoffWld, false, 'When no separate WLD ETC override is given, disabling ETC should also disable the WLD ETC path.');
+
   const sizeBeforeUpdate = engine.transpositionTable.size;
   engine.updateOptions({
     presetKey: engine.options.presetKey,
@@ -1003,6 +1125,281 @@ function runSearchTests() {
     'The UI summary should distinguish incomplete exact-root attempts from finished exact solves.',
   );
 
+  const wldPreExactState = findSeededStateWithMinimumLegalMoves(5, 2);
+  assert.ok(
+    wldPreExactState,
+    'The WLD regression should find a five-empty position with at least two legal root moves.',
+  );
+  const wldDepthLimitedState = findSeededStateWithMinimumLegalMoves(6, 2);
+  assert.ok(
+    wldDepthLimitedState,
+    'The WLD regression should find a six-empty position outside the pre-exact window.',
+  );
+
+  const wldReferenceOutcome = classifyOutcomeFromScore(bruteForceExactScore(wldPreExactState));
+  const wldEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+  });
+  wldEngine.runIterativeDeepening = () => {
+    throw new Error('WLD pre-exact roots should bypass iterative deepening and run a dedicated single-pass WLD solve.');
+  };
+  wldEngine.negamax = () => {
+    throw new Error('WLD pre-exact roots should not fall back to the depth-limited/exact negamax path.');
+  };
+  wldEngine.solveSmallExact = () => {
+    throw new Error('WLD pre-exact roots should keep their own WLD-only small solver instead of using the exact small solver.');
+  };
+  const wldResult = wldEngine.findBestMove(wldPreExactState, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 4,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    wldResult.searchMode,
+    'wld-endgame',
+    'Roots exactly one empty above the exact boundary should expose a dedicated WLD endgame search mode.',
+  );
+  assert.equal(
+    wldResult.isWldResult,
+    true,
+    'Completed WLD pre-exact searches should mark that a full WLD solve finished.',
+  );
+  assert.equal(
+    classifyOutcomeFromScore(wldResult.score),
+    wldReferenceOutcome,
+    'The dedicated WLD solve should preserve the exact win/draw/loss outcome on a small pre-exact regression state.',
+  );
+  assert.ok(
+    wldResult.stats.wldNodes > 0,
+    'The dedicated WLD mode should report that it expanded WLD nodes.',
+  );
+  assert.ok(
+    wldResult.stats.wldSmallSolverCalls > 0,
+    'The dedicated WLD mode should route late leaves through the WLD-only small solver.',
+  );
+  assert.match(
+    formatSearchSummary(wldResult),
+    /승무패 끝내기/,
+    'The UI summary should explicitly label completed WLD pre-exact solves.',
+  );
+
+  const exactAgainstWldEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+  });
+  exactAgainstWldEngine.wldNegamax = () => {
+    throw new Error('Exact-root positions must not route through the WLD solver.');
+  };
+  const exactAgainstWldResult = exactAgainstWldEngine.findBestMove(nearEndgame, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 4,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    exactAgainstWldResult.searchMode,
+    'exact-endgame',
+    'Positions inside the exact boundary should stay on the exact solver even when WLD pre-exact mode is enabled.',
+  );
+
+  const depthLimitedAgainstWldEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 3,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+  });
+  depthLimitedAgainstWldEngine.wldNegamax = () => {
+    throw new Error('Positions outside the pre-exact window must stay on the normal depth-limited search.');
+  };
+  const depthLimitedAgainstWldResult = depthLimitedAgainstWldEngine.findBestMove(wldDepthLimitedState, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 3,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 1,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    depthLimitedAgainstWldResult.searchMode,
+    'depth-limited',
+    'Positions beyond the configured pre-exact window should keep the ordinary depth-limited search mode.',
+  );
+
+  assert.equal(
+    wldDepthLimitedState.currentPlayer,
+    'black',
+    'The two-empty-above pre-exact regression should cover the black-to-move parity case that the +1 window misses.',
+  );
+
+  const wldRangeTwoReferenceOutcome = classifyOutcomeFromScore(bruteForceExactScore(wldDepthLimitedState));
+  const blackWldRangeTwoEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+  });
+  blackWldRangeTwoEngine.runIterativeDeepening = () => {
+    throw new Error('Two-empty-above pre-exact WLD roots should still bypass iterative deepening and stay in the dedicated WLD solver.');
+  };
+  blackWldRangeTwoEngine.negamax = () => {
+    throw new Error('Two-empty-above pre-exact WLD roots should not fall back to the mixed depth-limited/exact negamax path.');
+  };
+  blackWldRangeTwoEngine.solveSmallExact = () => {
+    throw new Error('Two-empty-above pre-exact WLD roots should keep using the WLD-only late solver.');
+  };
+  const blackWldRangeTwoResult = blackWldRangeTwoEngine.findBestMove(wldDepthLimitedState, {
+    presetKey: 'custom',
+    timeLimitMs: 1200,
+    maxDepth: 4,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    styleKey: 'balanced',
+  });
+  assert.equal(
+    blackWldRangeTwoResult.searchMode,
+    'wld-endgame',
+    'Roots exactly two empties above the exact boundary should also expose the dedicated WLD endgame mode when +2 is enabled.',
+  );
+  assert.equal(
+    blackWldRangeTwoResult.isWldResult,
+    true,
+    'Completed +2 pre-exact WLD searches should still report a finished WLD solve.',
+  );
+  assert.equal(
+    classifyOutcomeFromScore(blackWldRangeTwoResult.score),
+    wldRangeTwoReferenceOutcome,
+    'The black-side +2 WLD solve should preserve the exact win/draw/loss outcome on a small regression state.',
+  );
+
+  const wldEtcWindowMoves = wldDepthLimitedState.getSearchMoves();
+  assert.ok(wldEtcWindowMoves.length >= 2, 'The WLD ETC regression should expose at least two legal moves in the +2 pre-exact window.');
+
+  const wldEtcEnabledEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    enhancedTranspositionCutoffWld: true,
+  });
+  const wldEtcFailHighChild = wldDepthLimitedState.applyMoveFast(
+    wldEtcWindowMoves[0].index,
+    wldEtcWindowMoves[0].flips ?? null,
+  );
+  assert.ok(wldEtcFailHighChild, 'The WLD ETC fail-high regression child should be legal.');
+  wldEtcEnabledEngine.storeTransposition(wldEtcFailHighChild, {
+    depth: wldDepthLimitedState.getEmptyCount(),
+    value: -10000,
+    flag: 'upper',
+    bestMoveIndex: null,
+  });
+  const wldEtcFailHigh = wldEtcEnabledEngine.applyEnhancedTranspositionCutoff(
+    wldDepthLimitedState,
+    wldEtcWindowMoves,
+    wldDepthLimitedState.getEmptyCount() + 1,
+    -10000,
+    10000,
+    1,
+    true,
+    'wld',
+  );
+  assert.ok(wldEtcFailHigh, 'The WLD ETC helper should activate on pre-exact WLD nodes when enabled.');
+  assert.equal(wldEtcFailHigh.cutoff, true, 'A proven WLD child upper-bound should allow a fail-high ETC cutoff in the WLD bucket.');
+  assert.equal(wldEtcFailHigh.score, 10000, 'The WLD ETC cutoff should negate the child bound into a parent win bound.');
+  assert.ok(wldEtcEnabledEngine.stats.etcWldNodes > 0, 'The WLD ETC helper should increment the dedicated WLD ETC bucket counters.');
+  assert.equal(wldEtcEnabledEngine.stats.etcExactNodes, 0, 'The WLD ETC helper should not touch the ordinary exact ETC bucket counters.');
+
+  const wldEtcDisabledEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    enhancedTranspositionCutoffWld: false,
+  });
+  wldEtcDisabledEngine.storeTransposition(wldEtcFailHighChild, {
+    depth: wldDepthLimitedState.getEmptyCount(),
+    value: -10000,
+    flag: 'upper',
+    bestMoveIndex: null,
+  });
+  const wldEtcDisabled = wldEtcDisabledEngine.applyEnhancedTranspositionCutoff(
+    wldDepthLimitedState,
+    wldEtcWindowMoves,
+    wldDepthLimitedState.getEmptyCount() + 1,
+    -10000,
+    10000,
+    1,
+    true,
+    'wld',
+  );
+  assert.equal(wldEtcDisabled, null, 'Disabling WLD ETC should skip the helper entirely for WLD nodes.');
+  assert.equal(wldEtcDisabledEngine.stats.etcWldNodes, 0, 'Disabling WLD ETC should keep the dedicated WLD bucket counters at zero.');
+
+  assert.equal(
+    new SearchEngine({ presetKey: 'hard' }).options.wldPreExactEmpties,
+    0,
+    'Hard and shallower presets should keep WLD pre-exact mode disabled by default.',
+  );
+  assert.equal(
+    new SearchEngine({ presetKey: 'expert' }).options.wldPreExactEmpties,
+    2,
+    'Expert strength should now default to the full +2 pre-exact WLD window.',
+  );
+  assert.equal(
+    new SearchEngine({ presetKey: 'impossible' }).options.wldPreExactEmpties,
+    2,
+    'Impossible strength should now default to the full +2 pre-exact WLD window.',
+  );
+  assert.equal(
+    new SearchEngine({
+      presetKey: 'custom',
+      maxDepth: 8,
+      timeLimitMs: 3900,
+      exactEndgameEmpties: 12,
+      aspirationWindow: 0,
+      randomness: 0,
+    }).options.wldPreExactEmpties,
+    2,
+    'Strong custom settings should inherit the full +2 pre-exact WLD window by default.',
+  );
+  assert.equal(
+    new SearchEngine({
+      presetKey: 'custom',
+      maxDepth: 6,
+      timeLimitMs: 5000,
+      exactEndgameEmpties: 12,
+      aspirationWindow: 0,
+      randomness: 0,
+    }).options.wldPreExactEmpties,
+    0,
+    'High time alone should not auto-enable WLD pre-exact mode when the configured search depth is still shallow.',
+  );
+
   assert.equal(
     nearEndgameResult.stats.lmrReductions,
     0,
@@ -1025,6 +1422,35 @@ function runSearchTests() {
     'The lightweight move-ordering evaluator should stay disabled once the endgame is already tiny enough for direct tactical heuristics to dominate.',
   );
 
+  const stabilityBoundRegressionStates = [
+    createStateFromBitboards({
+      black: 17910994675932133648n,
+      white: 517734999267935876n,
+      currentPlayer: 'black',
+    }),
+    createStateFromBitboards({
+      black: 18059068105867983120n,
+      white: 81431193180374660n,
+      currentPlayer: 'white',
+    }),
+    createStateFromBitboards({
+      black: 18059068105859545360n,
+      white: 81431193188779652n,
+      currentPlayer: 'black',
+    }),
+  ];
+
+  for (const stabilityState of stabilityBoundRegressionStates) {
+    const empties = stabilityState.getEmptyCount();
+    const { player, opponent } = stabilityState.getPlayerBoards();
+    const stableBounds = describeStableDiscBounds(player, opponent, empties);
+    const exactScore = bruteForceExactScore(stabilityState);
+    assert.ok(
+      exactScore >= (stableBounds.lowerBound * 10000) && exactScore <= (stableBounds.upperBound * 10000),
+      `Stable-disc bounds should conservatively contain the exact score at ${empties} empties.`,
+    );
+  }
+
   for (const seed of [1, 2, 3]) {
     const seededNearEndgame = playSeededRandomUntilEmptyCount(6, seed);
     assert.equal(seededNearEndgame.getEmptyCount(), 6, `Seeded endgame regression ${seed} should reach six empties.`);
@@ -1043,6 +1469,252 @@ function runSearchTests() {
       `Exact endgame search should match brute force on seeded regression position ${seed}.`,
     );
   }
+
+  const fewEmptiesDirectRegression = playSeededRandomUntilEmptyCount(4, 2);
+  assert.equal(fewEmptiesDirectRegression.getEmptyCount(), 4, 'The Stage 22 few-empties direct regression should reach four empties.');
+  const fewEmptiesDirectReference = bruteForceExactScore(fewEmptiesDirectRegression);
+
+  const fewEmptiesBaselineEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    optimizedFewEmptiesExactSolver: false,
+  });
+  const fewEmptiesBaselineScore = fewEmptiesBaselineEngine.solveSmallExact(fewEmptiesDirectRegression);
+
+  const fewEmptiesOptimizedEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    optimizedFewEmptiesExactSolver: true,
+  });
+  const fewEmptiesOptimizedScore = fewEmptiesOptimizedEngine.solveSmallExact(fewEmptiesDirectRegression);
+
+  assert.equal(fewEmptiesBaselineScore, fewEmptiesDirectReference, 'The full-width few-empties exact solver baseline should still match brute force.');
+  assert.equal(fewEmptiesOptimizedScore, fewEmptiesDirectReference, 'The Stage 22 optimized few-empties exact solver should preserve the exact score.');
+  assert.ok(
+    fewEmptiesOptimizedEngine.stats.smallSolverNodes <= fewEmptiesBaselineEngine.stats.smallSolverNodes,
+    'The optimized few-empties exact solver should not visit more small-solver nodes than the full-width baseline on the direct regression.',
+  );
+
+  const fewEmptiesBoundaryRegression = playSeededRandomUntilEmptyCount(10, 45);
+  assert.equal(fewEmptiesBoundaryRegression.getEmptyCount(), 10, 'The Stage 22 few-empties boundary regression should reach ten empties.');
+
+  const fewEmptiesBoundaryBaseline = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 6000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    optimizedFewEmptiesExactSolver: false,
+  }).findBestMove(fewEmptiesBoundaryRegression);
+
+  const fewEmptiesBoundaryOptimized = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 6000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    optimizedFewEmptiesExactSolver: true,
+  }).findBestMove(fewEmptiesBoundaryRegression);
+
+  assert.equal(fewEmptiesBoundaryOptimized.searchMode, 'exact-endgame', 'The Stage 22 optimized few-empties solver should only engage inside the exact bucket.');
+  assert.equal(fewEmptiesBoundaryOptimized.bestMoveCoord, fewEmptiesBoundaryBaseline.bestMoveCoord, 'The Stage 22 optimized few-empties solver should preserve the root exact best move on the boundary regression.');
+  assert.equal(fewEmptiesBoundaryOptimized.score, fewEmptiesBoundaryBaseline.score, 'The Stage 22 optimized few-empties solver should preserve the root exact score on the boundary regression.');
+  assert.ok(
+    fewEmptiesBoundaryOptimized.stats.smallSolverNodes < fewEmptiesBoundaryBaseline.stats.smallSolverNodes,
+    'The Stage 22 optimized few-empties solver should reduce small-solver work on the exact boundary regression.',
+  );
+
+  const fewEmptiesWldRegression = playSeededRandomUntilEmptyCount(12, 50);
+  assert.equal(fewEmptiesWldRegression.getEmptyCount(), 12, 'The Stage 22 few-empties WLD regression should reach twelve empties.');
+
+  const fewEmptiesWldBaseline = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 8,
+    timeLimitMs: 3000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    optimizedFewEmptiesExactSolver: false,
+  }).findBestMove(fewEmptiesWldRegression);
+
+  const fewEmptiesWldOptimized = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 8,
+    timeLimitMs: 3000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    optimizedFewEmptiesExactSolver: true,
+  }).findBestMove(fewEmptiesWldRegression);
+
+  assert.equal(fewEmptiesWldBaseline.searchMode, 'wld-endgame', 'The Stage 22 WLD regression should stay inside the dedicated WLD bucket.');
+  assert.equal(fewEmptiesWldOptimized.bestMoveCoord, fewEmptiesWldBaseline.bestMoveCoord, 'The exact-only few-empties optimization should not change WLD root move choice on the WLD regression.');
+  assert.equal(fewEmptiesWldOptimized.score, fewEmptiesWldBaseline.score, 'The exact-only few-empties optimization should not change WLD root score on the WLD regression.');
+  assert.equal(fewEmptiesWldOptimized.stats.wldSmallSolverNodes, fewEmptiesWldBaseline.stats.wldSmallSolverNodes, 'The exact-only few-empties optimization should leave the WLD small solver untouched.');
+
+  const specializedFewEmptiesBaselineEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: false,
+  });
+  const specializedFewEmptiesCandidateEngine = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 1200,
+    exactEndgameEmpties: 4,
+    randomness: 0,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: true,
+  });
+  const specializedFewEmptiesBaselineScore = specializedFewEmptiesBaselineEngine.solveSmallExact(fewEmptiesDirectRegression);
+  const specializedFewEmptiesCandidateScore = specializedFewEmptiesCandidateEngine.solveSmallExact(fewEmptiesDirectRegression);
+
+  assert.equal(specializedFewEmptiesBaselineScore, fewEmptiesDirectReference, 'The Stage 23 baseline should preserve the direct four-empty exact score.');
+  assert.equal(specializedFewEmptiesCandidateScore, fewEmptiesDirectReference, 'The Stage 23 specialized few-empties solver should preserve the direct four-empty exact score.');
+  assert.ok(
+    specializedFewEmptiesCandidateEngine.stats.specializedFewEmpties4Calls > 0,
+    'The Stage 23 specialized few-empties regression should actually dispatch through the dedicated four-empty solver.',
+  );
+  assert.ok(
+    specializedFewEmptiesCandidateEngine.stats.smallSolverNodes < specializedFewEmptiesBaselineEngine.stats.smallSolverNodes,
+    'The Stage 23 specialized few-empties direct regression should reduce exact small-solver work versus the Stage 22 path.',
+  );
+
+  const specializedBoundaryBaseline = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 6000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: false,
+  }).findBestMove(fewEmptiesBoundaryRegression);
+
+  const specializedBoundaryCandidate = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 6000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: true,
+  }).findBestMove(fewEmptiesBoundaryRegression);
+
+  assert.equal(specializedBoundaryCandidate.searchMode, 'exact-endgame', 'The Stage 23 specialized few-empties solver should stay inside the exact bucket.');
+  assert.equal(specializedBoundaryCandidate.bestMoveCoord, specializedBoundaryBaseline.bestMoveCoord, 'The Stage 23 specialized few-empties solver should preserve the exact best move on the boundary regression.');
+  assert.equal(specializedBoundaryCandidate.score, specializedBoundaryBaseline.score, 'The Stage 23 specialized few-empties solver should preserve the exact score on the boundary regression.');
+  assert.ok(
+    specializedBoundaryCandidate.stats.specializedFewEmptiesCalls > 0,
+    'The Stage 23 boundary regression should visit the dedicated specialized exact solver.',
+  );
+  assert.ok(
+    specializedBoundaryCandidate.stats.smallSolverNodes < specializedBoundaryBaseline.stats.smallSolverNodes,
+    'The Stage 23 specialized few-empties solver should reduce exact small-solver work on the boundary regression.',
+  );
+
+  const specializedWldBaseline = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 8,
+    timeLimitMs: 3000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: false,
+  }).findBestMove(fewEmptiesWldRegression);
+
+  const specializedWldCandidate = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 8,
+    timeLimitMs: 3000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    optimizedFewEmptiesExactSolver: true,
+    specializedFewEmptiesExactSolver: true,
+  }).findBestMove(fewEmptiesWldRegression);
+
+  assert.equal(specializedWldCandidate.bestMoveCoord, specializedWldBaseline.bestMoveCoord, 'The Stage 23 specialized few-empties solver should not change WLD root move choice.');
+  assert.equal(specializedWldCandidate.score, specializedWldBaseline.score, 'The Stage 23 specialized few-empties solver should not change WLD root score.');
+  assert.equal(specializedWldCandidate.stats.wldSmallSolverNodes, specializedWldBaseline.stats.wldSmallSolverNodes, 'The Stage 23 specialized few-empties solver should leave the WLD small solver untouched.');
+  assert.equal(specializedWldCandidate.stats.specializedFewEmptiesCalls, 0, 'The Stage 23 specialized few-empties solver should not run inside the WLD bucket.');
+
+  const exactFastestRegression = playSeededRandomUntilEmptyCount(14, 23);
+  assert.equal(exactFastestRegression.getEmptyCount(), 14, 'The Stage 24 exact fastest-first regression should reach fourteen empties.');
+
+  const exactFastestBaseline = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 15000,
+    exactEndgameEmpties: 14,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    maxTableEntries: 400000,
+    exactFastestFirstOrdering: false,
+  }).findBestMove(exactFastestRegression);
+
+  const exactFastestCandidate = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 4,
+    timeLimitMs: 15000,
+    exactEndgameEmpties: 14,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 0,
+    maxTableEntries: 400000,
+  }).findBestMove(exactFastestRegression);
+
+  assert.equal(exactFastestCandidate.searchMode, 'exact-endgame', 'The Stage 24 fastest-first candidate should stay inside the exact bucket.');
+  assert.equal(exactFastestCandidate.bestMoveCoord, exactFastestBaseline.bestMoveCoord, 'The Stage 24 fastest-first candidate should preserve the exact best move on the 14-empty regression.');
+  assert.equal(exactFastestCandidate.score, exactFastestBaseline.score, 'The Stage 24 fastest-first candidate should preserve the exact score on the 14-empty regression.');
+  assert.ok(
+    exactFastestCandidate.stats.fastestFirstExactSorts > 0,
+    'The Stage 24 fastest-first regression should actually trigger exact fastest-first ordering.',
+  );
+  assert.ok(
+    exactFastestCandidate.stats.nodes < exactFastestBaseline.stats.nodes,
+    'The Stage 24 fastest-first candidate should reduce exact node count on the 14-empty regression.',
+  );
+
+
+
+  const exactFastestWldCandidate = new SearchEngine({
+    presetKey: 'custom',
+    maxDepth: 8,
+    timeLimitMs: 3000,
+    exactEndgameEmpties: 10,
+    aspirationWindow: 0,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+    exactFastestFirstOrdering: true,
+  }).findBestMove(fewEmptiesWldRegression);
+
+  assert.equal(exactFastestWldCandidate.bestMoveCoord, fewEmptiesWldBaseline.bestMoveCoord, 'The Stage 24 exact fastest-first ordering should not change WLD root move choice.');
+  assert.equal(exactFastestWldCandidate.score, fewEmptiesWldBaseline.score, 'The Stage 24 exact fastest-first ordering should not change WLD root score.');
+  assert.equal(exactFastestWldCandidate.stats.fastestFirstExactSorts, 0, 'The Stage 24 exact fastest-first ordering should stay inactive inside the WLD bucket.');
 }
 
 function run() {

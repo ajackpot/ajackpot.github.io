@@ -1,0 +1,45 @@
+{
+  "stage": 25,
+  "title": "Dormant runtime option cleanup and live-path alignment",
+  "decision": {
+    "removeFromLiveRuntime": [
+      "stabilityCutoff",
+      "stabilityCutoffWld",
+      "stabilityCutoffWldMaxEmpties",
+      "exactFastestCutFirstOrdering"
+    ],
+    "keepAsInternalBaselineOrShipped": [
+      "optimizedFewEmptiesExactSolver",
+      "specializedFewEmptiesExactSolver",
+      "exactFastestFirstOrdering",
+      "enhancedTranspositionCutoff",
+      "enhancedTranspositionCutoffWld",
+      "wldPreExactEmpties"
+    ],
+    "keepAsEvaluatorDiagnosticOnly": [
+      "describeStableDiscBounds"
+    ]
+  },
+  "runtimeFilesChanged": [
+    "js/ai/search-engine.js",
+    "js/ai/evaluator.js"
+  ],
+  "testAndDocFilesChanged": [
+    "js/test/core-smoke.mjs",
+    "js/test/benchmark-helpers.mjs",
+    "js/test/stage24_exact_fastest_first_benchmark.mjs",
+    "docs/reports/README.md",
+    "docs/reports/implementation/impl-stage-25-runtime-option-cleanup-and-dormant-logic-removal.md",
+    "docs/reports/review/review-stage-25-dormant-runtime-logic-classification.md",
+    "README.md"
+  ],
+  "removedFiles": [
+    "js/test/stage21_wld_stability_cutoff_benchmark.mjs"
+  ],
+  "verification": {
+    "coreSmoke": "passed",
+    "perft": "passed",
+    "uiSmoke": "passed",
+    "virtualHostSmoke": "passed"
+  }
+}

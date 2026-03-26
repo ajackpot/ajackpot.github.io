@@ -34,6 +34,10 @@
 7. 리스크 / 비채택 항목
 8. 다음 단계
 
+## 운영 메모
+- **현재 코드와 역사 문서는 다를 수 있습니다.** 비채택 실험은 보고서와 벤치마크 JSON로는 남기되, 실제 런타임 코드에서는 제거할 수 있습니다.
+- 사용자 노출 옵션은 실제 플레이에서 의미 있는 선택지만 남기고, 성능이 나빴던 실험 토글은 문서로만 보존하는 것을 원칙으로 합니다.
+
 ## 현재 문서 목록
 ### 구현
 - `implementation/impl-stage-03-search-engine-comparison-and-optimization.md`
@@ -44,6 +48,14 @@
 - `implementation/impl-stage-13-evaluator-corner-access-and-audit-tuning.md`
 - `implementation/impl-stage-14-root-exact-endgame-boundary-and-fallback-hardening.md`
 - `implementation/impl-stage-15-exact-root-single-shot-and-ui-mode-annotation.md`
+- `implementation/impl-stage-17-conservative-enhanced-transposition-cutoff.md`
+- `implementation/impl-stage-18-strict-root-wld-pre-exact-mode.md`
+- `implementation/impl-stage-19-wld-range2-default-adoption-and-black-parity.md`
+- `implementation/impl-stage-21-wld-only-stability-cutoff-prototype.md`
+- `implementation/impl-stage-22-exact-only-few-empties-solver-and-stats-cleanup.md`
+- `implementation/impl-stage-23-specialized-few-empties-exact-solver.md`
+- `implementation/impl-stage-24-exact-fastest-first-ordering.md`
+- `implementation/impl-stage-25-runtime-option-cleanup-and-dormant-logic-removal.md`
 
 ### 검토
 - `review/review-stage-03-engine-audit.md`
@@ -59,6 +71,15 @@
 - `review/review-stage-13-traditional-evaluator-audit.md`
 - `review/review-stage-14-late-game-boundary-bug-audit.md`
 - `review/review-stage-15-exact-root-ux-and-overhead-audit.md`
+- `review/review-stage-16-stability-cutoff-prototype-screening.md`
+- `review/review-stage-17-enhanced-transposition-cutoff-benchmark.md`
+- `review/review-stage-18-wld-pre-exact-root-benchmark.md`
+- `review/review-stage-19-wld-range2-black-parity-benchmark.md`
+- `review/review-stage-21-wld-only-stability-cutoff-spotcheck.md`
+- `review/review-stage-22-few-empties-exact-vs-wld-buckets.md`
+- `review/review-stage-23-specialized-few-empties-exact-solver.md`
+- `review/review-stage-24-exact-fastest-first-and-cut-aware-audit.md`
+- `review/review-stage-25-dormant-runtime-logic-classification.md`
 
 ### 기능
 - `features/feature-opening-book-integration.md`

@@ -134,6 +134,25 @@ export function formatEngineSummaryLine(options) {
   return `${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하`;
 }
 
+function formatWldOutcome(outcome, score) {
+  if (outcome === 'win') {
+    return '승리 확정';
+  }
+  if (outcome === 'loss') {
+    return '패배 확정';
+  }
+  if (outcome === 'draw') {
+    return '무승부 확정';
+  }
+  if (score > 0) {
+    return '승리 확정';
+  }
+  if (score < 0) {
+    return '패배 확정';
+  }
+  return '무승부 확정';
+}
+
 export function formatSearchSummary(result) {
   if (!result) {
     return '아직 AI 탐색 결과가 없습니다.';
@@ -185,6 +204,24 @@ export function formatSearchSummary(result) {
     }
 
     return `${best}, 정확 끝내기 미완료로 휴리스틱 대체, ${emptyCountText}평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+  }
+
+  if (result.searchMode === 'wld-endgame') {
+    const emptyCountText = rootEmptyCount === null ? '' : `현재 빈칸 ${rootEmptyCount}칸, `;
+    const outcomeText = formatWldOutcome(result.wldOutcome, score);
+    const partialRootText = rootAnalyzedMoveCount === null || rootLegalMoveCount === null
+      ? ''
+      : `, 검토 루트 수 ${rootAnalyzedMoveCount}/${rootLegalMoveCount}`;
+
+    if (result.searchCompletion === 'complete') {
+      return `${best}, 승무패 끝내기, ${emptyCountText}${outcomeText}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+    }
+
+    if (result.searchCompletion === 'partial-timeout') {
+      return `${best}, 승무패 끝내기 시간 만료로 현재까지 최선 수 반환, ${emptyCountText}${outcomeText}${partialRootText}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
+    }
+
+    return `${best}, 승무패 끝내기 미완료로 휴리스틱 대체, ${emptyCountText}평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
   }
 
   return `${best}, 평가 ${score}, 완료 깊이 ${depth}, 탐색 노드 ${nodes}, TT 적중 ${ttHits}, 시간 ${elapsed}ms, 주 변형 ${pv}.${bookNote}`;
