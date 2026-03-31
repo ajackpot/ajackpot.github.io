@@ -48,6 +48,7 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
     modalEscapes: 0,
     modalReturns: 0,
     focusLossCount: 0,
+    contextResets: 0,
     bookingCancels: 0,
   };
 
@@ -126,6 +127,7 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
       if (type === 'wrong-selection') metrics.wrongSelections += 1;
       if (type === 'cancel-booking') metrics.bookingCancels += 1;
       if (type === 'focus-loss') metrics.focusLossCount += 1;
+      if (type === 'context-reset') metrics.contextResets += 1;
       pushEvent(type, payload);
     },
     setModalState(nextState) {

@@ -1,14 +1,14 @@
 export const calendarBenchmarkGraphs = {
   variantA: {
-    label: '조건 A · 고비용 구조',
-    description: '헤더/필터 이후 결과 진입, 슬롯별 복수 탭 스톱, 약한 모달 포커스 관리.',
+    label: '비교안 A · 조작 부담이 큰 구조',
+    description: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간마다 여러 번 멈춰야 하며, 대화상자를 닫은 뒤 결과 제목 근처부터 다시 찾아야 하는 구조.',
     tasks: {
       task1_book_remote_tuesday: {
         title: '화요일 오후 비대면 30분 상담 예약',
         assumptions: [
-          '헤더와 보조 링크를 지나 결과 영역에 도달해야 한다.',
-          '슬롯 행마다 선택과 상세 보기 버튼이 분리되어 있다.',
-          '모달이 열려도 초점이 자동 이동하지 않고 결과 영역으로 복귀도 보장되지 않는다.',
+          '상단 링크와 보조 링크를 지나 예약 가능 시간 영역에 도달해야 한다.',
+          '예약 시간마다 선택과 자세히 보기 버튼이 분리되어 있다.',
+          '대화상자를 닫으면 방금 보던 예약 시간으로 돌아가지 않고 결과 제목 근처부터 다시 찾아야 한다.',
         ],
         steps: [
           { id: 'reach-filters', bucket: 'entry', navMoves: 16, activations: 0, decisions: 2, waits: 0, speechUnits: 6, scanSteps: 18 },
@@ -22,9 +22,9 @@ export const calendarBenchmarkGraphs = {
       task2_move_earlier_same_day: {
         title: '같은 날 더 이른 시간대로 변경',
         assumptions: [
-          '기존 예약 상태를 확인하는 패널까지 다시 순차 탐색해야 한다.',
-          '필터는 유지되지만 결과 목록 위치가 기억되지 않아 재탐색이 발생한다.',
-          '변경 확인 모달에서도 배경 이탈 가능성이 있다.',
+          '기존 예약 상태를 확인하는 영역까지 다시 차례대로 이동해야 한다.',
+          '조건은 유지되지만 결과 목록 위치가 기억되지 않아 다시 찾아야 한다.',
+          '변경 확인 대화상자를 닫으면 이전 예약 시간 대신 결과 제목 근처부터 다시 살펴야 한다.',
         ],
         steps: [
           { id: 'reorient', bucket: 'entry', navMoves: 20, activations: 0, decisions: 3, waits: 0, speechUnits: 8, scanSteps: 23 },
@@ -36,9 +36,9 @@ export const calendarBenchmarkGraphs = {
       task3_cancel_and_rebook_thursday: {
         title: '취소 후 목요일 오전 대면 예약',
         assumptions: [
-          '취소 버튼이 결과 목록 뒤에 있어 우선 재탐색이 필요하다.',
-          '취소 후 필터를 다시 맞춘 다음 목요일 슬롯을 순차 탐색해야 한다.',
-          '새 예약 확정까지 모달 진입과 복귀 비용이 중첩된다.',
+          '취소 버튼이 결과 목록 뒤에 있어 먼저 다시 찾아야 한다.',
+          '취소 후 조건을 다시 맞춘 다음 목요일 예약 시간을 차례대로 찾아야 한다.',
+          '새 예약을 확정할 때까지 대화상자 진입과 결과 제목으로의 복귀 부담이 겹친다.',
         ],
         steps: [
           { id: 'reach-current-booking', bucket: 'entry', navMoves: 22, activations: 0, decisions: 3, waits: 0, speechUnits: 8, scanSteps: 25 },
@@ -51,15 +51,15 @@ export const calendarBenchmarkGraphs = {
     },
   },
   variantB: {
-    label: '조건 B · 개선 구조',
-    description: '스킵 링크, 결과 이동, 슬롯 그리드 단일 진입, 모달 초기 포커스·복귀 보장.',
+    label: '비교안 B · 개선 구조',
+    description: '결과로 바로 이동하고, 예약 시간표에 한 번만 들어간 뒤 이동하며, 대화상자 초점 이동과 복귀를 보장하는 구조.',
     tasks: {
       task1_book_remote_tuesday: {
         title: '화요일 오후 비대면 30분 상담 예약',
         assumptions: [
-          '스킵 링크와 결과 이동으로 첫 진입 비용이 낮다.',
-          '슬롯 목록이 layout grid로 묶여 단일 탭 스톱으로 진입한다.',
-          '모달이 열리면 첫 액션으로 이동하고 닫히면 호출 슬롯으로 돌아온다.',
+          '결과로 바로 이동하는 링크와 결과 이동 버튼으로 첫 진입 부담이 낮다.',
+          '예약 시간표가 하나의 묶음으로 제공되어 한 번만 들어간 뒤 이동한다.',
+          '대화상자가 열리면 첫 동작으로 이동하고 닫히면 호출한 예약 시간으로 돌아온다.',
         ],
         steps: [
           { id: 'skip-to-main', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
@@ -72,8 +72,8 @@ export const calendarBenchmarkGraphs = {
       task2_move_earlier_same_day: {
         title: '같은 날 더 이른 시간대로 변경',
         assumptions: [
-          '현재 예약 상태가 같은 영역에서 유지되어 문맥 재구축 비용이 적다.',
-          '슬롯 간 이동은 화살표 기반으로 짧게 끝난다.',
+          '현재 예약 상태가 같은 영역에 유지되어 다시 파악하는 부담이 적다.',
+          '예약 시간 사이 이동은 방향키 중심이라 짧게 끝난다.',
           '변경 후 초점이 새 예약 요약으로 이동한다.',
         ],
         steps: [
@@ -85,9 +85,9 @@ export const calendarBenchmarkGraphs = {
       task3_cancel_and_rebook_thursday: {
         title: '취소 후 목요일 오전 대면 예약',
         assumptions: [
-          '현재 예약 패널이 빠른 진입점으로 노출된다.',
-          '필터 적용 후 결과 제목으로 초점이 이동한다.',
-          '새 슬롯 선택 전까지 반복 영역 우회가 유지된다.',
+          '현재 예약 영역이 빠르게 닿을 수 있는 위치에 놓인다.',
+          '조건을 적용한 뒤 결과 제목으로 초점이 이동한다.',
+          '새 예약 시간을 고를 때까지 반복되는 상단 영역을 건너뛸 수 있다.',
         ],
         steps: [
           { id: 'cancel-existing', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 2 },

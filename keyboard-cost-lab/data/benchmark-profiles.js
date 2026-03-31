@@ -1,7 +1,7 @@
 export const benchmarkProfiles = {
   keyboard: {
     id: 'keyboard',
-    label: '키보드 프로필',
+    label: '키보드 사용자',
     navigationModel: 'nav',
     navigationMs: { lower: 450, expected: 650, upper: 900 },
     activationMs: { lower: 220, expected: 320, upper: 450 },
@@ -12,7 +12,7 @@ export const benchmarkProfiles = {
   },
   screenReader: {
     id: 'screenReader',
-    label: '화면낭독 프로필',
+    label: '화면낭독 사용자',
     navigationModel: 'nav',
     navigationMs: { lower: 700, expected: 980, upper: 1350 },
     activationMs: { lower: 260, expected: 380, upper: 520 },
@@ -25,7 +25,7 @@ export const benchmarkProfiles = {
   },
   switch: {
     id: 'switch',
-    label: '스위치 프로필',
+    label: '스위치 사용자',
     navigationModel: 'scan',
     scanStepMs: { lower: 950, expected: 1400, upper: 2100 },
     activationMs: { lower: 700, expected: 980, upper: 1300 },

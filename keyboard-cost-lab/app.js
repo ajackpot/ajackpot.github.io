@@ -17,28 +17,78 @@ const DAY_ORDER = {
   fri: 4,
 };
 
+const SERVICE_TYPES = [
+  {
+    id: 'calendar',
+    label: '예약 캘린더',
+    summary: '상담 예약 화면에서 조건을 맞추고 원하는 예약 시간을 찾는 과업을 수행합니다.',
+    statusLabel: '구현 완료',
+    available: true,
+    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
+  },
+  {
+    id: 'comments',
+    label: '댓글 목록',
+    summary: '댓글 읽기·정렬·답글 이동 과업을 위한 다음 서비스 유형입니다.',
+    statusLabel: '준비 중',
+    available: false,
+    points: ['후속 단계 예정'],
+  },
+  {
+    id: 'product',
+    label: '상품 옵션 선택',
+    summary: '옵션 고르기와 장바구니 진입 과업을 위한 후속 서비스 유형입니다.',
+    statusLabel: '준비 중',
+    available: false,
+    points: ['후속 단계 예정'],
+  },
+];
+
 const VARIANT_META = {
   variantA: {
     shortLabel: 'A',
-    title: '조건 A · 고비용 구조',
-    subtitle: '헤더와 필터 이후에 결과에 도달하고, 슬롯마다 복수 탭 스톱이 있는 구조',
+    title: '비교안 A · 조작 부담이 큰 구조',
+    subtitle: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간을 다시 찾게 되는 구조',
     improvements: [
-      '헤더·보조 링크를 모두 지나야 결과를 만날 수 있습니다.',
-      '슬롯 행마다 선택/상세가 분리되어 순차 탐색 비용이 누적됩니다.',
-      '모달을 열어도 초점이 자동 이동하지 않고, 닫을 때 원래 위치 복귀가 보장되지 않습니다.',
+      '상단 링크와 보조 링크를 모두 지나야 결과를 만날 수 있습니다.',
+      '예약 시간마다 선택과 시간 안내 보기 버튼이 나뉘어 있어 순서대로 많이 이동하게 됩니다.',
+      '대화상자를 닫거나 확정하면 방금 보던 예약 시간으로 돌아가지 않고 결과 제목 근처부터 다시 찾아야 합니다.',
     ],
   },
   variantB: {
     shortLabel: 'B',
-    title: '조건 B · 개선 구조',
-    subtitle: '스킵 링크, 단일 진입 슬롯 그리드, 모달 초기 초점·복귀를 갖춘 구조',
+    title: '비교안 B · 개선 구조',
+    subtitle: '결과로 바로 이동하고, 예약 시간표에 한 번만 들어가 이동하며, 대화상자 초점 복귀를 보장하는 구조',
     improvements: [
-      '스킵 링크와 결과 이동으로 첫 진입 비용을 낮춥니다.',
-      '슬롯 영역은 단일 탭 스톱으로 진입하고 화살표로 이동합니다.',
-      '모달을 열면 첫 액션으로 이동하고 닫으면 호출 슬롯으로 돌아갑니다.',
+      '결과로 바로 이동할 수 있어 첫 진입 부담을 낮춥니다.',
+      '예약 시간표는 한 번만 들어간 뒤 방향키로 이동합니다.',
+      '대화상자를 열면 첫 동작으로 이동하고 닫으면 방금 있던 예약 시간으로 돌아갑니다.',
     ],
   },
 };
+
+const GLOSSARY_ENTRIES = [
+  {
+    term: '비교안 A/B',
+    description: '같은 과업을 두 가지 화면 구조로 비교하기 위한 화면입니다. 내용은 같고 이동 방식만 다릅니다.',
+  },
+  {
+    term: '사전 계산 기준',
+    description: '실제 실험 전에 미리 계산해 둔 예상 조작 부담 값입니다. 실제 기록과 나란히 비교합니다.',
+  },
+  {
+    term: '초점',
+    description: '키보드로 현재 선택되어 있는 위치입니다. 탭 키를 누를 때 초점이 다음 요소로 이동합니다.',
+  },
+  {
+    term: '대화상자',
+    description: '예약 확인이나 취소 확인을 위해 잠깐 열리는 작은 창입니다.',
+  },
+  {
+    term: '결과 파일(JSON)',
+    description: '실험 기록을 텍스트 형태로 저장하는 파일입니다. JSON은 파일 형식 이름입니다.',
+  },
+];
 
 const root = document.querySelector('#app');
 if (!root) {
@@ -57,7 +107,8 @@ function createInitialState() {
     order,
     currentConditionIndex: 0,
     currentTaskIndex: 0,
-    view: 'intro',
+    selectedServiceId: null,
+    view: 'home',
     benchmarkProfileFocus: 'keyboard',
     focusRequest: null,
     runs: {
@@ -102,6 +153,40 @@ function getOrCreateSessionId() {
   return generated;
 }
 
+function resetExperimentState() {
+  state.currentConditionIndex = 0;
+  state.currentTaskIndex = 0;
+  state.runs.variantA = createConditionRuntime('variantA');
+  state.runs.variantB = createConditionRuntime('variantB');
+}
+
+function getSelectedService() {
+  return SERVICE_TYPES.find((service) => service.id === state.selectedServiceId) ?? null;
+}
+
+function openService(serviceId) {
+  const service = SERVICE_TYPES.find((item) => item.id === serviceId);
+  if (!service || !service.available) return;
+  state.selectedServiceId = service.id;
+  resetExperimentState();
+  state.view = 'serviceIntro';
+  requestFocus('#service-heading');
+  render();
+}
+
+function goHome() {
+  const currentRun = getCurrentRun();
+  if (currentRun?.currentTaskLogger) {
+    currentRun.currentTaskLogger.finish({ success: false, reason: 'go-home' });
+  }
+  state.selectedServiceId = null;
+  resetExperimentState();
+  state.view = 'home';
+  requestFocus('#page-title');
+  render();
+}
+
+
 function wireEvents() {
   root.addEventListener('click', handleRootClick);
   root.addEventListener('change', handleRootChange);
@@ -109,9 +194,26 @@ function wireEvents() {
 }
 
 function handleRootClick(event) {
+  const inertLink = event.target.closest('[data-inert-link="true"]');
+  if (inertLink) {
+    event.preventDefault();
+  }
+
   const actionTarget = event.target.closest('[data-action]');
   if (!actionTarget) return;
   const action = actionTarget.dataset.action;
+
+  if (action === 'open-service') {
+    event.preventDefault();
+    openService(actionTarget.dataset.serviceId);
+    return;
+  }
+
+  if (action === 'go-home') {
+    event.preventDefault();
+    goHome();
+    return;
+  }
 
   if (action === 'start-experiment') {
     event.preventDefault();
@@ -177,7 +279,7 @@ function handleRootClick(event) {
 
   if (action === 'jump-results') {
     event.preventDefault();
-    requestFocus('#results-heading');
+    focusElementNow('#results-heading');
     return;
   }
 }
@@ -211,7 +313,7 @@ function handleRootKeydown(event) {
     return;
   }
 
-  if (run.modal && getCurrentConditionId() === 'variantB') {
+  if (run.modal) {
     const dialog = document.querySelector('[data-modal-dialog]');
     if (dialog instanceof HTMLElement && dialog.contains(event.target) && event.key === 'Tab') {
       trapFocusInDialog(dialog, event);
@@ -251,6 +353,8 @@ function resetConditionRuntime(variantId) {
 }
 
 function startExperiment() {
+  const selectedService = getSelectedService();
+  if (!selectedService || !selectedService.available) return;
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   resetConditionRuntime('variantA');
@@ -266,12 +370,9 @@ function restartExperiment() {
   if (currentRun?.currentTaskLogger) {
     currentRun.currentTaskLogger.finish({ success: false, reason: 'restart' });
   }
-  state.currentConditionIndex = 0;
-  state.currentTaskIndex = 0;
-  state.view = 'intro';
-  state.runs.variantA = createConditionRuntime('variantA');
-  state.runs.variantB = createConditionRuntime('variantB');
-  requestFocus('#page-title');
+  resetExperimentState();
+  state.view = state.selectedServiceId ? 'serviceIntro' : 'home';
+  requestFocus(state.selectedServiceId ? '#service-heading' : '#page-title');
   render();
 }
 
@@ -286,7 +387,7 @@ function prepareCurrentTask() {
   run.isWorking = false;
   run.cancelPerformedThisTask = false;
   run.lastTaskCompletionNote = '';
-  run.liveStatus = '목표를 맞추기 위해 필터를 적용하고 슬롯을 여십시오.';
+  run.liveStatus = '목표에 맞도록 조건을 적용한 뒤 원하는 예약 시간을 여십시오.';
 
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots[0]?.id ?? null;
@@ -343,6 +444,16 @@ function requestFocus(selector) {
   state.focusRequest = selector;
 }
 
+function focusElementNow(selector) {
+  const target = document.querySelector(selector);
+  if (target instanceof HTMLElement) {
+    target.focus();
+    return true;
+  }
+  requestFocus(selector);
+  return false;
+}
+
 function applyPendingFocus() {
   if (!state.focusRequest) return;
   const selector = state.focusRequest;
@@ -369,7 +480,7 @@ function applyFilters() {
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '필터를 적용하는 중입니다…';
+  run.liveStatus = '조건을 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
@@ -378,12 +489,12 @@ function applyFilters() {
     const visibleAvailableSlots = getAvailableVisibleSlots(run);
     run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
     const resultCount = visibleAvailableSlots.length;
-    run.liveStatus = `${resultCount}개의 예약 가능 슬롯이 표시되었습니다.`;
+    run.liveStatus = `예약 가능한 시간이 ${resultCount}개 표시되었습니다.`;
 
     if (getCurrentConditionId() === 'variantB') {
       requestFocus('#results-heading');
     } else {
-      requestFocus('[data-focus-id="apply-filters"]');
+      requestFocus('[data-focus-id="apply-criteria"]');
     }
     render();
   }, 320);
@@ -413,6 +524,8 @@ function openSlotModal(slotId, triggerFocusId, dialogMode = 'select') {
 
   if (getCurrentConditionId() === 'variantB') {
     requestFocus('[data-dialog-primary]');
+  } else {
+    requestFocus('#dialog-title');
   }
   render();
 }
@@ -433,6 +546,8 @@ function openCancelModal(triggerFocusId) {
 
   if (getCurrentConditionId() === 'variantB') {
     requestFocus('[data-dialog-primary]');
+  } else {
+    requestFocus('#dialog-title');
   }
   render();
 }
@@ -452,7 +567,7 @@ function closeModal() {
   if (getCurrentConditionId() === 'variantB' && closingModal.triggerFocusId) {
     requestFocus(`[data-focus-id="${closingModal.triggerFocusId}"]`);
   } else {
-    run.currentTaskLogger?.note('focus-loss', { reason: 'modal-closed-without-return-focus' });
+    run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-results-heading' });
     requestFocus('#results-heading');
   }
   render();
@@ -506,13 +621,13 @@ function confirmSlotFromModal() {
     }
 
     run.liveStatus = wasCorrect
-      ? '예약이 반영되었습니다. 과업 성공 조건을 다시 확인하십시오.'
-      : '예약은 되었지만 목표 슬롯과 일치하지 않습니다. 다시 시도하십시오.';
+      ? '예약이 반영되었습니다. 과업의 완료 조건을 다시 확인하십시오.'
+      : '예약은 되었지만 목표 예약 시간과 일치하지 않습니다. 다시 시도하십시오.';
 
     if (getCurrentConditionId() === 'variantB') {
       requestFocus('#booking-summary');
     } else {
-      run.currentTaskLogger?.note('focus-loss', { reason: 'variant-a-booking-confirmed' });
+      run.currentTaskLogger?.note('context-reset', { reason: 'variant-a-booking-confirmed' });
       requestFocus('#results-heading');
     }
     render();
@@ -541,12 +656,12 @@ function confirmCancelFromModal() {
       closedAt: performance.now(),
     });
 
-    run.liveStatus = '기존 예약을 취소했습니다. 새 슬롯을 선택하십시오.';
+    run.liveStatus = '기존 예약을 취소했습니다. 새 예약 시간을 선택하십시오.';
 
     if (getCurrentConditionId() === 'variantB') {
       requestFocus('#booking-summary');
     } else {
-      run.currentTaskLogger?.note('focus-loss', { reason: 'variant-a-cancel-confirmed' });
+      run.currentTaskLogger?.note('context-reset', { reason: 'variant-a-cancel-confirmed' });
       requestFocus('#results-heading');
     }
     render();
@@ -682,6 +797,13 @@ function trapFocusInDialog(dialog, event) {
   const first = focusables[0];
   const last = focusables[focusables.length - 1];
   const active = document.activeElement;
+
+  if (!focusables.includes(active)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+    return;
+  }
+
   if (event.shiftKey && active === first) {
     event.preventDefault();
     last.focus();
@@ -692,52 +814,123 @@ function trapFocusInDialog(dialog, event) {
 }
 
 function render() {
+  document.title = getDocumentTitle();
   root.innerHTML = `
     <div class="page-shell">
       ${renderPage()}
+      ${renderLanguageGuideCard()}
     </div>
   `;
   applyPendingFocus();
 }
 
+function getDocumentTitle() {
+  if (state.view === 'home') return '과도한 키보드 조작 실험';
+  if (state.view === 'serviceIntro') return '예약 캘린더 서비스 화면';
+  if (state.view === 'task') return `과업 진행 · ${getCurrentTask()?.title ?? '예약 캘린더'}`;
+  if (state.view === 'taskReview') return '과업 결과 요약';
+  if (state.view === 'conditionReview') return '비교안 요약';
+  return '예약 캘린더 최종 비교';
+}
+
 function renderPage() {
-  if (state.view === 'intro') return renderIntroView();
+  if (state.view === 'home') return renderHomeView();
+  if (state.view === 'serviceIntro') return renderServiceIntroView();
   if (state.view === 'task') return renderTaskView();
   if (state.view === 'taskReview') return renderTaskReviewView();
   if (state.view === 'conditionReview') return renderConditionReviewView();
   return renderFinalView();
 }
 
-function renderIntroView() {
+function renderHomeView() {
   return `
     <header class="hero card">
-      <p class="eyebrow">Calendar benchmark prototype</p>
-      <h1 id="page-title" tabindex="-1">예약 캘린더 A/B 테스트 프로토타입</h1>
+      <p class="eyebrow">실험 시작 준비</p>
+      <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
       <p>
-        정적 웹앱 안에서 조건 A와 B를 차례로 실행하고, 각 과업의 실제 로그를
-        사전 계산한 벤치마크와 나란히 보여주는 첫 번째 서비스 유형 구현입니다.
+        먼저 실험할 서비스 유형을 고르십시오. 현재는 예약 캘린더가 준비되어 있으며,
+        이후 다른 서비스 유형도 같은 방식으로 하나씩 추가할 수 있습니다.
       </p>
       <div class="hero-grid">
         <section>
-          <h2>이번 단계에서 구현한 것</h2>
+          <h2>이번 단계 목표</h2>
           <ul>
-            <li>캘린더 A/B 페이지와 3개 과업</li>
-            <li>키 입력·포커스 이동·모달 이탈 등 로그 수집</li>
-            <li>키보드 / 화면낭독 / 스위치 프로필별 사전 벤치마크</li>
-            <li>docs 폴더용 단계 보고서</li>
+            <li>서비스 유형을 먼저 고르고 해당 서비스 화면에서 과업을 시작하도록 흐름을 분리합니다.</li>
+            <li>같은 과업을 비교안 A와 B로 수행해 조작 부담 차이를 확인합니다.</li>
+            <li>실제 기록과 사전 계산 기준을 함께 남겨 후속 서비스 유형에 재사용합니다.</li>
           </ul>
         </section>
         <section>
-          <h2>세션 정보</h2>
+          <h2>실험 정보</h2>
           <dl class="meta-list">
-            <div><dt>세션 ID</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
-            <div><dt>조건 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>현재 범위</dt><dd>예약 캘린더 → 벤치마크 → 결과 요약</dd></div>
+            <div><dt>실험 번호</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
+            <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
+            <div><dt>현재 공개 범위</dt><dd>예약 캘린더</dd></div>
+          </dl>
+        </section>
+      </div>
+    </header>
+    <section class="service-grid" aria-label="서비스 유형 목록">
+      ${SERVICE_TYPES.map((service) => renderHomeServiceCard(service)).join('')}
+    </section>
+  `;
+}
+
+function renderHomeServiceCard(service) {
+  return `
+    <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
+      <div class="service-card-header">
+        <div>
+          <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
+          <h2>${escapeHtml(service.label)}</h2>
+        </div>
+        <span class="pill ${service.available ? '' : 'pill-warning'}">${escapeHtml(service.statusLabel)}</span>
+      </div>
+      <p>${escapeHtml(service.summary)}</p>
+      <ul>
+        ${service.points.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
+      </ul>
+      <div class="button-row">
+        <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
+          ${service.available ? '이 서비스 화면으로 이동' : '준비 중'}
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function renderServiceIntroView() {
+  const service = getSelectedService();
+  if (!service) return renderHomeView();
+  return `
+    <header class="hero card">
+      <p class="eyebrow">선택한 서비스 유형</p>
+      <h1 id="service-heading" tabindex="-1">${escapeHtml(service.label)}</h1>
+      <p>
+        ${escapeHtml(service.summary)}
+        이 화면에서 과업을 시작하거나, 다시 서비스 선택 화면으로 돌아갈 수 있습니다.
+      </p>
+      <div class="hero-grid">
+        <section>
+          <h2>이번에 바로 확인하는 것</h2>
+          <ul>
+            <li>예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지</li>
+            <li>실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지</li>
+            <li>같은 실험 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지</li>
+          </ul>
+        </section>
+        <section>
+          <h2>실험 설정</h2>
+          <dl class="meta-list">
+            <div><dt>실험 번호</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
+            <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
+            <div><dt>과업 수</dt><dd>${calendarTasks.length}개</dd></div>
           </dl>
         </section>
       </div>
       <div class="button-row">
-        <button class="button button-primary" data-action="start-experiment">실험 시작</button>
+        <button class="button button-primary" data-action="start-experiment">과업 시작</button>
+        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
       </div>
     </header>
     <section class="card muted-card">
@@ -746,9 +939,26 @@ function renderIntroView() {
         ${calendarTasks.map((task) => `<li><strong>${escapeHtml(task.title)}</strong><br>${escapeHtml(task.goalSummary)}</li>`).join('')}
       </ol>
       <p class="muted">
-        권장 사용법: 마우스보다 키보드 중심으로 수행하십시오. 클릭도 허용되지만 결과 요약에 pointer activation이 함께 기록됩니다.
+        권장 사용법: 가능하면 마우스보다 키보드 중심으로 수행하십시오. 클릭도 허용되지만, 결과 요약에 클릭 입력 횟수가 함께 기록됩니다.
       </p>
     </section>
+  `;
+}
+
+function renderLanguageGuideCard() {
+  return `
+    <details class="card glossary-card">
+      <summary>용어 설명 보기</summary>
+      <p class="muted">이 실험은 사용자가 낯선 영어 표현을 학습하지 않아도 이해할 수 있도록 자주 쓰는 한국어를 우선 사용합니다.</p>
+      <dl class="glossary-list">
+        ${GLOSSARY_ENTRIES.map((entry) => `
+          <div>
+            <dt>${escapeHtml(entry.term)}</dt>
+            <dd>${escapeHtml(entry.description)}</dd>
+          </div>
+        `).join('')}
+      </dl>
+    </details>
   `;
 }
 
@@ -762,7 +972,7 @@ function renderTaskView() {
   const meta = VARIANT_META[conditionId];
 
   return `
-    ${conditionId === 'variantB' ? '<a class="skip-link" href="#results-heading">결과 영역으로 건너뛰기</a>' : ''}
+    ${conditionId === 'variantB' ? '<a class="skip-link" href="#results-heading">결과로 바로 이동</a>' : ''}
     <section class="card top-summary">
       <div>
         <p class="eyebrow">${escapeHtml(meta.title)}</p>
@@ -770,8 +980,8 @@ function renderTaskView() {
         <p>${escapeHtml(meta.subtitle)}</p>
       </div>
       <div class="pill-group">
-        <span class="pill">세션 ${escapeHtml(state.sessionId)}</span>
-        <span class="pill">조건 ${escapeHtml(meta.shortLabel)}</span>
+        <span class="pill">실험 번호 ${escapeHtml(state.sessionId)}</span>
+        <span class="pill">비교안 ${escapeHtml(meta.shortLabel)}</span>
         <span class="pill">과업 ${state.currentTaskIndex + 1} / ${calendarTasks.length}</span>
       </div>
     </section>
@@ -802,13 +1012,14 @@ function renderTaskInstructionCard(task, run) {
       <ol>
         ${task.instructions.map((instruction) => `<li>${escapeHtml(instruction)}</li>`).join('')}
       </ol>
-      <div class="status-box" aria-live="polite" id="live-status-region">
+      <div class="status-box" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">
         ${escapeHtml(run.liveStatus)}
       </div>
       <dl class="meta-list compact">
         <div><dt>현재 예약</dt><dd>${escapeHtml(formatBookingSummary(run.booking))}</dd></div>
-        <div><dt>실시간 키 입력</dt><dd>${snapshot ? snapshot.totalKeyInputs : 0}</dd></div>
-        <div><dt>포커스 이동</dt><dd>${snapshot ? snapshot.focusChanges : 0}</dd></div>
+        <div><dt>지금까지 누른 키</dt><dd>${snapshot ? snapshot.totalKeyInputs : 0}</dd></div>
+        <div><dt>초점 이동</dt><dd>${snapshot ? snapshot.focusChanges : 0}</dd></div>
+        <div><dt>위치 다시 찾기</dt><dd>${snapshot ? snapshot.contextResets : 0}</dd></div>
       </dl>
     </section>
   `;
@@ -818,7 +1029,7 @@ function renderStructuralHints(conditionId) {
   const meta = VARIANT_META[conditionId];
   return `
     <section class="card hint-card">
-      <h2>현재 구조 특징</h2>
+      <h2>현재 화면의 이동 구조</h2>
       <ul>
         ${meta.improvements.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
       </ul>
@@ -828,12 +1039,12 @@ function renderStructuralHints(conditionId) {
 
 function renderSimulatedHeader(conditionId) {
   const hasVisibleSkip = conditionId === 'variantB';
-  const links = ['홈', '상담사 소개', '패키지', '후기', '가격', 'FAQ', '정책', '문의'];
+  const links = ['처음 화면', '상담사 소개', '이용권', '이용 후기', '가격 안내', '자주 묻는 질문', '운영 정책', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       ${hasVisibleSkip ? '<a class="inline-link" href="#results-heading" data-action="jump-results" data-focus-id="header-skip-results">결과로 바로 이동</a>' : ''}
       <nav aria-label="서비스 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}">${escapeHtml(label)}</a>`).join('')}
+        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
     </header>
   `;
@@ -846,14 +1057,14 @@ function renderFilters(conditionId, run) {
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
       <div class="filters-header">
         <div>
-          <h2 id="filters-heading">필터</h2>
-          <p class="muted">A와 B는 동일한 정보량을 유지하고, 탐색 구조만 다르게 구성했습니다.</p>
+          <h2 id="filters-heading">조건 선택</h2>
+          <p class="muted">비교안 A와 B는 같은 정보량을 유지하고, 이동 구조만 다르게 구성했습니다.</p>
         </div>
-        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-results-button">결과로 이동</button>' : ''}
+        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-results-button">결과로 바로 이동</button>' : ''}
       </div>
       <div class="filters-grid">
         <label>
-          <span>서비스</span>
+          <span>서비스 종류</span>
           <select name="serviceType" data-focus-id="filter-service">
             ${calendarScenario.serviceTypes.map((serviceType) => `
               <option value="${serviceType.id}" ${run.filtersDraft.serviceType === serviceType.id ? 'selected' : ''}>${escapeHtml(serviceType.label)}</option>
@@ -861,7 +1072,7 @@ function renderFilters(conditionId, run) {
           </select>
         </label>
         <label>
-          <span>형식</span>
+          <span>상담 방식</span>
           <select name="mode" data-focus-id="filter-mode">
             <option value="all" ${run.filtersDraft.mode === 'all' ? 'selected' : ''}>전체</option>
             ${calendarScenario.modes.map((mode) => `
@@ -880,21 +1091,21 @@ function renderFilters(conditionId, run) {
           </select>
         </label>
         <label>
-          <span>길이</span>
+          <span>상담 시간</span>
           <select name="duration" data-focus-id="filter-duration">
             ${durationOptions.map((durationValue) => `
               <option value="${durationValue}" ${String(run.filtersDraft.duration) === String(durationValue) ? 'selected' : ''}>
-                ${durationValue === 'all' ? '전체 길이' : `${durationValue}분`}
+                ${durationValue === 'all' ? '전체 시간' : `${durationValue}분`}
               </option>
             `).join('')}
           </select>
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="policy-link">변경 정책 보기</a>
-        <a href="#" class="inline-link" data-focus-id="support-link">이용 안내 보기</a>
-        <button class="button button-primary" data-action="apply-filters" data-focus-id="apply-filters" ${run.isApplying ? 'disabled' : ''}>
-          ${run.isApplying ? '적용 중…' : '필터 적용'}
+        <a href="#" class="inline-link" data-focus-id="policy-link" data-inert-link="true">변경 기준 보기</a>
+        <a href="#" class="inline-link" data-focus-id="support-link" data-inert-link="true">이용 안내 보기</a>
+        <button class="button button-primary" data-action="apply-filters" data-focus-id="apply-criteria" ${run.isApplying ? 'disabled' : ''}>
+          ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>
       </div>
     </section>
@@ -906,10 +1117,10 @@ function renderResults(conditionId, run, availableSlots, unavailableSlots) {
     <section class="card results-card">
       <div class="results-header">
         <div>
-          <h2 id="results-heading" tabindex="-1">결과</h2>
-          <p class="muted">${availableSlots.length}개의 예약 가능 슬롯 · ${unavailableSlots.length}개의 예약 불가 슬롯</p>
+          <h2 id="results-heading" tabindex="-1">예약 가능 시간</h2>
+          <p class="muted">예약 가능한 시간 ${availableSlots.length}개 · 예약할 수 없는 시간 ${unavailableSlots.length}개</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 이동, Enter/Space로 열기</p>' : '<p class="keyboard-tip">Tab/Shift+Tab으로 슬롯 행을 순차 탐색</p>'}
+        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 이동하고 엔터 키나 스페이스바로 열기</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 예약 시간을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
         ? renderVariantAResults(availableSlots, unavailableSlots)
@@ -920,7 +1131,7 @@ function renderResults(conditionId, run, availableSlots, unavailableSlots) {
 
 function renderVariantAResults(availableSlots, unavailableSlots) {
   if (availableSlots.length === 0 && unavailableSlots.length === 0) {
-    return '<p class="muted">현재 필터에 맞는 슬롯이 없습니다.</p>';
+    return '<p class="muted">현재 조건에 맞는 예약 시간이 없습니다.</p>';
   }
   return `
     <ul class="slot-list slot-list-a">
@@ -928,11 +1139,11 @@ function renderVariantAResults(availableSlots, unavailableSlots) {
         <li class="slot-row">
           <div>
             <strong>${escapeHtml(formatSlotLabel(slot))}</strong>
-            <p class="muted">예약 가능 슬롯</p>
+            <p class="muted">예약 가능한 시간</p>
           </div>
           <div class="button-row compact-row">
             <button class="button button-secondary" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="select" data-focus-id="slot-${slot.id}-select">선택</button>
-            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">상세</button>
+            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">시간 안내 보기</button>
           </div>
         </li>
       `).join('')}
@@ -940,11 +1151,11 @@ function renderVariantAResults(availableSlots, unavailableSlots) {
         <li class="slot-row slot-row-unavailable">
           <div>
             <strong>${escapeHtml(formatSlotLabel(slot))}</strong>
-            <p class="muted">현재 예약 불가</p>
+            <p class="muted">지금은 예약할 수 없음</p>
           </div>
           <div class="button-row compact-row">
-            <span class="pill pill-warning">예약 불가</span>
-            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">상세</button>
+            <span class="pill pill-warning">예약 마감</span>
+            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">시간 안내 보기</button>
           </div>
         </li>
       `).join('')}
@@ -954,12 +1165,12 @@ function renderVariantAResults(availableSlots, unavailableSlots) {
 
 function renderVariantBResults(run, availableSlots, unavailableSlots) {
   if (availableSlots.length === 0 && unavailableSlots.length === 0) {
-    return '<p class="muted">현재 필터에 맞는 슬롯이 없습니다.</p>';
+    return '<p class="muted">현재 조건에 맞는 예약 시간이 없습니다.</p>';
   }
   const rows = chunkArray(availableSlots, 4);
   return `
-    ${availableSlots.length === 0 ? '<p class="muted">예약 가능한 슬롯은 없고, 아래에 예약 불가 슬롯만 표시됩니다.</p>' : ''}
-    <div role="grid" aria-label="예약 가능 슬롯 그리드" class="slot-grid" data-grid-root>
+    ${availableSlots.length === 0 ? '<p class="muted">예약 가능한 시간은 없고, 아래에 예약할 수 없는 시간만 표시됩니다.</p>' : ''}
+    <div role="grid" aria-label="예약 가능한 시간표" class="slot-grid" data-grid-root>
       ${rows.map((row, rowIndex) => `
         <div role="row" class="slot-grid-row">
           ${row.map((slot, columnIndex) => `
@@ -985,7 +1196,7 @@ function renderVariantBResults(run, availableSlots, unavailableSlots) {
     </div>
     ${unavailableSlots.length > 0 ? `
       <section class="unavailable-card">
-        <h3>예약 불가 슬롯</h3>
+        <h3>예약이 마감된 시간</h3>
         <ul class="chip-list">
           ${unavailableSlots.map((slot) => `<li>${escapeHtml(formatSlotLabel(slot))}</li>`).join('')}
         </ul>
@@ -997,7 +1208,7 @@ function renderVariantBResults(run, availableSlots, unavailableSlots) {
 function renderBookingPanel(run, emphasized) {
   return `
     <section class="card booking-card ${emphasized ? 'booking-card-emphasized' : ''}">
-      <h2 id="booking-summary" tabindex="-1">현재 예약</h2>
+      <h2 id="booking-summary" tabindex="-1">현재 예약 내용</h2>
       <p>${escapeHtml(formatBookingSummary(run.booking))}</p>
       <div class="button-row">
         ${run.booking ? `
@@ -1012,9 +1223,9 @@ function renderModal(modal, run, task) {
   if (modal.kind === 'cancel-booking') {
     return `
       <div class="modal-backdrop">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" data-modal-dialog>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">현재 예약을 취소하시겠습니까?</h2>
-          <p>${escapeHtml(formatBookingSummary(run.booking))}</p>
+          <p id="dialog-description">${escapeHtml(formatBookingSummary(run.booking))}</p>
           <div class="button-row">
             <button class="button button-ghost" data-action="dialog-close" data-focus-id="cancel-dialog-close">닫기</button>
             <button class="button button-primary" data-action="dialog-confirm-cancel" data-dialog-primary data-focus-id="cancel-dialog-confirm">
@@ -1030,12 +1241,13 @@ function renderModal(modal, run, task) {
   if (!slot) return '';
   const isTarget = slot.id === task.targetSlotId;
   const actionLabel = run.booking ? '변경 확정' : '예약 확정';
+  const modeLabel = modal.dialogMode === 'details' ? '시간 안내' : '예약 확인';
   return `
     <div class="modal-backdrop">
-      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" data-modal-dialog>
-        <h2 id="dialog-title" tabindex="-1">${escapeHtml(formatSlotLabel(slot))}</h2>
-        <p>${slot.available ? '예약 가능한 슬롯입니다.' : '현재 예약이 불가능한 슬롯입니다.'}</p>
-        <p class="muted">현재 과업 목표 슬롯과 ${isTarget ? '일치합니다' : '일치하지 않습니다'}.</p>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+        <h2 id="dialog-title" tabindex="-1">${escapeHtml(modeLabel)} · ${escapeHtml(formatSlotLabel(slot))}</h2>
+        <p id="dialog-description">${slot.available ? '예약 가능한 시간입니다.' : '지금은 예약할 수 없는 시간입니다.'}</p>
+        <p class="muted">현재 과업에서 찾아야 하는 예약 시간과 ${isTarget ? '일치합니다' : '일치하지 않습니다'}.</p>
         <div class="button-row">
           <button class="button button-ghost" data-action="dialog-close" data-focus-id="slot-dialog-close">닫기</button>
           ${slot.available ? `
@@ -1061,35 +1273,35 @@ function renderTaskReviewView() {
     <section class="card review-hero">
       <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
       <h1 id="review-heading" tabindex="-1">과업 완료</h1>
-      <p>${escapeHtml(task.title)}를 완료했습니다. 실제 로그와 사전 벤치마크를 함께 확인하십시오.</p>
+      <p>${escapeHtml(task.title)}를 완료했습니다. 실제 기록과 사전 계산 기준을 함께 확인하십시오.</p>
     </section>
     <section class="review-grid">
       <article class="card">
-        <h2>실제 로그 요약</h2>
+        <h2>실제 기록 요약</h2>
         <dl class="meta-list compact">
           <div><dt>완료 시간</dt><dd>${formatSeconds(result.durationSeconds)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${result.totalKeyInputs}</dd></div>
-          <div><dt>포커스 이동</dt><dd>${result.focusChanges}</dd></div>
-          <div><dt>backtrack 입력</dt><dd>${result.backtrackInputs}</dd></div>
-          <div><dt>wrong selection</dt><dd>${result.wrongSelections}</dd></div>
-          <div><dt>modal escape</dt><dd>${result.modalEscapes}</dd></div>
-          <div><dt>pointer activation</dt><dd>${result.pointerActivations}</dd></div>
+          <div><dt>초점 이동</dt><dd>${result.focusChanges}</dd></div>
+          <div><dt>되돌아간 입력</dt><dd>${result.backtrackInputs}</dd></div>
+          <div><dt>목표와 다른 시간 선택</dt><dd>${result.wrongSelections}</dd></div>
+          <div><dt>위치 다시 찾기</dt><dd>${result.contextResets ?? 0}</dd></div>
+          <div><dt>클릭 입력</dt><dd>${result.pointerActivations}</dd></div>
         </dl>
       </article>
       <article class="card">
-        <h2>사전 벤치마크</h2>
+        <h2>사전 계산 기준</h2>
         ${renderProfileBenchmarkTable(benchmark)}
       </article>
       <article class="card">
-        <h2>왜 비용 차이가 나는가</h2>
+        <h2>왜 조작 부담 차이가 나는가</h2>
         <ul>
           ${benchmark.assumptions.map((assumption) => `<li>${escapeHtml(assumption)}</li>`).join('')}
         </ul>
         <div class="benchmark-delta">
-          <h3>조건 B 예상 개선폭</h3>
+          <h3>비교안 B 예상 개선폭</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
-              <li><strong>${escapeHtml(benchmarkResultsCalendar.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 (${value.expectedReductionPercent}%)</li>
+              <li><strong>${escapeHtml(benchmarkResultsCalendar.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
             `).join('')}
           </ul>
         </div>
@@ -1097,7 +1309,7 @@ function renderTaskReviewView() {
     </section>
     <div class="button-row">
       <button class="button button-primary" data-action="continue-after-task">
-        ${state.currentTaskIndex < calendarTasks.length - 1 ? '다음 과업으로' : '현재 조건 요약 보기'}
+        ${state.currentTaskIndex < calendarTasks.length - 1 ? '다음 과업으로' : '현재 비교안 요약 보기'}
       </button>
       <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
     </div>
@@ -1109,10 +1321,10 @@ function renderProfileBenchmarkTable(benchmark) {
     <table class="summary-table">
       <thead>
         <tr>
-          <th>프로필</th>
-          <th>lower</th>
-          <th>expected</th>
-          <th>upper</th>
+          <th>사용자 유형</th>
+          <th>낮은 예상</th>
+          <th>기준 예상</th>
+          <th>높은 예상</th>
         </tr>
       </thead>
       <tbody>
@@ -1137,8 +1349,8 @@ function renderConditionReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">조건 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 완료</p>
-      <h1 id="condition-review-heading" tabindex="-1">현재 구현 범위 요약</h1>
+      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 완료</p>
+      <h1 id="condition-review-heading" tabindex="-1">현재 서비스 요약</h1>
       <p>${escapeHtml(VARIANT_META[conditionId].title)}에서 3개 과업을 모두 마쳤습니다.</p>
     </section>
     <section class="review-grid">
@@ -1147,17 +1359,17 @@ function renderConditionReviewView() {
         <dl class="meta-list compact">
           <div><dt>총 완료 시간</dt><dd>${formatSeconds(totals.durationSeconds)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${totals.totalKeyInputs}</dd></div>
-          <div><dt>총 포커스 이동</dt><dd>${totals.focusChanges}</dd></div>
-          <div><dt>wrong selection</dt><dd>${totals.wrongSelections}</dd></div>
-          <div><dt>modal escape</dt><dd>${totals.modalEscapes}</dd></div>
+          <div><dt>총 초점 이동</dt><dd>${totals.focusChanges}</dd></div>
+          <div><dt>목표와 다른 시간 선택</dt><dd>${totals.wrongSelections}</dd></div>
+          <div><dt>위치 다시 찾기</dt><dd>${totals.contextResets}</dd></div>
           <div><dt>예약 취소 횟수</dt><dd>${totals.bookingCancels}</dd></div>
         </dl>
       </article>
       <article class="card">
-        <h2>예상 비용 합계</h2>
+        <h2>예상 조작 부담 합계</h2>
         <table class="summary-table">
           <thead>
-            <tr><th>프로필</th><th>expected</th><th>A→B 예상 감소</th></tr>
+            <tr><th>사용자 유형</th><th>기준 예상</th><th>A→B 예상 감소</th></tr>
           </thead>
           <tbody>
             ${Object.entries(benchmarkOverall).map(([profileId, value]) => `
@@ -1173,13 +1385,13 @@ function renderConditionReviewView() {
       <article class="card">
         <h2>저장된 과업 기록</h2>
         <ol>
-          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(calendarTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, key ${result.totalKeyInputs}, focus ${result.focusChanges}</li>`).join('')}
+          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(calendarTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
         </ol>
       </article>
     </section>
     <div class="button-row">
       <button class="button button-primary" data-action="continue-after-condition">
-        ${state.currentConditionIndex < state.order.length - 1 ? '다음 조건 시작' : '최종 비교 보기'}
+        ${state.currentConditionIndex < state.order.length - 1 ? '다음 비교안 시작' : '최종 비교 보기'}
       </button>
       <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
     </div>
@@ -1195,13 +1407,13 @@ function renderFinalView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">Calendar benchmark prototype completed</p>
-      <h1 id="final-summary-heading" tabindex="-1">조건 A/B 최종 비교</h1>
-      <p>실제 로그와 사전 벤치마크를 함께 보면서, 다음 서비스 유형으로 확장할 때 재사용할 기준점을 마련했습니다.</p>
+      <p class="eyebrow">예약 캘린더 실험 완료</p>
+      <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
+      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 키보드 점검 기준을 마련했습니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
-        <span>벤치마크 프로필</span>
+        <span>비교 기준 사용자 유형</span>
         <select name="benchmark-profile">
           ${Object.entries(benchmarkResultsCalendar.overall).map(([profileId, profile]) => `
             <option value="${profileId}" ${profileId === selectedProfileId ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
@@ -1209,8 +1421,8 @@ function renderFinalView() {
         </select>
       </label>
       <div class="button-row">
-        <a class="button button-secondary" download="calendar-session-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">세션 JSON 내려받기</a>
-        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문으로 결과 전달</a>` : '<span class="muted">설문 URL을 설정하면 전달 링크가 생성됩니다.</span>'}
+        <a class="button button-secondary" download="reservation-calendar-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
     <section class="comparison-grid">
@@ -1218,30 +1430,30 @@ function renderFinalView() {
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
     </section>
     <section class="card">
-      <h2>실제 로그 비교</h2>
+      <h2>실제 기록 비교</h2>
       <table class="summary-table">
         <thead>
           <tr>
             <th>지표</th>
-            <th>조건 A</th>
-            <th>조건 B</th>
+            <th>비교안 A</th>
+            <th>비교안 B</th>
             <th>차이</th>
           </tr>
         </thead>
         <tbody>
           <tr><th>총 완료 시간</th><td>${formatSeconds(actualA.durationSeconds)}</td><td>${formatSeconds(actualB.durationSeconds)}</td><td>${formatSigned(actualB.durationSeconds - actualA.durationSeconds, '초')}</td></tr>
           <tr><th>총 키 입력</th><td>${actualA.totalKeyInputs}</td><td>${actualB.totalKeyInputs}</td><td>${formatSigned(actualB.totalKeyInputs - actualA.totalKeyInputs)}</td></tr>
-          <tr><th>총 포커스 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
-          <tr><th>wrong selection</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
-          <tr><th>modal escape</th><td>${actualA.modalEscapes}</td><td>${actualB.modalEscapes}</td><td>${formatSigned(actualB.modalEscapes - actualA.modalEscapes)}</td></tr>
+          <tr><th>총 초점 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
+          <tr><th>목표와 다른 시간 선택</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
+          <tr><th>위치 다시 찾기</th><td>${actualA.contextResets}</td><td>${actualB.contextResets}</td><td>${formatSigned(actualB.contextResets - actualA.contextResets)}</td></tr>
         </tbody>
       </table>
     </section>
     <section class="card">
       <h2>다음 단계에 바로 쓸 수 있는 포인트</h2>
       <ul>
-        <li>이번 구현에서 공통 실험 프레임은 이미 분리되어 있으므로, 다음 서비스 유형은 시나리오 데이터와 화면 조합만 바꾸면 됩니다.</li>
-        <li>벤치마크 엔진은 task graph만 추가하면 같은 형식으로 결과를 생성할 수 있습니다.</li>
+        <li>이번 구현에서 공통 실험 프레임과 초점 관리 규칙은 이미 분리되어 있으므로, 다음 서비스 유형은 시나리오 데이터와 화면 조합만 바꾸면 됩니다.</li>
+        <li>사전 계산 엔진은 과업 그래프만 추가하면 같은 형식으로 결과를 생성할 수 있습니다.</li>
         <li>docs 폴더의 단계 보고서에 현재 결정 사항과 후속 작업 항목을 기록해 두었습니다.</li>
       </ul>
       <div class="button-row">
@@ -1264,8 +1476,8 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
       <dl class="meta-list compact">
         <div><dt>실제 완료 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
         <div><dt>실제 키 입력</dt><dd>${actualTotals.totalKeyInputs}</dd></div>
-        <div><dt>실제 포커스 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
-        <div><dt>${escapeHtml(benchmarkOverall.label)} expected</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
+        <div><dt>실제 초점 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
+        <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
       </dl>
     </article>
   `;
@@ -1278,6 +1490,7 @@ function aggregateActualCondition(run) {
       totals.totalKeyInputs += result.totalKeyInputs;
       totals.focusChanges += result.focusChanges;
       totals.wrongSelections += result.wrongSelections;
+      totals.contextResets += result.contextResets ?? 0;
       totals.modalEscapes += result.modalEscapes;
       totals.bookingCancels += result.bookingCancels;
       return totals;
@@ -1287,6 +1500,7 @@ function aggregateActualCondition(run) {
       totalKeyInputs: 0,
       focusChanges: 0,
       wrongSelections: 0,
+      contextResets: 0,
       modalEscapes: 0,
       bookingCancels: 0,
     }
