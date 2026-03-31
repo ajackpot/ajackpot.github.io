@@ -1,0 +1,9 @@
+{
+  "name": "keyboard-cost-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "benchmark": "node scripts/run-benchmark.mjs",
+    "serve": "python -m http.server 4173"
+  }
+}
