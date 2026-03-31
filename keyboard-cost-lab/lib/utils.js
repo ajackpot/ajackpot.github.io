@@ -32,6 +32,20 @@ export function clsx(...tokens) {
   return tokens.filter(Boolean).join(' ');
 }
 
+
+export function formatServiceScreenButtonLabel(serviceLabel) {
+  return `${serviceLabel} 화면으로 이동`;
+}
+
+export function renderRunnerFooterHtml({ jumpLabel, closeLabel = '이 탭 닫기' } = {}) {
+  return `
+    <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
+      <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">${escapeHtml(jumpLabel)}</button>
+      <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">${escapeHtml(closeLabel)}</button>
+    </footer>
+  `;
+}
+
 export function toQueryString(params) {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

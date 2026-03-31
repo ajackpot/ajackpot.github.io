@@ -2,7 +2,7 @@ import { calendarScenario } from './data/calendar-scenario.js';
 import { calendarTasks } from './data/tasks-calendar.js';
 import { benchmarkResultsCalendar } from './data/benchmark-results-calendar.js';
 import { createTaskLogger } from './lib/logger.js';
-import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString } from './lib/utils.js';
+import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString, formatServiceScreenButtonLabel, renderRunnerFooterHtml } from './lib/utils.js';
 
 const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
@@ -68,13 +68,18 @@ const VARIANT_META = {
   variantB: {
     shortLabel: 'B',
     title: '비교안 B · 개선 구조',
-    subtitle: '결과로 바로 이동하고, 예약 시간표에 한 번만 들어가 이동하며, 대화상자 초점 복귀를 보장하는 구조',
+    subtitle: '예약 가능 시간으로 바로 이동하고, 예약 시간표에 한 번만 들어가 이동하며, 대화상자 초점 복귀를 보장하는 구조',
     improvements: [
-      '결과로 바로 이동할 수 있어 첫 진입 부담을 낮춥니다.',
+      '예약 가능 시간으로 바로 이동할 수 있어 첫 진입 부담을 낮춥니다.',
       '예약 시간표는 한 번만 들어간 뒤 방향키로 이동합니다.',
       '대화상자를 열면 첫 동작으로 이동하고 닫으면 방금 있던 예약 시간으로 돌아갑니다.',
     ],
   },
+};
+
+const RUNNER_LABELS = {
+  quickJump: '예약 가능 시간으로 바로 이동',
+  footerJump: '예약 가능 시간으로 이동',
 };
 
 const GLOSSARY_ENTRIES = [
@@ -1223,7 +1228,7 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? '<a class="skip-link" href="#results-heading">결과로 바로 이동</a>' : ''}
+      ${conditionId === 'variantB' ? `<a class="skip-link" href="#results-heading" data-action="jump-results" data-focus-id="runner-skip-results">${RUNNER_LABELS.quickJump}</a>` : ''}
       <main class="runner-main" aria-label="예약 캘린더 수행 화면">
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
         ${renderSimulatedHeader(conditionId)}
@@ -1233,10 +1238,7 @@ function renderRunnerPage() {
         ${conditionId === 'variantA' ? renderBookingPanel(run, false) : ''}
       </main>
       <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
-      <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
-        <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">결과로 바로 이동</button>
-        <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">이 탭 닫기</button>
-      </footer>
+      ${renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${run.modal ? renderModal(run.modal, run, task) : ''}
     </div>
   `;
@@ -1292,7 +1294,7 @@ function renderHomeServiceCard(service) {
       </ul>
       <div class="button-row">
         <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
-          ${service.available ? '이 서비스 화면으로 이동' : '준비 중'}
+          ${service.available ? formatServiceScreenButtonLabel(service.label) : '준비 중'}
         </button>
       </div>
     </article>
@@ -1668,11 +1670,9 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
 }
 
 function renderSimulatedHeader(conditionId) {
-  const hasVisibleSkip = conditionId === 'variantB';
   const links = ['처음 화면', '상담사 소개', '이용권', '이용 후기', '가격 안내', '자주 묻는 질문', '운영 정책', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
-      ${hasVisibleSkip ? '<a class="inline-link" href="#results-heading" data-action="jump-results" data-focus-id="header-skip-results">결과로 바로 이동</a>' : ''}
       <nav aria-label="서비스 보조 내비게이션">
         ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
@@ -1688,9 +1688,7 @@ function renderFilters(conditionId, run) {
       <div class="filters-header">
         <div>
           <h2 id="filters-heading">조건 선택</h2>
-          <p class="muted">비교안 A와 B는 같은 정보량을 유지하고, 이동 구조만 다르게 구성했습니다.</p>
         </div>
-        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-results-button">결과로 바로 이동</button>' : ''}
       </div>
       <div class="filters-grid">
         <label>

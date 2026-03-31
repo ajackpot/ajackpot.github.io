@@ -2,7 +2,7 @@ import { productScenario } from './data/product-scenario.js';
 import { productTasks } from './data/tasks-product.js';
 import { benchmarkResultsProduct } from './data/benchmark-results-product.js';
 import { createTaskLogger } from './lib/logger.js';
-import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString } from './lib/utils.js';
+import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString, renderRunnerFooterHtml } from './lib/utils.js';
 
 const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-product-session-id';
@@ -33,13 +33,18 @@ const VARIANT_META = {
   variantB: {
     shortLabel: 'B',
     title: '비교안 B · 개선 구조',
-    subtitle: '옵션 영역으로 바로 이동하고, 각 옵션 묶음에 한 번만 들어간 뒤 방향키로 고르며, 설명 보기와 장바구니를 현재 선택 가까이에 모은 구조',
+    subtitle: '옵션 선택으로 바로 이동하고, 각 옵션 묶음에 한 번만 들어간 뒤 방향키로 고르며, 설명 보기와 장바구니를 현재 선택 가까이에 모은 구조',
     improvements: [
-      '옵션 영역으로 바로 이동해 첫 진입 부담을 줄입니다.',
+      '옵션 선택으로 바로 이동해 첫 진입 부담을 줄입니다.',
       '색상, 크기, 추가 구성은 각 묶음에 한 번만 들어간 뒤 방향키로 고릅니다.',
       '설명 대화상자를 닫으면 방금 사용한 설명 보기 버튼으로 초점이 돌아옵니다.',
     ],
   },
+};
+
+const RUNNER_LABELS = {
+  quickJump: '옵션 선택으로 바로 이동',
+  footerJump: '옵션 선택으로 이동',
 };
 
 const GLOSSARY_ENTRIES = [
@@ -1067,7 +1072,7 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? '<a class="skip-link" href="#options-heading">옵션 영역으로 바로 이동</a>' : ''}
+      ${conditionId === 'variantB' ? `<a class="skip-link" href="#options-heading" data-action="jump-results" data-focus-id="runner-skip-options">${RUNNER_LABELS.quickJump}</a>` : ''}
       <main class="runner-main" aria-label="상품 옵션 선택 수행 화면">
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
         ${renderProductHeader(conditionId)}
@@ -1075,10 +1080,7 @@ function renderRunnerPage() {
         ${renderProductOptionSection(conditionId, run)}
       </main>
       <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
-      <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
-        <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">옵션 영역으로 바로 이동</button>
-        <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">이 탭 닫기</button>
-      </footer>
+      ${renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${run.modal ? renderProductModal(run.modal) : ''}
     </div>
   `;
@@ -1455,7 +1457,6 @@ function renderProductHeader(conditionId) {
   const links = ['기획전', '신상품', '베스트', '할인 쿠폰', '배송 안내', '교환 안내', '찜한 상품', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
-      ${conditionId === 'variantB' ? '<a class="inline-link" href="#options-heading" data-action="jump-results" data-focus-id="header-skip-options">옵션 영역으로 바로 이동</a>' : ''}
       <nav aria-label="상품 보조 내비게이션">
         ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="product-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
@@ -1496,7 +1497,6 @@ function renderVariantAOptionSection(run) {
       <div class="results-header">
         <div>
           <h2 id="options-heading" tabindex="-1">옵션 선택</h2>
-          <p class="muted">같은 상품 정보에 옵션 줄 단위의 순차 이동 구조를 적용했습니다.</p>
         </div>
       </div>
       <div class="option-selector-grid">
@@ -1573,7 +1573,6 @@ function renderVariantBOptionSection(run) {
       <div class="results-header">
         <div>
           <h2 id="options-heading" tabindex="-1">옵션 선택</h2>
-          <p class="muted">옵션 묶음에 한 번씩 들어간 뒤 방향키로 고르는 구조입니다.</p>
         </div>
         <span class="pill">현재 총액 ${formatPrice(calculateTotalPrice(run))}</span>
       </div>

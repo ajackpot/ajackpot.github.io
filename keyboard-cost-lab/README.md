@@ -4,6 +4,8 @@
 
 ## 현재 구현 범위
 
+- 서비스 카드 버튼 이름은 대상 서비스 이름을 포함해 서로 구분되도록 유지합니다.
+- 수행 탭의 서비스 콘텐츠에는 실험 설명 문구를 남기지 않고, 맨 아래 보조 영역만 별도로 둡니다.
 - 홈 화면에서 서비스 유형 선택
 - 예약 캘린더 서비스 화면 진입
 - 댓글 목록 서비스 화면 진입
@@ -67,4 +69,5 @@ python -m http.server 4173
 - `docs/step-04-separated-runner-and-timing-report.md`: 4단계 메인 창·수행 탭 분리와 계측 규칙 정비 보고서
 - `docs/step-05-comments-service-and-checklist-report.md`: 5단계 댓글 목록 서비스 추가와 점검표 정리 보고서
 - `docs/step-06-product-service-report.md`: 6단계 상품 옵션 선택 서비스 추가 보고서
+- `docs/step-07-labels-and-runner-cleanup-report.md`: 7단계 버튼 이름 구분 가능성 보완과 수행 탭 정리 보고서
 - `docs/manual-release-checklist.md`: 배포 전 수동 점검표

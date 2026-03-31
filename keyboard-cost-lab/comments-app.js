@@ -2,7 +2,7 @@ import { commentsScenario } from './data/comments-scenario.js';
 import { commentsTasks } from './data/tasks-comments.js';
 import { benchmarkResultsComments } from './data/benchmark-results-comments.js';
 import { createTaskLogger } from './lib/logger.js';
-import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString } from './lib/utils.js';
+import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString, renderRunnerFooterHtml } from './lib/utils.js';
 
 const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-comments-session-id';
@@ -40,6 +40,11 @@ const VARIANT_META = {
       '댓글 정보 대화상자를 닫으면 방금 사용한 작업 버튼으로 초점이 돌아옵니다.',
     ],
   },
+};
+
+const RUNNER_LABELS = {
+  quickJump: '댓글 목록으로 바로 이동',
+  footerJump: '댓글 목록으로 이동',
 };
 
 const GLOSSARY_ENTRIES = [
@@ -1107,7 +1112,7 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? '<a class="skip-link" href="#comments-heading">댓글 목록으로 바로 이동</a>' : ''}
+      ${conditionId === 'variantB' ? `<a class="skip-link" href="#comments-heading" data-action="jump-results" data-focus-id="runner-skip-comments">${RUNNER_LABELS.quickJump}</a>` : ''}
       <main class="runner-main" aria-label="댓글 목록 수행 화면">
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
         ${renderCommentsHeader(conditionId)}
@@ -1115,10 +1120,7 @@ function renderRunnerPage() {
         ${renderCommentsSection(conditionId, run, visibleComments)}
       </main>
       <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
-      <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
-        <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">결과로 바로 이동</button>
-        <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">이 탭 닫기</button>
-      </footer>
+      ${renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${run.modal ? renderCommentModal(run.modal, run) : ''}
     </div>
   `;
@@ -1496,7 +1498,6 @@ function renderCommentsHeader(conditionId) {
   const links = ['게시글 목록', '인기 글', '이용 안내', '새 글 쓰기', '알림', '내 댓글', '커뮤니티 규칙', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
-      ${conditionId === 'variantB' ? '<a class="inline-link" href="#comments-heading" data-action="jump-results" data-focus-id="header-skip-comments">댓글 목록으로 바로 이동</a>' : ''}
       <nav aria-label="커뮤니티 보조 내비게이션">
         ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="community-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
@@ -1510,9 +1511,7 @@ function renderCommentControls(conditionId, run) {
       <div class="filters-header">
         <div>
           <h2 id="filters-heading">정렬과 범위 선택</h2>
-          <p class="muted">댓글 내용은 같고 이동 구조만 다르게 구성했습니다.</p>
         </div>
-        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-comments-button">결과로 바로 이동</button>' : ''}
       </div>
       <div class="filters-grid">
         <label>
