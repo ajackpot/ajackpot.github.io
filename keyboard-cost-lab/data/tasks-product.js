@@ -1,0 +1,60 @@
+export const productTasks = [
+  {
+    id: 'task-1-cream-15-charger',
+    benchmarkTaskId: 'task1_cream_15_charger_add',
+    title: '과업 1. 크림색 15형과 충전기 주머니 포함 구성 담기',
+    goalSummary: '색상을 크림으로, 크기를 15형으로, 추가 구성을 충전기 주머니 포함으로 맞춘 뒤 장바구니에 담으십시오.',
+    instructions: [
+      '색상을 크림으로 바꾸십시오.',
+      '크기를 15형으로 바꾸십시오.',
+      '추가 구성을 충전기 주머니 포함으로 바꾸십시오.',
+      '선택이 맞으면 장바구니에 담으십시오.',
+    ],
+    requiredSelections: {
+      color: 'cream',
+      size: 'size15',
+      bundle: 'charger',
+      quantity: 1,
+    },
+    completion: 'addToCart',
+  },
+  {
+    id: 'task-2-size13-detail-charcoal-basic',
+    benchmarkTaskId: 'task2_size13_detail_charcoal_basic_add',
+    title: '과업 2. 13형 설명을 확인한 뒤 먹색 기본형 담기',
+    goalSummary: '13형 설명 보기를 열었다가 닫고, 먹색 13형 기본형으로 맞춘 뒤 장바구니에 담으십시오.',
+    instructions: [
+      '13형 설명 보기를 열었다가 닫으십시오.',
+      '색상은 먹색으로, 크기는 13형으로, 추가 구성은 기본형으로 맞추십시오.',
+      '선택이 맞으면 장바구니에 담으십시오.',
+    ],
+    requiredSelections: {
+      color: 'charcoal',
+      size: 'size13',
+      bundle: 'basic',
+      quantity: 1,
+    },
+    requiredDetailKey: 'size:size13',
+    completion: 'addToCart',
+  },
+  {
+    id: 'task-3-olive-15-document-2',
+    benchmarkTaskId: 'task3_olive_15_document_two_add',
+    title: '과업 3. 올리브 15형 문서 주머니 포함 구성 2개 담기',
+    goalSummary: '색상을 올리브로, 크기를 15형으로, 추가 구성을 문서 주머니 포함으로 맞추고 수량을 2개로 바꾼 뒤 장바구니에 담으십시오.',
+    instructions: [
+      '색상을 올리브로 바꾸십시오.',
+      '크기를 15형으로 바꾸고, 추가 구성을 문서 주머니 포함으로 바꾸십시오.',
+      '수량을 2개로 바꾸십시오.',
+      '필요하면 메인 창에서 과업 내용을 다시 확인한 뒤 수행 탭으로 돌아오십시오.',
+      '선택이 맞으면 장바구니에 담으십시오.',
+    ],
+    requiredSelections: {
+      color: 'olive',
+      size: 'size15',
+      bundle: 'document',
+      quantity: 2,
+    },
+    completion: 'addToCart',
+  },
+];

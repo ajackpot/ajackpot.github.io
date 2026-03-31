@@ -19,17 +19,33 @@ function categorizeKey(event) {
   return 'other';
 }
 
-export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) {
-  const startedAt = now();
+function targetMatchesIgnoreSelector(target, ignoreSelector) {
+  if (!ignoreSelector || !(target instanceof Element)) return false;
+  return Boolean(target.closest(ignoreSelector));
+}
+
+export function createTaskLogger({
+  sessionId,
+  conditionId,
+  taskId,
+  taskTitle,
+  startMode = 'immediate',
+  ignoreSelector = '',
+  onStart = null,
+}) {
+  const createdAt = now();
   const events = [];
   const metrics = {
     sessionId,
     conditionId,
     taskId,
     taskTitle,
-    startedAt,
+    createdAt,
+    startedAt: startMode === 'immediate' ? createdAt : null,
+    firstInteractionOffsetMs: null,
     completedAt: null,
     durationMs: null,
+    hiddenDurationMs: 0,
     keyCounts: {
       tab: 0,
       shiftTab: 0,
@@ -54,6 +70,7 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
 
   const visitedFocusIds = new Set();
   let disposed = false;
+  let hiddenStartedAt = null;
   let modalState = {
     open: false,
     containerSelector: null,
@@ -62,15 +79,41 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
   };
 
   function pushEvent(type, payload = {}) {
+    const baseAt = metrics.startedAt ?? createdAt;
     events.push({
       type,
-      at: Number((now() - startedAt).toFixed(1)),
+      at: Number((now() - baseAt).toFixed(1)),
       ...payload,
     });
   }
 
+  function getActiveDurationMs(referenceNow = now()) {
+    if (metrics.startedAt == null) return 0;
+    const pausedMs = hiddenStartedAt == null ? 0 : referenceNow - hiddenStartedAt;
+    return Math.max(0, Math.round(referenceNow - metrics.startedAt - metrics.hiddenDurationMs - pausedMs));
+  }
+
+  function ensureStarted(triggerType, eventTarget) {
+    if (disposed || metrics.startedAt != null) return false;
+    const startedAt = now();
+    metrics.startedAt = startedAt;
+    metrics.firstInteractionOffsetMs = Math.round(startedAt - createdAt);
+    pushEvent('measurement-start', {
+      triggerType,
+      focusId: getFocusableToken(eventTarget instanceof HTMLElement ? eventTarget : document.activeElement),
+    });
+    if (typeof onStart === 'function') {
+      onStart({
+        triggerType,
+        startedAt,
+      });
+    }
+    return true;
+  }
+
   function handleKeydown(event) {
-    if (disposed) return;
+    if (disposed || targetMatchesIgnoreSelector(event.target, ignoreSelector)) return;
+    ensureStarted('keydown', event.target);
     const category = categorizeKey(event);
     metrics.keyCounts[category] += 1;
     pushEvent('keydown', {
@@ -81,7 +124,8 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
   }
 
   function handleClick(event) {
-    if (disposed) return;
+    if (disposed || targetMatchesIgnoreSelector(event.target, ignoreSelector)) return;
+    ensureStarted('click', event.target);
     if (event.target instanceof HTMLElement) {
       metrics.pointerActivations += 1;
       pushEvent('click', { focusId: getFocusableToken(event.target) });
@@ -89,7 +133,7 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
   }
 
   function handleFocusIn(event) {
-    if (disposed) return;
+    if (disposed || metrics.startedAt == null || targetMatchesIgnoreSelector(event.target, ignoreSelector)) return;
     const token = getFocusableToken(event.target);
     metrics.focusChanges += 1;
     if (visitedFocusIds.has(token)) {
@@ -118,9 +162,26 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
     pushEvent('focusin', { focusId: token });
   }
 
+  function handleVisibilityChange() {
+    if (disposed || metrics.startedAt == null) return;
+    if (document.visibilityState === 'hidden' && hiddenStartedAt == null) {
+      hiddenStartedAt = now();
+      pushEvent('pause-hidden');
+      return;
+    }
+
+    if (document.visibilityState === 'visible' && hiddenStartedAt != null) {
+      const delta = now() - hiddenStartedAt;
+      metrics.hiddenDurationMs += Math.round(delta);
+      hiddenStartedAt = null;
+      pushEvent('resume-visible', { hiddenMs: Math.round(delta) });
+    }
+  }
+
   document.addEventListener('keydown', handleKeydown, true);
   document.addEventListener('click', handleClick, true);
   document.addEventListener('focusin', handleFocusIn, true);
+  document.addEventListener('visibilitychange', handleVisibilityChange, true);
 
   return {
     note(type, payload = {}) {
@@ -128,6 +189,9 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
       if (type === 'cancel-booking') metrics.bookingCancels += 1;
       if (type === 'focus-loss') metrics.focusLossCount += 1;
       if (type === 'context-reset') metrics.contextResets += 1;
+      if (metrics.startedAt == null && payload.startMeasurementOnNote) {
+        ensureStarted(type, document.activeElement);
+      }
       pushEvent(type, payload);
     },
     setModalState(nextState) {
@@ -140,6 +204,9 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
     getSnapshot() {
       return {
         ...metrics,
+        durationMs: getActiveDurationMs(),
+        durationSeconds: Number((getActiveDurationMs() / 1000).toFixed(1)),
+        hiddenDurationSeconds: Number((metrics.hiddenDurationMs / 1000).toFixed(1)),
         backtrackInputs: metrics.keyCounts.shiftTab + metrics.keyCounts.home + metrics.keyCounts.end,
         totalKeyInputs: Object.values(metrics.keyCounts).reduce((sum, value) => sum + value, 0),
       };
@@ -147,14 +214,20 @@ export function createTaskLogger({ sessionId, conditionId, taskId, taskTitle }) 
     finish(extra = {}) {
       if (disposed) return null;
       disposed = true;
+      if (hiddenStartedAt != null) {
+        metrics.hiddenDurationMs += Math.round(now() - hiddenStartedAt);
+        hiddenStartedAt = null;
+      }
       document.removeEventListener('keydown', handleKeydown, true);
       document.removeEventListener('click', handleClick, true);
       document.removeEventListener('focusin', handleFocusIn, true);
+      document.removeEventListener('visibilitychange', handleVisibilityChange, true);
       metrics.completedAt = now();
-      metrics.durationMs = Math.round(metrics.completedAt - startedAt);
+      metrics.durationMs = getActiveDurationMs(metrics.completedAt);
       const summary = {
         ...metrics,
         durationSeconds: Number((metrics.durationMs / 1000).toFixed(1)),
+        hiddenDurationSeconds: Number((metrics.hiddenDurationMs / 1000).toFixed(1)),
         backtrackInputs: metrics.keyCounts.shiftTab + metrics.keyCounts.home + metrics.keyCounts.end,
         totalKeyInputs: Object.values(metrics.keyCounts).reduce((sum, value) => sum + value, 0),
         success: extra.success ?? false,

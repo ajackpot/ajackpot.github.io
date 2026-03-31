@@ -1,0 +1,47 @@
+export const commentsTasks = [
+  {
+    id: 'task-1-newest-review-open-replies',
+    benchmarkTaskId: 'task1_newest_review_open_replies',
+    title: '과업 1. 최신 후기에서 민지 댓글 답글 열기',
+    goalSummary: '정렬 기준을 최신순으로 바꾸고, 후기 댓글만 보이게 한 뒤 민지 댓글의 답글 2개 보기를 여십시오.',
+    instructions: [
+      '정렬 기준을 최신순으로 바꾸십시오.',
+      '댓글 범위를 후기로 바꾸십시오.',
+      '민지 댓글을 찾아 답글 2개 보기를 열면 과업이 끝납니다.',
+    ],
+    targetCommentId: 'comment-minji',
+    completion: 'expandReplies',
+    requiredSort: 'newest',
+    requiredCategory: 'review',
+  },
+  {
+    id: 'task-2-popular-admin-detail-helpful',
+    benchmarkTaskId: 'task2_popular_admin_detail_helpful',
+    title: '과업 2. 운영자 안내 댓글 정보 보기 후 도움이 돼요',
+    goalSummary: '도움이 많은 순으로 바꾸고, 운영자 안내 댓글의 댓글 정보 보기를 열었다가 닫은 뒤 도움이 돼요를 누르십시오.',
+    instructions: [
+      '정렬 기준을 도움이 많은 순으로 바꾸십시오.',
+      '운영자 안내 댓글의 댓글 정보 보기를 열었다가 닫으십시오.',
+      '같은 댓글에 도움이 돼요를 누르면 과업이 끝납니다.',
+    ],
+    targetCommentId: 'comment-admin',
+    completion: 'helpful',
+    requiredSort: 'popular',
+    requiredCategory: 'all',
+    requiresDetailVisit: true,
+  },
+  {
+    id: 'task-3-question-open-juno-replies',
+    benchmarkTaskId: 'task3_question_open_juno_replies',
+    title: '과업 3. 질문 댓글에서 준호 댓글 답글 열기',
+    goalSummary: '질문 댓글만 보이게 바꾸고, 준호 댓글의 답글 3개 보기를 여십시오.',
+    instructions: [
+      '댓글 범위를 질문으로 바꾸십시오.',
+      '준호 댓글을 찾아 답글 3개 보기를 여십시오.',
+      '필요하면 메인 창에서 과업 내용을 다시 확인한 뒤 수행 탭으로 돌아오십시오.',
+    ],
+    targetCommentId: 'comment-juno',
+    completion: 'expandReplies',
+    requiredCategory: 'question',
+  },
+];

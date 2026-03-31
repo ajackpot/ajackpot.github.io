@@ -1,24 +1,16 @@
-import { calendarScenario } from './data/calendar-scenario.js';
-import { calendarTasks } from './data/tasks-calendar.js';
-import { benchmarkResultsCalendar } from './data/benchmark-results-calendar.js';
+import { commentsScenario } from './data/comments-scenario.js';
+import { commentsTasks } from './data/tasks-comments.js';
+import { benchmarkResultsComments } from './data/benchmark-results-comments.js';
 import { createTaskLogger } from './lib/logger.js';
 import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString } from './lib/utils.js';
 
 const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
-const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-launch';
-const CHANNEL_PREFIX = 'keyboard-cost-lab-channel';
-const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-channel-fallback';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-comments-session-id';
+const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-comments-launch';
+const CHANNEL_PREFIX = 'keyboard-cost-lab-comments-channel';
+const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-comments-channel-fallback';
 const SURVEY_CONFIG = {
   baseUrl: '',
-};
-
-const DAY_ORDER = {
-  mon: 0,
-  tue: 1,
-  wed: 2,
-  thu: 3,
-  fri: 4,
 };
 
 const MEASUREMENT_RULES = [
@@ -27,52 +19,25 @@ const MEASUREMENT_RULES = [
   '수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다.',
 ];
 
-const SERVICE_TYPES = [
-  {
-    id: 'calendar',
-    label: '예약 캘린더',
-    summary: '상담 예약 화면에서 조건을 맞추고 원하는 예약 시간을 찾는 과업을 수행합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-  {
-    id: 'comments',
-    label: '댓글 목록',
-    summary: '댓글 정렬·답글 보기·댓글 정보 확인 과업으로 탐색 부담을 비교합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-  {
-    id: 'product',
-    label: '상품 옵션 선택',
-    summary: '상품 상세 화면에서 색상, 크기, 추가 구성을 맞추고 장바구니에 담는 과업을 수행합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-];
-
 const VARIANT_META = {
   variantA: {
     shortLabel: 'A',
     title: '비교안 A · 조작 부담이 큰 구조',
-    subtitle: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간을 다시 찾게 되는 구조',
+    subtitle: '댓글마다 여러 링크와 버튼을 지나야 하고, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾아야 하는 구조',
     improvements: [
-      '상단 링크와 보조 링크를 모두 지나야 결과를 만날 수 있습니다.',
-      '예약 시간마다 선택과 시간 안내 보기 버튼이 나뉘어 있어 순서대로 많이 이동하게 됩니다.',
-      '대화상자를 닫거나 확정하면 방금 보던 예약 시간으로 돌아가지 않고 결과 제목 근처부터 다시 찾아야 합니다.',
+      '상단 링크와 정렬·범위 선택 뒤에 댓글 목록이 나옵니다.',
+      '댓글마다 작성자, 작성 시각, 도움이 돼요, 답글 보기, 댓글 정보 보기 등이 따로 나뉘어 있어 순차 이동이 길어집니다.',
+      '댓글 정보 대화상자를 닫으면 방금 보던 댓글 작업으로 돌아가지 않고 댓글 목록 제목 근처부터 다시 찾아야 합니다.',
     ],
   },
   variantB: {
     shortLabel: 'B',
     title: '비교안 B · 개선 구조',
-    subtitle: '결과로 바로 이동하고, 예약 시간표에 한 번만 들어가 이동하며, 대화상자 초점 복귀를 보장하는 구조',
+    subtitle: '댓글 목록으로 바로 이동하고, 댓글을 하나의 선택 항목으로 고른 뒤, 댓글 작업을 한곳에서 이어서 수행하는 구조',
     improvements: [
-      '결과로 바로 이동할 수 있어 첫 진입 부담을 낮춥니다.',
-      '예약 시간표는 한 번만 들어간 뒤 방향키로 이동합니다.',
-      '대화상자를 열면 첫 동작으로 이동하고 닫으면 방금 있던 예약 시간으로 돌아갑니다.',
+      '댓글 목록으로 바로 이동해 첫 진입 부담을 줄입니다.',
+      '댓글은 한 번만 들어간 뒤 방향키로 고르고, 댓글 작업은 한곳에 모아 둡니다.',
+      '댓글 정보 대화상자를 닫으면 방금 사용한 작업 버튼으로 초점이 돌아옵니다.',
     ],
   },
 };
@@ -80,7 +45,7 @@ const VARIANT_META = {
 const GLOSSARY_ENTRIES = [
   {
     term: '비교안 A/B',
-    description: '같은 과업을 두 가지 화면 구조로 비교하기 위한 화면입니다. 내용은 같고 이동 방식만 다릅니다.',
+    description: '같은 과업을 두 가지 다른 화면 구조로 비교하기 위한 화면입니다. 댓글 내용은 같고 이동 방식만 다릅니다.',
   },
   {
     term: '사전 계산 기준',
@@ -92,11 +57,11 @@ const GLOSSARY_ENTRIES = [
   },
   {
     term: '대화상자',
-    description: '예약 확인이나 취소 확인을 위해 잠깐 열리는 작은 창입니다.',
+    description: '댓글 정보 확인처럼 잠깐 열리는 작은 창입니다.',
   },
   {
-    term: '결과 파일(JSON)',
-    description: '실험 기록을 텍스트 형태로 저장하는 파일입니다. JSON은 파일 형식 이름입니다.',
+    term: '답글',
+    description: '기존 댓글 아래에 이어지는 댓글입니다. 댓글 아래쪽에 묶여서 표시됩니다.',
   },
 ];
 
@@ -206,8 +171,7 @@ function createMainState() {
     order,
     currentConditionIndex: 0,
     currentTaskIndex: 0,
-    selectedServiceId: null,
-    view: 'home',
+    view: 'serviceIntro',
     benchmarkProfileFocus: 'keyboard',
     focusRequest: null,
     activeLaunch: null,
@@ -224,7 +188,6 @@ function createRunnerState() {
   const conditionId = params.get('condition') || 'variantA';
   const taskIndex = Number.parseInt(params.get('taskIndex') || '0', 10);
   const launchId = params.get('launchId') || '';
-  const serviceId = params.get('service') || 'calendar';
   const launchPayload = launchId ? readLaunchSnapshot(launchId) : null;
 
   if (!launchPayload) {
@@ -233,7 +196,6 @@ function createRunnerState() {
       conditionId,
       taskIndex,
       launchId,
-      serviceId,
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
@@ -242,14 +204,12 @@ function createRunnerState() {
   }
 
   const runtime = hydrateConditionRuntime(conditionId, launchPayload.runSnapshot);
-  const task = calendarTasks[taskIndex] ?? calendarTasks[0];
+  const task = commentsTasks[taskIndex] ?? commentsTasks[0];
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.cancelPerformedThisTask = false;
-  runtime.liveStatus = '조건을 적용한 뒤 원하는 예약 시간을 여십시오.';
-  const visibleAvailableSlots = getAvailableVisibleSlots(runtime);
-  runtime.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === runtime.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
+  runtime.liveStatus = '정렬 기준과 댓글 범위를 맞춘 뒤 원하는 댓글을 찾으십시오.';
+  ensureCurrentCommentVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
     conditionId,
@@ -273,7 +233,6 @@ function createRunnerState() {
     conditionId,
     taskIndex,
     launchId,
-    serviceId,
     focusRequest: null,
     completed: false,
     run: runtime,
@@ -284,34 +243,28 @@ function createRunnerState() {
 function createConditionRuntime(variantId) {
   return {
     variantId,
-    filters: defaultFilters(),
-    filtersDraft: defaultFilters(),
-    booking: null,
+    sort: 'popular',
+    sortDraft: 'popular',
+    category: 'all',
+    categoryDraft: 'all',
+    helpfulByCommentId: {},
+    expandedCommentId: null,
+    currentCommentId: commentsScenario.comments[0]?.id ?? null,
+    detailVisitedThisTask: {},
     modal: null,
-    liveStatus: '필터를 적용하면 결과 수가 갱신됩니다.',
+    liveStatus: '정렬 기준을 바꾸면 댓글 목록이 갱신됩니다.',
     taskResults: [],
     currentTaskLogger: null,
-    currentGridSlotId: null,
-    cancelPerformedThisTask: false,
     isApplying: false,
     isWorking: false,
     lastTaskCompletionNote: '',
   };
 }
 
-function defaultFilters() {
-  return {
-    serviceType: 'counseling',
-    mode: 'all',
-    provider: 'all',
-    duration: 'all',
-  };
-}
-
 function getOrCreateSessionId() {
   const stored = window.localStorage.getItem(STORAGE_KEY_SESSION);
   if (stored) return stored;
-  const generated = uniqueId('session');
+  const generated = uniqueId('comments-session');
   window.localStorage.setItem(STORAGE_KEY_SESSION, generated);
   return generated;
 }
@@ -328,33 +281,37 @@ function getCurrentRun() {
 }
 
 function getCurrentTask() {
-  if (APP_MODE === 'runner') return calendarTasks[state.taskIndex] ?? null;
-  return calendarTasks[state.currentTaskIndex] ?? null;
+  if (APP_MODE === 'runner') return commentsTasks[state.taskIndex] ?? null;
+  return commentsTasks[state.currentTaskIndex] ?? null;
 }
 
 function hydrateConditionRuntime(variantId, snapshot = {}) {
   const runtime = createConditionRuntime(variantId);
-  runtime.filters = normalizeFilters(snapshot.filters ?? runtime.filters);
-  runtime.filtersDraft = {
-    ...runtime.filters,
-    ...(snapshot.filtersDraft ?? runtime.filtersDraft),
-  };
-  runtime.booking = snapshot.booking ? deepClone(snapshot.booking) : null;
-  runtime.currentGridSlotId = snapshot.currentGridSlotId ?? null;
-  runtime.cancelPerformedThisTask = Boolean(snapshot.cancelPerformedThisTask);
+  runtime.sort = snapshot.sort ?? runtime.sort;
+  runtime.sortDraft = snapshot.sortDraft ?? runtime.sortDraft;
+  runtime.category = snapshot.category ?? runtime.category;
+  runtime.categoryDraft = snapshot.categoryDraft ?? runtime.categoryDraft;
+  runtime.helpfulByCommentId = deepClone(snapshot.helpfulByCommentId ?? runtime.helpfulByCommentId);
+  runtime.expandedCommentId = snapshot.expandedCommentId ?? null;
+  runtime.currentCommentId = snapshot.currentCommentId ?? runtime.currentCommentId;
+  runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
+  ensureCurrentCommentVisible(runtime);
   return runtime;
 }
 
 function serializeRuntimeSnapshot(run) {
   return {
     variantId: run.variantId,
-    filters: deepClone(run.filters),
-    filtersDraft: deepClone(run.filtersDraft),
-    booking: run.booking ? deepClone(run.booking) : null,
-    currentGridSlotId: run.currentGridSlotId,
-    cancelPerformedThisTask: run.cancelPerformedThisTask,
+    sort: run.sort,
+    sortDraft: run.sortDraft,
+    category: run.category,
+    categoryDraft: run.categoryDraft,
+    helpfulByCommentId: deepClone(run.helpfulByCommentId),
+    expandedCommentId: run.expandedCommentId,
+    currentCommentId: run.currentCommentId,
+    detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     liveStatus: run.liveStatus,
   };
@@ -362,11 +319,14 @@ function serializeRuntimeSnapshot(run) {
 
 function applyRuntimeSnapshot(targetRun, snapshot) {
   const hydrated = hydrateConditionRuntime(targetRun.variantId, snapshot);
-  targetRun.filters = hydrated.filters;
-  targetRun.filtersDraft = hydrated.filtersDraft;
-  targetRun.booking = hydrated.booking;
-  targetRun.currentGridSlotId = hydrated.currentGridSlotId;
-  targetRun.cancelPerformedThisTask = hydrated.cancelPerformedThisTask;
+  targetRun.sort = hydrated.sort;
+  targetRun.sortDraft = hydrated.sortDraft;
+  targetRun.category = hydrated.category;
+  targetRun.categoryDraft = hydrated.categoryDraft;
+  targetRun.helpfulByCommentId = hydrated.helpfulByCommentId;
+  targetRun.expandedCommentId = hydrated.expandedCommentId;
+  targetRun.currentCommentId = hydrated.currentCommentId;
+  targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -382,43 +342,12 @@ function resetExperimentState() {
   state.runs.variantB = createConditionRuntime('variantB');
 }
 
-function getSelectedService() {
-  if (APP_MODE === 'runner') return SERVICE_TYPES.find((service) => service.id === state.serviceId) ?? null;
-  return SERVICE_TYPES.find((service) => service.id === state.selectedServiceId) ?? null;
-}
-
-function openService(serviceId) {
-  if (APP_MODE === 'runner') return;
-  const service = SERVICE_TYPES.find((item) => item.id === serviceId);
-  if (!service || !service.available) return;
-  if (service.id === 'comments') {
-    window.location.href = './comments.html';
-    return;
-  }
-  if (service.id === 'product') {
-    window.location.href = './product.html';
-    return;
-  }
-  state.selectedServiceId = service.id;
-  resetExperimentState();
-  state.view = 'serviceIntro';
-  requestFocus('#service-heading');
-  render();
-}
-
 function goHome() {
-  if (APP_MODE === 'runner') return;
-  state.selectedServiceId = null;
-  resetExperimentState();
-  state.view = 'home';
-  requestFocus('#page-title');
-  render();
+  window.location.href = './index.html';
 }
 
 function startExperiment() {
   if (APP_MODE === 'runner') return;
-  const selectedService = getSelectedService();
-  if (!selectedService || !selectedService.available) return;
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.runs.variantA = createConditionRuntime('variantA');
@@ -432,8 +361,8 @@ function startExperiment() {
 function restartExperiment() {
   if (APP_MODE === 'runner') return;
   resetExperimentState();
-  state.view = state.selectedServiceId ? 'serviceIntro' : 'home';
-  requestFocus(state.selectedServiceId ? '#service-heading' : '#page-title');
+  state.view = 'serviceIntro';
+  requestFocus('#service-heading');
   render();
 }
 
@@ -445,16 +374,15 @@ function prepareCurrentTaskForMain() {
   run.modal = null;
   run.isApplying = false;
   run.isWorking = false;
-  run.cancelPerformedThisTask = false;
+  run.detailVisitedThisTask = {};
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
-  const visibleAvailableSlots = getAvailableVisibleSlots(run);
-  run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
+  ensureCurrentCommentVisible(run);
   state.activeLaunch = null;
 }
 
 function continueAfterTask() {
   if (APP_MODE === 'runner') return;
-  if (state.currentTaskIndex < calendarTasks.length - 1) {
+  if (state.currentTaskIndex < commentsTasks.length - 1) {
     state.currentTaskIndex += 1;
     prepareCurrentTaskForMain();
     state.view = 'taskPrep';
@@ -509,12 +437,11 @@ function clearLaunchSnapshot(launchId) {
   window.localStorage.removeItem(buildLaunchStorageKey(launchId));
 }
 
-function buildRunnerUrl({ launchId, conditionId, taskIndex, serviceId, sessionId }) {
+function buildRunnerUrl({ launchId, conditionId, taskIndex, sessionId }) {
   const url = new URL(window.location.href);
   url.search = '';
   url.searchParams.set('mode', 'runner');
   url.searchParams.set('sessionId', sessionId);
-  url.searchParams.set('service', serviceId);
   url.searchParams.set('condition', conditionId);
   url.searchParams.set('taskIndex', String(taskIndex));
   url.searchParams.set('launchId', launchId);
@@ -528,11 +455,10 @@ function launchRunnerTask() {
   const task = getCurrentTask();
   if (!conditionId || !run || !task) return;
 
-  const launchId = uniqueId('launch');
+  const launchId = uniqueId('comments-launch');
   const payload = {
     launchId,
     sessionId: state.sessionId,
-    serviceId: state.selectedServiceId,
     conditionId,
     taskIndex: state.currentTaskIndex,
     taskId: task.id,
@@ -551,7 +477,6 @@ function launchRunnerTask() {
       launchId,
       conditionId,
       taskIndex: state.currentTaskIndex,
-      serviceId: state.selectedServiceId,
       sessionId: state.sessionId,
     }),
     '_blank'
@@ -580,9 +505,9 @@ function acceptRunnerTaskCompletion(message) {
   run.taskResults.push({
     ...message.summary,
     benchmarkTaskId: task.benchmarkTaskId,
-    targetSlotId: task.targetSlotId,
-    bookingAfterTask: deepClone(run.booking),
-    cancellationPerformed: run.cancelPerformedThisTask,
+    targetCommentId: task.targetCommentId,
+    expandedCommentIdAfterTask: run.expandedCommentId,
+    helpfulByCommentIdAfterTask: deepClone(run.helpfulByCommentId),
     conditionId,
   });
 
@@ -644,68 +569,66 @@ function handleRootClick(event) {
   const action = actionTarget.dataset.action;
 
   if (APP_MODE === 'main') {
-    if (action === 'open-service') {
-      event.preventDefault();
-      openService(actionTarget.dataset.serviceId);
-      return;
-    }
-
     if (action === 'go-home') {
       event.preventDefault();
       goHome();
       return;
     }
-
     if (action === 'start-experiment') {
       event.preventDefault();
       startExperiment();
       return;
     }
-
     if (action === 'launch-runner') {
       event.preventDefault();
       launchRunnerTask();
       return;
     }
-
     if (action === 'restart-experiment') {
       event.preventDefault();
       restartExperiment();
       return;
     }
-
     if (action === 'continue-after-task') {
       event.preventDefault();
       continueAfterTask();
       return;
     }
-
     if (action === 'continue-after-condition') {
       event.preventDefault();
       continueAfterCondition();
       return;
     }
-
     return;
   }
 
-  if (action === 'apply-filters') {
+  if (action === 'apply-comment-filters') {
     event.preventDefault();
-    applyFilters();
+    applyCommentFilters();
     return;
   }
 
-  if (action === 'slot-open') {
+  if (action === 'select-comment') {
     event.preventDefault();
-    const slotId = actionTarget.dataset.slotId;
-    const mode = actionTarget.dataset.dialogMode || 'select';
-    openSlotModal(slotId, actionTarget.dataset.focusId, mode);
+    selectComment(actionTarget.dataset.commentId);
     return;
   }
 
-  if (action === 'open-cancel-modal') {
+  if (action === 'toggle-replies') {
     event.preventDefault();
-    openCancelModal(actionTarget.dataset.focusId);
+    toggleReplies(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'open-comment-detail') {
+    event.preventDefault();
+    openCommentDetail(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'mark-helpful') {
+    event.preventDefault();
+    markHelpful(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
     return;
   }
 
@@ -715,21 +638,9 @@ function handleRootClick(event) {
     return;
   }
 
-  if (action === 'dialog-confirm-slot') {
-    event.preventDefault();
-    confirmSlotFromModal();
-    return;
-  }
-
-  if (action === 'dialog-confirm-cancel') {
-    event.preventDefault();
-    confirmCancelFromModal();
-    return;
-  }
-
   if (action === 'jump-results') {
     event.preventDefault();
-    focusElementNow('#results-heading');
+    focusElementNow('#comments-heading');
     return;
   }
 
@@ -753,9 +664,8 @@ function handleRootChange(event) {
 
   const run = getCurrentRun();
   if (!run) return;
-  if (element.name in run.filtersDraft) {
-    run.filtersDraft[element.name] = element.value;
-  }
+  if (element.name === 'sort') run.sortDraft = element.value;
+  if (element.name === 'category') run.categoryDraft = element.value;
 }
 
 function handleRootKeydown(event) {
@@ -778,9 +688,9 @@ function handleRootKeydown(event) {
   }
 
   if (state.conditionId === 'variantB') {
-    const slotButton = event.target.closest('[data-grid-slot="true"]');
-    if (slotButton instanceof HTMLElement) {
-      handleGridNavigation(event, slotButton);
+    const commentOption = event.target.closest('[data-comment-option="true"]');
+    if (commentOption instanceof HTMLElement) {
+      handleCommentOptionNavigation(event, commentOption);
     }
   }
 }
@@ -811,86 +721,143 @@ function applyPendingFocus() {
   });
 }
 
-function normalizeFilters(filtersDraft) {
-  return {
-    serviceType: filtersDraft.serviceType,
-    mode: filtersDraft.mode,
-    provider: filtersDraft.provider,
-    duration: filtersDraft.duration === 'all' ? 'all' : Number(filtersDraft.duration),
-  };
+function getCommentById(commentId) {
+  return commentsScenario.comments.find((comment) => comment.id === commentId) ?? null;
 }
 
-function applyFilters() {
+function getSortLabel(sortId) {
+  return commentsScenario.sortOptions.find((option) => option.id === sortId)?.label ?? sortId;
+}
+
+function getCategoryLabel(categoryId) {
+  return commentsScenario.categoryOptions.find((option) => option.id === categoryId)?.label ?? categoryId;
+}
+
+function getEffectiveHelpfulCount(comment, run) {
+  return comment.helpfulCount + (run.helpfulByCommentId[comment.id] ? 1 : 0);
+}
+
+function getVisibleComments(run) {
+  const filtered = commentsScenario.comments.filter((comment) => {
+    if (run.category === 'all') return true;
+    return comment.category === run.category;
+  });
+
+  const sorted = filtered.slice().sort((left, right) => {
+    if (run.sort === 'newest') {
+      return right.createdAt.localeCompare(left.createdAt);
+    }
+    if (run.sort === 'oldest') {
+      return left.createdAt.localeCompare(right.createdAt);
+    }
+    const helpfulGap = getEffectiveHelpfulCount(right, run) - getEffectiveHelpfulCount(left, run);
+    if (helpfulGap !== 0) return helpfulGap;
+    return right.createdAt.localeCompare(left.createdAt);
+  });
+
+  return sorted;
+}
+
+function ensureCurrentCommentVisible(run) {
+  const visibleComments = getVisibleComments(run);
+  run.currentCommentId = visibleComments.find((comment) => comment.id === run.currentCommentId)?.id ?? visibleComments[0]?.id ?? null;
+}
+
+function getSelectedVisibleComment(run) {
+  ensureCurrentCommentVisible(run);
+  return getCommentById(run.currentCommentId);
+}
+
+function formatCommentLabel(comment, run) {
+  return `${comment.author} · ${comment.badge} · ${comment.timeLabel} · 도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}`;
+}
+
+function formatRunStateSummary(run) {
+  const expandedComment = run.expandedCommentId ? getCommentById(run.expandedCommentId) : null;
+  const helpfulComments = Object.keys(run.helpfulByCommentId)
+    .filter((commentId) => run.helpfulByCommentId[commentId])
+    .map((commentId) => getCommentById(commentId)?.author)
+    .filter(Boolean);
+  return [
+    `정렬 기준 ${getSortLabel(run.sort)}`,
+    `댓글 범위 ${getCategoryLabel(run.category)}`,
+    expandedComment ? `열린 답글 ${expandedComment.author} 댓글` : '열린 답글 없음',
+    helpfulComments.length > 0 ? `도움이 돼요 표시 ${helpfulComments.join(', ')}` : '도움이 돼요 표시 없음',
+  ].join(' / ');
+}
+
+function buildCommentSelector(commentId) {
+  return `[data-comment-option="true"][data-comment-id="${commentId}"]`;
+}
+
+function selectComment(commentId) {
+  const run = getCurrentRun();
+  if (!run || !commentId) return;
+  run.currentCommentId = commentId;
+  requestFocus(buildCommentSelector(commentId));
+  render();
+}
+
+function applyCommentFilters() {
   const run = getCurrentRun();
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '조건을 적용하는 중입니다…';
+  run.liveStatus = '정렬 기준과 댓글 범위를 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
     run.isApplying = false;
-    run.filters = normalizeFilters(run.filtersDraft);
-    const visibleAvailableSlots = getAvailableVisibleSlots(run);
-    run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
-    const resultCount = visibleAvailableSlots.length;
-    run.liveStatus = `예약 가능한 시간이 ${resultCount}개 표시되었습니다.`;
+    run.sort = run.sortDraft;
+    run.category = run.categoryDraft;
+    ensureCurrentCommentVisible(run);
+    const visibleComments = getVisibleComments(run);
+    run.liveStatus = `현재 ${visibleComments.length}개의 댓글이 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
-      requestFocus('#results-heading');
+      requestFocus('#comments-heading');
     } else {
-      requestFocus('[data-focus-id="apply-criteria"]');
+      requestFocus('[data-focus-id="apply-comment-filters"]');
     }
     render();
-  }, 320);
+  }, 280);
 }
 
-function openSlotModal(slotId, triggerFocusId, dialogMode = 'select') {
+function noteWrongCommentAction(commentId, actionType) {
+  const run = getCurrentRun();
+  const task = getCurrentTask();
+  if (!run || !task || !commentId || commentId === task.targetCommentId) return;
+  const relevantActions = {
+    expandReplies: ['toggle-replies'],
+    helpful: ['open-detail', 'mark-helpful'],
+  };
+  if (!relevantActions[task.completion]?.includes(actionType)) return;
+  run.currentTaskLogger?.note('wrong-selection', {
+    actionType,
+    commentId,
+    targetCommentId: task.targetCommentId,
+  });
+}
+
+function openCommentDetail(commentId, triggerFocusId) {
   const run = getCurrentRun();
   if (!run || run.isWorking) return;
-  const slot = getSlotById(slotId);
-  if (!slot) return;
-
+  const comment = getCommentById(commentId);
+  if (!comment) return;
+  noteWrongCommentAction(commentId, 'open-detail');
   run.modal = {
-    kind: 'slot',
-    slotId,
+    kind: 'comment-detail',
+    commentId,
     triggerFocusId,
-    dialogMode,
   };
-  run.currentTaskLogger?.note('open-slot', {
-    slotId,
-    dialogMode,
-  });
+  run.currentTaskLogger?.note('open-comment-detail', { commentId });
   run.currentTaskLogger?.setModalState({
     open: true,
     containerSelector: '[data-modal-dialog]',
     triggerFocusId,
   });
-
   if (state.conditionId === 'variantB') {
-    requestFocus('[data-dialog-primary]');
-  } else {
-    requestFocus('#dialog-title');
-  }
-  render();
-}
-
-function openCancelModal(triggerFocusId) {
-  const run = getCurrentRun();
-  if (!run || !run.booking || run.isWorking) return;
-  run.modal = {
-    kind: 'cancel-booking',
-    triggerFocusId,
-  };
-  run.currentTaskLogger?.note('open-cancel-dialog');
-  run.currentTaskLogger?.setModalState({
-    open: true,
-    containerSelector: '[data-modal-dialog]',
-    triggerFocusId,
-  });
-
-  if (state.conditionId === 'variantB') {
-    requestFocus('[data-dialog-primary]');
+    requestFocus('[data-dialog-close]');
   } else {
     requestFocus('#dialog-title');
   }
@@ -902,6 +869,12 @@ function closeModal() {
   if (!run || !run.modal) return;
   const closingModal = run.modal;
   run.modal = null;
+  if (closingModal.kind === 'comment-detail' && closingModal.commentId) {
+    run.detailVisitedThisTask = {
+      ...run.detailVisitedThisTask,
+      [closingModal.commentId]: true,
+    };
+  }
   run.currentTaskLogger?.setModalState({
     open: false,
     containerSelector: null,
@@ -912,113 +885,90 @@ function closeModal() {
   if (state.conditionId === 'variantB' && closingModal.triggerFocusId) {
     requestFocus(`[data-focus-id="${closingModal.triggerFocusId}"]`);
   } else {
-    run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-results-heading' });
-    requestFocus('#results-heading');
+    run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-comments-heading' });
+    requestFocus('#comments-heading');
   }
   render();
 }
 
-function confirmSlotFromModal() {
+function toggleReplies(commentId, triggerFocusId) {
   const run = getCurrentRun();
   const task = getCurrentTask();
-  if (!run || !run.modal || run.modal.kind !== 'slot' || !task || run.isWorking) return;
+  if (!run || !task || run.isWorking) return;
+  const comment = getCommentById(commentId);
+  if (!comment) return;
+  noteWrongCommentAction(commentId, 'toggle-replies');
 
-  const closingModal = { ...run.modal };
-  const slot = getSlotById(closingModal.slotId);
-  if (!slot || !slot.available) {
-    closeModal();
+  const expanding = run.expandedCommentId !== commentId;
+  run.expandedCommentId = expanding ? commentId : null;
+  run.currentTaskLogger?.note('toggle-replies', {
+    commentId,
+    expanded: expanding,
+  });
+
+  if (isTaskSatisfied(task, run)) {
+    finishRunnerTask('target-replies-opened');
     return;
   }
 
-  run.isWorking = true;
+  run.liveStatus = expanding
+    ? `${comment.author} 댓글의 답글 ${comment.replyCount}개를 펼쳤습니다.`
+    : `${comment.author} 댓글의 답글을 접었습니다.`;
+
+  if (triggerFocusId) {
+    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  }
   render();
-
-  window.setTimeout(() => {
-    const wasCorrect = slot.id === task.targetSlotId;
-    if (!wasCorrect) {
-      run.currentTaskLogger?.note('wrong-selection', {
-        pickedSlotId: slot.id,
-        targetSlotId: task.targetSlotId,
-      });
-    }
-
-    run.booking = {
-      slotId: slot.id,
-      taskId: task.id,
-      at: new Date().toISOString(),
-    };
-    run.isWorking = false;
-    run.modal = null;
-    run.currentTaskLogger?.note('booking-confirmed', {
-      slotId: slot.id,
-      correct: wasCorrect,
-    });
-    run.currentTaskLogger?.setModalState({
-      open: false,
-      containerSelector: null,
-      triggerFocusId: closingModal.triggerFocusId ?? null,
-      closedAt: performance.now(),
-    });
-
-    if (isTaskSatisfied(task, run)) {
-      finishRunnerTask(wasCorrect ? 'target-slot-confirmed' : 'task-satisfied-after-reselection');
-      return;
-    }
-
-    run.liveStatus = wasCorrect
-      ? '예약이 반영되었습니다. 과업의 완료 조건을 다시 확인하십시오.'
-      : '예약은 되었지만 목표 예약 시간과 일치하지 않습니다. 다시 시도하십시오.';
-
-    if (state.conditionId === 'variantB') {
-      requestFocus('#booking-summary');
-    } else {
-      run.currentTaskLogger?.note('context-reset', { reason: 'variant-a-booking-confirmed' });
-      requestFocus('#results-heading');
-    }
-    render();
-  }, 360);
 }
 
-function confirmCancelFromModal() {
+function markHelpful(commentId, triggerFocusId) {
   const run = getCurrentRun();
   const task = getCurrentTask();
-  if (!run || !run.modal || run.modal.kind !== 'cancel-booking' || run.isWorking) return;
+  if (!run || !task || run.isWorking) return;
+  const comment = getCommentById(commentId);
+  if (!comment) return;
+  noteWrongCommentAction(commentId, 'mark-helpful');
 
-  const closingModal = { ...run.modal };
-  run.isWorking = true;
+  const alreadyHelpful = Boolean(run.helpfulByCommentId[commentId]);
+  run.helpfulByCommentId = {
+    ...run.helpfulByCommentId,
+    [commentId]: true,
+  };
+  run.currentTaskLogger?.note('mark-helpful', {
+    commentId,
+    alreadyHelpful,
+  });
+
+  if (isTaskSatisfied(task, run)) {
+    finishRunnerTask('target-comment-helpful');
+    return;
+  }
+
+  run.liveStatus = alreadyHelpful
+    ? `${comment.author} 댓글에는 이미 도움이 돼요가 표시되어 있습니다.`
+    : `${comment.author} 댓글에 도움이 돼요를 표시했습니다.`;
+  if (triggerFocusId) {
+    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  }
   render();
-
-  window.setTimeout(() => {
-    run.booking = null;
-    run.cancelPerformedThisTask = true;
-    run.isWorking = false;
-    run.modal = null;
-    run.currentTaskLogger?.note('cancel-booking', { taskId: task?.id });
-    run.currentTaskLogger?.setModalState({
-      open: false,
-      containerSelector: null,
-      triggerFocusId: closingModal.triggerFocusId ?? null,
-      closedAt: performance.now(),
-    });
-
-    run.liveStatus = '기존 예약을 취소했습니다. 새 예약 시간을 선택하십시오.';
-
-    if (state.conditionId === 'variantB') {
-      requestFocus('#booking-summary');
-    } else {
-      run.currentTaskLogger?.note('context-reset', { reason: 'variant-a-cancel-confirmed' });
-      requestFocus('#results-heading');
-    }
-    render();
-  }, 320);
 }
 
 function isTaskSatisfied(task, run) {
-  const bookingMatches = run.booking?.slotId === task.targetSlotId;
-  if (task.requiresCancellation) {
-    return bookingMatches && run.cancelPerformedThisTask;
+  if (!task || !run) return false;
+  if (task.requiredSort && run.sort !== task.requiredSort) return false;
+  if (task.requiredCategory && run.category !== task.requiredCategory) return false;
+
+  if (task.completion === 'expandReplies') {
+    return run.expandedCommentId === task.targetCommentId;
   }
-  return bookingMatches;
+
+  if (task.completion === 'helpful') {
+    const helpfulDone = Boolean(run.helpfulByCommentId[task.targetCommentId]);
+    const detailDone = task.requiresDetailVisit ? Boolean(run.detailVisitedThisTask[task.targetCommentId]) : true;
+    return helpfulDone && detailDone;
+  }
+
+  return false;
 }
 
 function finishRunnerTask(reason) {
@@ -1031,8 +981,8 @@ function finishRunnerTask(reason) {
     success: true,
     reason,
     notes: [
-      `booking=${run.booking?.slotId ?? 'none'}`,
-      `cancelPerformed=${run.cancelPerformedThisTask}`,
+      `expandedComment=${run.expandedCommentId ?? 'none'}`,
+      `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
       'measurement=first-input-visible-only',
     ],
   });
@@ -1056,86 +1006,24 @@ function finishRunnerTask(reason) {
   render();
 }
 
-function getVisibleSlots(run) {
-  return calendarScenario.slots
-    .filter((slot) => {
-      if (run.filters.serviceType !== 'all' && run.filters.serviceType !== 'counseling') {
-        return false;
-      }
-      if (run.filters.mode !== 'all' && slot.mode !== run.filters.mode) {
-        return false;
-      }
-      if (run.filters.provider !== 'all' && slot.provider !== run.filters.provider) {
-        return false;
-      }
-      if (run.filters.duration !== 'all' && slot.duration !== run.filters.duration) {
-        return false;
-      }
-      return true;
-    })
-    .sort((left, right) => {
-      if (DAY_ORDER[left.day] !== DAY_ORDER[right.day]) {
-        return DAY_ORDER[left.day] - DAY_ORDER[right.day];
-      }
-      return left.start.localeCompare(right.start);
-    });
-}
-
-function getAvailableVisibleSlots(run) {
-  return getVisibleSlots(run).filter((slot) => slot.available);
-}
-
-function getSlotById(slotId) {
-  return calendarScenario.slots.find((slot) => slot.id === slotId) ?? null;
-}
-
-function getProviderLabel(providerId) {
-  return calendarScenario.providers.find((provider) => provider.id === providerId)?.label ?? providerId;
-}
-
-function getModeLabel(modeId) {
-  return calendarScenario.modes.find((mode) => mode.id === modeId)?.label ?? modeId;
-}
-
-function formatSlotLabel(slot) {
-  return `${slot.dayLabel} ${slot.start} · ${getProviderLabel(slot.provider)} · ${getModeLabel(slot.mode)} · ${slot.duration}분`;
-}
-
-function formatBookingSummary(booking) {
-  if (!booking?.slotId) return '현재 예약 없음';
-  const slot = getSlotById(booking.slotId);
-  if (!slot) return '현재 예약 없음';
-  return formatSlotLabel(slot);
-}
-
-function handleGridNavigation(event, currentButton) {
+function handleCommentOptionNavigation(event, currentButton) {
   const run = getCurrentRun();
-  if (!run || !currentButton.dataset.slotId) return;
-  const availableSlots = getAvailableVisibleSlots(run);
-  const currentIndex = availableSlots.findIndex((slot) => slot.id === currentButton.dataset.slotId);
+  if (!run || !currentButton.dataset.commentId) return;
+  const visibleComments = getVisibleComments(run);
+  const currentIndex = visibleComments.findIndex((comment) => comment.id === currentButton.dataset.commentId);
   if (currentIndex === -1) return;
 
   let nextIndex = currentIndex;
-  const columns = 4;
-
-  if (event.key === 'ArrowRight') nextIndex = Math.min(currentIndex + 1, availableSlots.length - 1);
-  if (event.key === 'ArrowLeft') nextIndex = Math.max(currentIndex - 1, 0);
-  if (event.key === 'ArrowDown') nextIndex = Math.min(currentIndex + columns, availableSlots.length - 1);
-  if (event.key === 'ArrowUp') nextIndex = Math.max(currentIndex - columns, 0);
+  if (event.key === 'ArrowDown') nextIndex = Math.min(currentIndex + 1, visibleComments.length - 1);
+  if (event.key === 'ArrowUp') nextIndex = Math.max(currentIndex - 1, 0);
   if (event.key === 'Home') nextIndex = 0;
-  if (event.key === 'End') nextIndex = availableSlots.length - 1;
+  if (event.key === 'End') nextIndex = visibleComments.length - 1;
 
-  if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+  if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    run.currentGridSlotId = availableSlots[nextIndex].id;
-    requestFocus(`[data-grid-slot="true"][data-slot-id="${availableSlots[nextIndex].id}"]`);
+    run.currentCommentId = visibleComments[nextIndex].id;
+    requestFocus(buildCommentSelector(visibleComments[nextIndex].id));
     render();
-    return;
-  }
-
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    openSlotModal(currentButton.dataset.slotId, currentButton.dataset.focusId, 'select');
   }
 }
 
@@ -1180,18 +1068,16 @@ function render() {
 function getDocumentTitle() {
   if (APP_MODE === 'runner') {
     const task = getCurrentTask();
-    return `수행 화면 · ${task?.title ?? '예약 캘린더'}`;
+    return `수행 화면 · ${task?.title ?? '댓글 목록'}`;
   }
-  if (state.view === 'home') return '과도한 키보드 조작 실험';
-  if (state.view === 'serviceIntro') return '예약 캘린더 서비스 화면';
-  if (state.view === 'taskPrep' || state.view === 'taskRunning') return `과업 준비 · ${getCurrentTask()?.title ?? '예약 캘린더'}`;
+  if (state.view === 'serviceIntro') return '댓글 목록 서비스 화면';
+  if (state.view === 'taskPrep' || state.view === 'taskRunning') return `과업 준비 · ${getCurrentTask()?.title ?? '댓글 목록'}`;
   if (state.view === 'taskReview') return '과업 결과 요약';
   if (state.view === 'conditionReview') return '비교안 요약';
-  return '예약 캘린더 최종 비교';
+  return '댓글 목록 최종 비교';
 }
 
 function renderMainPage() {
-  if (state.view === 'home') return renderHomeView();
   if (state.view === 'serviceIntro') return renderServiceIntroView();
   if (state.view === 'taskPrep' || state.view === 'taskRunning') return renderTaskPreparationView();
   if (state.view === 'taskReview') return renderTaskReviewView();
@@ -1216,107 +1102,44 @@ function renderRunnerPage() {
 
   const run = getCurrentRun();
   const conditionId = getCurrentConditionId();
-  const visibleSlots = getVisibleSlots(run);
-  const availableSlots = visibleSlots.filter((slot) => slot.available);
-  const unavailableSlots = visibleSlots.filter((slot) => !slot.available);
+  const visibleComments = getVisibleComments(run);
   const task = getCurrentTask();
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? '<a class="skip-link" href="#results-heading">결과로 바로 이동</a>' : ''}
-      <main class="runner-main" aria-label="예약 캘린더 수행 화면">
+      ${conditionId === 'variantB' ? '<a class="skip-link" href="#comments-heading">댓글 목록으로 바로 이동</a>' : ''}
+      <main class="runner-main" aria-label="댓글 목록 수행 화면">
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
-        ${renderSimulatedHeader(conditionId)}
-        ${conditionId === 'variantB' ? renderBookingPanel(run, true) : ''}
-        ${renderFilters(conditionId, run)}
-        ${renderResults(conditionId, run, availableSlots, unavailableSlots)}
-        ${conditionId === 'variantA' ? renderBookingPanel(run, false) : ''}
+        ${renderCommentsHeader(conditionId)}
+        ${renderCommentControls(conditionId, run)}
+        ${renderCommentsSection(conditionId, run, visibleComments)}
       </main>
       <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
       <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
         <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">결과로 바로 이동</button>
         <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">이 탭 닫기</button>
       </footer>
-      ${run.modal ? renderModal(run.modal, run, task) : ''}
+      ${run.modal ? renderCommentModal(run.modal, run) : ''}
     </div>
   `;
 }
 
-function renderHomeView() {
-  return `
-    <header class="hero card">
-      <p class="eyebrow">실험 시작 준비</p>
-      <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
-      <p>
-        먼저 실험할 서비스 유형을 고르십시오. 현재는 예약 캘린더, 댓글 목록, 상품 옵션 선택이 준비되어 있으며,
-        이후 다른 서비스 유형도 같은 방식으로 하나씩 추가할 수 있습니다.
-      </p>
-      <div class="hero-grid">
-        <section>
-          <h2>이번 단계 목표</h2>
-          <ul>
-            <li>서비스 유형을 먼저 고르고 해당 서비스 화면에서 과업을 준비합니다.</li>
-            <li>과업 내용은 메인 창에서 먼저 읽고, 실제 수행은 새 탭에서 분리해 진행합니다.</li>
-            <li>실제 기록과 사전 계산 기준을 함께 남겨 후속 서비스 유형에 재사용합니다.</li>
-          </ul>
-        </section>
-        <section>
-          <h2>실험 정보</h2>
-          <dl class="meta-list">
-            <div><dt>실험 번호</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
-            <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>현재 공개 범위</dt><dd>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</dd></div>
-          </dl>
-        </section>
-      </div>
-    </header>
-    <section class="service-grid" aria-label="서비스 유형 목록">
-      ${SERVICE_TYPES.map((service) => renderHomeServiceCard(service)).join('')}
-    </section>
-  `;
-}
-
-function renderHomeServiceCard(service) {
-  return `
-    <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
-      <div class="service-card-header">
-        <div>
-          <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
-          <h2>${escapeHtml(service.label)}</h2>
-        </div>
-        <span class="pill ${service.available ? '' : 'pill-warning'}">${escapeHtml(service.statusLabel)}</span>
-      </div>
-      <p>${escapeHtml(service.summary)}</p>
-      <ul>
-        ${service.points.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
-      </ul>
-      <div class="button-row">
-        <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
-          ${service.available ? '이 서비스 화면으로 이동' : '준비 중'}
-        </button>
-      </div>
-    </article>
-  `;
-}
-
 function renderServiceIntroView() {
-  const service = getSelectedService();
-  if (!service) return renderHomeView();
   return `
     <header class="hero card">
       <p class="eyebrow">선택한 서비스 유형</p>
-      <h1 id="service-heading" tabindex="-1">${escapeHtml(service.label)}</h1>
+      <h1 id="service-heading" tabindex="-1">댓글 목록</h1>
       <p>
-        ${escapeHtml(service.summary)}
+        같은 댓글 내용을 두 가지 다른 이동 구조로 보여 주는 실험 화면입니다.
         이 화면에서 과업 준비 단계로 들어가거나, 다시 서비스 선택 화면으로 돌아갈 수 있습니다.
       </p>
       <div class="hero-grid">
         <section>
-          <h2>이번에 바로 확인하는 것</h2>
+          <h2>이번에 확인하는 것</h2>
           <ul>
-            <li>예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지</li>
-            <li>실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지</li>
-            <li>같은 실험 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지</li>
+            <li>댓글마다 따로 흩어진 작업 버튼이 순차 탐색 부담을 얼마나 키우는지</li>
+            <li>댓글을 하나의 선택 항목으로 묶고 작업을 한곳에 모았을 때 부담이 얼마나 줄어드는지</li>
+            <li>대화상자를 닫은 뒤 같은 댓글 작업으로 돌아오는 구조가 실제 기록에 어떤 차이를 만드는지</li>
           </ul>
         </section>
         <section>
@@ -1357,9 +1180,10 @@ function renderTaskPreparationView() {
   const conditionId = getCurrentConditionId();
   const run = getCurrentRun();
   const task = getCurrentTask();
-  const benchmark = benchmarkResultsCalendar.variants[conditionId].tasks[task.benchmarkTaskId];
+  const benchmark = benchmarkResultsComments.variants[conditionId].tasks[task.benchmarkTaskId];
   const activeLaunch = state.activeLaunch;
   const isRunning = state.view === 'taskRunning';
+  const targetComment = getCommentById(task.targetCommentId);
 
   return `
     <section class="card review-hero">
@@ -1371,7 +1195,7 @@ function renderTaskPreparationView() {
       <div class="pill-group">
         <span class="pill">실험 번호 ${escapeHtml(state.sessionId)}</span>
         <span class="pill">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)}</span>
-        <span class="pill">과업 ${state.currentTaskIndex + 1} / ${calendarTasks.length}</span>
+        <span class="pill">과업 ${state.currentTaskIndex + 1} / ${commentsTasks.length}</span>
       </div>
     </section>
 
@@ -1383,8 +1207,8 @@ function renderTaskPreparationView() {
           ${task.instructions.map((instruction) => `<li>${escapeHtml(instruction)}</li>`).join('')}
         </ol>
         <dl class="meta-list compact">
-          <div><dt>현재 예약</dt><dd>${escapeHtml(formatBookingSummary(run.booking))}</dd></div>
-          <div><dt>목표 예약 시간</dt><dd>${escapeHtml(formatSlotLabel(getSlotById(task.targetSlotId)))}</dd></div>
+          <div><dt>현재 댓글 상태</dt><dd>${escapeHtml(formatRunStateSummary(run))}</dd></div>
+          <div><dt>목표 댓글</dt><dd>${escapeHtml(targetComment ? formatCommentLabel(targetComment, run) : '없음')}</dd></div>
         </dl>
       </article>
 
@@ -1445,8 +1269,8 @@ function renderTaskReviewView() {
   const run = getCurrentRun();
   const task = getCurrentTask();
   const result = run.taskResults.at(-1);
-  const benchmark = benchmarkResultsCalendar.variants[conditionId].tasks[result.benchmarkTaskId];
-  const comparison = benchmarkResultsCalendar.comparisons[result.benchmarkTaskId];
+  const benchmark = benchmarkResultsComments.variants[conditionId].tasks[result.benchmarkTaskId];
+  const comparison = benchmarkResultsComments.comparisons[result.benchmarkTaskId];
 
   return `
     <section class="card review-hero">
@@ -1463,7 +1287,7 @@ function renderTaskReviewView() {
           <div><dt>총 키 입력</dt><dd>${result.totalKeyInputs}</dd></div>
           <div><dt>초점 이동</dt><dd>${result.focusChanges}</dd></div>
           <div><dt>되돌아간 입력</dt><dd>${result.backtrackInputs}</dd></div>
-          <div><dt>목표와 다른 시간 선택</dt><dd>${result.wrongSelections}</dd></div>
+          <div><dt>목표와 다른 댓글에서 동작</dt><dd>${result.wrongSelections}</dd></div>
           <div><dt>위치 다시 찾기</dt><dd>${result.contextResets ?? 0}</dd></div>
           <div><dt>클릭 입력</dt><dd>${result.pointerActivations}</dd></div>
         </dl>
@@ -1482,7 +1306,7 @@ function renderTaskReviewView() {
           <h3>비교안 B 예상 개선폭</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
-              <li><strong>${escapeHtml(benchmarkResultsCalendar.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
+              <li><strong>${escapeHtml(benchmarkResultsComments.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
             `).join('')}
           </ul>
         </div>
@@ -1490,7 +1314,7 @@ function renderTaskReviewView() {
     </section>
     <div class="button-row">
       <button class="button button-primary" data-action="continue-after-task">
-        ${state.currentTaskIndex < calendarTasks.length - 1 ? '다음 과업 준비' : '현재 비교안 요약 보기'}
+        ${state.currentTaskIndex < commentsTasks.length - 1 ? '다음 과업 준비' : '현재 비교안 요약 보기'}
       </button>
       <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
     </div>
@@ -1542,9 +1366,9 @@ function renderConditionReviewView() {
           <div><dt>총 숨김 탭 제외 시간</dt><dd>${formatSeconds(totals.hiddenDurationSeconds)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${totals.totalKeyInputs}</dd></div>
           <div><dt>총 초점 이동</dt><dd>${totals.focusChanges}</dd></div>
-          <div><dt>목표와 다른 시간 선택</dt><dd>${totals.wrongSelections}</dd></div>
+          <div><dt>목표와 다른 댓글에서 동작</dt><dd>${totals.wrongSelections}</dd></div>
           <div><dt>위치 다시 찾기</dt><dd>${totals.contextResets}</dd></div>
-          <div><dt>예약 취소 횟수</dt><dd>${totals.bookingCancels}</dd></div>
+          <div><dt>대화상자 바깥으로 초점 이탈</dt><dd>${totals.modalEscapes}</dd></div>
         </dl>
       </article>
       <article class="card">
@@ -1567,7 +1391,7 @@ function renderConditionReviewView() {
       <article class="card">
         <h2>저장된 과업 기록</h2>
         <ol>
-          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(calendarTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
+          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(commentsTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
         </ol>
       </article>
     </section>
@@ -1589,21 +1413,21 @@ function renderFinalView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">예약 캘린더 실험 완료</p>
+      <p class="eyebrow">댓글 목록 실험 완료</p>
       <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
-      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 키보드 점검 기준을 마련했습니다.</p>
+      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 점검 기준을 마련했습니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
         <span>비교 기준 사용자 유형</span>
         <select name="benchmark-profile">
-          ${Object.entries(benchmarkResultsCalendar.overall).map(([profileId, profile]) => `
+          ${Object.entries(benchmarkResultsComments.overall).map(([profileId, profile]) => `
             <option value="${profileId}" ${profileId === selectedProfileId ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
           `).join('')}
         </select>
       </label>
       <div class="button-row">
-        <a class="button button-secondary" download="reservation-calendar-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="comments-list-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
@@ -1627,7 +1451,7 @@ function renderFinalView() {
           <tr><th>총 숨김 탭 제외 시간</th><td>${formatSeconds(actualA.hiddenDurationSeconds)}</td><td>${formatSeconds(actualB.hiddenDurationSeconds)}</td><td>${formatSigned(actualB.hiddenDurationSeconds - actualA.hiddenDurationSeconds, '초')}</td></tr>
           <tr><th>총 키 입력</th><td>${actualA.totalKeyInputs}</td><td>${actualB.totalKeyInputs}</td><td>${formatSigned(actualB.totalKeyInputs - actualA.totalKeyInputs)}</td></tr>
           <tr><th>총 초점 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
-          <tr><th>목표와 다른 시간 선택</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
+          <tr><th>목표와 다른 댓글에서 동작</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
           <tr><th>위치 다시 찾기</th><td>${actualA.contextResets}</td><td>${actualB.contextResets}</td><td>${formatSigned(actualB.contextResets - actualA.contextResets)}</td></tr>
         </tbody>
       </table>
@@ -1636,19 +1460,20 @@ function renderFinalView() {
     <section class="card">
       <h2>다음 단계에 바로 쓸 수 있는 포인트</h2>
       <ul>
-        <li>이번 구현에서 메인 창과 수행 탭을 분리했으므로, 다음 서비스 유형도 같은 운영 방식으로 확장할 수 있습니다.</li>
-        <li>사전 계산 엔진은 과업 그래프만 추가하면 같은 형식으로 결과를 생성할 수 있습니다.</li>
-        <li>docs 폴더의 단계 보고서에 현재 결정 사항과 후속 작업 항목을 기록해 두었습니다.</li>
+        <li>댓글 목록도 메인 창과 수행 탭을 분리해 같은 운영 방식으로 확장했습니다.</li>
+        <li>서비스별 사전 계산 그래프와 결과 파일을 별도로 둬 후속 서비스 유형을 독립적으로 추가할 수 있습니다.</li>
+        <li>수동 점검표 문서를 함께 두어 브라우저 자동화가 어려운 부분을 배포 전 점검으로 보완할 수 있습니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
+        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
       </div>
     </section>
   `;
 }
 
 function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) {
-  const benchmarkOverall = benchmarkResultsCalendar.overall[selectedProfileId];
+  const benchmarkOverall = benchmarkResultsComments.overall[selectedProfileId];
   const expectedSeconds = conditionId === 'variantA'
     ? benchmarkOverall.variantAExpectedSeconds
     : benchmarkOverall.variantBExpectedSeconds;
@@ -1667,74 +1492,46 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
   `;
 }
 
-function renderSimulatedHeader(conditionId) {
-  const hasVisibleSkip = conditionId === 'variantB';
-  const links = ['처음 화면', '상담사 소개', '이용권', '이용 후기', '가격 안내', '자주 묻는 질문', '운영 정책', '문의'];
+function renderCommentsHeader(conditionId) {
+  const links = ['게시글 목록', '인기 글', '이용 안내', '새 글 쓰기', '알림', '내 댓글', '커뮤니티 규칙', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
-      ${hasVisibleSkip ? '<a class="inline-link" href="#results-heading" data-action="jump-results" data-focus-id="header-skip-results">결과로 바로 이동</a>' : ''}
-      <nav aria-label="서비스 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
+      ${conditionId === 'variantB' ? '<a class="inline-link" href="#comments-heading" data-action="jump-results" data-focus-id="header-skip-comments">댓글 목록으로 바로 이동</a>' : ''}
+      <nav aria-label="커뮤니티 보조 내비게이션">
+        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="community-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
     </header>
   `;
 }
 
-function renderFilters(conditionId, run) {
-  const providerOptions = ['all', ...calendarScenario.providers.map((provider) => provider.id)];
-  const durationOptions = ['all', ...calendarScenario.durations.map((duration) => String(duration))];
+function renderCommentControls(conditionId, run) {
   return `
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
       <div class="filters-header">
         <div>
-          <h2 id="filters-heading">조건 선택</h2>
-          <p class="muted">비교안 A와 B는 같은 정보량을 유지하고, 이동 구조만 다르게 구성했습니다.</p>
+          <h2 id="filters-heading">정렬과 범위 선택</h2>
+          <p class="muted">댓글 내용은 같고 이동 구조만 다르게 구성했습니다.</p>
         </div>
-        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-results-button">결과로 바로 이동</button>' : ''}
+        ${conditionId === 'variantB' ? '<button class="button button-secondary" data-action="jump-results" data-focus-id="jump-comments-button">결과로 바로 이동</button>' : ''}
       </div>
       <div class="filters-grid">
         <label>
-          <span>서비스 종류</span>
-          <select name="serviceType" data-focus-id="filter-service">
-            ${calendarScenario.serviceTypes.map((serviceType) => `
-              <option value="${serviceType.id}" ${run.filtersDraft.serviceType === serviceType.id ? 'selected' : ''}>${escapeHtml(serviceType.label)}</option>
-            `).join('')}
+          <span>정렬 기준</span>
+          <select name="sort" data-focus-id="comment-sort">
+            ${commentsScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
           </select>
         </label>
         <label>
-          <span>상담 방식</span>
-          <select name="mode" data-focus-id="filter-mode">
-            <option value="all" ${run.filtersDraft.mode === 'all' ? 'selected' : ''}>전체</option>
-            ${calendarScenario.modes.map((mode) => `
-              <option value="${mode.id}" ${run.filtersDraft.mode === mode.id ? 'selected' : ''}>${escapeHtml(mode.label)}</option>
-            `).join('')}
-          </select>
-        </label>
-        <label>
-          <span>상담사</span>
-          <select name="provider" data-focus-id="filter-provider">
-            ${providerOptions.map((providerId) => `
-              <option value="${providerId}" ${run.filtersDraft.provider === providerId ? 'selected' : ''}>
-                ${providerId === 'all' ? '전체 상담사' : escapeHtml(getProviderLabel(providerId))}
-              </option>
-            `).join('')}
-          </select>
-        </label>
-        <label>
-          <span>상담 시간</span>
-          <select name="duration" data-focus-id="filter-duration">
-            ${durationOptions.map((durationValue) => `
-              <option value="${durationValue}" ${String(run.filtersDraft.duration) === String(durationValue) ? 'selected' : ''}>
-                ${durationValue === 'all' ? '전체 시간' : `${durationValue}분`}
-              </option>
-            `).join('')}
+          <span>댓글 범위</span>
+          <select name="category" data-focus-id="comment-category">
+            ${commentsScenario.categoryOptions.map((option) => `<option value="${option.id}" ${run.categoryDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
           </select>
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="policy-link" data-inert-link="true">변경 기준 보기</a>
-        <a href="#" class="inline-link" data-focus-id="support-link" data-inert-link="true">이용 안내 보기</a>
-        <button class="button button-primary" data-action="apply-filters" data-focus-id="apply-criteria" ${run.isApplying ? 'disabled' : ''}>
+        <a href="#" class="inline-link" data-focus-id="comment-policy-link" data-inert-link="true">댓글 운영 기준 보기</a>
+        <a href="#" class="inline-link" data-focus-id="comment-help-link" data-inert-link="true">작성 안내 보기</a>
+        <button class="button button-primary" data-action="apply-comment-filters" data-focus-id="apply-comment-filters" ${run.isApplying ? 'disabled' : ''}>
           ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>
       </div>
@@ -1742,149 +1539,133 @@ function renderFilters(conditionId, run) {
   `;
 }
 
-function renderResults(conditionId, run, availableSlots, unavailableSlots) {
+function renderCommentsSection(conditionId, run, visibleComments) {
   return `
     <section class="card results-card">
       <div class="results-header">
         <div>
-          <h2 id="results-heading" tabindex="-1">예약 가능 시간</h2>
-          <p class="muted">예약 가능한 시간 ${availableSlots.length}개 · 예약할 수 없는 시간 ${unavailableSlots.length}개</p>
+          <h2 id="comments-heading" tabindex="-1">댓글 목록</h2>
+          <p class="muted">표시된 댓글 ${visibleComments.length}개 · 게시글 제목 ${escapeHtml(commentsScenario.postTitle)}</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 이동하고 엔터 키나 스페이스바로 열기</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 예약 시간을 차례대로 이동</p>'}
+        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 댓글을 고르고 탭 키로 댓글 작업으로 이동</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 댓글과 댓글 작업을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
-        ? renderVariantAResults(availableSlots, unavailableSlots)
-        : renderVariantBResults(run, availableSlots, unavailableSlots)}
+        ? renderVariantACommentList(run, visibleComments)
+        : renderVariantBCommentList(run, visibleComments)}
     </section>
   `;
 }
 
-function renderVariantAResults(availableSlots, unavailableSlots) {
-  if (availableSlots.length === 0 && unavailableSlots.length === 0) {
-    return '<p class="muted">현재 조건에 맞는 예약 시간이 없습니다.</p>';
+function renderVariantACommentList(run, visibleComments) {
+  if (visibleComments.length === 0) {
+    return '<p class="muted">현재 조건에 맞는 댓글이 없습니다.</p>';
   }
+
   return `
-    <ul class="slot-list slot-list-a">
-      ${availableSlots.map((slot) => `
-        <li class="slot-row">
-          <div>
-            <strong>${escapeHtml(formatSlotLabel(slot))}</strong>
-            <p class="muted">예약 가능한 시간</p>
+    <ul class="comment-list comment-list-a">
+      ${visibleComments.map((comment) => `
+        <li class="comment-card ${run.expandedCommentId === comment.id ? 'comment-card-expanded' : ''}">
+          <div class="comment-card-head">
+            <div class="comment-head-links">
+              <a href="#" class="inline-link" data-focus-id="comment-author-${comment.id}" data-inert-link="true">${escapeHtml(comment.author)}</a>
+              <span class="pill ${comment.category === 'notice' ? 'pill-warning' : ''}">${escapeHtml(comment.badge)}</span>
+              <a href="#" class="inline-link" data-focus-id="comment-time-${comment.id}" data-inert-link="true">${escapeHtml(comment.timeLabel)}</a>
+            </div>
+            <a href="#" class="inline-link" data-focus-id="comment-share-${comment.id}" data-inert-link="true">공유</a>
           </div>
-          <div class="button-row compact-row">
-            <button class="button button-secondary" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="select" data-focus-id="slot-${slot.id}-select">선택</button>
-            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">시간 안내 보기</button>
+          <p class="comment-summary"><strong>${escapeHtml(comment.summary)}</strong></p>
+          <p class="muted">${escapeHtml(comment.body)}</p>
+          <div class="comment-metrics muted">도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}</div>
+          <div class="button-row comment-action-row">
+            <button class="button button-secondary" data-action="mark-helpful" data-comment-id="${comment.id}" data-focus-id="comment-helpful-${comment.id}">도움이 돼요</button>
+            <button class="button button-ghost" data-action="toggle-replies" data-comment-id="${comment.id}" data-focus-id="comment-replies-${comment.id}">${run.expandedCommentId === comment.id ? `답글 ${comment.replyCount}개 닫기` : `답글 ${comment.replyCount}개 보기`}</button>
+            <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${comment.id}" data-focus-id="comment-detail-${comment.id}">댓글 정보 보기</button>
           </div>
-        </li>
-      `).join('')}
-      ${unavailableSlots.map((slot) => `
-        <li class="slot-row slot-row-unavailable">
-          <div>
-            <strong>${escapeHtml(formatSlotLabel(slot))}</strong>
-            <p class="muted">지금은 예약할 수 없음</p>
-          </div>
-          <div class="button-row compact-row">
-            <span class="pill pill-warning">예약 마감</span>
-            <button class="button button-ghost" data-action="slot-open" data-slot-id="${slot.id}" data-dialog-mode="details" data-focus-id="slot-${slot.id}-details">시간 안내 보기</button>
-          </div>
+          ${run.expandedCommentId === comment.id ? renderReplyList(comment) : ''}
         </li>
       `).join('')}
     </ul>
   `;
 }
 
-function renderVariantBResults(run, availableSlots, unavailableSlots) {
-  if (availableSlots.length === 0 && unavailableSlots.length === 0) {
-    return '<p class="muted">현재 조건에 맞는 예약 시간이 없습니다.</p>';
+function renderVariantBCommentList(run, visibleComments) {
+  if (visibleComments.length === 0) {
+    return '<p class="muted">현재 조건에 맞는 댓글이 없습니다.</p>';
   }
-  const rows = chunkArray(availableSlots, 4);
+  ensureCurrentCommentVisible(run);
+  const selectedComment = getSelectedVisibleComment(run);
+  const expandedComment = run.expandedCommentId ? getCommentById(run.expandedCommentId) : null;
+
   return `
-    ${availableSlots.length === 0 ? '<p class="muted">예약 가능한 시간은 없고, 아래에 예약할 수 없는 시간만 표시됩니다.</p>' : ''}
-    <div role="grid" aria-label="예약 가능한 시간표" class="slot-grid" data-grid-root>
-      ${rows.map((row) => `
-        <div role="row" class="slot-grid-row">
-          ${row.map((slot) => `
-            <div role="gridcell" class="slot-grid-cell">
-              <button
-                class="slot-grid-button ${run.currentGridSlotId === slot.id ? 'slot-grid-button-active' : ''}"
-                data-grid-slot="true"
-                data-slot-id="${slot.id}"
-                data-focus-id="grid-slot-${slot.id}"
-                tabindex="${run.currentGridSlotId === slot.id ? '0' : '-1'}"
-                aria-label="${escapeHtml(formatSlotLabel(slot))}"
-              >
-                <span class="slot-day">${escapeHtml(slot.dayLabel)}</span>
-                <strong>${escapeHtml(slot.start)}</strong>
-                <span class="slot-provider">${escapeHtml(getProviderLabel(slot.provider))}</span>
-                <span class="slot-mode">${escapeHtml(getModeLabel(slot.mode))} · ${slot.duration}분</span>
-              </button>
-            </div>
-          `).join('')}
-          ${Array.from({ length: Math.max(0, 4 - row.length) }).map(() => '<div role="presentation" class="slot-grid-cell slot-grid-cell-empty"></div>').join('')}
-        </div>
-      `).join('')}
-    </div>
-    ${unavailableSlots.length > 0 ? `
-      <section class="unavailable-card">
-        <h3>예약이 마감된 시간</h3>
-        <ul class="chip-list">
-          ${unavailableSlots.map((slot) => `<li>${escapeHtml(formatSlotLabel(slot))}</li>`).join('')}
-        </ul>
+    <div class="comment-composite-layout">
+      <div role="listbox" aria-label="댓글 목록" class="comment-option-list">
+        ${visibleComments.map((comment) => `
+          <button
+            role="option"
+            class="comment-option-button ${run.currentCommentId === comment.id ? 'comment-option-button-active' : ''}"
+            aria-selected="${run.currentCommentId === comment.id ? 'true' : 'false'}"
+            data-action="select-comment"
+            data-comment-option="true"
+            data-comment-id="${comment.id}"
+            data-focus-id="comment-option-${comment.id}"
+            tabindex="${run.currentCommentId === comment.id ? '0' : '-1'}"
+            aria-label="${escapeHtml(formatCommentLabel(comment, run))}"
+          >
+            <span class="comment-option-top">
+              <strong>${escapeHtml(comment.author)}</strong>
+              <span class="pill ${comment.category === 'notice' ? 'pill-warning' : ''}">${escapeHtml(comment.badge)}</span>
+            </span>
+            <span class="muted">${escapeHtml(comment.timeLabel)}</span>
+            <span>${escapeHtml(comment.summary)}</span>
+            <span class="muted">도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}</span>
+          </button>
+        `).join('')}
+      </div>
+      <section class="card selected-comment-card">
+        <h3 id="selected-comment-heading">선택한 댓글 작업</h3>
+        ${selectedComment ? `
+          <p class="goal">${escapeHtml(selectedComment.author)} · ${escapeHtml(selectedComment.badge)}</p>
+          <p class="muted">${escapeHtml(selectedComment.summary)}</p>
+          <div class="button-row">
+            <button class="button button-secondary" data-action="toggle-replies" data-comment-id="${selectedComment.id}" data-focus-id="selected-replies-${selectedComment.id}">${run.expandedCommentId === selectedComment.id ? `답글 ${selectedComment.replyCount}개 닫기` : `답글 ${selectedComment.replyCount}개 보기`}</button>
+            <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${selectedComment.id}" data-focus-id="selected-detail-${selectedComment.id}">댓글 정보 보기</button>
+            <button class="button button-ghost" data-action="mark-helpful" data-comment-id="${selectedComment.id}" data-focus-id="selected-helpful-${selectedComment.id}">도움이 돼요</button>
+          </div>
+        ` : '<p class="muted">선택된 댓글이 없습니다.</p>'}
       </section>
-    ` : ''}
+    </div>
+    ${expandedComment ? renderReplyList(expandedComment) : ''}
   `;
 }
 
-function renderBookingPanel(run, emphasized) {
+function renderReplyList(comment) {
   return `
-    <section class="card booking-card ${emphasized ? 'booking-card-emphasized' : ''}">
-      <h2 id="booking-summary" tabindex="-1">현재 예약 내용</h2>
-      <p>${escapeHtml(formatBookingSummary(run.booking))}</p>
-      <div class="button-row">
-        ${run.booking ? `
-          <button class="button button-secondary" data-action="open-cancel-modal" data-focus-id="current-booking-cancel">현재 예약 취소</button>
-        ` : '<span class="muted">아직 취소할 예약이 없습니다.</span>'}
-      </div>
+    <section class="reply-card" aria-label="${escapeHtml(comment.author)} 댓글의 답글 목록">
+      <h3>${escapeHtml(comment.author)} 댓글의 답글 ${comment.replyCount}개</h3>
+      <ul class="reply-list">
+        ${comment.replies.map((reply) => `<li><strong>${escapeHtml(reply.author)}</strong> · ${escapeHtml(reply.text)}</li>`).join('')}
+      </ul>
     </section>
   `;
 }
 
-function renderModal(modal, run, task) {
-  if (modal.kind === 'cancel-booking') {
-    return `
-      <div class="modal-backdrop">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
-          <h2 id="dialog-title" tabindex="-1">현재 예약을 취소하시겠습니까?</h2>
-          <p id="dialog-description">${escapeHtml(formatBookingSummary(run.booking))}</p>
-          <div class="button-row">
-            <button class="button button-ghost" data-action="dialog-close" data-focus-id="cancel-dialog-close">닫기</button>
-            <button class="button button-primary" data-action="dialog-confirm-cancel" data-dialog-primary data-focus-id="cancel-dialog-confirm">
-              ${run.isWorking ? '취소 중…' : '예약 취소'}
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  const slot = getSlotById(modal.slotId);
-  if (!slot) return '';
-  const isTarget = slot.id === task.targetSlotId;
-  const actionLabel = run.booking ? '변경 확정' : '예약 확정';
-  const modeLabel = modal.dialogMode === 'details' ? '시간 안내' : '예약 확인';
+function renderCommentModal(modal, run) {
+  const comment = getCommentById(modal.commentId);
+  if (!comment) return '';
   return `
     <div class="modal-backdrop">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
-        <h2 id="dialog-title" tabindex="-1">${escapeHtml(modeLabel)} · ${escapeHtml(formatSlotLabel(slot))}</h2>
-        <p id="dialog-description">${slot.available ? '예약 가능한 시간입니다.' : '지금은 예약할 수 없는 시간입니다.'}</p>
-        <p class="muted">현재 과업에서 찾아야 하는 예약 시간과 ${isTarget ? '일치합니다' : '일치하지 않습니다'}.</p>
+        <h2 id="dialog-title" tabindex="-1">댓글 정보 보기 · ${escapeHtml(comment.author)}</h2>
+        <p id="dialog-description">${escapeHtml(comment.summary)}</p>
+        <dl class="meta-list compact">
+          <div><dt>댓글 범위</dt><dd>${escapeHtml(comment.badge)}</dd></div>
+          <div><dt>작성 시각</dt><dd>${escapeHtml(comment.timeLabel)}</dd></div>
+          <div><dt>도움이 수</dt><dd>${getEffectiveHelpfulCount(comment, run)}</dd></div>
+          <div><dt>답글 수</dt><dd>${comment.replyCount}</dd></div>
+        </dl>
+        <p class="muted">${escapeHtml(comment.body)}</p>
         <div class="button-row">
-          <button class="button button-ghost" data-action="dialog-close" data-focus-id="slot-dialog-close">닫기</button>
-          ${slot.available ? `
-            <button class="button button-primary" data-action="dialog-confirm-slot" data-dialog-primary data-focus-id="slot-dialog-confirm" ${run.isWorking ? 'disabled' : ''}>
-              ${run.isWorking ? '저장 중…' : escapeHtml(actionLabel)}
-            </button>
-          ` : ''}
+          <button class="button button-primary" data-action="dialog-close" data-dialog-close data-focus-id="comment-dialog-close">닫기</button>
         </div>
       </div>
     </div>
@@ -1901,7 +1682,6 @@ function aggregateActualCondition(run) {
       totals.wrongSelections += result.wrongSelections;
       totals.contextResets += result.contextResets ?? 0;
       totals.modalEscapes += result.modalEscapes;
-      totals.bookingCancels += result.bookingCancels;
       return totals;
     },
     {
@@ -1912,15 +1692,14 @@ function aggregateActualCondition(run) {
       wrongSelections: 0,
       contextResets: 0,
       modalEscapes: 0,
-      bookingCancels: 0,
     }
   );
 }
 
 function aggregateBenchmarkCondition(conditionId) {
-  const variantResults = benchmarkResultsCalendar.variants[conditionId].tasks;
+  const variantResults = benchmarkResultsComments.variants[conditionId].tasks;
   const totals = {};
-  for (const [profileId, overall] of Object.entries(benchmarkResultsCalendar.overall)) {
+  for (const [profileId, overall] of Object.entries(benchmarkResultsComments.overall)) {
     const expectedSeconds = Object.values(variantResults).reduce((sum, taskResult) => sum + taskResult.profiles[profileId].ranges.expected.seconds, 0);
     totals[profileId] = {
       label: overall.label,
@@ -1934,6 +1713,7 @@ function aggregateBenchmarkCondition(conditionId) {
 function buildExportPayload() {
   return {
     exportedAt: new Date().toISOString(),
+    serviceId: 'comments',
     sessionId: state.sessionId,
     order: state.order,
     measurementRules: MEASUREMENT_RULES,
@@ -1941,7 +1721,7 @@ function buildExportPayload() {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
     },
-    benchmark: benchmarkResultsCalendar,
+    benchmark: benchmarkResultsComments,
   };
 }
 
@@ -1953,6 +1733,7 @@ function buildSurveyUrl() {
   if (!SURVEY_CONFIG.baseUrl) return '';
   const params = {
     sessionId: state.sessionId,
+    serviceId: 'comments',
     order: state.order.join(','),
     actualA: aggregateActualCondition(state.runs.variantA),
     actualB: aggregateActualCondition(state.runs.variantB),
@@ -1964,12 +1745,4 @@ function formatSigned(value, suffix = '') {
   const prefix = value > 0 ? '+' : '';
   const normalized = typeof value === 'number' ? Number(value.toFixed(1)) : Number(value);
   return `${prefix}${normalized}${suffix}`;
-}
-
-function chunkArray(items, size) {
-  const chunks = [];
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
-  }
-  return chunks;
 }

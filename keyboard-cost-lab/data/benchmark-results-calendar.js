@@ -1,5 +1,5 @@
 export const benchmarkResultsCalendar = {
-  "generatedAt": "2026-03-31T05:52:42.759Z",
+  "generatedAt": "2026-03-31T11:17:21.534Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",
@@ -1496,5 +1496,11 @@ export const benchmarkResultsCalendar = {
       "expectedReductionSeconds": 203.4,
       "expectedReductionPercent": 59.4
     }
-  }
+  },
+  "measurementRules": [
+    "실제 계측은 수행 탭에서 첫 조작이 들어갈 때 시작합니다.",
+    "수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.",
+    "수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다."
+  ],
+  "actualMeasurementScope": "과업 내용 확인은 메인 창에서 진행하고, 새 탭의 실제 서비스 조작만 기록합니다."
 };
