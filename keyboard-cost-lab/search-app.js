@@ -1,6 +1,6 @@
-import { commentsScenario } from './data/comments-scenario.js';
-import { commentsTasks } from './data/tasks-comments.js';
-import { benchmarkResultsComments } from './data/benchmark-results-comments.js';
+import { searchScenario } from './data/search-scenario.js';
+import { searchTasks } from './data/tasks-search.js';
+import { benchmarkResultsSearch } from './data/benchmark-results-search.js';
 import { createTaskLogger } from './lib/logger.js';
 import {
   uniqueId,
@@ -39,10 +39,10 @@ import {
 } from './lib/service-shell.js';
 
 const APP_MODE = getAppMode();
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-comments-session-id';
-const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-comments-launch';
-const CHANNEL_PREFIX = 'keyboard-cost-lab-comments-channel';
-const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-comments-channel-fallback';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-search-session-id';
+const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-search-launch';
+const CHANNEL_PREFIX = 'keyboard-cost-lab-search-channel';
+const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-search-channel-fallback';
 const SURVEY_CONFIG = {
   baseUrl: '',
 };
@@ -53,50 +53,50 @@ const VARIANT_META = {
   variantA: {
     shortLabel: 'A',
     title: '비교안 A · 조작 부담이 큰 구조',
-    subtitle: '댓글마다 여러 링크와 버튼을 지나야 하고, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾아야 하는 구조',
+    subtitle: '상단 보조 링크와 자료 조건 선택을 지난 뒤 검색 결과에 도달하고, 자료마다 여러 링크와 버튼을 각각 지나야 하며, 미리보기 대화상자를 닫으면 검색 결과 제목 근처부터 다시 찾아야 하는 구조',
     improvements: [
-      '상단 링크와 정렬·범위 선택 뒤에 댓글 목록이 나옵니다.',
-      '댓글마다 작성자, 작성 시각, 도움이 돼요, 답글 보기, 댓글 정보 보기 등이 따로 나뉘어 있어 순차 이동이 길어집니다.',
-      '댓글 정보 대화상자를 닫으면 방금 보던 댓글 작업으로 돌아가지 않고 댓글 목록 제목 근처부터 다시 찾아야 합니다.',
+      '상단 보조 링크와 자료 조건 선택을 지난 뒤 검색 결과에 도달합니다.',
+      '자료마다 제목 링크, 갱신 시각, 공유, 저장, 바로 열기, 미리보기가 따로 나뉘어 있어 순차 이동이 길어집니다.',
+      '미리보기 대화상자를 닫으면 방금 보던 자료 작업으로 돌아가지 않고 검색 결과 제목 근처부터 다시 찾아야 합니다.',
     ],
   },
   variantB: {
     shortLabel: 'B',
     title: '비교안 B · 개선 구조',
-    subtitle: '댓글 목록으로 바로 이동하고, 댓글을 하나의 선택 항목으로 고른 뒤, 댓글 작업을 한곳에서 이어서 수행하는 구조',
+    subtitle: '검색 결과로 바로 이동하고, 자료를 하나의 선택 항목으로 고른 뒤, 선택한 자료 작업을 한곳에서 이어서 수행하는 구조',
     improvements: [
-      '댓글 목록으로 바로 이동해 첫 진입 부담을 줄입니다.',
-      '댓글은 한 번만 들어간 뒤 방향키로 고르고, 댓글 작업은 한곳에 모아 둡니다.',
-      '댓글 정보 대화상자를 닫으면 방금 사용한 작업 버튼으로 초점이 돌아옵니다.',
+      '검색 결과로 바로 이동해 첫 진입 부담을 줄입니다.',
+      '자료는 한 번만 들어간 뒤 방향키로 고르고, 선택한 자료 작업은 한곳에 모아 둡니다.',
+      '미리보기 대화상자를 닫으면 방금 사용한 작업 버튼으로 초점이 돌아옵니다.',
     ],
   },
 };
 
 const RUNNER_LABELS = {
-  quickJump: '댓글 목록으로 바로 이동',
-  footerJump: '댓글 목록으로 이동',
+  quickJump: '검색 결과로 바로 이동',
+  footerJump: '검색 결과로 이동',
 };
 
 const GLOSSARY_ENTRIES = [
   {
     term: '비교안 A/B',
-    description: '같은 과업을 두 가지 다른 화면 구조로 비교하기 위한 화면입니다. 댓글 내용은 같고 이동 방식만 다릅니다.',
+    description: '같은 과업을 두 가지 다른 화면 구조로 비교하기 위한 화면입니다. 자료 내용은 같고 이동 방식만 다릅니다.',
   },
   {
     term: '사전 계산 기준',
     description: '실제 실험 전에 미리 계산해 둔 예상 조작 부담 값입니다. 실제 기록과 나란히 비교합니다.',
   },
   {
-    term: '초점',
-    description: '키보드로 현재 선택되어 있는 위치입니다. 탭 키를 누를 때 초점이 다음 요소로 이동합니다.',
+    term: '검색 결과',
+    description: '검색어에 맞아 화면에 표시된 자료 목록입니다.',
   },
   {
-    term: '대화상자',
-    description: '댓글 정보 확인처럼 잠깐 열리는 작은 창입니다.',
+    term: '미리보기',
+    description: '자료를 바로 열기 전에 핵심 내용만 잠깐 확인하는 작은 창입니다.',
   },
   {
-    term: '답글',
-    description: '기존 댓글 아래에 이어지는 댓글입니다. 댓글 아래쪽에 묶여서 표시됩니다.',
+    term: '저장',
+    description: '나중에 다시 보려고 자료를 보관 목록에 넣는 기능입니다.',
   },
 ];
 
@@ -208,12 +208,12 @@ function createRunnerState() {
   }
 
   const runtime = hydrateConditionRuntime(conditionId, launchPayload.runSnapshot);
-  const task = commentsTasks[taskIndex] ?? commentsTasks[0];
+  const task = searchTasks[taskIndex] ?? searchTasks[0];
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.liveStatus = '정렬 기준과 댓글 범위를 맞춘 뒤 원하는 댓글을 찾으십시오.';
-  ensureCurrentCommentVisible(runtime);
+  runtime.liveStatus = '정렬 기준과 자료 범위를 맞춘 뒤 원하는 자료를 찾으십시오.';
+  ensureCurrentResultVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
     conditionId,
@@ -247,16 +247,16 @@ function createRunnerState() {
 function createConditionRuntime(variantId) {
   return {
     variantId,
-    sort: 'popular',
-    sortDraft: 'popular',
-    category: 'all',
-    categoryDraft: 'all',
-    helpfulByCommentId: {},
-    expandedCommentId: null,
-    currentCommentId: commentsScenario.comments[0]?.id ?? null,
-    detailVisitedThisTask: {},
+    sort: 'relevance',
+    sortDraft: 'relevance',
+    type: 'all',
+    typeDraft: 'all',
+    savedByResultId: {},
+    openedResultId: null,
+    currentResultId: searchScenario.results[0]?.id ?? null,
+    previewVisitedThisTask: {},
     modal: null,
-    liveStatus: '정렬 기준을 바꾸면 댓글 목록이 갱신됩니다.',
+    liveStatus: '정렬 기준을 바꾸면 검색 결과 목록이 갱신됩니다.',
     taskResults: [],
     currentTaskLogger: null,
     isApplying: false,
@@ -268,7 +268,7 @@ function createConditionRuntime(variantId) {
 function getOrCreateSessionId() {
   return getSharedSessionId({
     storageKey: STORAGE_KEY_SESSION,
-    idPrefix: 'comments-session',
+    idPrefix: 'search-session',
   });
 }
 
@@ -284,23 +284,23 @@ function getCurrentRun() {
 }
 
 function getCurrentTask() {
-  if (APP_MODE === 'runner') return commentsTasks[state.taskIndex] ?? null;
-  return commentsTasks[state.currentTaskIndex] ?? null;
+  if (APP_MODE === 'runner') return searchTasks[state.taskIndex] ?? null;
+  return searchTasks[state.currentTaskIndex] ?? null;
 }
 
 function hydrateConditionRuntime(variantId, snapshot = {}) {
   const runtime = createConditionRuntime(variantId);
   runtime.sort = snapshot.sort ?? runtime.sort;
   runtime.sortDraft = snapshot.sortDraft ?? runtime.sortDraft;
-  runtime.category = snapshot.category ?? runtime.category;
-  runtime.categoryDraft = snapshot.categoryDraft ?? runtime.categoryDraft;
-  runtime.helpfulByCommentId = deepClone(snapshot.helpfulByCommentId ?? runtime.helpfulByCommentId);
-  runtime.expandedCommentId = snapshot.expandedCommentId ?? null;
-  runtime.currentCommentId = snapshot.currentCommentId ?? runtime.currentCommentId;
-  runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
+  runtime.type = snapshot.type ?? runtime.type;
+  runtime.typeDraft = snapshot.typeDraft ?? runtime.typeDraft;
+  runtime.savedByResultId = deepClone(snapshot.savedByResultId ?? runtime.savedByResultId);
+  runtime.openedResultId = snapshot.openedResultId ?? null;
+  runtime.currentResultId = snapshot.currentResultId ?? runtime.currentResultId;
+  runtime.previewVisitedThisTask = deepClone(snapshot.previewVisitedThisTask ?? runtime.previewVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
-  ensureCurrentCommentVisible(runtime);
+  ensureCurrentResultVisible(runtime);
   return runtime;
 }
 
@@ -309,12 +309,12 @@ function serializeRuntimeSnapshot(run) {
     variantId: run.variantId,
     sort: run.sort,
     sortDraft: run.sortDraft,
-    category: run.category,
-    categoryDraft: run.categoryDraft,
-    helpfulByCommentId: deepClone(run.helpfulByCommentId),
-    expandedCommentId: run.expandedCommentId,
-    currentCommentId: run.currentCommentId,
-    detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
+    type: run.type,
+    typeDraft: run.typeDraft,
+    savedByResultId: deepClone(run.savedByResultId),
+    openedResultId: run.openedResultId,
+    currentResultId: run.currentResultId,
+    previewVisitedThisTask: deepClone(run.previewVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     liveStatus: run.liveStatus,
   };
@@ -324,12 +324,12 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   const hydrated = hydrateConditionRuntime(targetRun.variantId, snapshot);
   targetRun.sort = hydrated.sort;
   targetRun.sortDraft = hydrated.sortDraft;
-  targetRun.category = hydrated.category;
-  targetRun.categoryDraft = hydrated.categoryDraft;
-  targetRun.helpfulByCommentId = hydrated.helpfulByCommentId;
-  targetRun.expandedCommentId = hydrated.expandedCommentId;
-  targetRun.currentCommentId = hydrated.currentCommentId;
-  targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
+  targetRun.type = hydrated.type;
+  targetRun.typeDraft = hydrated.typeDraft;
+  targetRun.savedByResultId = hydrated.savedByResultId;
+  targetRun.openedResultId = hydrated.openedResultId;
+  targetRun.currentResultId = hydrated.currentResultId;
+  targetRun.previewVisitedThisTask = hydrated.previewVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -377,15 +377,16 @@ function prepareCurrentTaskForMain() {
   run.modal = null;
   run.isApplying = false;
   run.isWorking = false;
-  run.detailVisitedThisTask = {};
+  run.previewVisitedThisTask = {};
+  run.openedResultId = null;
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
-  ensureCurrentCommentVisible(run);
+  ensureCurrentResultVisible(run);
   state.activeLaunch = null;
 }
 
 function continueAfterTask() {
   if (APP_MODE === 'runner') return;
-  if (state.currentTaskIndex < commentsTasks.length - 1) {
+  if (state.currentTaskIndex < searchTasks.length - 1) {
     state.currentTaskIndex += 1;
     prepareCurrentTaskForMain();
     state.view = 'taskPrep';
@@ -451,7 +452,7 @@ function launchRunnerTask() {
   const task = getCurrentTask();
   if (!conditionId || !run || !task) return;
 
-  const launchId = uniqueId('comments-launch');
+  const launchId = uniqueId('search-launch');
   const payload = {
     launchId,
     sessionId: state.sessionId,
@@ -501,9 +502,9 @@ function acceptRunnerTaskCompletion(message) {
   run.taskResults.push({
     ...message.summary,
     benchmarkTaskId: task.benchmarkTaskId,
-    targetCommentId: task.targetCommentId,
-    expandedCommentIdAfterTask: run.expandedCommentId,
-    helpfulByCommentIdAfterTask: deepClone(run.helpfulByCommentId),
+    targetResultId: task.targetResultId,
+    openedResultIdAfterTask: run.openedResultId,
+    savedByResultIdAfterTask: deepClone(run.savedByResultId),
     conditionId,
   });
 
@@ -591,33 +592,33 @@ function handleRootClick(event) {
     return;
   }
 
-  if (action === 'apply-comment-filters') {
+  if (action === 'apply-result-filters') {
     event.preventDefault();
-    applyCommentFilters();
+    applyResultFilters();
     return;
   }
 
-  if (action === 'select-comment') {
+  if (action === 'select-result') {
     event.preventDefault();
-    selectComment(actionTarget.dataset.commentId);
+    selectResult(actionTarget.dataset.resultId);
     return;
   }
 
-  if (action === 'toggle-replies') {
+  if (action === 'open-result-preview') {
     event.preventDefault();
-    toggleReplies(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    openResultPreview(actionTarget.dataset.resultId, actionTarget.dataset.focusId);
     return;
   }
 
-  if (action === 'open-comment-detail') {
+  if (action === 'save-result') {
     event.preventDefault();
-    openCommentDetail(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    saveResult(actionTarget.dataset.resultId, actionTarget.dataset.focusId);
     return;
   }
 
-  if (action === 'mark-helpful') {
+  if (action === 'open-result') {
     event.preventDefault();
-    markHelpful(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    openResult(actionTarget.dataset.resultId, actionTarget.dataset.focusId);
     return;
   }
 
@@ -629,7 +630,7 @@ function handleRootClick(event) {
 
   if (action === 'jump-results') {
     event.preventDefault();
-    focusElementNow('#comments-heading');
+    focusElementNow('#search-heading');
     return;
   }
 
@@ -660,7 +661,7 @@ function handleRootChange(event) {
   const run = getCurrentRun();
   if (!run) return;
   if (element.name === 'sort') run.sortDraft = element.value;
-  if (element.name === 'category') run.categoryDraft = element.value;
+  if (element.name === 'type') run.typeDraft = element.value;
 }
 
 function handleRootKeydown(event) {
@@ -693,9 +694,9 @@ function handleRootKeydown(event) {
   }
 
   if (state.conditionId === 'variantB') {
-    const commentOption = event.target.closest('[data-comment-option="true"]');
-    if (commentOption instanceof HTMLElement) {
-      handleCommentOptionNavigation(event, commentOption);
+    const resultOption = event.target.closest('[data-result-option="true"]');
+    if (resultOption instanceof HTMLElement) {
+      handleResultOptionNavigation(event, resultOption);
     }
   }
 }
@@ -726,141 +727,150 @@ function applyPendingFocus() {
   });
 }
 
-function getCommentById(commentId) {
-  return commentsScenario.comments.find((comment) => comment.id === commentId) ?? null;
+function getResultById(resultId) {
+  return searchScenario.results.find((result) => result.id === resultId) ?? null;
 }
 
 function getSortLabel(sortId) {
-  return commentsScenario.sortOptions.find((option) => option.id === sortId)?.label ?? sortId;
+  return searchScenario.sortOptions.find((option) => option.id === sortId)?.label ?? sortId;
 }
 
-function getCategoryLabel(categoryId) {
-  return commentsScenario.categoryOptions.find((option) => option.id === categoryId)?.label ?? categoryId;
+function getTypeLabel(typeId) {
+  return searchScenario.typeOptions.find((option) => option.id === typeId)?.label ?? typeId;
 }
 
-function getEffectiveHelpfulCount(comment, run) {
-  return comment.helpfulCount + (run.helpfulByCommentId[comment.id] ? 1 : 0);
+function getEffectiveSaveCount(result, run) {
+  return result.saveCount + (run.savedByResultId[result.id] ? 1 : 0);
 }
 
-function getVisibleComments(run) {
-  const filtered = commentsScenario.comments.filter((comment) => {
-    if (run.category === 'all') return true;
-    return comment.category === run.category;
+function getVisibleSearch(run) {
+  const filtered = searchScenario.results.filter((result) => {
+    if (run.type === 'all') return true;
+    return result.type === run.type;
   });
 
   const sorted = filtered.slice().sort((left, right) => {
     if (run.sort === 'newest') {
-      return right.createdAt.localeCompare(left.createdAt);
+      return right.updatedAt.localeCompare(left.updatedAt);
     }
-    if (run.sort === 'oldest') {
-      return left.createdAt.localeCompare(right.createdAt);
+    if (run.sort === 'title') {
+      return left.title.localeCompare(right.title, 'ko');
     }
-    const helpfulGap = getEffectiveHelpfulCount(right, run) - getEffectiveHelpfulCount(left, run);
-    if (helpfulGap !== 0) return helpfulGap;
-    return right.createdAt.localeCompare(left.createdAt);
+    return left.relevanceRank - right.relevanceRank;
   });
 
   return sorted;
 }
 
-function ensureCurrentCommentVisible(run) {
-  const visibleComments = getVisibleComments(run);
-  run.currentCommentId = visibleComments.find((comment) => comment.id === run.currentCommentId)?.id ?? visibleComments[0]?.id ?? null;
+function ensureCurrentResultVisible(run) {
+  const visibleSearch = getVisibleSearch(run);
+  run.currentResultId = visibleSearch.find((result) => result.id === run.currentResultId)?.id ?? visibleSearch[0]?.id ?? null;
 }
 
-function getSelectedVisibleComment(run) {
-  ensureCurrentCommentVisible(run);
-  return getCommentById(run.currentCommentId);
+function getSelectedVisibleResult(run) {
+  ensureCurrentResultVisible(run);
+  return getResultById(run.currentResultId);
 }
 
-function formatCommentLabel(comment, run) {
-  return `${comment.author} · ${comment.badge} · ${comment.timeLabel} · 도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}`;
+function formatResultLabel(result, run) {
+  return `${result.title} · ${result.badge} · ${result.timeLabel} · 저장 ${getEffectiveSaveCount(result, run)}`;
 }
 
 function formatRunStateSummary(run) {
-  const expandedComment = run.expandedCommentId ? getCommentById(run.expandedCommentId) : null;
-  const helpfulComments = Object.keys(run.helpfulByCommentId)
-    .filter((commentId) => run.helpfulByCommentId[commentId])
-    .map((commentId) => getCommentById(commentId)?.author)
+  const openedResult = run.openedResultId ? getResultById(run.openedResultId) : null;
+  const savedResults = Object.keys(run.savedByResultId)
+    .filter((resultId) => run.savedByResultId[resultId])
+    .map((resultId) => getResultById(resultId)?.title)
     .filter(Boolean);
+
   return [
     `정렬 기준 ${getSortLabel(run.sort)}`,
-    `댓글 범위 ${getCategoryLabel(run.category)}`,
-    expandedComment ? `열린 답글 ${expandedComment.author} 댓글` : '열린 답글 없음',
-    helpfulComments.length > 0 ? `도움이 돼요 표시 ${helpfulComments.join(', ')}` : '도움이 돼요 표시 없음',
+    `자료 범위 ${getTypeLabel(run.type)}`,
+    openedResult ? `최근 바로 열기 ${openedResult.title}` : '최근 바로 열기 없음',
+    savedResults.length > 0 ? `저장한 자료 ${savedResults.join(', ')}` : '저장한 자료 없음',
   ].join(' / ');
 }
 
-function buildCommentSelector(commentId) {
-  return `[data-comment-option="true"][data-comment-id="${commentId}"]`;
+function buildResultSelector(resultId) {
+  return `[data-result-option="true"][data-result-id="${resultId}"]`;
 }
 
-function selectComment(commentId) {
+function selectResult(resultId) {
   const run = getCurrentRun();
-  if (!run || !commentId) return;
-  run.currentCommentId = commentId;
-  requestFocus(buildCommentSelector(commentId));
+  if (!run || !resultId) return;
+  run.currentResultId = resultId;
+  requestFocus(buildResultSelector(resultId));
   render();
 }
 
-function applyCommentFilters() {
+function applyResultFilters() {
   const run = getCurrentRun();
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '정렬 기준과 댓글 범위를 적용하는 중입니다…';
+  run.liveStatus = '정렬 기준과 자료 범위를 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
     run.isApplying = false;
     run.sort = run.sortDraft;
-    run.category = run.categoryDraft;
-    ensureCurrentCommentVisible(run);
-    const visibleComments = getVisibleComments(run);
-    run.liveStatus = `현재 ${visibleComments.length}개의 댓글이 표시되었습니다.`;
+    run.type = run.typeDraft;
+    ensureCurrentResultVisible(run);
+    const visibleSearch = getVisibleSearch(run);
+    run.liveStatus = `현재 ${visibleSearch.length}개의 자료가 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
-      requestFocus('#comments-heading');
+      requestFocus('#search-heading');
     } else {
-      requestFocus('[data-focus-id="apply-comment-filters"]');
+      requestFocus('[data-focus-id="apply-result-filters"]');
     }
     render();
   }, 280);
 }
 
-function noteWrongCommentAction(commentId, actionType) {
+function noteWrongResultAction(resultId, actionType, extra = {}) {
   const run = getCurrentRun();
   const task = getCurrentTask();
-  if (!run || !task || !commentId || commentId === task.targetCommentId) return;
+  if (!run || !task || !resultId) return;
+
   const relevantActions = {
-    expandReplies: ['toggle-replies'],
-    helpful: ['open-detail', 'mark-helpful'],
+    closePreview: ['open-preview'],
+    save: ['save-result'],
+    open: ['open-preview', 'open-result'],
   };
-  if (!relevantActions[task.completion]?.includes(actionType)) return;
+
+  const isTarget = resultId === task.targetResultId;
+  const actionRelevant = relevantActions[task.completion]?.includes(actionType);
+
+  if ((!actionRelevant || isTarget) && !extra.previewMissing) return;
+
   run.currentTaskLogger?.note('wrong-selection', {
     actionType,
-    commentId,
-    targetCommentId: task.targetCommentId,
+    resultId,
+    targetResultId: task.targetResultId,
+    ...extra,
   });
 }
 
-function openCommentDetail(commentId, triggerFocusId) {
+function openResultPreview(resultId, triggerFocusId) {
   const run = getCurrentRun();
   if (!run || run.isWorking) return;
-  const comment = getCommentById(commentId);
-  if (!comment) return;
-  noteWrongCommentAction(commentId, 'open-detail');
+  const result = getResultById(resultId);
+  if (!result) return;
+
+  noteWrongResultAction(resultId, 'open-preview');
   run.modal = {
-    kind: 'comment-detail',
-    commentId,
+    kind: 'result-preview',
+    resultId,
     triggerFocusId,
   };
-  run.currentTaskLogger?.note('open-comment-detail', { commentId });
+  run.currentTaskLogger?.note('open-result-preview', { resultId });
   run.currentTaskLogger?.setModalState({
     open: true,
     containerSelector: '[data-modal-dialog]',
     triggerFocusId,
   });
+
   if (state.conditionId === 'variantB') {
     requestFocus('[data-dialog-close]');
   } else {
@@ -871,15 +881,18 @@ function openCommentDetail(commentId, triggerFocusId) {
 
 function closeModal() {
   const run = getCurrentRun();
+  const task = getCurrentTask();
   if (!run || !run.modal) return;
   const closingModal = run.modal;
   run.modal = null;
-  if (closingModal.kind === 'comment-detail' && closingModal.commentId) {
-    run.detailVisitedThisTask = {
-      ...run.detailVisitedThisTask,
-      [closingModal.commentId]: true,
+
+  if (closingModal.kind === 'result-preview' && closingModal.resultId) {
+    run.previewVisitedThisTask = {
+      ...run.previewVisitedThisTask,
+      [closingModal.resultId]: true,
     };
   }
+
   run.currentTaskLogger?.setModalState({
     open: false,
     containerSelector: null,
@@ -890,35 +903,44 @@ function closeModal() {
   if (state.conditionId === 'variantB' && closingModal.triggerFocusId) {
     requestFocus(`[data-focus-id="${closingModal.triggerFocusId}"]`);
   } else {
-    run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-comments-heading' });
-    requestFocus('#comments-heading');
+    run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-search-heading' });
+    requestFocus('#search-heading');
   }
-  render();
-}
 
-function toggleReplies(commentId, triggerFocusId) {
-  const run = getCurrentRun();
-  const task = getCurrentTask();
-  if (!run || !task || run.isWorking) return;
-  const comment = getCommentById(commentId);
-  if (!comment) return;
-  noteWrongCommentAction(commentId, 'toggle-replies');
-
-  const expanding = run.expandedCommentId !== commentId;
-  run.expandedCommentId = expanding ? commentId : null;
-  run.currentTaskLogger?.note('toggle-replies', {
-    commentId,
-    expanded: expanding,
-  });
-
-  if (isTaskSatisfied(task, run)) {
-    finishRunnerTask('target-replies-opened');
+  if (task && isTaskSatisfied(task, run) && task.completion === 'closePreview' && closingModal.resultId === task.targetResultId) {
+    finishRunnerTask('target-preview-closed');
     return;
   }
 
-  run.liveStatus = expanding
-    ? `${comment.author} 댓글의 답글 ${comment.replyCount}개를 펼쳤습니다.`
-    : `${comment.author} 댓글의 답글을 접었습니다.`;
+  render();
+}
+
+function saveResult(resultId, triggerFocusId) {
+  const run = getCurrentRun();
+  const task = getCurrentTask();
+  if (!run || !task || run.isWorking) return;
+  const result = getResultById(resultId);
+  if (!result) return;
+
+  noteWrongResultAction(resultId, 'save-result');
+  const alreadySaved = Boolean(run.savedByResultId[resultId]);
+  run.savedByResultId = {
+    ...run.savedByResultId,
+    [resultId]: true,
+  };
+  run.currentTaskLogger?.note('save-result', {
+    resultId,
+    alreadySaved,
+  });
+
+  if (isTaskSatisfied(task, run)) {
+    finishRunnerTask('target-result-saved');
+    return;
+  }
+
+  run.liveStatus = alreadySaved
+    ? `${result.title} 자료는 이미 저장되어 있습니다.`
+    : `${result.title} 자료를 저장했습니다.`;
 
   if (triggerFocusId) {
     requestFocus(`[data-focus-id="${triggerFocusId}"]`);
@@ -926,32 +948,29 @@ function toggleReplies(commentId, triggerFocusId) {
   render();
 }
 
-function markHelpful(commentId, triggerFocusId) {
+function openResult(resultId, triggerFocusId) {
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || run.isWorking) return;
-  const comment = getCommentById(commentId);
-  if (!comment) return;
-  noteWrongCommentAction(commentId, 'mark-helpful');
+  const result = getResultById(resultId);
+  if (!result) return;
 
-  const alreadyHelpful = Boolean(run.helpfulByCommentId[commentId]);
-  run.helpfulByCommentId = {
-    ...run.helpfulByCommentId,
-    [commentId]: true,
-  };
-  run.currentTaskLogger?.note('mark-helpful', {
-    commentId,
-    alreadyHelpful,
-  });
+  if (task.requiresPreviewVisit && resultId === task.targetResultId && !run.previewVisitedThisTask[resultId]) {
+    noteWrongResultAction(resultId, 'open-result', { previewMissing: true });
+  } else {
+    noteWrongResultAction(resultId, 'open-result');
+  }
+
+  run.openedResultId = resultId;
+  run.currentTaskLogger?.note('open-result', { resultId });
 
   if (isTaskSatisfied(task, run)) {
-    finishRunnerTask('target-comment-helpful');
+    finishRunnerTask('target-result-opened');
     return;
   }
 
-  run.liveStatus = alreadyHelpful
-    ? `${comment.author} 댓글에는 이미 도움이 돼요가 표시되어 있습니다.`
-    : `${comment.author} 댓글에 도움이 돼요를 표시했습니다.`;
+  run.liveStatus = `${result.title} 자료를 바로 열었습니다.`;
+
   if (triggerFocusId) {
     requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   }
@@ -961,16 +980,22 @@ function markHelpful(commentId, triggerFocusId) {
 function isTaskSatisfied(task, run) {
   if (!task || !run) return false;
   if (task.requiredSort && run.sort !== task.requiredSort) return false;
-  if (task.requiredCategory && run.category !== task.requiredCategory) return false;
+  if (task.requiredType && run.type !== task.requiredType) return false;
 
-  if (task.completion === 'expandReplies') {
-    return run.expandedCommentId === task.targetCommentId;
+  const previewDone = task.requiresPreviewVisit
+    ? Boolean(run.previewVisitedThisTask[task.targetResultId])
+    : true;
+
+  if (task.completion === 'closePreview') {
+    return previewDone;
   }
 
-  if (task.completion === 'helpful') {
-    const helpfulDone = Boolean(run.helpfulByCommentId[task.targetCommentId]);
-    const detailDone = task.requiresDetailVisit ? Boolean(run.detailVisitedThisTask[task.targetCommentId]) : true;
-    return helpfulDone && detailDone;
+  if (task.completion === 'save') {
+    return previewDone && Boolean(run.savedByResultId[task.targetResultId]);
+  }
+
+  if (task.completion === 'open') {
+    return previewDone && run.openedResultId === task.targetResultId;
   }
 
   return false;
@@ -986,8 +1011,9 @@ function finishRunnerTask(reason) {
     success: true,
     reason,
     notes: [
-      `expandedComment=${run.expandedCommentId ?? 'none'}`,
-      `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
+      `openedResult=${run.openedResultId ?? 'none'}`,
+      `saved=${Object.keys(run.savedByResultId).filter((resultId) => run.savedByResultId[resultId]).join(',') || 'none'}`,
+      `previewVisited=${Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]).join(',') || 'none'}`,
       'measurement=first-input-visible-only',
     ],
   });
@@ -1012,23 +1038,23 @@ function finishRunnerTask(reason) {
   render();
 }
 
-function handleCommentOptionNavigation(event, currentButton) {
+function handleResultOptionNavigation(event, currentButton) {
   const run = getCurrentRun();
-  if (!run || !currentButton.dataset.commentId) return;
-  const visibleComments = getVisibleComments(run);
-  const currentIndex = visibleComments.findIndex((comment) => comment.id === currentButton.dataset.commentId);
+  if (!run || !currentButton.dataset.resultId) return;
+  const visibleSearch = getVisibleSearch(run);
+  const currentIndex = visibleSearch.findIndex((result) => result.id === currentButton.dataset.resultId);
   if (currentIndex === -1) return;
 
   let nextIndex = currentIndex;
-  if (event.key === 'ArrowDown') nextIndex = Math.min(currentIndex + 1, visibleComments.length - 1);
+  if (event.key === 'ArrowDown') nextIndex = Math.min(currentIndex + 1, visibleSearch.length - 1);
   if (event.key === 'ArrowUp') nextIndex = Math.max(currentIndex - 1, 0);
   if (event.key === 'Home') nextIndex = 0;
-  if (event.key === 'End') nextIndex = visibleComments.length - 1;
+  if (event.key === 'End') nextIndex = visibleSearch.length - 1;
 
   if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    run.currentCommentId = visibleComments[nextIndex].id;
-    requestFocus(buildCommentSelector(visibleComments[nextIndex].id));
+    run.currentResultId = visibleSearch[nextIndex].id;
+    requestFocus(buildResultSelector(visibleSearch[nextIndex].id));
     render();
   }
 }
@@ -1055,13 +1081,13 @@ function render() {
 function getDocumentTitle() {
   if (APP_MODE === 'runner') {
     const task = getCurrentTask();
-    return `수행 화면 · ${task?.title ?? '댓글 목록'}`;
+    return `수행 화면 · ${task?.title ?? '검색 결과 목록'}`;
   }
-  if (state.view === 'serviceIntro') return '댓글 목록 서비스 화면';
-  if (state.view === 'taskPrep' || state.view === 'taskRunning') return `과업 준비 · ${getCurrentTask()?.title ?? '댓글 목록'}`;
+  if (state.view === 'serviceIntro') return '검색 결과 목록 서비스 화면';
+  if (state.view === 'taskPrep' || state.view === 'taskRunning') return `과업 준비 · ${getCurrentTask()?.title ?? '검색 결과 목록'}`;
   if (state.view === 'taskReview') return '과업 결과 요약';
   if (state.view === 'conditionReview') return '비교안 요약';
-  return '댓글 목록 최종 비교';
+  return '검색 결과 목록 최종 비교';
 }
 
 function renderMainPage() {
@@ -1089,21 +1115,21 @@ function renderRunnerPage() {
 
   const run = getCurrentRun();
   const conditionId = getCurrentConditionId();
-  const visibleComments = getVisibleComments(run);
+  const visibleSearch = getVisibleSearch(run);
   const task = getCurrentTask();
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' && !state.completed ? `<a class="skip-link" href="#comments-heading" data-action="jump-results" data-focus-id="runner-skip-comments">${RUNNER_LABELS.quickJump}</a>` : ''}
-      <main class="runner-main" aria-label="댓글 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
+      ${conditionId === 'variantB' && !state.completed ? `<a class="skip-link" href="#search-heading" data-action="jump-results" data-focus-id="runner-skip-search">${RUNNER_LABELS.quickJump}</a>` : ''}
+      <main class="runner-main" aria-label="검색 결과 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
-        ${renderCommentsHeader(conditionId)}
-        ${renderCommentControls(conditionId, run)}
-        ${renderCommentsSection(conditionId, run, visibleComments)}
+        ${renderSearchHeader(conditionId)}
+        ${renderResultControls(conditionId, run)}
+        ${renderSearchSection(conditionId, run, visibleSearch)}
       </main>
       ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
       ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
-      ${run.modal ? renderCommentModal(run.modal, run) : ''}
+      ${run.modal ? renderResultModal(run.modal, run) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
           description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인을 누르면 이 탭이 자동으로 닫힙니다.`,
@@ -1117,18 +1143,18 @@ function renderServiceIntroView() {
   return `
     <header class="hero card">
       <p class="eyebrow">선택한 서비스 유형</p>
-      <h1 id="service-heading" tabindex="-1">댓글 목록</h1>
+      <h1 id="service-heading" tabindex="-1">검색 결과 목록</h1>
       <p>
-        같은 댓글 내용을 두 가지 다른 이동 구조로 보여 주는 실험 화면입니다.
+        같은 검색 결과를 두 가지 다른 이동 구조로 보여 주는 실험 화면입니다.
         이 화면에서 과업 준비 단계로 들어가거나, 다시 서비스 선택 화면으로 돌아갈 수 있습니다.
       </p>
       <div class="hero-grid">
         <section>
           <h2>이번에 확인하는 것</h2>
           <ul>
-            <li>댓글마다 따로 흩어진 작업 버튼이 순차 탐색 부담을 얼마나 키우는지</li>
-            <li>댓글을 하나의 선택 항목으로 묶고 작업을 한곳에 모았을 때 부담이 얼마나 줄어드는지</li>
-            <li>대화상자를 닫은 뒤 같은 댓글 작업으로 돌아오는 구조가 실제 기록에 어떤 차이를 만드는지</li>
+            <li>자료마다 따로 흩어진 작업 버튼이 순차 탐색 부담을 얼마나 키우는지</li>
+            <li>자료를 하나의 선택 항목으로 묶고 작업을 한곳에 모았을 때 부담이 얼마나 줄어드는지</li>
+            <li>미리보기 대화상자를 닫은 뒤 같은 자료 작업으로 돌아오는 구조가 실제 기록에 어떤 차이를 만드는지</li>
           </ul>
         </section>
         <section>
@@ -1156,10 +1182,10 @@ function renderTaskPreparationView() {
   const conditionId = getCurrentConditionId();
   const run = getCurrentRun();
   const task = getCurrentTask();
-  const benchmark = benchmarkResultsComments.variants[conditionId].tasks[task.benchmarkTaskId];
+  const benchmark = benchmarkResultsSearch.variants[conditionId].tasks[task.benchmarkTaskId];
   const activeLaunch = state.activeLaunch;
   const isRunning = state.view === 'taskRunning';
-  const targetComment = getCommentById(task.targetCommentId);
+  const targetResult = getResultById(task.targetResultId);
 
   return `
     <section class="card review-hero">
@@ -1171,7 +1197,7 @@ function renderTaskPreparationView() {
       <div class="pill-group">
         <span class="pill">실험 번호 ${escapeHtml(state.sessionId)}</span>
         <span class="pill">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)}</span>
-        <span class="pill">과업 ${state.currentTaskIndex + 1} / ${commentsTasks.length}</span>
+        <span class="pill">과업 ${state.currentTaskIndex + 1} / ${searchTasks.length}</span>
       </div>
     </section>
 
@@ -1183,8 +1209,8 @@ function renderTaskPreparationView() {
           ${task.instructions.map((instruction) => `<li>${escapeHtml(instruction)}</li>`).join('')}
         </ol>
         <dl class="meta-list compact">
-          <div><dt>현재 댓글 상태</dt><dd>${escapeHtml(formatRunStateSummary(run))}</dd></div>
-          <div><dt>목표 댓글</dt><dd>${escapeHtml(targetComment ? formatCommentLabel(targetComment, run) : '없음')}</dd></div>
+          <div><dt>현재 검색 상태</dt><dd>${escapeHtml(formatRunStateSummary(run))}</dd></div>
+          <div><dt>목표 자료</dt><dd>${escapeHtml(targetResult ? formatResultLabel(targetResult, run) : '없음')}</dd></div>
         </dl>
       </article>
 
@@ -1236,8 +1262,8 @@ function renderTaskReviewView() {
   const run = getCurrentRun();
   const task = getCurrentTask();
   const result = run.taskResults.at(-1);
-  const benchmark = benchmarkResultsComments.variants[conditionId].tasks[result.benchmarkTaskId];
-  const comparison = benchmarkResultsComments.comparisons[result.benchmarkTaskId];
+  const benchmark = benchmarkResultsSearch.variants[conditionId].tasks[result.benchmarkTaskId];
+  const comparison = benchmarkResultsSearch.comparisons[result.benchmarkTaskId];
 
   return `
     <section class="card review-hero">
@@ -1254,7 +1280,7 @@ function renderTaskReviewView() {
           <div><dt>총 키 입력</dt><dd>${result.totalKeyInputs}</dd></div>
           <div><dt>초점 이동</dt><dd>${result.focusChanges}</dd></div>
           <div><dt>되돌아간 입력</dt><dd>${result.backtrackInputs}</dd></div>
-          <div><dt>목표와 다른 댓글에서 동작</dt><dd>${result.wrongSelections}</dd></div>
+          <div><dt>목표와 다른 자료에서 동작</dt><dd>${result.wrongSelections}</dd></div>
           <div><dt>위치 다시 찾기</dt><dd>${result.contextResets ?? 0}</dd></div>
           <div><dt>클릭 입력</dt><dd>${result.pointerActivations}</dd></div>
         </dl>
@@ -1273,7 +1299,7 @@ function renderTaskReviewView() {
           <h3>비교안 B 예상 개선폭</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
-              <li><strong>${escapeHtml(benchmarkResultsComments.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
+              <li><strong>${escapeHtml(benchmarkResultsSearch.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
             `).join('')}
           </ul>
         </div>
@@ -1281,7 +1307,7 @@ function renderTaskReviewView() {
     </section>
     <div class="button-row">
       <button class="button button-primary" data-action="continue-after-task">
-        ${state.currentTaskIndex < commentsTasks.length - 1 ? '다음 과업 준비' : '현재 비교안 요약 보기'}
+        ${state.currentTaskIndex < searchTasks.length - 1 ? '다음 과업 준비' : '현재 비교안 요약 보기'}
       </button>
       <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
     </div>
@@ -1312,7 +1338,7 @@ function renderConditionReviewView() {
           <div><dt>총 숨김 탭 제외 시간</dt><dd>${formatSeconds(totals.hiddenDurationSeconds)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${totals.totalKeyInputs}</dd></div>
           <div><dt>총 초점 이동</dt><dd>${totals.focusChanges}</dd></div>
-          <div><dt>목표와 다른 댓글에서 동작</dt><dd>${totals.wrongSelections}</dd></div>
+          <div><dt>목표와 다른 자료에서 동작</dt><dd>${totals.wrongSelections}</dd></div>
           <div><dt>위치 다시 찾기</dt><dd>${totals.contextResets}</dd></div>
           <div><dt>대화상자 바깥으로 초점 이탈</dt><dd>${totals.modalEscapes}</dd></div>
         </dl>
@@ -1337,7 +1363,7 @@ function renderConditionReviewView() {
       <article class="card">
         <h2>저장된 과업 기록</h2>
         <ol>
-          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(commentsTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
+          ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(searchTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
         </ol>
       </article>
     </section>
@@ -1359,7 +1385,7 @@ function renderFinalView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">댓글 목록 실험 완료</p>
+      <p class="eyebrow">검색 결과 목록 실험 완료</p>
       <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
       <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 점검 기준을 마련했습니다.</p>
     </section>
@@ -1367,13 +1393,13 @@ function renderFinalView() {
       <label>
         <span>비교 기준 사용자 유형</span>
         <select name="benchmark-profile">
-          ${Object.entries(benchmarkResultsComments.overall).map(([profileId, profile]) => `
+          ${Object.entries(benchmarkResultsSearch.overall).map(([profileId, profile]) => `
             <option value="${profileId}" ${profileId === selectedProfileId ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
           `).join('')}
         </select>
       </label>
       <div class="button-row">
-        <a class="button button-secondary" download="comments-list-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="search-results-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
@@ -1397,7 +1423,7 @@ function renderFinalView() {
           <tr><th>총 숨김 탭 제외 시간</th><td>${formatSeconds(actualA.hiddenDurationSeconds)}</td><td>${formatSeconds(actualB.hiddenDurationSeconds)}</td><td>${formatSigned(actualB.hiddenDurationSeconds - actualA.hiddenDurationSeconds, '초')}</td></tr>
           <tr><th>총 키 입력</th><td>${actualA.totalKeyInputs}</td><td>${actualB.totalKeyInputs}</td><td>${formatSigned(actualB.totalKeyInputs - actualA.totalKeyInputs)}</td></tr>
           <tr><th>총 초점 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
-          <tr><th>목표와 다른 댓글에서 동작</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
+          <tr><th>목표와 다른 자료에서 동작</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
           <tr><th>위치 다시 찾기</th><td>${actualA.contextResets}</td><td>${actualB.contextResets}</td><td>${formatSigned(actualB.contextResets - actualA.contextResets)}</td></tr>
         </tbody>
       </table>
@@ -1406,7 +1432,7 @@ function renderFinalView() {
     <section class="card">
       <h2>다음 단계에 바로 쓸 수 있는 포인트</h2>
       <ul>
-        <li>댓글 목록도 메인 창과 수행 탭을 분리해 같은 운영 방식으로 확장했습니다.</li>
+        <li>검색 결과 목록도 메인 창과 수행 탭을 분리해 같은 운영 방식으로 확장했습니다.</li>
         <li>서비스별 사전 계산 그래프와 결과 파일을 별도로 둬 후속 서비스 유형을 독립적으로 추가할 수 있습니다.</li>
         <li>수동 점검표 문서를 함께 두어 브라우저 자동화가 어려운 부분을 배포 전 점검으로 보완할 수 있습니다.</li>
       </ul>
@@ -1423,48 +1449,48 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
     conditionId,
     actualTotals,
     selectedProfileId,
-    benchmarkResults: benchmarkResultsComments,
+    benchmarkResults: benchmarkResultsSearch,
     variantMeta: VARIANT_META,
   });
 }
 
-function renderCommentsHeader(conditionId) {
-  const links = ['게시글 목록', '인기 글', '이용 안내', '새 글 쓰기', '알림', '내 댓글', '커뮤니티 규칙', '문의'];
+function renderSearchHeader(conditionId) {
+  const links = ['홈', '통합 검색 도움말', '검색 기록', '저장한 자료', '자료 요청', '이용 안내', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
-      <nav aria-label="커뮤니티 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="community-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
+      <nav aria-label="검색 보조 내비게이션">
+        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="search-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
     </header>
   `;
 }
 
-function renderCommentControls(conditionId, run) {
+function renderResultControls(conditionId, run) {
   return `
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
       <div class="filters-header">
         <div>
-          <h2 id="filters-heading">정렬과 범위 선택</h2>
+          <h2 id="filters-heading">정렬과 자료 범위 선택</h2>
         </div>
       </div>
       <div class="filters-grid">
         <label>
           <span>정렬 기준</span>
-          <select name="sort" data-focus-id="comment-sort">
-            ${commentsScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+          <select name="sort" data-focus-id="result-sort">
+            ${searchScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
           </select>
         </label>
         <label>
-          <span>댓글 범위</span>
-          <select name="category" data-focus-id="comment-category">
-            ${commentsScenario.categoryOptions.map((option) => `<option value="${option.id}" ${run.categoryDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+          <span>자료 범위</span>
+          <select name="type" data-focus-id="result-type">
+            ${searchScenario.typeOptions.map((option) => `<option value="${option.id}" ${run.typeDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
           </select>
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="comment-policy-link" data-inert-link="true">댓글 운영 기준 보기</a>
-        <a href="#" class="inline-link" data-focus-id="comment-help-link" data-inert-link="true">작성 안내 보기</a>
-        <button class="button button-primary" data-action="apply-comment-filters" data-focus-id="apply-comment-filters" ${run.isApplying ? 'disabled' : ''}>
+        <a href="#" class="inline-link" data-focus-id="result-policy-link" data-inert-link="true">검색 도움말 보기</a>
+        <a href="#" class="inline-link" data-focus-id="result-help-link" data-inert-link="true">자료 범위 설명 보기</a>
+        <button class="button button-primary" data-action="apply-result-filters" data-focus-id="apply-result-filters" ${run.isApplying ? 'disabled' : ''}>
           ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>
       </div>
@@ -1472,133 +1498,141 @@ function renderCommentControls(conditionId, run) {
   `;
 }
 
-function renderCommentsSection(conditionId, run, visibleComments) {
+function renderSearchSection(conditionId, run, visibleSearch) {
   return `
     <section class="card results-card">
       <div class="results-header">
         <div>
-          <h2 id="comments-heading" tabindex="-1">댓글 목록</h2>
-          <p class="muted">표시된 댓글 ${visibleComments.length}개 · 게시글 제목 ${escapeHtml(commentsScenario.postTitle)}</p>
+          <h2 id="search-heading" tabindex="-1">검색 결과</h2>
+          <p class="muted">검색어 ${escapeHtml(searchScenario.queryLabel)} · 표시된 자료 ${visibleSearch.length}개</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 댓글을 고르고 탭 키로 댓글 작업으로 이동</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 댓글과 댓글 작업을 차례대로 이동</p>'}
+        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 자료를 고르고 탭 키로 선택한 자료 작업으로 이동</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 자료와 자료 작업을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
-        ? renderVariantACommentList(run, visibleComments)
-        : renderVariantBCommentList(run, visibleComments)}
+        ? renderVariantAResultList(run, visibleSearch)
+        : renderVariantBResultList(run, visibleSearch)}
     </section>
   `;
 }
 
-function renderVariantACommentList(run, visibleComments) {
-  if (visibleComments.length === 0) {
-    return '<p class="muted">현재 조건에 맞는 댓글이 없습니다.</p>';
+function renderVariantAResultList(run, visibleSearch) {
+  if (visibleSearch.length === 0) {
+    return '<p class="muted">현재 조건에 맞는 자료가 없습니다.</p>';
   }
 
   return `
-    <ul class="comment-list comment-list-a">
-      ${visibleComments.map((comment) => `
-        <li class="comment-card ${run.expandedCommentId === comment.id ? 'comment-card-expanded' : ''}">
-          <div class="comment-card-head">
-            <div class="comment-head-links">
-              <a href="#" class="inline-link" data-focus-id="comment-author-${comment.id}" data-inert-link="true">${escapeHtml(comment.author)}</a>
-              <span class="pill ${comment.category === 'notice' ? 'pill-warning' : ''}">${escapeHtml(comment.badge)}</span>
-              <a href="#" class="inline-link" data-focus-id="comment-time-${comment.id}" data-inert-link="true">${escapeHtml(comment.timeLabel)}</a>
+    <ul class="result-list result-list-a">
+      ${visibleSearch.map((result) => `
+        <li class="result-card ${run.openedResultId === result.id ? 'result-card-expanded' : ''}">
+          <div class="result-card-head">
+            <div class="result-head-links">
+              <a href="#" class="inline-link" data-focus-id="result-title-${result.id}" data-inert-link="true">${escapeHtml(result.title)}</a>
+              <span class="pill ${result.type === 'form' ? 'pill-warning' : ''}">${escapeHtml(result.badge)}</span>
+              <a href="#" class="inline-link" data-focus-id="result-time-${result.id}" data-inert-link="true">${escapeHtml(result.timeLabel)}</a>
             </div>
-            <a href="#" class="inline-link" data-focus-id="comment-share-${comment.id}" data-inert-link="true">공유</a>
+            <a href="#" class="inline-link" data-focus-id="result-share-${result.id}" data-inert-link="true">공유</a>
           </div>
-          <p class="comment-summary"><strong>${escapeHtml(comment.summary)}</strong></p>
-          <p class="muted">${escapeHtml(comment.body)}</p>
-          <div class="comment-metrics muted">도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}</div>
-          <div class="button-row comment-action-row">
-            <button class="button button-secondary" data-action="mark-helpful" data-comment-id="${comment.id}" data-focus-id="comment-helpful-${comment.id}">도움이 돼요</button>
-            <button class="button button-ghost" data-action="toggle-replies" data-comment-id="${comment.id}" data-focus-id="comment-replies-${comment.id}">${run.expandedCommentId === comment.id ? `답글 ${comment.replyCount}개 닫기` : `답글 ${comment.replyCount}개 보기`}</button>
-            <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${comment.id}" data-focus-id="comment-detail-${comment.id}">댓글 정보 보기</button>
+          <p class="result-summary"><strong>${escapeHtml(result.summary)}</strong></p>
+          <p class="muted">${escapeHtml(result.body)}</p>
+          ${renderKeywordList(result)}
+          <div class="result-metrics muted">저장 ${getEffectiveSaveCount(result, run)} · 자료 유형 ${escapeHtml(result.badge)}</div>
+          <div class="button-row result-action-row">
+            <button class="button button-secondary" data-action="save-result" data-result-id="${result.id}" data-focus-id="result-save-${result.id}">저장</button>
+            <button class="button button-ghost" data-action="open-result" data-result-id="${result.id}" data-focus-id="result-open-${result.id}">바로 열기</button>
+            <button class="button button-ghost" data-action="open-result-preview" data-result-id="${result.id}" data-focus-id="result-preview-${result.id}">미리보기</button>
           </div>
-          ${run.expandedCommentId === comment.id ? renderReplyList(comment) : ''}
+          ${run.openedResultId === result.id ? renderOpenedResultStatus(result) : ''}
         </li>
       `).join('')}
     </ul>
   `;
 }
 
-function renderVariantBCommentList(run, visibleComments) {
-  if (visibleComments.length === 0) {
-    return '<p class="muted">현재 조건에 맞는 댓글이 없습니다.</p>';
+function renderVariantBResultList(run, visibleSearch) {
+  if (visibleSearch.length === 0) {
+    return '<p class="muted">현재 조건에 맞는 자료가 없습니다.</p>';
   }
-  ensureCurrentCommentVisible(run);
-  const selectedComment = getSelectedVisibleComment(run);
-  const expandedComment = run.expandedCommentId ? getCommentById(run.expandedCommentId) : null;
+  ensureCurrentResultVisible(run);
+  const selectedResult = getSelectedVisibleResult(run);
+  const openedResult = run.openedResultId ? getResultById(run.openedResultId) : null;
 
   return `
-    <div class="comment-composite-layout">
-      <div role="listbox" aria-label="댓글 목록" class="comment-option-list">
-        ${visibleComments.map((comment) => `
+    <div class="result-composite-layout">
+      <div role="listbox" aria-label="검색 결과 목록" class="result-option-list">
+        ${visibleSearch.map((result) => `
           <button
             role="option"
-            class="comment-option-button ${run.currentCommentId === comment.id ? 'comment-option-button-active' : ''}"
-            aria-selected="${run.currentCommentId === comment.id ? 'true' : 'false'}"
-            data-action="select-comment"
-            data-comment-option="true"
-            data-comment-id="${comment.id}"
-            data-focus-id="comment-option-${comment.id}"
-            tabindex="${run.currentCommentId === comment.id ? '0' : '-1'}"
-            aria-label="${escapeHtml(formatCommentLabel(comment, run))}"
+            class="result-option-button ${run.currentResultId === result.id ? 'result-option-button-active' : ''}"
+            aria-selected="${run.currentResultId === result.id ? 'true' : 'false'}"
+            data-action="select-result"
+            data-result-option="true"
+            data-result-id="${result.id}"
+            data-focus-id="result-option-${result.id}"
+            tabindex="${run.currentResultId === result.id ? '0' : '-1'}"
+            aria-label="${escapeHtml(formatResultLabel(result, run))}"
           >
-            <span class="comment-option-top">
-              <strong>${escapeHtml(comment.author)}</strong>
-              <span class="pill ${comment.category === 'notice' ? 'pill-warning' : ''}">${escapeHtml(comment.badge)}</span>
+            <span class="result-option-top">
+              <strong>${escapeHtml(result.title)}</strong>
+              <span class="pill ${result.type === 'form' ? 'pill-warning' : ''}">${escapeHtml(result.badge)}</span>
             </span>
-            <span class="muted">${escapeHtml(comment.timeLabel)}</span>
-            <span>${escapeHtml(comment.summary)}</span>
-            <span class="muted">도움이 ${getEffectiveHelpfulCount(comment, run)} · 답글 ${comment.replyCount}</span>
+            <span class="muted">${escapeHtml(result.timeLabel)}</span>
+            <span>${escapeHtml(result.summary)}</span>
+            <span class="muted">저장 ${getEffectiveSaveCount(result, run)}</span>
           </button>
         `).join('')}
       </div>
-      <section class="card selected-comment-card">
-        <h3 id="selected-comment-heading">선택한 댓글 작업</h3>
-        ${selectedComment ? `
-          <p class="goal">${escapeHtml(selectedComment.author)} · ${escapeHtml(selectedComment.badge)}</p>
-          <p class="muted">${escapeHtml(selectedComment.summary)}</p>
+      <section class="card selected-result-card">
+        <h3 id="selected-result-heading">선택한 자료 작업</h3>
+        ${selectedResult ? `
+          <p class="goal">${escapeHtml(selectedResult.title)} · ${escapeHtml(selectedResult.badge)}</p>
+          <p class="muted">${escapeHtml(selectedResult.summary)}</p>
+          ${renderKeywordList(selectedResult)}
           <div class="button-row">
-            <button class="button button-secondary" data-action="toggle-replies" data-comment-id="${selectedComment.id}" data-focus-id="selected-replies-${selectedComment.id}">${run.expandedCommentId === selectedComment.id ? `답글 ${selectedComment.replyCount}개 닫기` : `답글 ${selectedComment.replyCount}개 보기`}</button>
-            <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${selectedComment.id}" data-focus-id="selected-detail-${selectedComment.id}">댓글 정보 보기</button>
-            <button class="button button-ghost" data-action="mark-helpful" data-comment-id="${selectedComment.id}" data-focus-id="selected-helpful-${selectedComment.id}">도움이 돼요</button>
+            <button class="button button-secondary" data-action="open-result-preview" data-result-id="${selectedResult.id}" data-focus-id="selected-preview-${selectedResult.id}">미리보기</button>
+            <button class="button button-ghost" data-action="save-result" data-result-id="${selectedResult.id}" data-focus-id="selected-save-${selectedResult.id}">저장</button>
+            <button class="button button-ghost" data-action="open-result" data-result-id="${selectedResult.id}" data-focus-id="selected-open-${selectedResult.id}">바로 열기</button>
           </div>
-        ` : '<p class="muted">선택된 댓글이 없습니다.</p>'}
+        ` : '<p class="muted">선택된 자료가 없습니다.</p>'}
       </section>
     </div>
-    ${expandedComment ? renderReplyList(expandedComment) : ''}
+    ${openedResult ? renderOpenedResultStatus(openedResult) : ''}
   `;
 }
 
-function renderReplyList(comment) {
+function renderKeywordList(result) {
   return `
-    <section class="reply-card" aria-label="${escapeHtml(comment.author)} 댓글의 답글 목록">
-      <h3>${escapeHtml(comment.author)} 댓글의 답글 ${comment.replyCount}개</h3>
-      <ul class="reply-list">
-        ${comment.replies.map((reply) => `<li><strong>${escapeHtml(reply.author)}</strong> · ${escapeHtml(reply.text)}</li>`).join('')}
-      </ul>
+    <ul class="chip-list result-keyword-list" aria-label="${escapeHtml(result.title)} 관련 낱말">
+      ${result.keywords.map((keyword) => `<li>${escapeHtml(keyword)}</li>`).join('')}
+    </ul>
+  `;
+}
+
+function renderOpenedResultStatus(result) {
+  return `
+    <section class="result-status-card" aria-label="${escapeHtml(result.title)} 자료 상태">
+      <h3>${escapeHtml(result.title)} 자료를 바로 열었습니다.</h3>
+      <p class="muted">실험용 화면에서는 실제 새 페이지로 이동하지 않고, 이 자료를 열었다는 상태만 표시합니다.</p>
     </section>
   `;
 }
 
-function renderCommentModal(modal, run) {
-  const comment = getCommentById(modal.commentId);
-  if (!comment) return '';
+function renderResultModal(modal, run) {
+  const result = getResultById(modal.resultId);
+  if (!result) return '';
   return `
     <div class="modal-backdrop">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
-        <h2 id="dialog-title" tabindex="-1">댓글 정보 보기 · ${escapeHtml(comment.author)}</h2>
-        <p id="dialog-description">${escapeHtml(comment.summary)}</p>
+        <h2 id="dialog-title" tabindex="-1">미리보기 · ${escapeHtml(result.title)}</h2>
+        <p id="dialog-description">${escapeHtml(result.summary)}</p>
         <dl class="meta-list compact">
-          <div><dt>댓글 범위</dt><dd>${escapeHtml(comment.badge)}</dd></div>
-          <div><dt>작성 시각</dt><dd>${escapeHtml(comment.timeLabel)}</dd></div>
-          <div><dt>도움이 수</dt><dd>${getEffectiveHelpfulCount(comment, run)}</dd></div>
-          <div><dt>답글 수</dt><dd>${comment.replyCount}</dd></div>
+          <div><dt>자료 유형</dt><dd>${escapeHtml(result.badge)}</dd></div>
+          <div><dt>갱신 시각</dt><dd>${escapeHtml(result.timeLabel)}</dd></div>
+          <div><dt>저장 수</dt><dd>${getEffectiveSaveCount(result, run)}</dd></div>
+          <div><dt>관련 낱말</dt><dd>${escapeHtml(result.keywords.join(', '))}</dd></div>
         </dl>
-        <p class="muted">${escapeHtml(comment.body)}</p>
+        <p class="muted">${escapeHtml(result.body)}</p>
         <div class="button-row">
-          <button class="button button-primary" data-action="dialog-close" data-dialog-close data-focus-id="comment-dialog-close">닫기</button>
+          <button class="button button-primary" data-action="dialog-close" data-dialog-close data-focus-id="result-dialog-close">닫기</button>
         </div>
       </div>
     </div>
@@ -1619,14 +1653,14 @@ function aggregateActualCondition(run) {
 
 function aggregateBenchmarkCondition(conditionId) {
   return aggregateSharedBenchmarkCondition({
-    benchmarkResults: benchmarkResultsComments,
+    benchmarkResults: benchmarkResultsSearch,
     conditionId,
   });
 }
 
 function buildExportPayload() {
   return buildSharedExportPayload({
-    serviceId: 'comments',
+    serviceId: 'search',
     sessionId: state.sessionId,
     order: state.order,
     measurementRules: MEASUREMENT_RULES,
@@ -1634,7 +1668,7 @@ function buildExportPayload() {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
     },
-    benchmarkResults: benchmarkResultsComments,
+    benchmarkResults: benchmarkResultsSearch,
   });
 }
 
@@ -1646,7 +1680,7 @@ function buildSurveyUrl() {
   return buildSharedSurveyUrl({
     baseUrl: SURVEY_CONFIG.baseUrl,
     sessionId: state.sessionId,
-    serviceId: 'comments',
+    serviceId: 'search',
     order: state.order,
     actualA: aggregateActualCondition(state.runs.variantA),
     actualB: aggregateActualCondition(state.runs.variantB),

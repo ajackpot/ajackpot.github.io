@@ -756,6 +756,112 @@ input {
   }
 }
 
+
+.result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.result-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fafcff;
+  padding: 18px;
+}
+
+.result-card-expanded {
+  border-color: #bfd4ff;
+  background: #f7fbff;
+}
+
+.result-card-head,
+.result-head-links,
+.result-option-top {
+  display: flex;
+  gap: 10px;
+}
+
+.result-card-head {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.result-head-links,
+.result-option-top {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.result-summary {
+  margin: 12px 0 8px;
+}
+
+.result-metrics {
+  margin-bottom: 14px;
+}
+
+.result-action-row {
+  margin-top: 12px;
+}
+
+.result-composite-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.95fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.result-option-list {
+  display: grid;
+  gap: 12px;
+}
+
+.result-option-button {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: white;
+  padding: 16px;
+  text-align: left;
+  display: grid;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.result-option-button:hover,
+.result-option-button:focus-visible,
+.result-option-button-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(27, 99, 216, 0.16);
+}
+
+.result-keyword-list {
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.selected-result-card {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.result-status-card {
+  margin-top: 14px;
+  border-top: 1px dashed var(--border);
+  padding-top: 14px;
+}
+
+@media (max-width: 960px) {
+  .result-composite-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .product-option-list {
   list-style: none;
   margin: 0;
@@ -844,4 +950,160 @@ input {
   .product-option-card-head {
     flex-direction: column;
   }
+}
+
+.settings-section-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-section-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fafcff;
+  padding: 18px;
+}
+
+.settings-section-card-a {
+  background: #ffffff;
+}
+
+.settings-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.settings-item-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.setting-row {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.setting-row-b {
+  background: #f9fbff;
+}
+
+.setting-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.setting-row-head h4 {
+  margin-bottom: 6px;
+}
+
+.settings-composite-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.3fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-tablist-card,
+.selected-settings-card {
+  margin: 0;
+}
+
+.settings-tablist {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-tab-button {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: white;
+  padding: 16px;
+  text-align: left;
+  display: grid;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.settings-tab-button:hover,
+.settings-tab-button:focus-visible,
+.settings-tab-button-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(27, 99, 216, 0.16);
+}
+
+.setting-choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.setting-choice-button {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.setting-choice-button:hover,
+.setting-choice-button:focus-visible,
+.setting-choice-button-active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+@media (max-width: 960px) {
+  .settings-composite-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-section-head,
+  .setting-row-head {
+    flex-direction: column;
+  }
+}
+
+.filters-stack {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 18px;
+}
+
+.filter-group-card {
+  display: grid;
+  gap: 12px;
+}
+
+.filter-group-card h3 {
+  margin-bottom: 0;
+}
+
+.filter-button-list {
+  align-items: flex-start;
+}
+
+.checkbox-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+}
+
+.checkbox-filter input {
+  width: auto;
+  flex: 0 0 auto;
 }

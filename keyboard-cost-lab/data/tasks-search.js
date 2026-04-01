@@ -1,0 +1,48 @@
+export const searchTasks = [
+  {
+    id: 'task-1-newest-guide-preview-close',
+    benchmarkTaskId: 'task1_newest_guide_preview_close',
+    title: '과업 1. 최신 안내문에서 예약 변경 안내 미리보기 열었다가 닫기',
+    goalSummary: '정렬 기준을 최신 자료 순으로 바꾸고, 안내문만 보이게 한 뒤 `예약 변경 안내`의 미리보기를 열었다가 닫으십시오.',
+    instructions: [
+      '정렬 기준을 최신 자료 순으로 바꾸십시오.',
+      '자료 범위를 안내문으로 바꾸십시오.',
+      '예약 변경 안내 자료의 미리보기를 열었다가 닫으면 과업이 끝납니다.',
+    ],
+    targetResultId: 'result-change-guide',
+    completion: 'closePreview',
+    requiredSort: 'newest',
+    requiredType: 'guide',
+    requiresPreviewVisit: true,
+  },
+  {
+    id: 'task-2-title-faq-save',
+    benchmarkTaskId: 'task2_title_faq_save_remote',
+    title: '과업 2. 제목순 질문답변에서 비대면 상담 연결 방법 저장',
+    goalSummary: '정렬 기준을 제목순으로 바꾸고, 질문답변만 보이게 한 뒤 `비대면 상담 연결 방법`을 저장하십시오.',
+    instructions: [
+      '정렬 기준을 제목순으로 바꾸십시오.',
+      '자료 범위를 질문답변으로 바꾸십시오.',
+      '비대면 상담 연결 방법 자료를 저장하면 과업이 끝납니다.',
+    ],
+    targetResultId: 'result-remote-faq',
+    completion: 'save',
+    requiredSort: 'title',
+    requiredType: 'faq',
+  },
+  {
+    id: 'task-3-form-preview-then-open',
+    benchmarkTaskId: 'task3_form_preview_then_open',
+    title: '과업 3. 신청 서식에서 상담 준비 체크 목록 미리보기 후 바로 열기',
+    goalSummary: '자료 범위를 신청 서식으로 바꾸고, `상담 준비 체크 목록`의 미리보기를 열었다가 닫은 뒤 바로 열기를 누르십시오.',
+    instructions: [
+      '자료 범위를 신청 서식으로 바꾸십시오.',
+      '상담 준비 체크 목록의 미리보기를 열었다가 닫으십시오.',
+      '같은 자료에서 바로 열기를 누르면 과업이 끝납니다.',
+    ],
+    targetResultId: 'result-checklist-form',
+    completion: 'open',
+    requiredType: 'form',
+    requiresPreviewVisit: true,
+  },
+];

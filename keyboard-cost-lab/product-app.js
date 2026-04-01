@@ -2,9 +2,43 @@ import { productScenario } from './data/product-scenario.js';
 import { productTasks } from './data/tasks-product.js';
 import { benchmarkResultsProduct } from './data/benchmark-results-product.js';
 import { createTaskLogger } from './lib/logger.js';
-import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString, renderRunnerFooterHtml } from './lib/utils.js';
+import {
+  uniqueId,
+  formatSeconds,
+  escapeHtml,
+  deepClone,
+  getDefaultConditionOrder,
+  renderRunnerFooterHtml,
+  renderRunnerCompletionDialogHtml,
+} from './lib/utils.js';
+import {
+  createMessageBridge as createSharedMessageBridge,
+  postBridgeMessage as postSharedBridgeMessage,
+  getOrCreateSessionId as getSharedSessionId,
+  buildLaunchStorageKey as buildSharedLaunchStorageKey,
+  saveLaunchSnapshot as saveSharedLaunchSnapshot,
+  readLaunchSnapshot as readSharedLaunchSnapshot,
+  clearLaunchSnapshot as clearSharedLaunchSnapshot,
+  buildRunnerUrl as buildSharedRunnerUrl,
+  closeRunnerWindow as closeSharedRunnerWindow,
+  trapFocusInDialog as trapSharedFocusInDialog,
+  getAppMode,
+} from './lib/experiment-bridge.js';
+import { commonMeasurementRules } from './data/measurement-rules.js';
+import {
+  renderLanguageGuideCard as renderSharedLanguageGuideCard,
+  renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
+  renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
+  renderFinalConditionCard as renderSharedFinalConditionCard,
+  aggregateBenchmarkCondition as aggregateSharedBenchmarkCondition,
+  buildExportPayload as buildSharedExportPayload,
+  buildExportDataUrl as buildSharedExportDataUrl,
+  buildSurveyUrl as buildSharedSurveyUrl,
+  formatSigned as formatSharedSigned,
+  aggregateMetrics,
+} from './lib/service-shell.js';
 
-const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
+const APP_MODE = getAppMode();
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-product-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-product-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-product-channel';
@@ -13,11 +47,7 @@ const SURVEY_CONFIG = {
   baseUrl: '',
 };
 
-const MEASUREMENT_RULES = [
-  '실제 계측은 수행 탭에서 첫 조작이 들어갈 때 시작합니다.',
-  '수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.',
-  '수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에 포함하지 않습니다.',
-];
+const MEASUREMENT_RULES = commonMeasurementRules;
 
 const VARIANT_META = {
   variantA: {
@@ -90,47 +120,16 @@ if (APP_MODE === 'runner') {
 render();
 
 function createMessageBridge(sessionId) {
-  const channelName = `${CHANNEL_PREFIX}-${sessionId}`;
-  const fallbackKey = `${CHANNEL_FALLBACK_STORAGE_PREFIX}-${sessionId}`;
-  const bridgeState = {
+  return createSharedMessageBridge({
     sessionId,
-    channel: null,
-    fallbackKey,
-  };
-
-  if ('BroadcastChannel' in window) {
-    bridgeState.channel = new BroadcastChannel(channelName);
-    bridgeState.channel.addEventListener('message', (event) => {
-      handleBridgeMessage(event.data);
-    });
-  } else {
-    window.addEventListener('storage', (event) => {
-      if (event.key !== fallbackKey || !event.newValue) return;
-      try {
-        handleBridgeMessage(JSON.parse(event.newValue));
-      } catch {
-        // noop
-      }
-    });
-  }
-
-  return bridgeState;
+    channelPrefix: CHANNEL_PREFIX,
+    fallbackStoragePrefix: CHANNEL_FALLBACK_STORAGE_PREFIX,
+    onMessage: handleBridgeMessage,
+  });
 }
 
 function postBridgeMessage(message) {
-  if (!bridge || !message) return;
-  const payload = {
-    ...message,
-    emittedAt: Date.now(),
-    nonce: uniqueId('msg'),
-  };
-
-  if (bridge.channel) {
-    bridge.channel.postMessage(payload);
-    return;
-  }
-
-  window.localStorage.setItem(bridge.fallbackKey, JSON.stringify(payload));
+  postSharedBridgeMessage(bridge, message);
 }
 
 function handleBridgeMessage(message) {
@@ -170,7 +169,7 @@ function handleBridgeMessage(message) {
 
 function createMainState() {
   const sessionId = getOrCreateSessionId();
-  const order = hashString(sessionId) % 2 === 0 ? ['variantA', 'variantB'] : ['variantB', 'variantA'];
+  const order = getDefaultConditionOrder();
   return {
     sessionId,
     order,
@@ -265,11 +264,10 @@ function createConditionRuntime(variantId) {
 }
 
 function getOrCreateSessionId() {
-  const stored = window.localStorage.getItem(STORAGE_KEY_SESSION);
-  if (stored) return stored;
-  const generated = uniqueId('product-session');
-  window.localStorage.setItem(STORAGE_KEY_SESSION, generated);
-  return generated;
+  return getSharedSessionId({
+    storageKey: STORAGE_KEY_SESSION,
+    idPrefix: 'product-session',
+  });
 }
 
 function getCurrentConditionId() {
@@ -414,36 +412,29 @@ function continueAfterCondition() {
 }
 
 function buildLaunchStorageKey(launchId) {
-  return `${LAUNCH_STORAGE_PREFIX}:${launchId}`;
+  return buildSharedLaunchStorageKey(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function saveLaunchSnapshot(launchId, payload) {
-  window.localStorage.setItem(buildLaunchStorageKey(launchId), JSON.stringify(payload));
+  saveSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId, payload);
 }
 
 function readLaunchSnapshot(launchId) {
-  const raw = window.localStorage.getItem(buildLaunchStorageKey(launchId));
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return readSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function clearLaunchSnapshot(launchId) {
-  window.localStorage.removeItem(buildLaunchStorageKey(launchId));
+  clearSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function buildRunnerUrl({ launchId, conditionId, taskIndex, sessionId }) {
-  const url = new URL(window.location.href);
-  url.search = '';
-  url.searchParams.set('mode', 'runner');
-  url.searchParams.set('sessionId', sessionId);
-  url.searchParams.set('condition', conditionId);
-  url.searchParams.set('taskIndex', String(taskIndex));
-  url.searchParams.set('launchId', launchId);
-  return url.toString();
+  return buildSharedRunnerUrl({
+    currentHref: window.location.href,
+    sessionId,
+    conditionId,
+    taskIndex,
+    launchId,
+  });
 }
 
 function launchRunnerTask() {
@@ -522,20 +513,13 @@ function acceptRunnerTaskCompletion(message) {
 
 function closeRunnerWindow() {
   if (APP_MODE !== 'runner') return;
-  postBridgeMessage({
-    type: 'runner-closed',
+  closeSharedRunnerWindow({
+    bridge,
     sessionId: state.sessionId,
     launchId: state.launchId,
     completed: state.completed,
+    fallbackHref: window.location.href,
   });
-  const fallbackUrl = new URL(window.location.href);
-  fallbackUrl.search = '';
-  window.close();
-  window.setTimeout(() => {
-    if (!window.closed) {
-      window.location.href = fallbackUrl.toString();
-    }
-  }, 80);
 }
 
 function wireEvents() {
@@ -632,6 +616,12 @@ function handleRootClick(event) {
   if (action === 'close-runner') {
     event.preventDefault();
     closeRunnerWindow();
+    return;
+  }
+
+  if (action === 'acknowledge-task-complete') {
+    event.preventDefault();
+    closeRunnerWindow();
   }
 }
 
@@ -656,6 +646,16 @@ function handleRootKeydown(event) {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   if (!run) return;
+
+  if (state.completed) {
+    const completionDialog = document.querySelector('[data-completion-dialog]');
+    if (completionDialog instanceof HTMLElement && event.key === 'Tab') {
+      trapFocusInDialog(completionDialog, event);
+    } else if (completionDialog instanceof HTMLElement && event.key === 'Escape') {
+      event.preventDefault();
+    }
+    return;
+  }
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
@@ -950,8 +950,9 @@ function finishRunnerTask(reason) {
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
+  run.modal = null;
   state.completed = true;
-  run.liveStatus = '과업 결과를 원래 실험 창으로 전달했습니다.';
+  run.liveStatus = '과업 수행이 끝났습니다. 확인을 누르면 이 탭이 닫힙니다.';
 
   postBridgeMessage({
     type: 'task-complete',
@@ -963,7 +964,7 @@ function finishRunnerTask(reason) {
     runSnapshot: serializeRuntimeSnapshot(run),
   });
 
-  requestFocus('[data-action="close-runner"]');
+  requestFocus('[data-completion-confirm]');
   render();
 }
 
@@ -994,26 +995,7 @@ function handleOptionGroupNavigation(event, currentButton) {
 }
 
 function trapFocusInDialog(dialog, event) {
-  const focusables = Array.from(dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-    .filter((element) => !element.hasAttribute('disabled'));
-  if (focusables.length === 0) return;
-  const first = focusables[0];
-  const last = focusables[focusables.length - 1];
-  const active = document.activeElement;
-
-  if (!focusables.includes(active)) {
-    event.preventDefault();
-    (event.shiftKey ? last : first).focus();
-    return;
-  }
-
-  if (event.shiftKey && active === first) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && active === last) {
-    event.preventDefault();
-    first.focus();
-  }
+  trapSharedFocusInDialog(dialog, event);
 }
 
 function render() {
@@ -1072,16 +1054,21 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? `<a class="skip-link" href="#options-heading" data-action="jump-results" data-focus-id="runner-skip-options">${RUNNER_LABELS.quickJump}</a>` : ''}
-      <main class="runner-main" aria-label="상품 옵션 선택 수행 화면">
+      ${conditionId === 'variantB' && !state.completed ? `<a class="skip-link" href="#options-heading" data-action="jump-results" data-focus-id="runner-skip-options">${RUNNER_LABELS.quickJump}</a>` : ''}
+      <main class="runner-main" aria-label="상품 옵션 선택 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
         ${renderProductHeader(conditionId)}
         ${renderProductHeroCard(run)}
         ${renderProductOptionSection(conditionId, run)}
       </main>
-      <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
-      ${renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
+      ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
+      ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${run.modal ? renderProductModal(run.modal) : ''}
+      ${state.completed
+        ? renderRunnerCompletionDialogHtml({
+          description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인을 누르면 이 탭이 자동으로 닫힙니다.`,
+        })
+        : ''}
     </div>
   `;
 }
@@ -1122,20 +1109,7 @@ function renderServiceIntroView() {
 }
 
 function renderLanguageGuideCard() {
-  return `
-    <details class="card glossary-card">
-      <summary>용어 설명 보기</summary>
-      <p class="muted">이 실험은 사용자가 낯선 영어 표현을 학습하지 않아도 이해할 수 있도록 자주 쓰는 한국어를 우선 사용합니다.</p>
-      <dl class="glossary-list">
-        ${GLOSSARY_ENTRIES.map((entry) => `
-          <div>
-            <dt>${escapeHtml(entry.term)}</dt>
-            <dd>${escapeHtml(entry.description)}</dd>
-          </div>
-        `).join('')}
-      </dl>
-    </details>
-  `;
+  return renderSharedLanguageGuideCard(GLOSSARY_ENTRIES);
 }
 
 function renderTaskPreparationView() {
@@ -1213,16 +1187,7 @@ function renderTaskPreparationView() {
 }
 
 function renderLaunchStatusMessage(activeLaunch, isRunning) {
-  if (!activeLaunch) {
-    return '아직 수행 탭을 열지 않았습니다. 과업 내용을 충분히 읽은 뒤 시작하십시오.';
-  }
-  if (activeLaunch.status === 'blocked') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'opening') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'ready') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'started') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'closed') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'completed') return activeLaunch.lastMessage;
-  return isRunning ? '수행 탭이 열려 있습니다.' : '과업 준비가 완료되었습니다.';
+  return renderSharedLaunchStatusMessage(activeLaunch, isRunning);
 }
 
 function renderTaskReviewView() {
@@ -1283,28 +1248,7 @@ function renderTaskReviewView() {
 }
 
 function renderProfileBenchmarkTable(benchmark) {
-  return `
-    <table class="summary-table">
-      <thead>
-        <tr>
-          <th>사용자 유형</th>
-          <th>낮은 예상</th>
-          <th>기준 예상</th>
-          <th>높은 예상</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${Object.values(benchmark.profiles).map((profile) => `
-          <tr>
-            <th>${escapeHtml(profile.label)}</th>
-            <td>${formatSeconds(profile.ranges.lower.seconds)}</td>
-            <td>${formatSeconds(profile.ranges.expected.seconds)}</td>
-            <td>${formatSeconds(profile.ranges.upper.seconds)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
+  return renderSharedProfileBenchmarkTable(benchmark);
 }
 
 function renderConditionReviewView() {
@@ -1434,23 +1378,13 @@ function renderFinalView() {
 }
 
 function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) {
-  const benchmarkOverall = benchmarkResultsProduct.overall[selectedProfileId];
-  const expectedSeconds = conditionId === 'variantA'
-    ? benchmarkOverall.variantAExpectedSeconds
-    : benchmarkOverall.variantBExpectedSeconds;
-
-  return `
-    <article class="card final-condition-card">
-      <h2>${escapeHtml(VARIANT_META[conditionId].title)}</h2>
-      <p class="muted">${escapeHtml(VARIANT_META[conditionId].subtitle)}</p>
-      <dl class="meta-list compact">
-        <div><dt>실제 완료 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
-        <div><dt>총 키 입력</dt><dd>${actualTotals.totalKeyInputs}</dd></div>
-        <div><dt>총 초점 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
-        <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
-      </dl>
-    </article>
-  `;
+  return renderSharedFinalConditionCard({
+    conditionId,
+    actualTotals,
+    selectedProfileId,
+    benchmarkResults: benchmarkResultsProduct,
+    variantMeta: VARIANT_META,
+  });
 }
 
 function renderProductHeader(conditionId) {
@@ -1693,76 +1627,53 @@ function formatRequiredDetailLabel(detailKey) {
 }
 
 function aggregateActualCondition(run) {
-  return run.taskResults.reduce(
-    (totals, result) => {
-      totals.durationSeconds += result.durationSeconds;
-      totals.hiddenDurationSeconds += result.hiddenDurationSeconds ?? 0;
-      totals.totalKeyInputs += result.totalKeyInputs;
-      totals.focusChanges += result.focusChanges;
-      totals.wrongSelections += result.wrongSelections;
-      totals.contextResets += result.contextResets ?? 0;
-      totals.modalEscapes += result.modalEscapes;
-      return totals;
-    },
-    {
-      durationSeconds: 0,
-      hiddenDurationSeconds: 0,
-      totalKeyInputs: 0,
-      focusChanges: 0,
-      wrongSelections: 0,
-      contextResets: 0,
-      modalEscapes: 0,
-    }
-  );
+  return aggregateMetrics(run.taskResults, {
+    durationSeconds: 'durationSeconds',
+    hiddenDurationSeconds: 'hiddenDurationSeconds',
+    totalKeyInputs: 'totalKeyInputs',
+    focusChanges: 'focusChanges',
+    wrongSelections: 'wrongSelections',
+    contextResets: 'contextResets',
+    modalEscapes: 'modalEscapes',
+  });
 }
 
 function aggregateBenchmarkCondition(conditionId) {
-  const variantResults = benchmarkResultsProduct.variants[conditionId].tasks;
-  const totals = {};
-  for (const [profileId, overall] of Object.entries(benchmarkResultsProduct.overall)) {
-    const expectedSeconds = Object.values(variantResults).reduce((sum, taskResult) => sum + taskResult.profiles[profileId].ranges.expected.seconds, 0);
-    totals[profileId] = {
-      label: overall.label,
-      expectedSeconds: Number(expectedSeconds.toFixed(1)),
-      variantReductionHint: `${overall.expectedReductionSeconds}초 (${overall.expectedReductionPercent}%)`,
-    };
-  }
-  return totals;
+  return aggregateSharedBenchmarkCondition({
+    benchmarkResults: benchmarkResultsProduct,
+    conditionId,
+  });
 }
 
 function buildExportPayload() {
-  return {
-    exportedAt: new Date().toISOString(),
+  return buildSharedExportPayload({
     serviceId: 'product',
     sessionId: state.sessionId,
     order: state.order,
     measurementRules: MEASUREMENT_RULES,
-    actual: {
+    actualRuns: {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
     },
-    benchmark: benchmarkResultsProduct,
-  };
+    benchmarkResults: benchmarkResultsProduct,
+  });
 }
 
 function buildExportDataUrl() {
-  return `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(buildExportPayload(), null, 2))}`;
+  return buildSharedExportDataUrl(buildExportPayload());
 }
 
 function buildSurveyUrl() {
-  if (!SURVEY_CONFIG.baseUrl) return '';
-  const params = {
+  return buildSharedSurveyUrl({
+    baseUrl: SURVEY_CONFIG.baseUrl,
     sessionId: state.sessionId,
     serviceId: 'product',
-    order: state.order.join(','),
+    order: state.order,
     actualA: aggregateActualCondition(state.runs.variantA),
     actualB: aggregateActualCondition(state.runs.variantB),
-  };
-  return `${SURVEY_CONFIG.baseUrl}?${toQueryString(params)}`;
+  });
 }
 
 function formatSigned(value, suffix = '') {
-  const prefix = value > 0 ? '+' : '';
-  const normalized = typeof value === 'number' ? Number(value.toFixed(1)) : Number(value);
-  return `${prefix}${normalized}${suffix}`;
+  return formatSharedSigned(value, suffix);
 }

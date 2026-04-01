@@ -2,9 +2,46 @@ import { calendarScenario } from './data/calendar-scenario.js';
 import { calendarTasks } from './data/tasks-calendar.js';
 import { benchmarkResultsCalendar } from './data/benchmark-results-calendar.js';
 import { createTaskLogger } from './lib/logger.js';
-import { hashString, uniqueId, formatSeconds, escapeHtml, deepClone, toQueryString, formatServiceScreenButtonLabel, renderRunnerFooterHtml } from './lib/utils.js';
+import {
+  uniqueId,
+  formatSeconds,
+  escapeHtml,
+  deepClone,
+  formatServiceScreenButtonLabel,
+  getDefaultConditionOrder,
+  renderRunnerFooterHtml,
+  renderRunnerCompletionDialogHtml,
+} from './lib/utils.js';
+import { serviceRegistry, getServiceById } from './data/service-registry.js';
+import { commonMeasurementRules } from './data/measurement-rules.js';
+import {
+  createMessageBridge as createSharedMessageBridge,
+  postBridgeMessage as postSharedBridgeMessage,
+  getOrCreateSessionId as getSharedSessionId,
+  buildLaunchStorageKey as buildSharedLaunchStorageKey,
+  saveLaunchSnapshot as saveSharedLaunchSnapshot,
+  readLaunchSnapshot as readSharedLaunchSnapshot,
+  clearLaunchSnapshot as clearSharedLaunchSnapshot,
+  buildRunnerUrl as buildSharedRunnerUrl,
+  closeRunnerWindow as closeSharedRunnerWindow,
+  trapFocusInDialog as trapSharedFocusInDialog,
+  getAppMode,
+} from './lib/experiment-bridge.js';
+import {
+  renderLanguageGuideCard as renderSharedLanguageGuideCard,
+  renderServiceIntroView as renderSharedServiceIntroView,
+  renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
+  renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
+  renderFinalConditionCard as renderSharedFinalConditionCard,
+  aggregateBenchmarkCondition as aggregateSharedBenchmarkCondition,
+  buildExportPayload as buildSharedExportPayload,
+  buildExportDataUrl as buildSharedExportDataUrl,
+  buildSurveyUrl as buildSharedSurveyUrl,
+  formatSigned as formatSharedSigned,
+  aggregateMetrics,
+} from './lib/service-shell.js';
 
-const APP_MODE = new URL(window.location.href).searchParams.get('mode') === 'runner' ? 'runner' : 'main';
+const APP_MODE = getAppMode();
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-channel';
@@ -21,39 +58,15 @@ const DAY_ORDER = {
   fri: 4,
 };
 
-const MEASUREMENT_RULES = [
-  '실제 계측은 수행 탭에서 첫 조작이 들어갈 때 시작합니다.',
-  '수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.',
-  '수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다.',
-];
+const MEASUREMENT_RULES = commonMeasurementRules;
 
-const SERVICE_TYPES = [
-  {
-    id: 'calendar',
-    label: '예약 캘린더',
-    summary: '상담 예약 화면에서 조건을 맞추고 원하는 예약 시간을 찾는 과업을 수행합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-  {
-    id: 'comments',
-    label: '댓글 목록',
-    summary: '댓글 정렬·답글 보기·댓글 정보 확인 과업으로 탐색 부담을 비교합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-  {
-    id: 'product',
-    label: '상품 옵션 선택',
-    summary: '상품 상세 화면에서 색상, 크기, 추가 구성을 맞추고 장바구니에 담는 과업을 수행합니다.',
-    statusLabel: '구현 완료',
-    available: true,
-    points: ['3개 과업', '비교안 A/B', '사전 계산 기준 포함'],
-  },
-];
+const SERVICE_TYPES = serviceRegistry;
 
+const SERVICE_INTRO_POINTS = [
+  '예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지',
+  '실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지',
+  '같은 실험 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지',
+];
 const VARIANT_META = {
   variantA: {
     shortLabel: 'A',
@@ -125,47 +138,16 @@ if (APP_MODE === 'runner') {
 render();
 
 function createMessageBridge(sessionId) {
-  const channelName = `${CHANNEL_PREFIX}-${sessionId}`;
-  const fallbackKey = `${CHANNEL_FALLBACK_STORAGE_PREFIX}-${sessionId}`;
-  const bridgeState = {
+  return createSharedMessageBridge({
     sessionId,
-    channel: null,
-    fallbackKey,
-  };
-
-  if ('BroadcastChannel' in window) {
-    bridgeState.channel = new BroadcastChannel(channelName);
-    bridgeState.channel.addEventListener('message', (event) => {
-      handleBridgeMessage(event.data);
-    });
-  } else {
-    window.addEventListener('storage', (event) => {
-      if (event.key !== fallbackKey || !event.newValue) return;
-      try {
-        handleBridgeMessage(JSON.parse(event.newValue));
-      } catch {
-        // noop
-      }
-    });
-  }
-
-  return bridgeState;
+    channelPrefix: CHANNEL_PREFIX,
+    fallbackStoragePrefix: CHANNEL_FALLBACK_STORAGE_PREFIX,
+    onMessage: handleBridgeMessage,
+  });
 }
 
 function postBridgeMessage(message) {
-  if (!bridge || !message) return;
-  const payload = {
-    ...message,
-    emittedAt: Date.now(),
-    nonce: uniqueId('msg'),
-  };
-
-  if (bridge.channel) {
-    bridge.channel.postMessage(payload);
-    return;
-  }
-
-  window.localStorage.setItem(bridge.fallbackKey, JSON.stringify(payload));
+  postSharedBridgeMessage(bridge, message);
 }
 
 function handleBridgeMessage(message) {
@@ -205,7 +187,7 @@ function handleBridgeMessage(message) {
 
 function createMainState() {
   const sessionId = getOrCreateSessionId();
-  const order = hashString(sessionId) % 2 === 0 ? ['variantA', 'variantB'] : ['variantB', 'variantA'];
+  const order = getDefaultConditionOrder();
   return {
     sessionId,
     order,
@@ -314,11 +296,10 @@ function defaultFilters() {
 }
 
 function getOrCreateSessionId() {
-  const stored = window.localStorage.getItem(STORAGE_KEY_SESSION);
-  if (stored) return stored;
-  const generated = uniqueId('session');
-  window.localStorage.setItem(STORAGE_KEY_SESSION, generated);
-  return generated;
+  return getSharedSessionId({
+    storageKey: STORAGE_KEY_SESSION,
+    idPrefix: 'session',
+  });
 }
 
 function getCurrentConditionId() {
@@ -388,20 +369,16 @@ function resetExperimentState() {
 }
 
 function getSelectedService() {
-  if (APP_MODE === 'runner') return SERVICE_TYPES.find((service) => service.id === state.serviceId) ?? null;
-  return SERVICE_TYPES.find((service) => service.id === state.selectedServiceId) ?? null;
+  if (APP_MODE === 'runner') return getServiceById(state.serviceId);
+  return getServiceById(state.selectedServiceId);
 }
 
 function openService(serviceId) {
   if (APP_MODE === 'runner') return;
   const service = SERVICE_TYPES.find((item) => item.id === serviceId);
   if (!service || !service.available) return;
-  if (service.id === 'comments') {
-    window.location.href = './comments.html';
-    return;
-  }
-  if (service.id === 'product') {
-    window.location.href = './product.html';
+  if (service.path) {
+    window.location.href = service.path;
     return;
   }
   state.selectedServiceId = service.id;
@@ -493,37 +470,30 @@ function continueAfterCondition() {
 }
 
 function buildLaunchStorageKey(launchId) {
-  return `${LAUNCH_STORAGE_PREFIX}:${launchId}`;
+  return buildSharedLaunchStorageKey(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function saveLaunchSnapshot(launchId, payload) {
-  window.localStorage.setItem(buildLaunchStorageKey(launchId), JSON.stringify(payload));
+  saveSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId, payload);
 }
 
 function readLaunchSnapshot(launchId) {
-  const raw = window.localStorage.getItem(buildLaunchStorageKey(launchId));
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return readSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function clearLaunchSnapshot(launchId) {
-  window.localStorage.removeItem(buildLaunchStorageKey(launchId));
+  clearSharedLaunchSnapshot(LAUNCH_STORAGE_PREFIX, launchId);
 }
 
 function buildRunnerUrl({ launchId, conditionId, taskIndex, serviceId, sessionId }) {
-  const url = new URL(window.location.href);
-  url.search = '';
-  url.searchParams.set('mode', 'runner');
-  url.searchParams.set('sessionId', sessionId);
-  url.searchParams.set('service', serviceId);
-  url.searchParams.set('condition', conditionId);
-  url.searchParams.set('taskIndex', String(taskIndex));
-  url.searchParams.set('launchId', launchId);
-  return url.toString();
+  return buildSharedRunnerUrl({
+    currentHref: window.location.href,
+    sessionId,
+    serviceId,
+    conditionId,
+    taskIndex,
+    launchId,
+  });
 }
 
 function launchRunnerTask() {
@@ -605,20 +575,13 @@ function acceptRunnerTaskCompletion(message) {
 
 function closeRunnerWindow() {
   if (APP_MODE !== 'runner') return;
-  postBridgeMessage({
-    type: 'runner-closed',
+  closeSharedRunnerWindow({
+    bridge,
     sessionId: state.sessionId,
     launchId: state.launchId,
     completed: state.completed,
+    fallbackHref: window.location.href,
   });
-  const fallbackUrl = new URL(window.location.href);
-  fallbackUrl.search = '';
-  window.close();
-  window.setTimeout(() => {
-    if (!window.closed) {
-      window.location.href = fallbackUrl.toString();
-    }
-  }, 80);
 }
 
 function wireEvents() {
@@ -741,6 +704,12 @@ function handleRootClick(event) {
   if (action === 'close-runner') {
     event.preventDefault();
     closeRunnerWindow();
+    return;
+  }
+
+  if (action === 'acknowledge-task-complete') {
+    event.preventDefault();
+    closeRunnerWindow();
   }
 }
 
@@ -767,6 +736,16 @@ function handleRootKeydown(event) {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   if (!run) return;
+
+  if (state.completed) {
+    const completionDialog = document.querySelector('[data-completion-dialog]');
+    if (completionDialog instanceof HTMLElement && event.key === 'Tab') {
+      trapFocusInDialog(completionDialog, event);
+    } else if (completionDialog instanceof HTMLElement && event.key === 'Escape') {
+      event.preventDefault();
+    }
+    return;
+  }
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
@@ -1044,8 +1023,9 @@ function finishRunnerTask(reason) {
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
+  run.modal = null;
   state.completed = true;
-  run.liveStatus = '과업 결과를 원래 실험 창으로 전달했습니다.';
+  run.liveStatus = '과업 수행이 끝났습니다. 확인을 누르면 이 탭이 닫힙니다.';
 
   postBridgeMessage({
     type: 'task-complete',
@@ -1057,7 +1037,7 @@ function finishRunnerTask(reason) {
     runSnapshot: serializeRuntimeSnapshot(run),
   });
 
-  requestFocus('[data-action="close-runner"]');
+  requestFocus('[data-completion-confirm]');
   render();
 }
 
@@ -1145,26 +1125,7 @@ function handleGridNavigation(event, currentButton) {
 }
 
 function trapFocusInDialog(dialog, event) {
-  const focusables = Array.from(dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-    .filter((element) => !element.hasAttribute('disabled'));
-  if (focusables.length === 0) return;
-  const first = focusables[0];
-  const last = focusables[focusables.length - 1];
-  const active = document.activeElement;
-
-  if (!focusables.includes(active)) {
-    event.preventDefault();
-    (event.shiftKey ? last : first).focus();
-    return;
-  }
-
-  if (event.shiftKey && active === first) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && active === last) {
-    event.preventDefault();
-    first.focus();
-  }
+  trapSharedFocusInDialog(dialog, event);
 }
 
 function render() {
@@ -1228,8 +1189,8 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' ? `<a class="skip-link" href="#results-heading" data-action="jump-results" data-focus-id="runner-skip-results">${RUNNER_LABELS.quickJump}</a>` : ''}
-      <main class="runner-main" aria-label="예약 캘린더 수행 화면">
+      ${conditionId === 'variantB' && !state.completed ? `<a class="skip-link" href="#results-heading" data-action="jump-results" data-focus-id="runner-skip-results">${RUNNER_LABELS.quickJump}</a>` : ''}
+      <main class="runner-main" aria-label="예약 캘린더 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
         ${renderSimulatedHeader(conditionId)}
         ${conditionId === 'variantB' ? renderBookingPanel(run, true) : ''}
@@ -1237,9 +1198,14 @@ function renderRunnerPage() {
         ${renderResults(conditionId, run, availableSlots, unavailableSlots)}
         ${conditionId === 'variantA' ? renderBookingPanel(run, false) : ''}
       </main>
-      <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>
-      ${renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
+      ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
+      ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${run.modal ? renderModal(run.modal, run, task) : ''}
+      ${state.completed
+        ? renderRunnerCompletionDialogHtml({
+          description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인을 누르면 이 탭이 자동으로 닫힙니다.`,
+        })
+        : ''}
     </div>
   `;
 }
@@ -1250,7 +1216,8 @@ function renderHomeView() {
       <p class="eyebrow">실험 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
       <p>
-        먼저 실험할 서비스 유형을 고르십시오. 현재는 예약 캘린더, 댓글 목록, 상품 옵션 선택이 준비되어 있으며,
+        먼저 실험할 서비스 유형을 고르십시오. 현재 공개된 서비스는
+        ${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(', ')}이며,
         이후 다른 서비스 유형도 같은 방식으로 하나씩 추가할 수 있습니다.
       </p>
       <div class="hero-grid">
@@ -1304,55 +1271,17 @@ function renderHomeServiceCard(service) {
 function renderServiceIntroView() {
   const service = getSelectedService();
   if (!service) return renderHomeView();
-  return `
-    <header class="hero card">
-      <p class="eyebrow">선택한 서비스 유형</p>
-      <h1 id="service-heading" tabindex="-1">${escapeHtml(service.label)}</h1>
-      <p>
-        ${escapeHtml(service.summary)}
-        이 화면에서 과업 준비 단계로 들어가거나, 다시 서비스 선택 화면으로 돌아갈 수 있습니다.
-      </p>
-      <div class="hero-grid">
-        <section>
-          <h2>이번에 바로 확인하는 것</h2>
-          <ul>
-            <li>예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지</li>
-            <li>실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지</li>
-            <li>같은 실험 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지</li>
-          </ul>
-        </section>
-        <section>
-          <h2>실험 설정</h2>
-          <dl class="meta-list">
-            <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>실제 수행 방식</dt><dd>메인 창에서 과업 확인 후 새 탭에서 수행</dd></div>
-            <div><dt>사전 계산 기준</dt><dd>키보드 · 화면낭독 · 스위치</dd></div>
-          </dl>
-        </section>
-      </div>
-      <div class="button-row">
-        <button class="button button-primary" data-action="start-experiment">과업 준비로 이동</button>
-        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
-      </div>
-    </header>
-  `;
+  return renderSharedServiceIntroView({
+    serviceLabel: service.label,
+    serviceSummary: service.summary,
+    introPoints: SERVICE_INTRO_POINTS,
+    order: state.order,
+    variantMeta: VARIANT_META,
+  });
 }
 
 function renderLanguageGuideCard() {
-  return `
-    <details class="card glossary-card">
-      <summary>용어 설명 보기</summary>
-      <p class="muted">이 실험은 사용자가 낯선 영어 표현을 학습하지 않아도 이해할 수 있도록 자주 쓰는 한국어를 우선 사용합니다.</p>
-      <dl class="glossary-list">
-        ${GLOSSARY_ENTRIES.map((entry) => `
-          <div>
-            <dt>${escapeHtml(entry.term)}</dt>
-            <dd>${escapeHtml(entry.description)}</dd>
-          </div>
-        `).join('')}
-      </dl>
-    </details>
-  `;
+  return renderSharedLanguageGuideCard(GLOSSARY_ENTRIES);
 }
 
 function renderTaskPreparationView() {
@@ -1430,16 +1359,7 @@ function renderTaskPreparationView() {
 }
 
 function renderLaunchStatusMessage(activeLaunch, isRunning) {
-  if (!activeLaunch) {
-    return '아직 수행 탭을 열지 않았습니다. 과업 내용을 충분히 읽은 뒤 시작하십시오.';
-  }
-  if (activeLaunch.status === 'blocked') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'opening') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'ready') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'started') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'closed') return activeLaunch.lastMessage;
-  if (activeLaunch.status === 'completed') return activeLaunch.lastMessage;
-  return isRunning ? '수행 탭이 열려 있습니다.' : '과업 준비가 완료되었습니다.';
+  return renderSharedLaunchStatusMessage(activeLaunch, isRunning);
 }
 
 function renderTaskReviewView() {
@@ -1500,28 +1420,7 @@ function renderTaskReviewView() {
 }
 
 function renderProfileBenchmarkTable(benchmark) {
-  return `
-    <table class="summary-table">
-      <thead>
-        <tr>
-          <th>사용자 유형</th>
-          <th>낮은 예상</th>
-          <th>기준 예상</th>
-          <th>높은 예상</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${Object.values(benchmark.profiles).map((profile) => `
-          <tr>
-            <th>${escapeHtml(profile.label)}</th>
-            <td>${formatSeconds(profile.ranges.lower.seconds)}</td>
-            <td>${formatSeconds(profile.ranges.expected.seconds)}</td>
-            <td>${formatSeconds(profile.ranges.upper.seconds)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
+  return renderSharedProfileBenchmarkTable(benchmark);
 }
 
 function renderConditionReviewView() {
@@ -1650,23 +1549,13 @@ function renderFinalView() {
 }
 
 function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) {
-  const benchmarkOverall = benchmarkResultsCalendar.overall[selectedProfileId];
-  const expectedSeconds = conditionId === 'variantA'
-    ? benchmarkOverall.variantAExpectedSeconds
-    : benchmarkOverall.variantBExpectedSeconds;
-
-  return `
-    <article class="card final-condition-card">
-      <h2>${escapeHtml(VARIANT_META[conditionId].title)}</h2>
-      <p class="muted">${escapeHtml(VARIANT_META[conditionId].subtitle)}</p>
-      <dl class="meta-list compact">
-        <div><dt>실제 완료 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
-        <div><dt>총 키 입력</dt><dd>${actualTotals.totalKeyInputs}</dd></div>
-        <div><dt>총 초점 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
-        <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
-      </dl>
-    </article>
-  `;
+  return renderSharedFinalConditionCard({
+    conditionId,
+    actualTotals,
+    selectedProfileId,
+    benchmarkResults: benchmarkResultsCalendar,
+    variantMeta: VARIANT_META,
+  });
 }
 
 function renderSimulatedHeader(conditionId) {
@@ -1890,84 +1779,54 @@ function renderModal(modal, run, task) {
 }
 
 function aggregateActualCondition(run) {
-  return run.taskResults.reduce(
-    (totals, result) => {
-      totals.durationSeconds += result.durationSeconds;
-      totals.hiddenDurationSeconds += result.hiddenDurationSeconds ?? 0;
-      totals.totalKeyInputs += result.totalKeyInputs;
-      totals.focusChanges += result.focusChanges;
-      totals.wrongSelections += result.wrongSelections;
-      totals.contextResets += result.contextResets ?? 0;
-      totals.modalEscapes += result.modalEscapes;
-      totals.bookingCancels += result.bookingCancels;
-      return totals;
-    },
-    {
-      durationSeconds: 0,
-      hiddenDurationSeconds: 0,
-      totalKeyInputs: 0,
-      focusChanges: 0,
-      wrongSelections: 0,
-      contextResets: 0,
-      modalEscapes: 0,
-      bookingCancels: 0,
-    }
-  );
+  return aggregateMetrics(run.taskResults, {
+    durationSeconds: 'durationSeconds',
+    hiddenDurationSeconds: 'hiddenDurationSeconds',
+    totalKeyInputs: 'totalKeyInputs',
+    focusChanges: 'focusChanges',
+    wrongSelections: 'wrongSelections',
+    contextResets: 'contextResets',
+    modalEscapes: 'modalEscapes',
+    bookingCancels: 'bookingCancels',
+  });
 }
 
 function aggregateBenchmarkCondition(conditionId) {
-  const variantResults = benchmarkResultsCalendar.variants[conditionId].tasks;
-  const totals = {};
-  for (const [profileId, overall] of Object.entries(benchmarkResultsCalendar.overall)) {
-    const expectedSeconds = Object.values(variantResults).reduce((sum, taskResult) => sum + taskResult.profiles[profileId].ranges.expected.seconds, 0);
-    totals[profileId] = {
-      label: overall.label,
-      expectedSeconds: Number(expectedSeconds.toFixed(1)),
-      variantReductionHint: `${overall.expectedReductionSeconds}초 (${overall.expectedReductionPercent}%)`,
-    };
-  }
-  return totals;
+  return aggregateSharedBenchmarkCondition({
+    benchmarkResults: benchmarkResultsCalendar,
+    conditionId,
+  });
 }
 
 function buildExportPayload() {
-  return {
-    exportedAt: new Date().toISOString(),
+  return buildSharedExportPayload({
+    serviceId: 'calendar',
     sessionId: state.sessionId,
     order: state.order,
     measurementRules: MEASUREMENT_RULES,
-    actual: {
+    actualRuns: {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
     },
-    benchmark: benchmarkResultsCalendar,
-  };
+    benchmarkResults: benchmarkResultsCalendar,
+  });
 }
 
 function buildExportDataUrl() {
-  return `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(buildExportPayload(), null, 2))}`;
+  return buildSharedExportDataUrl(buildExportPayload());
 }
 
 function buildSurveyUrl() {
-  if (!SURVEY_CONFIG.baseUrl) return '';
-  const params = {
+  return buildSharedSurveyUrl({
+    baseUrl: SURVEY_CONFIG.baseUrl,
     sessionId: state.sessionId,
-    order: state.order.join(','),
+    serviceId: 'calendar',
+    order: state.order,
     actualA: aggregateActualCondition(state.runs.variantA),
     actualB: aggregateActualCondition(state.runs.variantB),
-  };
-  return `${SURVEY_CONFIG.baseUrl}?${toQueryString(params)}`;
+  });
 }
 
 function formatSigned(value, suffix = '') {
-  const prefix = value > 0 ? '+' : '';
-  const normalized = typeof value === 'number' ? Number(value.toFixed(1)) : Number(value);
-  return `${prefix}${normalized}${suffix}`;
-}
-
-function chunkArray(items, size) {
-  const chunks = [];
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
-  }
-  return chunks;
+  return formatSharedSigned(value, suffix);
 }

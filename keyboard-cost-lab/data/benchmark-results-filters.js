@@ -1,0 +1,1506 @@
+export const benchmarkResultsFilters = {
+  "generatedAt": "2026-04-01T00:15:01.189Z",
+  "variants": {
+    "variantA": {
+      "label": "비교안 A · 조작 부담이 큰 구조",
+      "description": "상단 보조 링크와 세부 조건 묶음을 길게 지나야 검색 결과에 도달하고, 조건 선택지가 여러 개의 개별 버튼으로 흩어져 있으며, 자료마다 저장·바로 열기·미리보기가 각각 따로 있어 순차 이동이 길고, 미리보기 대화상자를 닫으면 검색 결과 제목 근처부터 다시 찾게 되는 구조.",
+      "tasks": {
+        "task1_recent_guide_preview_close": {
+          "title": "최근 7일 안내문에서 예약 변경 안내 미리보기 열었다가 닫기",
+          "assumptions": [
+            "상단 보조 링크와 세부 조건 설명 링크를 먼저 지나야 기간, 자료 종류, 담당 부서 조건을 모두 맞출 수 있다.",
+            "기간, 자료 종류, 담당 부서 선택지가 각각 여러 개의 개별 버튼으로 흩어져 있어 탭 이동이 길어진다.",
+            "미리보기 대화상자를 닫으면 방금 보던 자료 카드 대신 검색 결과 제목 근처로 돌아와 다시 위치를 잡아야 한다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 49,
+              "activations": 5,
+              "decisions": 15,
+              "waits": 1,
+              "speechUnits": 22,
+              "scanSteps": 57,
+              "contextResets": 1
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 34,
+                "activations": 3,
+                "decisions": 9,
+                "waits": 1,
+                "speechUnits": 14,
+                "scanSteps": 39,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 11,
+                "activations": 1,
+                "decisions": 4,
+                "waits": 0,
+                "speechUnits": 6,
+                "scanSteps": 13,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 4,
+                "activations": 1,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
+                "scanSteps": 5,
+                "contextResets": 1
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 29856,
+                  "seconds": 29.9
+                },
+                "expected": {
+                  "milliseconds": 44475,
+                  "seconds": 44.5
+                },
+                "upper": {
+                  "milliseconds": 63598,
+                  "seconds": 63.6
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 19860,
+                    "seconds": 19.9
+                  },
+                  "repeated": {
+                    "milliseconds": 6850,
+                    "seconds": 6.8
+                  },
+                  "recovery": {
+                    "milliseconds": 3146,
+                    "seconds": 3.1
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 29130,
+                    "seconds": 29.1
+                  },
+                  "repeated": {
+                    "milliseconds": 10070,
+                    "seconds": 10.1
+                  },
+                  "recovery": {
+                    "milliseconds": 5275,
+                    "seconds": 5.3
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 40820,
+                    "seconds": 40.8
+                  },
+                  "repeated": {
+                    "milliseconds": 14150,
+                    "seconds": 14.2
+                  },
+                  "recovery": {
+                    "milliseconds": 8628,
+                    "seconds": 8.6
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 51776,
+                  "seconds": 51.8
+                },
+                "expected": {
+                  "milliseconds": 75501,
+                  "seconds": 75.5
+                },
+                "upper": {
+                  "milliseconds": 108520,
+                  "seconds": 108.5
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 33240,
+                    "seconds": 33.2
+                  },
+                  "repeated": {
+                    "milliseconds": 11720,
+                    "seconds": 11.7
+                  },
+                  "recovery": {
+                    "milliseconds": 6816,
+                    "seconds": 6.8
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 47040,
+                    "seconds": 47
+                  },
+                  "repeated": {
+                    "milliseconds": 16600,
+                    "seconds": 16.6
+                  },
+                  "recovery": {
+                    "milliseconds": 11861,
+                    "seconds": 11.9
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 65590,
+                    "seconds": 65.6
+                  },
+                  "repeated": {
+                    "milliseconds": 23210,
+                    "seconds": 23.2
+                  },
+                  "recovery": {
+                    "milliseconds": 19720,
+                    "seconds": 19.7
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 68765,
+                  "seconds": 68.8
+                },
+                "expected": {
+                  "milliseconds": 104777,
+                  "seconds": 104.8
+                },
+                "upper": {
+                  "milliseconds": 162720,
+                  "seconds": 162.7
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 44670,
+                    "seconds": 44.7
+                  },
+                  "repeated": {
+                    "milliseconds": 15450,
+                    "seconds": 15.4
+                  },
+                  "recovery": {
+                    "milliseconds": 8645,
+                    "seconds": 8.6
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 65860,
+                    "seconds": 65.9
+                  },
+                  "repeated": {
+                    "milliseconds": 22780,
+                    "seconds": 22.8
+                  },
+                  "recovery": {
+                    "milliseconds": 16137,
+                    "seconds": 16.1
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 98270,
+                    "seconds": 98.3
+                  },
+                  "repeated": {
+                    "milliseconds": 34000,
+                    "seconds": 34
+                  },
+                  "recovery": {
+                    "milliseconds": 30450,
+                    "seconds": 30.4
+                  }
+                }
+              }
+            }
+          }
+        },
+        "task2_attachment_faq_save_remote": {
+          "title": "첨부 있는 질문답변에서 비대면 상담 연결 방법 저장",
+          "assumptions": [
+            "자료 종류, 담당 부서, 첨부 있는 자료만 보기 조건을 다시 맞춘 뒤 검색 결과 앞부분부터 원하는 자료를 찾아야 한다.",
+            "첨부 여부 토글과 결과 카드 작업 버튼이 모두 개별 이동 지점으로 노출되어 반복 이동 비용이 커진다.",
+            "질문답변 수가 줄어도 카드마다 여러 작업 버튼을 따로 지나야 한다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 37,
+              "activations": 4,
+              "decisions": 12,
+              "waits": 1,
+              "speechUnits": 18,
+              "scanSteps": 43,
+              "contextResets": 0
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 26,
+                "activations": 3,
+                "decisions": 7,
+                "waits": 1,
+                "speechUnits": 11,
+                "scanSteps": 30,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 11,
+                "activations": 1,
+                "decisions": 5,
+                "waits": 0,
+                "speechUnits": 7,
+                "scanSteps": 13,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 0,
+                "activations": 0,
+                "decisions": 0,
+                "waits": 0,
+                "speechUnits": 0,
+                "scanSteps": 0,
+                "contextResets": 0
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 22690,
+                  "seconds": 22.7
+                },
+                "expected": {
+                  "milliseconds": 33350,
+                  "seconds": 33.4
+                },
+                "upper": {
+                  "milliseconds": 46820,
+                  "seconds": 46.8
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 15420,
+                    "seconds": 15.4
+                  },
+                  "repeated": {
+                    "milliseconds": 7270,
+                    "seconds": 7.3
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 22630,
+                    "seconds": 22.6
+                  },
+                  "repeated": {
+                    "milliseconds": 10720,
+                    "seconds": 10.7
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 31720,
+                    "seconds": 31.7
+                  },
+                  "repeated": {
+                    "milliseconds": 15100,
+                    "seconds": 15.1
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 38340,
+                  "seconds": 38.3
+                },
+                "expected": {
+                  "milliseconds": 54320,
+                  "seconds": 54.3
+                },
+                "upper": {
+                  "milliseconds": 75870,
+                  "seconds": 75.9
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 25760,
+                    "seconds": 25.8
+                  },
+                  "repeated": {
+                    "milliseconds": 12580,
+                    "seconds": 12.6
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 36480,
+                    "seconds": 36.5
+                  },
+                  "repeated": {
+                    "milliseconds": 17840,
+                    "seconds": 17.8
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 50870,
+                    "seconds": 50.9
+                  },
+                  "repeated": {
+                    "milliseconds": 25000,
+                    "seconds": 25
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 50970,
+                  "seconds": 51
+                },
+                "expected": {
+                  "milliseconds": 75140,
+                  "seconds": 75.1
+                },
+                "upper": {
+                  "milliseconds": 112020,
+                  "seconds": 112
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 34920,
+                    "seconds": 34.9
+                  },
+                  "repeated": {
+                    "milliseconds": 16050,
+                    "seconds": 16.1
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 51460,
+                    "seconds": 51.5
+                  },
+                  "repeated": {
+                    "milliseconds": 23680,
+                    "seconds": 23.7
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 76670,
+                    "seconds": 76.7
+                  },
+                  "repeated": {
+                    "milliseconds": 35350,
+                    "seconds": 35.4
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "task3_remote_form_preview_open": {
+          "title": "비대면 상담 신청 서식에서 상담 준비 체크 목록 미리보기 후 바로 열기",
+          "assumptions": [
+            "자료 종류, 대상, 기간을 다시 맞춘 뒤에도 검색 결과 앞부분부터 원하는 자료를 다시 찾아야 한다.",
+            "미리보기 대화상자를 닫으면 원래 자료 카드의 작업 버튼으로 돌아가지 않아 바로 열기 버튼을 다시 찾아야 한다.",
+            "서식 수가 적어도 카드마다 저장·바로 열기·미리보기가 분산되어 있어 반복 이동이 남는다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 49,
+              "activations": 6,
+              "decisions": 16,
+              "waits": 1,
+              "speechUnits": 23,
+              "scanSteps": 57,
+              "contextResets": 2
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 27,
+                "activations": 3,
+                "decisions": 7,
+                "waits": 1,
+                "speechUnits": 11,
+                "scanSteps": 31,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 11,
+                "activations": 1,
+                "decisions": 4,
+                "waits": 0,
+                "speechUnits": 6,
+                "scanSteps": 13,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 11,
+                "activations": 2,
+                "decisions": 5,
+                "waits": 0,
+                "speechUnits": 6,
+                "scanSteps": 13,
+                "contextResets": 2
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 30959,
+                  "seconds": 31
+                },
+                "expected": {
+                  "milliseconds": 47151,
+                  "seconds": 47.2
+                },
+                "upper": {
+                  "milliseconds": 69318,
+                  "seconds": 69.3
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 15870,
+                    "seconds": 15.9
+                  },
+                  "repeated": {
+                    "milliseconds": 6850,
+                    "seconds": 6.8
+                  },
+                  "recovery": {
+                    "milliseconds": 8239,
+                    "seconds": 8.2
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 23280,
+                    "seconds": 23.3
+                  },
+                  "repeated": {
+                    "milliseconds": 10070,
+                    "seconds": 10.1
+                  },
+                  "recovery": {
+                    "milliseconds": 13801,
+                    "seconds": 13.8
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 32620,
+                    "seconds": 32.6
+                  },
+                  "repeated": {
+                    "milliseconds": 14150,
+                    "seconds": 14.2
+                  },
+                  "recovery": {
+                    "milliseconds": 22548,
+                    "seconds": 22.5
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 55556,
+                  "seconds": 55.6
+                },
+                "expected": {
+                  "milliseconds": 84191,
+                  "seconds": 84.2
+                },
+                "upper": {
+                  "milliseconds": 125376,
+                  "seconds": 125.4
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 26460,
+                    "seconds": 26.5
+                  },
+                  "repeated": {
+                    "milliseconds": 11720,
+                    "seconds": 11.7
+                  },
+                  "recovery": {
+                    "milliseconds": 17376,
+                    "seconds": 17.4
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 37460,
+                    "seconds": 37.5
+                  },
+                  "repeated": {
+                    "milliseconds": 16600,
+                    "seconds": 16.6
+                  },
+                  "recovery": {
+                    "milliseconds": 30131,
+                    "seconds": 30.1
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 52220,
+                    "seconds": 52.2
+                  },
+                  "repeated": {
+                    "milliseconds": 23210,
+                    "seconds": 23.2
+                  },
+                  "recovery": {
+                    "milliseconds": 49946,
+                    "seconds": 49.9
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 73095,
+                  "seconds": 73.1
+                },
+                "expected": {
+                  "milliseconds": 116329,
+                  "seconds": 116.3
+                },
+                "upper": {
+                  "milliseconds": 189735,
+                  "seconds": 189.7
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 35870,
+                    "seconds": 35.9
+                  },
+                  "repeated": {
+                    "milliseconds": 15450,
+                    "seconds": 15.4
+                  },
+                  "recovery": {
+                    "milliseconds": 21775,
+                    "seconds": 21.8
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 52860,
+                    "seconds": 52.9
+                  },
+                  "repeated": {
+                    "milliseconds": 22780,
+                    "seconds": 22.8
+                  },
+                  "recovery": {
+                    "milliseconds": 40689,
+                    "seconds": 40.7
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 78770,
+                    "seconds": 78.8
+                  },
+                  "repeated": {
+                    "milliseconds": 34000,
+                    "seconds": 34
+                  },
+                  "recovery": {
+                    "milliseconds": 76965,
+                    "seconds": 77
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "variantB": {
+      "label": "비교안 B · 개선 구조",
+      "description": "세부 조건으로 바로 이동해 처음 진입 부담을 낮추고, 기간·자료 종류·담당 부서·대상·첨부 여부를 적은 탭 수로 설정하며, 결과는 하나의 선택 항목으로 이동하고, 선택한 자료 작업을 한곳에 모아 두며, 미리보기 대화상자를 닫으면 바로 원래 작업 버튼으로 돌아오는 구조.",
+      "tasks": {
+        "task1_recent_guide_preview_close": {
+          "title": "최근 7일 안내문에서 예약 변경 안내 미리보기 열었다가 닫기",
+          "assumptions": [
+            "맨 앞의 세부 조건으로 바로 이동 링크로 첫 진입 부담을 줄인다.",
+            "기간, 자료 종류, 담당 부서 조건을 각각 한 번의 탭 진입으로 설정한다.",
+            "미리보기를 닫으면 같은 작업 버튼으로 초점이 돌아와 위치를 다시 찾는 비용을 줄인다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 17,
+              "activations": 6,
+              "decisions": 9,
+              "waits": 1,
+              "speechUnits": 10,
+              "scanSteps": 20,
+              "contextResets": 0
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 12,
+                "activations": 4,
+                "decisions": 6,
+                "waits": 1,
+                "speechUnits": 7,
+                "scanSteps": 15,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 3,
+                "activations": 1,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
+                "scanSteps": 3,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 2,
+                "activations": 1,
+                "decisions": 1,
+                "waits": 0,
+                "speechUnits": 1,
+                "scanSteps": 2,
+                "contextResets": 0
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 13024,
+                  "seconds": 13
+                },
+                "expected": {
+                  "milliseconds": 19608,
+                  "seconds": 19.6
+                },
+                "upper": {
+                  "milliseconds": 28310,
+                  "seconds": 28.3
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 8920,
+                    "seconds": 8.9
+                  },
+                  "repeated": {
+                    "milliseconds": 2410,
+                    "seconds": 2.4
+                  },
+                  "recovery": {
+                    "milliseconds": 1694,
+                    "seconds": 1.7
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 13200,
+                    "seconds": 13.2
+                  },
+                  "repeated": {
+                    "milliseconds": 3570,
+                    "seconds": 3.6
+                  },
+                  "recovery": {
+                    "milliseconds": 2838,
+                    "seconds": 2.8
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 18620,
+                    "seconds": 18.6
+                  },
+                  "repeated": {
+                    "milliseconds": 5050,
+                    "seconds": 5
+                  },
+                  "recovery": {
+                    "milliseconds": 4640,
+                    "seconds": 4.6
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 21984,
+                  "seconds": 22
+                },
+                "expected": {
+                  "milliseconds": 32171,
+                  "seconds": 32.2
+                },
+                "upper": {
+                  "milliseconds": 46347,
+                  "seconds": 46.3
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 14880,
+                    "seconds": 14.9
+                  },
+                  "repeated": {
+                    "milliseconds": 4080,
+                    "seconds": 4.1
+                  },
+                  "recovery": {
+                    "milliseconds": 3024,
+                    "seconds": 3
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 21180,
+                    "seconds": 21.2
+                  },
+                  "repeated": {
+                    "milliseconds": 5800,
+                    "seconds": 5.8
+                  },
+                  "recovery": {
+                    "milliseconds": 5191,
+                    "seconds": 5.2
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 29680,
+                    "seconds": 29.7
+                  },
+                  "repeated": {
+                    "milliseconds": 8150,
+                    "seconds": 8.2
+                  },
+                  "recovery": {
+                    "milliseconds": 8517,
+                    "seconds": 8.5
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 29680,
+                  "seconds": 29.7
+                },
+                "expected": {
+                  "milliseconds": 45242,
+                  "seconds": 45.2
+                },
+                "upper": {
+                  "milliseconds": 69805,
+                  "seconds": 69.8
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 20770,
+                    "seconds": 20.8
+                  },
+                  "repeated": {
+                    "milliseconds": 4750,
+                    "seconds": 4.8
+                  },
+                  "recovery": {
+                    "milliseconds": 4160,
+                    "seconds": 4.2
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 30540,
+                    "seconds": 30.5
+                  },
+                  "repeated": {
+                    "milliseconds": 6980,
+                    "seconds": 7
+                  },
+                  "recovery": {
+                    "milliseconds": 7722,
+                    "seconds": 7.7
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 45120,
+                    "seconds": 45.1
+                  },
+                  "repeated": {
+                    "milliseconds": 10300,
+                    "seconds": 10.3
+                  },
+                  "recovery": {
+                    "milliseconds": 14385,
+                    "seconds": 14.4
+                  }
+                }
+              }
+            }
+          }
+        },
+        "task2_attachment_faq_save_remote": {
+          "title": "첨부 있는 질문답변에서 비대면 상담 연결 방법 저장",
+          "assumptions": [
+            "자료 종류, 담당 부서, 첨부 있는 자료만 보기 조건을 적은 탭 수로 맞추고 결과 제목으로 바로 이어진다.",
+            "질문답변 사이 이동은 방향키 중심이라 짧게 끝난다.",
+            "저장, 미리보기, 바로 열기를 선택한 자료 작업 영역에 모아 둔다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 11,
+              "activations": 4,
+              "decisions": 7,
+              "waits": 1,
+              "speechUnits": 7,
+              "scanSteps": 12,
+              "contextResets": 0
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 8,
+                "activations": 3,
+                "decisions": 5,
+                "waits": 1,
+                "speechUnits": 5,
+                "scanSteps": 9,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 3,
+                "activations": 1,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
+                "scanSteps": 3,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 0,
+                "activations": 0,
+                "decisions": 0,
+                "waits": 0,
+                "speechUnits": 0,
+                "scanSteps": 0,
+                "contextResets": 0
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 8890,
+                  "seconds": 8.9
+                },
+                "expected": {
+                  "milliseconds": 13200,
+                  "seconds": 13.2
+                },
+                "upper": {
+                  "milliseconds": 18670,
+                  "seconds": 18.7
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 6480,
+                    "seconds": 6.5
+                  },
+                  "repeated": {
+                    "milliseconds": 2410,
+                    "seconds": 2.4
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 9630,
+                    "seconds": 9.6
+                  },
+                  "repeated": {
+                    "milliseconds": 3570,
+                    "seconds": 3.6
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 13620,
+                    "seconds": 13.6
+                  },
+                  "repeated": {
+                    "milliseconds": 5050,
+                    "seconds": 5
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 14880,
+                  "seconds": 14.9
+                },
+                "expected": {
+                  "milliseconds": 21200,
+                  "seconds": 21.2
+                },
+                "upper": {
+                  "milliseconds": 29780,
+                  "seconds": 29.8
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 10800,
+                    "seconds": 10.8
+                  },
+                  "repeated": {
+                    "milliseconds": 4080,
+                    "seconds": 4.1
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 15400,
+                    "seconds": 15.4
+                  },
+                  "repeated": {
+                    "milliseconds": 5800,
+                    "seconds": 5.8
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 21630,
+                    "seconds": 21.6
+                  },
+                  "repeated": {
+                    "milliseconds": 8150,
+                    "seconds": 8.2
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 18520,
+                  "seconds": 18.5
+                },
+                "expected": {
+                  "milliseconds": 27240,
+                  "seconds": 27.2
+                },
+                "upper": {
+                  "milliseconds": 40170,
+                  "seconds": 40.2
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 13770,
+                    "seconds": 13.8
+                  },
+                  "repeated": {
+                    "milliseconds": 4750,
+                    "seconds": 4.8
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 20260,
+                    "seconds": 20.3
+                  },
+                  "repeated": {
+                    "milliseconds": 6980,
+                    "seconds": 7
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 29870,
+                    "seconds": 29.9
+                  },
+                  "repeated": {
+                    "milliseconds": 10300,
+                    "seconds": 10.3
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "task3_remote_form_preview_open": {
+          "title": "비대면 상담 신청 서식에서 상담 준비 체크 목록 미리보기 후 바로 열기",
+          "assumptions": [
+            "자료 종류, 대상, 기간을 적은 탭 수로 맞추고 결과 제목으로 초점이 이동해 현재 조건을 다시 확인하기 쉽다.",
+            "서식 사이 이동은 방향키 중심이라 짧게 끝난다.",
+            "미리보기를 닫으면 같은 작업 버튼으로 돌아와 바로 열기까지 이어서 수행할 수 있다."
+          ],
+          "structural": {
+            "totals": {
+              "navMoves": 14,
+              "activations": 6,
+              "decisions": 9,
+              "waits": 1,
+              "speechUnits": 9,
+              "scanSteps": 15,
+              "contextResets": 0
+            },
+            "byBucket": {
+              "entry": {
+                "navMoves": 8,
+                "activations": 3,
+                "decisions": 5,
+                "waits": 1,
+                "speechUnits": 5,
+                "scanSteps": 9,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 3,
+                "activations": 1,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
+                "scanSteps": 3,
+                "contextResets": 0
+              },
+              "recovery": {
+                "navMoves": 3,
+                "activations": 2,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
+                "scanSteps": 3,
+                "contextResets": 0
+              }
+            }
+          },
+          "profiles": {
+            "keyboard": {
+              "label": "키보드 사용자",
+              "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 11783,
+                  "seconds": 11.8
+                },
+                "expected": {
+                  "milliseconds": 18063,
+                  "seconds": 18.1
+                },
+                "upper": {
+                  "milliseconds": 26645,
+                  "seconds": 26.6
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 6480,
+                    "seconds": 6.5
+                  },
+                  "repeated": {
+                    "milliseconds": 2410,
+                    "seconds": 2.4
+                  },
+                  "recovery": {
+                    "milliseconds": 2893,
+                    "seconds": 2.9
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 9630,
+                    "seconds": 9.6
+                  },
+                  "repeated": {
+                    "milliseconds": 3570,
+                    "seconds": 3.6
+                  },
+                  "recovery": {
+                    "milliseconds": 4863,
+                    "seconds": 4.9
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 13620,
+                    "seconds": 13.6
+                  },
+                  "repeated": {
+                    "milliseconds": 5050,
+                    "seconds": 5
+                  },
+                  "recovery": {
+                    "milliseconds": 7975,
+                    "seconds": 8
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 20088,
+                  "seconds": 20.1
+                },
+                "expected": {
+                  "milliseconds": 30161,
+                  "seconds": 30.2
+                },
+                "upper": {
+                  "milliseconds": 44519,
+                  "seconds": 44.5
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 10800,
+                    "seconds": 10.8
+                  },
+                  "repeated": {
+                    "milliseconds": 4080,
+                    "seconds": 4.1
+                  },
+                  "recovery": {
+                    "milliseconds": 5208,
+                    "seconds": 5.2
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 15400,
+                    "seconds": 15.4
+                  },
+                  "repeated": {
+                    "milliseconds": 5800,
+                    "seconds": 5.8
+                  },
+                  "recovery": {
+                    "milliseconds": 8961,
+                    "seconds": 9
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 21630,
+                    "seconds": 21.6
+                  },
+                  "repeated": {
+                    "milliseconds": 8150,
+                    "seconds": 8.2
+                  },
+                  "recovery": {
+                    "milliseconds": 14739,
+                    "seconds": 14.7
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 25605,
+                  "seconds": 25.6
+                },
+                "expected": {
+                  "milliseconds": 40374,
+                  "seconds": 40.4
+                },
+                "upper": {
+                  "milliseconds": 64530,
+                  "seconds": 64.5
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 13770,
+                    "seconds": 13.8
+                  },
+                  "repeated": {
+                    "milliseconds": 4750,
+                    "seconds": 4.8
+                  },
+                  "recovery": {
+                    "milliseconds": 7085,
+                    "seconds": 7.1
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 20260,
+                    "seconds": 20.3
+                  },
+                  "repeated": {
+                    "milliseconds": 6980,
+                    "seconds": 7
+                  },
+                  "recovery": {
+                    "milliseconds": 13134,
+                    "seconds": 13.1
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 29870,
+                    "seconds": 29.9
+                  },
+                  "repeated": {
+                    "milliseconds": 10300,
+                    "seconds": 10.3
+                  },
+                  "recovery": {
+                    "milliseconds": 24360,
+                    "seconds": 24.4
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "task1_recent_guide_preview_close": {
+      "keyboard": {
+        "expectedReductionSeconds": 24.9,
+        "expectedReductionPercent": 56
+      },
+      "screenReader": {
+        "expectedReductionSeconds": 43.3,
+        "expectedReductionPercent": 57.4
+      },
+      "switch": {
+        "expectedReductionSeconds": 59.6,
+        "expectedReductionPercent": 56.9
+      }
+    },
+    "task2_attachment_faq_save_remote": {
+      "keyboard": {
+        "expectedReductionSeconds": 20.2,
+        "expectedReductionPercent": 60.5
+      },
+      "screenReader": {
+        "expectedReductionSeconds": 33.1,
+        "expectedReductionPercent": 61
+      },
+      "switch": {
+        "expectedReductionSeconds": 47.9,
+        "expectedReductionPercent": 63.8
+      }
+    },
+    "task3_remote_form_preview_open": {
+      "keyboard": {
+        "expectedReductionSeconds": 29.1,
+        "expectedReductionPercent": 61.7
+      },
+      "screenReader": {
+        "expectedReductionSeconds": 54,
+        "expectedReductionPercent": 64.1
+      },
+      "switch": {
+        "expectedReductionSeconds": 75.9,
+        "expectedReductionPercent": 65.3
+      }
+    }
+  },
+  "overall": {
+    "keyboard": {
+      "label": "키보드 사용자",
+      "variantAExpectedSeconds": 125.1,
+      "variantBExpectedSeconds": 50.9,
+      "expectedReductionSeconds": 74.2,
+      "expectedReductionPercent": 59.3
+    },
+    "screenReader": {
+      "label": "화면낭독 사용자",
+      "variantAExpectedSeconds": 214,
+      "variantBExpectedSeconds": 83.6,
+      "expectedReductionSeconds": 130.4,
+      "expectedReductionPercent": 60.9
+    },
+    "switch": {
+      "label": "스위치 사용자",
+      "variantAExpectedSeconds": 296.2,
+      "variantBExpectedSeconds": 112.8,
+      "expectedReductionSeconds": 183.4,
+      "expectedReductionPercent": 61.9
+    }
+  },
+  "measurementRules": [
+    "실제 계측은 수행 탭에서 첫 조작이 들어갈 때 시작합니다.",
+    "수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.",
+    "수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다."
+  ],
+  "actualMeasurementScope": "과업 내용 확인은 메인 창에서 진행하고, 새 탭의 실제 검색 세부 조건 선택과 자료 조작만 기록합니다."
+};

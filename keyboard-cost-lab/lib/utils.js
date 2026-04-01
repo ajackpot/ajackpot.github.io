@@ -32,6 +32,9 @@ export function clsx(...tokens) {
   return tokens.filter(Boolean).join(' ');
 }
 
+export function getDefaultConditionOrder() {
+  return ['variantA', 'variantB'];
+}
 
 export function formatServiceScreenButtonLabel(serviceLabel) {
   return `${serviceLabel} 화면으로 이동`;
@@ -43,6 +46,32 @@ export function renderRunnerFooterHtml({ jumpLabel, closeLabel = '이 탭 닫기
       <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">${escapeHtml(jumpLabel)}</button>
       <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">${escapeHtml(closeLabel)}</button>
     </footer>
+  `;
+}
+
+export function renderRunnerCompletionDialogHtml({
+  title = '과업 수행이 끝났습니다.',
+  description = '확인 버튼을 누르면 이 탭이 자동으로 닫힙니다.',
+  confirmLabel = '확인',
+} = {}) {
+  return `
+    <div class="modal-backdrop" data-measurement-exempt="true">
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="runner-complete-title"
+        aria-describedby="runner-complete-description"
+        data-completion-dialog
+        data-trap-dialog="true"
+      >
+        <h2 id="runner-complete-title" tabindex="-1">${escapeHtml(title)}</h2>
+        <p id="runner-complete-description">${escapeHtml(description)}</p>
+        <div class="button-row" data-measurement-exempt="true">
+          <button class="button button-primary" data-action="acknowledge-task-complete" data-completion-confirm>${escapeHtml(confirmLabel)}</button>
+        </div>
+      </div>
+    </div>
   `;
 }
 

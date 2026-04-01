@@ -1,44 +1,44 @@
-export const benchmarkResultsComments = {
-  "generatedAt": "2026-04-01T00:15:01.162Z",
+{
+  "generatedAt": "2026-04-01T00:15:01.192Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",
-      "description": "상단 링크와 정렬·범위 선택을 지난 뒤 댓글 목록에 도달하고, 댓글마다 여러 개의 링크와 버튼을 지나야 하며, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾게 되는 구조.",
+      "description": "상단 보조 링크와 길게 이어진 신청 단계들을 차례로 지나야 원하는 항목에 도달하고, 각 항목마다 현재 상태, 최근 확인, 설명 보기, 값 선택 버튼이 흩어져 있으며, 설명 대화상자를 닫으면 신청 단계 제목 근처로 돌아와 다시 위치를 찾아야 하는 구조.",
       "tasks": {
-        "task1_newest_review_open_replies": {
-          "title": "최신 후기에서 민지 댓글 답글 열기",
+        "task1_remote_contact_card_submit": {
+          "title": "비대면 초진 상담을 고르고 연락처 확인 안내를 켠 뒤 카드 결제로 신청 완료",
           "assumptions": [
-            "상단 보조 링크와 범위 선택 도움 링크를 지나 댓글 목록에 도달해야 한다.",
-            "댓글마다 작성자, 작성 시각, 공유, 도움이 돼요, 답글 보기, 댓글 정보 보기 등 여러 멈춤 지점이 있다.",
-            "원하는 댓글 앞의 다른 댓글 행동 버튼들을 지나며 순차 탐색 부담이 누적된다."
+            "상단 보조 링크와 앞선 신청 단계 안내 링크를 지나야 신청 정보에 도달한다.",
+            "상담 종류, 연락처 확인 안내, 결제 수단, 제출 버튼이 서로 멀리 떨어져 있어 긴 순차 이동이 필요하다.",
+            "제출 확인은 맨 아래에 있어 원하는 값을 모두 바꾼 뒤 다시 내려가야 한다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 44,
-              "activations": 3,
-              "decisions": 13,
+              "navMoves": 49,
+              "activations": 4,
+              "decisions": 14,
               "waits": 1,
-              "speechUnits": 23,
-              "scanSteps": 53,
+              "speechUnits": 22,
+              "scanSteps": 57,
               "contextResets": 0
             },
             "byBucket": {
               "entry": {
-                "navMoves": 29,
-                "activations": 2,
-                "decisions": 7,
-                "waits": 1,
-                "speechUnits": 13,
-                "scanSteps": 34,
-                "contextResets": 0
-              },
-              "repeated": {
-                "navMoves": 15,
-                "activations": 1,
+                "navMoves": 24,
+                "activations": 0,
                 "decisions": 6,
                 "waits": 0,
                 "speechUnits": 10,
-                "scanSteps": 19,
+                "scanSteps": 28,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 25,
+                "activations": 4,
+                "decisions": 8,
+                "waits": 1,
+                "speechUnits": 12,
+                "scanSteps": 29,
                 "contextResets": 0
               },
               "recovery": {
@@ -58,27 +58,27 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 26040,
-                  "seconds": 26
+                  "milliseconds": 28930,
+                  "seconds": 28.9
                 },
                 "expected": {
-                  "milliseconds": 38230,
-                  "seconds": 38.2
+                  "milliseconds": 42450,
+                  "seconds": 42.5
                 },
                 "upper": {
-                  "milliseconds": 53620,
-                  "seconds": 53.6
+                  "milliseconds": 59520,
+                  "seconds": 59.5
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 16550,
-                    "seconds": 16.6
+                    "milliseconds": 13320,
+                    "seconds": 13.3
                   },
                   "repeated": {
-                    "milliseconds": 9490,
-                    "seconds": 9.5
+                    "milliseconds": 15610,
+                    "seconds": 15.6
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -87,12 +87,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 24260,
-                    "seconds": 24.3
+                    "milliseconds": 19500,
+                    "seconds": 19.5
                   },
                   "repeated": {
-                    "milliseconds": 13970,
-                    "seconds": 14
+                    "milliseconds": 22950,
+                    "seconds": 22.9
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -101,12 +101,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 33970,
-                    "seconds": 34
+                    "milliseconds": 27300,
+                    "seconds": 27.3
                   },
                   "repeated": {
-                    "milliseconds": 19650,
-                    "seconds": 19.6
+                    "milliseconds": 32220,
+                    "seconds": 32.2
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -120,27 +120,27 @@ export const benchmarkResultsComments = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 44480,
-                  "seconds": 44.5
+                  "milliseconds": 48780,
+                  "seconds": 48.8
                 },
                 "expected": {
-                  "milliseconds": 63000,
-                  "seconds": 63
+                  "milliseconds": 69040,
+                  "seconds": 69
                 },
                 "upper": {
-                  "milliseconds": 87950,
-                  "seconds": 88
+                  "milliseconds": 96330,
+                  "seconds": 96.3
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 27920,
-                    "seconds": 27.9
+                    "milliseconds": 22600,
+                    "seconds": 22.6
                   },
                   "repeated": {
-                    "milliseconds": 16560,
-                    "seconds": 16.6
+                    "milliseconds": 26180,
+                    "seconds": 26.2
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -149,12 +149,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 39520,
-                    "seconds": 39.5
+                    "milliseconds": 31920,
+                    "seconds": 31.9
                   },
                   "repeated": {
-                    "milliseconds": 23480,
-                    "seconds": 23.5
+                    "milliseconds": 37120,
+                    "seconds": 37.1
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -163,12 +163,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 55080,
-                    "seconds": 55.1
+                    "milliseconds": 44500,
+                    "seconds": 44.5
                   },
                   "repeated": {
-                    "milliseconds": 32870,
-                    "seconds": 32.9
+                    "milliseconds": 51830,
+                    "seconds": 51.8
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -182,27 +182,27 @@ export const benchmarkResultsComments = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 60370,
-                  "seconds": 60.4
+                  "milliseconds": 65470,
+                  "seconds": 65.5
                 },
                 "expected": {
-                  "milliseconds": 89060,
-                  "seconds": 89.1
+                  "milliseconds": 96540,
+                  "seconds": 96.5
                 },
                 "upper": {
-                  "milliseconds": 133070,
-                  "seconds": 133.1
+                  "milliseconds": 144120,
+                  "seconds": 144.1
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 38020,
-                    "seconds": 38
+                    "milliseconds": 30200,
+                    "seconds": 30.2
                   },
                   "repeated": {
-                    "milliseconds": 22350,
-                    "seconds": 22.4
+                    "milliseconds": 35270,
+                    "seconds": 35.3
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -211,12 +211,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 56080,
-                    "seconds": 56.1
+                    "milliseconds": 44600,
+                    "seconds": 44.6
                   },
                   "repeated": {
-                    "milliseconds": 32980,
-                    "seconds": 33
+                    "milliseconds": 51940,
+                    "seconds": 51.9
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -225,12 +225,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 83770,
-                    "seconds": 83.8
+                    "milliseconds": 66900,
+                    "seconds": 66.9
                   },
                   "repeated": {
-                    "milliseconds": 49300,
-                    "seconds": 49.3
+                    "milliseconds": 77220,
+                    "seconds": 77.2
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -241,49 +241,49 @@ export const benchmarkResultsComments = {
             }
           }
         },
-        "task2_popular_admin_detail_helpful": {
-          "title": "운영자 안내 댓글 정보 보기 후 도움이 돼요",
+        "task2_guardian_help_bank_submit": {
+          "title": "보호자 대리 신청과 준비 안내 설명 확인 뒤 계좌 이체로 신청 완료",
           "assumptions": [
-            "정렬 기준을 다시 맞춘 뒤 댓글 목록 맨 앞에서부터 원하는 댓글의 작업 버튼을 찾아야 한다.",
-            "댓글 정보 대화상자를 닫으면 원래 댓글의 버튼으로 돌아가지 않고 댓글 목록 제목 근처부터 다시 찾아야 한다.",
-            "도움이 돼요 버튼과 댓글 정보 버튼이 떨어져 있어 같은 댓글 안에서도 이동 횟수가 커진다."
+            "신청 대상, 준비 안내 설명, 준비 안내 값, 결제 수단, 제출 버튼이 서로 다른 단계에 흩어져 있다.",
+            "준비 안내 설명을 닫으면 방금 사용한 버튼이 아니라 신청 단계 제목 근처로 돌아온다.",
+            "설명 확인 뒤 안내 수신 항목과 제출 확인 단계까지 다시 찾아야 해 복구 비용이 커진다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 38,
-              "activations": 4,
-              "decisions": 11,
+              "navMoves": 56,
+              "activations": 6,
+              "decisions": 17,
               "waits": 1,
-              "speechUnits": 19,
-              "scanSteps": 45,
+              "speechUnits": 26,
+              "scanSteps": 66,
               "contextResets": 2
             },
             "byBucket": {
               "entry": {
-                "navMoves": 16,
-                "activations": 1,
-                "decisions": 3,
-                "waits": 1,
-                "speechUnits": 6,
-                "scanSteps": 18,
+                "navMoves": 17,
+                "activations": 0,
+                "decisions": 4,
+                "waits": 0,
+                "speechUnits": 7,
+                "scanSteps": 20,
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 8,
-                "activations": 1,
-                "decisions": 3,
-                "waits": 0,
-                "speechUnits": 5,
-                "scanSteps": 10,
+                "navMoves": 29,
+                "activations": 4,
+                "decisions": 9,
+                "waits": 1,
+                "speechUnits": 14,
+                "scanSteps": 34,
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 14,
+                "navMoves": 10,
                 "activations": 2,
-                "decisions": 5,
+                "decisions": 4,
                 "waits": 0,
-                "speechUnits": 8,
-                "scanSteps": 17,
+                "speechUnits": 5,
+                "scanSteps": 12,
                 "contextResets": 2
               }
             }
@@ -294,59 +294,59 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 23604,
-                  "seconds": 23.6
+                  "milliseconds": 34442,
+                  "seconds": 34.4
                 },
                 "expected": {
-                  "milliseconds": 36598,
-                  "seconds": 36.6
+                  "milliseconds": 52025,
+                  "seconds": 52
                 },
                 "upper": {
-                  "milliseconds": 54983,
-                  "seconds": 55
+                  "milliseconds": 75736,
+                  "seconds": 75.7
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 8800,
-                    "seconds": 8.8
+                    "milliseconds": 9330,
+                    "seconds": 9.3
                   },
                   "repeated": {
-                    "milliseconds": 5080,
-                    "seconds": 5.1
+                    "milliseconds": 17830,
+                    "seconds": 17.8
                   },
                   "recovery": {
-                    "milliseconds": 9724,
-                    "seconds": 9.7
+                    "milliseconds": 7282,
+                    "seconds": 7.3
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 12890,
-                    "seconds": 12.9
+                    "milliseconds": 13650,
+                    "seconds": 13.7
                   },
                   "repeated": {
-                    "milliseconds": 7470,
-                    "seconds": 7.5
+                    "milliseconds": 26200,
+                    "seconds": 26.2
                   },
                   "recovery": {
-                    "milliseconds": 16238,
-                    "seconds": 16.2
+                    "milliseconds": 12175,
+                    "seconds": 12.2
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 18020,
-                    "seconds": 18
+                    "milliseconds": 19100,
+                    "seconds": 19.1
                   },
                   "repeated": {
-                    "milliseconds": 10500,
-                    "seconds": 10.5
+                    "milliseconds": 36770,
+                    "seconds": 36.8
                   },
                   "recovery": {
-                    "milliseconds": 26463,
-                    "seconds": 26.5
+                    "milliseconds": 19866,
+                    "seconds": 19.9
                   }
                 }
               }
@@ -356,59 +356,59 @@ export const benchmarkResultsComments = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 43680,
-                  "seconds": 43.7
+                  "milliseconds": 61324,
+                  "seconds": 61.3
                 },
                 "expected": {
-                  "milliseconds": 68230,
-                  "seconds": 68.2
+                  "milliseconds": 91772,
+                  "seconds": 91.8
                 },
                 "upper": {
-                  "milliseconds": 104187,
-                  "seconds": 104.2
+                  "milliseconds": 135098,
+                  "seconds": 135.1
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 14640,
-                    "seconds": 14.6
+                    "milliseconds": 15820,
+                    "seconds": 15.8
                   },
                   "repeated": {
-                    "milliseconds": 8760,
-                    "seconds": 8.8
+                    "milliseconds": 30000,
+                    "seconds": 30
                   },
                   "recovery": {
-                    "milliseconds": 20280,
-                    "seconds": 20.3
+                    "milliseconds": 15504,
+                    "seconds": 15.5
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 20720,
-                    "seconds": 20.7
+                    "milliseconds": 22340,
+                    "seconds": 22.3
                   },
                   "repeated": {
-                    "milliseconds": 12420,
-                    "seconds": 12.4
+                    "milliseconds": 42520,
+                    "seconds": 42.5
                   },
                   "recovery": {
-                    "milliseconds": 35090,
-                    "seconds": 35.1
+                    "milliseconds": 26912,
+                    "seconds": 26.9
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 28830,
-                    "seconds": 28.8
+                    "milliseconds": 31130,
+                    "seconds": 31.1
                   },
                   "repeated": {
-                    "milliseconds": 17370,
-                    "seconds": 17.4
+                    "milliseconds": 59360,
+                    "seconds": 59.4
                   },
                   "recovery": {
-                    "milliseconds": 57987,
-                    "seconds": 58
+                    "milliseconds": 44608,
+                    "seconds": 44.6
                   }
                 }
               }
@@ -418,99 +418,99 @@ export const benchmarkResultsComments = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 58435,
-                  "seconds": 58.4
+                  "milliseconds": 81780,
+                  "seconds": 81.8
                 },
                 "expected": {
-                  "milliseconds": 96709,
-                  "seconds": 96.7
+                  "milliseconds": 128334,
+                  "seconds": 128.3
                 },
                 "upper": {
-                  "milliseconds": 164425,
-                  "seconds": 164.4
+                  "milliseconds": 206190,
+                  "seconds": 206.2
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 19720,
-                    "seconds": 19.7
+                    "milliseconds": 21400,
+                    "seconds": 21.4
                   },
                   "repeated": {
-                    "milliseconds": 12000,
-                    "seconds": 12
+                    "milliseconds": 40620,
+                    "seconds": 40.6
                   },
                   "recovery": {
-                    "milliseconds": 26715,
-                    "seconds": 26.7
+                    "milliseconds": 19760,
+                    "seconds": 19.8
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 29100,
-                    "seconds": 29.1
+                    "milliseconds": 31600,
+                    "seconds": 31.6
                   },
                   "repeated": {
-                    "milliseconds": 17680,
-                    "seconds": 17.7
+                    "milliseconds": 59840,
+                    "seconds": 59.8
                   },
                   "recovery": {
-                    "milliseconds": 49929,
-                    "seconds": 49.9
+                    "milliseconds": 36894,
+                    "seconds": 36.9
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 43470,
-                    "seconds": 43.5
+                    "milliseconds": 47400,
+                    "seconds": 47.4
                   },
                   "repeated": {
-                    "milliseconds": 26350,
-                    "seconds": 26.4
+                    "milliseconds": 89070,
+                    "seconds": 89.1
                   },
                   "recovery": {
-                    "milliseconds": 94605,
-                    "seconds": 94.6
+                    "milliseconds": 69720,
+                    "seconds": 69.7
                   }
                 }
               }
             }
           }
         },
-        "task3_question_open_juno_replies": {
-          "title": "질문 댓글에서 준호 댓글 답글 열기",
+        "task3_return_receipt_easy_submit": {
+          "title": "재방문 빠른 상담과 문자 영수증, 간편 결제로 신청 완료",
           "assumptions": [
-            "댓글 범위를 질문으로 바꾼 뒤에도 적용 버튼과 보조 링크를 지나 다시 댓글 목록을 만나야 한다.",
-            "답글이 열려 있던 다른 댓글이 있어도 원하는 질문 댓글의 버튼을 다시 찾아야 한다.",
-            "순차 탐색 구조에서는 댓글 수가 줄어도 각 댓글 안의 버튼 수 때문에 비용이 쉽게 남는다."
+            "상담 종류를 바꾼 뒤 결제 단계로 길게 이동해야 한다.",
+            "영수증 받는 방법과 결제 수단 선택 버튼이 각각 따로 흩어져 있어 반복 이동이 크다.",
+            "제출 확인 단계가 마지막에 있어 필요한 값을 맞춘 뒤 다시 한 번 길게 내려가야 한다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 30,
-              "activations": 2,
-              "decisions": 9,
+              "navMoves": 48,
+              "activations": 4,
+              "decisions": 13,
               "waits": 1,
-              "speechUnits": 16,
-              "scanSteps": 37,
+              "speechUnits": 21,
+              "scanSteps": 56,
               "contextResets": 0
             },
             "byBucket": {
               "entry": {
-                "navMoves": 18,
-                "activations": 1,
-                "decisions": 4,
-                "waits": 1,
-                "speechUnits": 8,
-                "scanSteps": 22,
+                "navMoves": 24,
+                "activations": 0,
+                "decisions": 5,
+                "waits": 0,
+                "speechUnits": 9,
+                "scanSteps": 28,
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 12,
-                "activations": 1,
-                "decisions": 5,
-                "waits": 0,
-                "speechUnits": 8,
-                "scanSteps": 15,
+                "navMoves": 24,
+                "activations": 4,
+                "decisions": 8,
+                "waits": 1,
+                "speechUnits": 12,
+                "scanSteps": 28,
                 "contextResets": 0
               },
               "recovery": {
@@ -530,27 +530,27 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 17840,
-                  "seconds": 17.8
+                  "milliseconds": 28060,
+                  "seconds": 28.1
                 },
                 "expected": {
-                  "milliseconds": 26210,
-                  "seconds": 26.2
+                  "milliseconds": 41150,
+                  "seconds": 41.1
                 },
                 "upper": {
-                  "milliseconds": 36770,
-                  "seconds": 36.8
+                  "milliseconds": 57670,
+                  "seconds": 57.7
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 10120,
-                    "seconds": 10.1
+                    "milliseconds": 12900,
+                    "seconds": 12.9
                   },
                   "repeated": {
-                    "milliseconds": 7720,
-                    "seconds": 7.7
+                    "milliseconds": 15160,
+                    "seconds": 15.2
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -559,12 +559,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 14840,
-                    "seconds": 14.8
+                    "milliseconds": 18850,
+                    "seconds": 18.9
                   },
                   "repeated": {
-                    "milliseconds": 11370,
-                    "seconds": 11.4
+                    "milliseconds": 22300,
+                    "seconds": 22.3
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -573,12 +573,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 20770,
-                    "seconds": 20.8
+                    "milliseconds": 26350,
+                    "seconds": 26.4
                   },
                   "repeated": {
-                    "milliseconds": 16000,
-                    "seconds": 16
+                    "milliseconds": 31320,
+                    "seconds": 31.3
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -592,27 +592,27 @@ export const benchmarkResultsComments = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 30500,
-                  "seconds": 30.5
+                  "milliseconds": 47220,
+                  "seconds": 47.2
                 },
                 "expected": {
-                  "milliseconds": 43220,
-                  "seconds": 43.2
+                  "milliseconds": 66820,
+                  "seconds": 66.8
                 },
                 "upper": {
-                  "milliseconds": 60350,
-                  "seconds": 60.4
+                  "milliseconds": 93190,
+                  "seconds": 93.2
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 17060,
-                    "seconds": 17.1
+                    "milliseconds": 21740,
+                    "seconds": 21.7
                   },
                   "repeated": {
-                    "milliseconds": 13440,
-                    "seconds": 13.4
+                    "milliseconds": 25480,
+                    "seconds": 25.5
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -621,12 +621,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 24160,
-                    "seconds": 24.2
+                    "milliseconds": 30680,
+                    "seconds": 30.7
                   },
                   "repeated": {
-                    "milliseconds": 19060,
-                    "seconds": 19.1
+                    "milliseconds": 36140,
+                    "seconds": 36.1
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -635,12 +635,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 33660,
-                    "seconds": 33.7
+                    "milliseconds": 42710,
+                    "seconds": 42.7
                   },
                   "repeated": {
-                    "milliseconds": 26690,
-                    "seconds": 26.7
+                    "milliseconds": 50480,
+                    "seconds": 50.5
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -654,27 +654,27 @@ export const benchmarkResultsComments = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 42070,
-                  "seconds": 42.1
+                  "milliseconds": 63920,
+                  "seconds": 63.9
                 },
                 "expected": {
-                  "milliseconds": 62080,
-                  "seconds": 62.1
+                  "milliseconds": 94240,
+                  "seconds": 94.2
                 },
                 "upper": {
-                  "milliseconds": 92770,
-                  "seconds": 92.8
+                  "milliseconds": 140670,
+                  "seconds": 140.7
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 24120,
-                    "seconds": 24.1
+                    "milliseconds": 29600,
+                    "seconds": 29.6
                   },
                   "repeated": {
-                    "milliseconds": 17950,
-                    "seconds": 17.9
+                    "milliseconds": 34320,
+                    "seconds": 34.3
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -683,12 +683,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 35600,
-                    "seconds": 35.6
+                    "milliseconds": 43700,
+                    "seconds": 43.7
                   },
                   "repeated": {
-                    "milliseconds": 26480,
-                    "seconds": 26.5
+                    "milliseconds": 50540,
+                    "seconds": 50.5
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -697,12 +697,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 53220,
-                    "seconds": 53.2
+                    "milliseconds": 65550,
+                    "seconds": 65.5
                   },
                   "repeated": {
-                    "milliseconds": 39550,
-                    "seconds": 39.5
+                    "milliseconds": 75120,
+                    "seconds": 75.1
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -717,42 +717,42 @@ export const benchmarkResultsComments = {
     },
     "variantB": {
       "label": "비교안 B · 개선 구조",
-      "description": "맨 앞의 댓글 목록 바로 이동 링크로 처음 진입 부담을 낮추고, 댓글 하나를 하나의 선택 항목으로 이동하며, 댓글 작업을 한곳에 모으고, 댓글 정보 대화상자를 닫으면 바로 원래 작업 버튼으로 돌아오는 구조.",
+      "description": "신청 단계로 바로 이동해 첫 진입 부담을 낮추고, 신청 단계 묶음을 한 번 선택한 뒤 같은 묶음 안에서 필요한 값을 바꾸며, 설명 대화상자를 닫으면 방금 누른 설명 보기 버튼으로 돌아오고, 제출 단계로 빠르게 이동해 신청을 끝낼 수 있는 구조.",
       "tasks": {
-        "task1_newest_review_open_replies": {
-          "title": "최신 후기에서 민지 댓글 답글 열기",
+        "task1_remote_contact_card_submit": {
+          "title": "비대면 초진 상담을 고르고 연락처 확인 안내를 켠 뒤 카드 결제로 신청 완료",
           "assumptions": [
-            "맨 앞의 댓글 목록 바로 이동 링크로 첫 진입 부담을 줄인다.",
-            "댓글은 하나의 선택 항목으로 제공되어 한 댓글 안의 여러 작업 버튼을 반복해 지나지 않는다.",
-            "선택한 댓글 작업이 한곳에 모여 있어 답글 보기까지의 이동이 짧다."
+            "맨 앞의 신청 단계로 바로 이동 링크로 첫 진입 부담을 줄인다.",
+            "신청 정보, 안내 수신, 결제 수단, 제출 확인을 묶음 선택으로 빠르게 오갈 수 있다.",
+            "같은 묶음 안에서 값 변경과 제출을 가까운 거리에서 이어서 수행한다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 12,
-              "activations": 4,
-              "decisions": 8,
+              "navMoves": 14,
+              "activations": 3,
+              "decisions": 7,
               "waits": 1,
-              "speechUnits": 10,
-              "scanSteps": 16,
+              "speechUnits": 8,
+              "scanSteps": 15,
               "contextResets": 0
             },
             "byBucket": {
               "entry": {
-                "navMoves": 8,
-                "activations": 3,
-                "decisions": 5,
-                "waits": 1,
-                "speechUnits": 7,
-                "scanSteps": 11,
-                "contextResets": 0
-              },
-              "repeated": {
-                "navMoves": 4,
+                "navMoves": 6,
                 "activations": 1,
                 "decisions": 3,
                 "waits": 0,
-                "speechUnits": 3,
-                "scanSteps": 5,
+                "speechUnits": 4,
+                "scanSteps": 7,
+                "contextResets": 0
+              },
+              "repeated": {
+                "navMoves": 8,
+                "activations": 2,
+                "decisions": 4,
+                "waits": 1,
+                "speechUnits": 4,
+                "scanSteps": 8,
                 "contextResets": 0
               },
               "recovery": {
@@ -772,27 +772,27 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 9760,
-                  "seconds": 9.8
+                  "milliseconds": 10020,
+                  "seconds": 10
                 },
                 "expected": {
-                  "milliseconds": 14500,
-                  "seconds": 14.5
+                  "milliseconds": 14830,
+                  "seconds": 14.8
                 },
                 "upper": {
-                  "milliseconds": 20520,
-                  "seconds": 20.5
+                  "milliseconds": 20920,
+                  "seconds": 20.9
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 6480,
-                    "seconds": 6.5
+                    "milliseconds": 4180,
+                    "seconds": 4.2
                   },
                   "repeated": {
-                    "milliseconds": 3280,
-                    "seconds": 3.3
+                    "milliseconds": 5840,
+                    "seconds": 5.8
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -801,12 +801,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 9630,
-                    "seconds": 9.6
+                    "milliseconds": 6170,
+                    "seconds": 6.2
                   },
                   "repeated": {
-                    "milliseconds": 4870,
-                    "seconds": 4.9
+                    "milliseconds": 8660,
+                    "seconds": 8.7
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -815,12 +815,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 13620,
-                    "seconds": 13.6
+                    "milliseconds": 8700,
+                    "seconds": 8.7
                   },
                   "repeated": {
-                    "milliseconds": 6900,
-                    "seconds": 6.9
+                    "milliseconds": 12220,
+                    "seconds": 12.2
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -834,27 +834,27 @@ export const benchmarkResultsComments = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 16760,
-                  "seconds": 16.8
+                  "milliseconds": 16880,
+                  "seconds": 16.9
                 },
                 "expected": {
-                  "milliseconds": 23900,
-                  "seconds": 23.9
+                  "milliseconds": 24000,
+                  "seconds": 24
                 },
                 "upper": {
-                  "milliseconds": 33600,
+                  "milliseconds": 33650,
                   "seconds": 33.6
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 11120,
-                    "seconds": 11.1
+                    "milliseconds": 7200,
+                    "seconds": 7.2
                   },
                   "repeated": {
-                    "milliseconds": 5640,
-                    "seconds": 5.6
+                    "milliseconds": 9680,
+                    "seconds": 9.7
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -863,12 +863,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 15880,
-                    "seconds": 15.9
+                    "milliseconds": 10220,
+                    "seconds": 10.2
                   },
                   "repeated": {
-                    "milliseconds": 8020,
-                    "seconds": 8
+                    "milliseconds": 13780,
+                    "seconds": 13.8
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -877,12 +877,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 22310,
-                    "seconds": 22.3
+                    "milliseconds": 14330,
+                    "seconds": 14.3
                   },
                   "repeated": {
-                    "milliseconds": 11290,
-                    "seconds": 11.3
+                    "milliseconds": 19320,
+                    "seconds": 19.3
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -896,27 +896,27 @@ export const benchmarkResultsComments = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 22920,
-                  "seconds": 22.9
+                  "milliseconds": 20670,
+                  "seconds": 20.7
                 },
                 "expected": {
-                  "milliseconds": 33740,
-                  "seconds": 33.7
+                  "milliseconds": 30460,
+                  "seconds": 30.5
                 },
                 "upper": {
-                  "milliseconds": 49920,
-                  "seconds": 49.9
+                  "milliseconds": 45170,
+                  "seconds": 45.2
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 15670,
-                    "seconds": 15.7
+                    "milliseconds": 9150,
+                    "seconds": 9.2
                   },
                   "repeated": {
-                    "milliseconds": 7250,
-                    "seconds": 7.3
+                    "milliseconds": 11520,
+                    "seconds": 11.5
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -925,12 +925,12 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 23060,
-                    "seconds": 23.1
+                    "milliseconds": 13480,
+                    "seconds": 13.5
                   },
                   "repeated": {
-                    "milliseconds": 10680,
-                    "seconds": 10.7
+                    "milliseconds": 16980,
+                    "seconds": 17
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -939,12 +939,12 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 34070,
-                    "seconds": 34.1
+                    "milliseconds": 20050,
+                    "seconds": 20.1
                   },
                   "repeated": {
-                    "milliseconds": 15850,
-                    "seconds": 15.8
+                    "milliseconds": 25120,
+                    "seconds": 25.1
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -955,49 +955,49 @@ export const benchmarkResultsComments = {
             }
           }
         },
-        "task2_popular_admin_detail_helpful": {
-          "title": "운영자 안내 댓글 정보 보기 후 도움이 돼요",
+        "task2_guardian_help_bank_submit": {
+          "title": "보호자 대리 신청과 준비 안내 설명 확인 뒤 계좌 이체로 신청 완료",
           "assumptions": [
-            "도움이 많은 순에서는 운영자 댓글이 바로 선택 영역에서 보인다.",
-            "댓글 정보 대화상자를 닫으면 같은 작업 버튼으로 초점이 돌아와 연속 동작이 가능하다.",
-            "도움이 돼요, 답글 보기, 댓글 정보 보기가 한곳에 모여 있어 댓글마다 반복되는 탭 이동을 줄인다."
+            "신청 대상과 준비 안내 받는 방법은 각 단계 묶음 안에서 짧게 접근할 수 있다.",
+            "준비 안내 설명을 닫으면 같은 설명 보기 버튼으로 초점이 돌아와 바로 다음 선택을 이어서 할 수 있다.",
+            "결제 수단 단계에서 계좌 이체로 다시 바꾼 뒤 제출 단계로 빠르게 이동할 수 있다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 8,
-              "activations": 4,
-              "decisions": 5,
+              "navMoves": 17,
+              "activations": 3,
+              "decisions": 9,
               "waits": 1,
-              "speechUnits": 6,
-              "scanSteps": 9,
+              "speechUnits": 9,
+              "scanSteps": 18,
               "contextResets": 0
             },
             "byBucket": {
               "entry": {
-                "navMoves": 3,
-                "activations": 1,
-                "decisions": 2,
-                "waits": 1,
-                "speechUnits": 2,
-                "scanSteps": 4,
+                "navMoves": 5,
+                "activations": 0,
+                "decisions": 3,
+                "waits": 0,
+                "speechUnits": 3,
+                "scanSteps": 6,
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 2,
-                "activations": 1,
-                "decisions": 1,
-                "waits": 0,
-                "speechUnits": 2,
-                "scanSteps": 2,
+                "navMoves": 8,
+                "activations": 2,
+                "decisions": 4,
+                "waits": 1,
+                "speechUnits": 4,
+                "scanSteps": 8,
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 3,
-                "activations": 2,
+                "navMoves": 4,
+                "activations": 1,
                 "decisions": 2,
                 "waits": 0,
                 "speechUnits": 2,
-                "scanSteps": 3,
+                "scanSteps": 4,
                 "contextResets": 0
               }
             }
@@ -1008,59 +1008,59 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 6963,
-                  "seconds": 7
+                  "milliseconds": 12496,
+                  "seconds": 12.5
                 },
                 "expected": {
-                  "milliseconds": 10923,
-                  "seconds": 10.9
+                  "milliseconds": 19136,
+                  "seconds": 19.1
                 },
                 "upper": {
-                  "milliseconds": 16545,
-                  "seconds": 16.5
+                  "milliseconds": 28198,
+                  "seconds": 28.2
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 2530,
-                    "seconds": 2.5
+                    "milliseconds": 3510,
+                    "seconds": 3.5
                   },
                   "repeated": {
-                    "milliseconds": 1540,
-                    "seconds": 1.5
+                    "milliseconds": 5840,
+                    "seconds": 5.8
                   },
                   "recovery": {
-                    "milliseconds": 2893,
-                    "seconds": 2.9
+                    "milliseconds": 3146,
+                    "seconds": 3.1
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 3790,
-                    "seconds": 3.8
+                    "milliseconds": 5200,
+                    "seconds": 5.2
                   },
                   "repeated": {
-                    "milliseconds": 2270,
-                    "seconds": 2.3
+                    "milliseconds": 8660,
+                    "seconds": 8.7
                   },
                   "recovery": {
-                    "milliseconds": 4863,
-                    "seconds": 4.9
+                    "milliseconds": 5276,
+                    "seconds": 5.3
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 5370,
-                    "seconds": 5.4
+                    "milliseconds": 7350,
+                    "seconds": 7.3
                   },
                   "repeated": {
-                    "milliseconds": 3200,
-                    "seconds": 3.2
+                    "milliseconds": 12220,
+                    "seconds": 12.2
                   },
                   "recovery": {
-                    "milliseconds": 7975,
-                    "seconds": 8
+                    "milliseconds": 8628,
+                    "seconds": 8.6
                   }
                 }
               }
@@ -1070,59 +1070,59 @@ export const benchmarkResultsComments = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 12088,
-                  "seconds": 12.1
+                  "milliseconds": 21496,
+                  "seconds": 21.5
                 },
                 "expected": {
-                  "milliseconds": 18801,
-                  "seconds": 18.8
+                  "milliseconds": 32231,
+                  "seconds": 32.2
                 },
                 "upper": {
-                  "milliseconds": 28559,
-                  "seconds": 28.6
+                  "milliseconds": 47590,
+                  "seconds": 47.6
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 4200,
-                    "seconds": 4.2
+                    "milliseconds": 6080,
+                    "seconds": 6.1
                   },
                   "repeated": {
-                    "milliseconds": 2680,
-                    "seconds": 2.7
+                    "milliseconds": 9680,
+                    "seconds": 9.7
                   },
                   "recovery": {
-                    "milliseconds": 5208,
-                    "seconds": 5.2
+                    "milliseconds": 5736,
+                    "seconds": 5.7
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 6020,
-                    "seconds": 6
+                    "milliseconds": 8620,
+                    "seconds": 8.6
                   },
                   "repeated": {
-                    "milliseconds": 3820,
-                    "seconds": 3.8
+                    "milliseconds": 13780,
+                    "seconds": 13.8
                   },
                   "recovery": {
-                    "milliseconds": 8961,
-                    "seconds": 9
+                    "milliseconds": 9831,
+                    "seconds": 9.8
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 8470,
-                    "seconds": 8.5
+                    "milliseconds": 12120,
+                    "seconds": 12.1
                   },
                   "repeated": {
-                    "milliseconds": 5350,
-                    "seconds": 5.3
+                    "milliseconds": 19320,
+                    "seconds": 19.3
                   },
                   "recovery": {
-                    "milliseconds": 14739,
-                    "seconds": 14.7
+                    "milliseconds": 16150,
+                    "seconds": 16.1
                   }
                 }
               }
@@ -1132,99 +1132,99 @@ export const benchmarkResultsComments = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 16105,
-                  "seconds": 16.1
-                },
-                "expected": {
-                  "milliseconds": 26414,
+                  "milliseconds": 26430,
                   "seconds": 26.4
                 },
+                "expected": {
+                  "milliseconds": 41907,
+                  "seconds": 41.9
+                },
                 "upper": {
-                  "milliseconds": 43930,
-                  "seconds": 43.9
+                  "milliseconds": 67810,
+                  "seconds": 67.8
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 5820,
-                    "seconds": 5.8
+                    "milliseconds": 7500,
+                    "seconds": 7.5
                   },
                   "repeated": {
-                    "milliseconds": 3200,
-                    "seconds": 3.2
+                    "milliseconds": 11520,
+                    "seconds": 11.5
                   },
                   "recovery": {
-                    "milliseconds": 7085,
-                    "seconds": 7.1
+                    "milliseconds": 7410,
+                    "seconds": 7.4
                   }
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 8600,
-                    "seconds": 8.6
+                    "milliseconds": 11100,
+                    "seconds": 11.1
                   },
                   "repeated": {
-                    "milliseconds": 4680,
-                    "seconds": 4.7
+                    "milliseconds": 16980,
+                    "seconds": 17
                   },
                   "recovery": {
-                    "milliseconds": 13134,
-                    "seconds": 13.1
+                    "milliseconds": 13827,
+                    "seconds": 13.8
                   }
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 12720,
-                    "seconds": 12.7
+                    "milliseconds": 16650,
+                    "seconds": 16.6
                   },
                   "repeated": {
-                    "milliseconds": 6850,
-                    "seconds": 6.8
+                    "milliseconds": 25120,
+                    "seconds": 25.1
                   },
                   "recovery": {
-                    "milliseconds": 24360,
-                    "seconds": 24.4
+                    "milliseconds": 26040,
+                    "seconds": 26
                   }
                 }
               }
             }
           }
         },
-        "task3_question_open_juno_replies": {
-          "title": "질문 댓글에서 준호 댓글 답글 열기",
+        "task3_return_receipt_easy_submit": {
+          "title": "재방문 빠른 상담과 문자 영수증, 간편 결제로 신청 완료",
           "assumptions": [
-            "댓글 범위를 바꾸면 댓글 목록 제목으로 초점이 이동해 다시 읽을 위치가 분명하다.",
-            "질문 댓글 사이 이동은 방향키 중심이라 짧게 끝난다.",
-            "답글 보기 작업은 선택한 댓글 작업 영역에서 바로 수행한다."
+            "신청 정보에서 재방문 빠른 상담으로 빠르게 바꾼다.",
+            "결제 수단 단계 안에서 영수증 받는 방법과 결제 수단을 짧게 이동하며 바꾼다.",
+            "제출 확인 단계로 한 번만 이동하면 바로 신청을 끝낼 수 있다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 7,
-              "activations": 2,
+              "navMoves": 12,
+              "activations": 1,
               "decisions": 5,
               "waits": 1,
               "speechUnits": 5,
-              "scanSteps": 8,
+              "scanSteps": 12,
               "contextResets": 0
             },
             "byBucket": {
               "entry": {
-                "navMoves": 4,
-                "activations": 1,
-                "decisions": 3,
-                "waits": 1,
-                "speechUnits": 3,
+                "navMoves": 5,
+                "activations": 0,
+                "decisions": 2,
+                "waits": 0,
+                "speechUnits": 2,
                 "scanSteps": 5,
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 3,
+                "navMoves": 7,
                 "activations": 1,
-                "decisions": 2,
-                "waits": 0,
-                "speechUnits": 2,
-                "scanSteps": 3,
+                "decisions": 3,
+                "waits": 1,
+                "speechUnits": 3,
+                "scanSteps": 7,
                 "contextResets": 0
               },
               "recovery": {
@@ -1244,147 +1244,23 @@ export const benchmarkResultsComments = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 5810,
-                  "seconds": 5.8
+                  "milliseconds": 7840,
+                  "seconds": 7.8
                 },
                 "expected": {
-                  "milliseconds": 8660,
-                  "seconds": 8.7
+                  "milliseconds": 11590,
+                  "seconds": 11.6
                 },
                 "upper": {
-                  "milliseconds": 12270,
-                  "seconds": 12.3
+                  "milliseconds": 16320,
+                  "seconds": 16.3
                 }
               },
               "bucketRanges": {
                 "lower": {
                   "entry": {
-                    "milliseconds": 3400,
-                    "seconds": 3.4
-                  },
-                  "repeated": {
-                    "milliseconds": 2410,
-                    "seconds": 2.4
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                },
-                "expected": {
-                  "entry": {
-                    "milliseconds": 5090,
-                    "seconds": 5.1
-                  },
-                  "repeated": {
-                    "milliseconds": 3570,
-                    "seconds": 3.6
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                },
-                "upper": {
-                  "entry": {
-                    "milliseconds": 7220,
-                    "seconds": 7.2
-                  },
-                  "repeated": {
-                    "milliseconds": 5050,
-                    "seconds": 5
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                }
-              }
-            },
-            "screenReader": {
-              "label": "화면낭독 사용자",
-              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
-              "ranges": {
-                "lower": {
-                  "milliseconds": 9840,
-                  "seconds": 9.8
-                },
-                "expected": {
-                  "milliseconds": 14040,
-                  "seconds": 14
-                },
-                "upper": {
-                  "milliseconds": 19760,
-                  "seconds": 19.8
-                }
-              },
-              "bucketRanges": {
-                "lower": {
-                  "entry": {
-                    "milliseconds": 5760,
-                    "seconds": 5.8
-                  },
-                  "repeated": {
-                    "milliseconds": 4080,
-                    "seconds": 4.1
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                },
-                "expected": {
-                  "entry": {
-                    "milliseconds": 8240,
-                    "seconds": 8.2
-                  },
-                  "repeated": {
-                    "milliseconds": 5800,
-                    "seconds": 5.8
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                },
-                "upper": {
-                  "entry": {
-                    "milliseconds": 11610,
-                    "seconds": 11.6
-                  },
-                  "repeated": {
-                    "milliseconds": 8150,
-                    "seconds": 8.2
-                  },
-                  "recovery": {
-                    "milliseconds": 0,
-                    "seconds": 0
-                  }
-                }
-              }
-            },
-            "switch": {
-              "label": "스위치 사용자",
-              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
-              "ranges": {
-                "lower": {
-                  "milliseconds": 12120,
-                  "seconds": 12.1
-                },
-                "expected": {
-                  "milliseconds": 17880,
-                  "seconds": 17.9
-                },
-                "upper": {
-                  "milliseconds": 26470,
-                  "seconds": 26.5
-                }
-              },
-              "bucketRanges": {
-                "lower": {
-                  "entry": {
-                    "milliseconds": 7370,
-                    "seconds": 7.4
+                    "milliseconds": 3090,
+                    "seconds": 3.1
                   },
                   "repeated": {
                     "milliseconds": 4750,
@@ -1397,11 +1273,11 @@ export const benchmarkResultsComments = {
                 },
                 "expected": {
                   "entry": {
-                    "milliseconds": 10900,
-                    "seconds": 10.9
+                    "milliseconds": 4550,
+                    "seconds": 4.5
                   },
                   "repeated": {
-                    "milliseconds": 6980,
+                    "milliseconds": 7040,
                     "seconds": 7
                   },
                   "recovery": {
@@ -1411,12 +1287,136 @@ export const benchmarkResultsComments = {
                 },
                 "upper": {
                   "entry": {
-                    "milliseconds": 16170,
-                    "seconds": 16.2
+                    "milliseconds": 6400,
+                    "seconds": 6.4
                   },
                   "repeated": {
-                    "milliseconds": 10300,
+                    "milliseconds": 9920,
+                    "seconds": 9.9
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "screenReader": {
+              "label": "화면낭독 사용자",
+              "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 13080,
+                  "seconds": 13.1
+                },
+                "expected": {
+                  "milliseconds": 18560,
+                  "seconds": 18.6
+                },
+                "upper": {
+                  "milliseconds": 25990,
+                  "seconds": 26
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 5220,
+                    "seconds": 5.2
+                  },
+                  "repeated": {
+                    "milliseconds": 7860,
+                    "seconds": 7.9
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 7380,
+                    "seconds": 7.4
+                  },
+                  "repeated": {
+                    "milliseconds": 11180,
+                    "seconds": 11.2
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 10330,
                     "seconds": 10.3
+                  },
+                  "repeated": {
+                    "milliseconds": 15660,
+                    "seconds": 15.7
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                }
+              }
+            },
+            "switch": {
+              "label": "스위치 사용자",
+              "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
+              "ranges": {
+                "lower": {
+                  "milliseconds": 15220,
+                  "seconds": 15.2
+                },
+                "expected": {
+                  "milliseconds": 22500,
+                  "seconds": 22.5
+                },
+                "upper": {
+                  "milliseconds": 33570,
+                  "seconds": 33.6
+                }
+              },
+              "bucketRanges": {
+                "lower": {
+                  "entry": {
+                    "milliseconds": 5950,
+                    "seconds": 6
+                  },
+                  "repeated": {
+                    "milliseconds": 9270,
+                    "seconds": 9.3
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "expected": {
+                  "entry": {
+                    "milliseconds": 8800,
+                    "seconds": 8.8
+                  },
+                  "repeated": {
+                    "milliseconds": 13700,
+                    "seconds": 13.7
+                  },
+                  "recovery": {
+                    "milliseconds": 0,
+                    "seconds": 0
+                  }
+                },
+                "upper": {
+                  "entry": {
+                    "milliseconds": 13200,
+                    "seconds": 13.2
+                  },
+                  "repeated": {
+                    "milliseconds": 20370,
+                    "seconds": 20.4
                   },
                   "recovery": {
                     "milliseconds": 0,
@@ -1431,70 +1431,70 @@ export const benchmarkResultsComments = {
     }
   },
   "comparisons": {
-    "task1_newest_review_open_replies": {
+    "task1_remote_contact_card_submit": {
       "keyboard": {
-        "expectedReductionSeconds": 23.7,
-        "expectedReductionPercent": 62
+        "expectedReductionSeconds": 27.7,
+        "expectedReductionPercent": 65.2
       },
       "screenReader": {
-        "expectedReductionSeconds": 39.1,
-        "expectedReductionPercent": 62.1
+        "expectedReductionSeconds": 45,
+        "expectedReductionPercent": 65.2
       },
       "switch": {
-        "expectedReductionSeconds": 55.4,
-        "expectedReductionPercent": 62.2
+        "expectedReductionSeconds": 66,
+        "expectedReductionPercent": 68.4
       }
     },
-    "task2_popular_admin_detail_helpful": {
+    "task2_guardian_help_bank_submit": {
       "keyboard": {
-        "expectedReductionSeconds": 25.7,
-        "expectedReductionPercent": 70.2
+        "expectedReductionSeconds": 32.9,
+        "expectedReductionPercent": 63.3
       },
       "screenReader": {
-        "expectedReductionSeconds": 49.4,
-        "expectedReductionPercent": 72.4
+        "expectedReductionSeconds": 59.6,
+        "expectedReductionPercent": 64.9
       },
       "switch": {
-        "expectedReductionSeconds": 70.3,
-        "expectedReductionPercent": 72.7
+        "expectedReductionSeconds": 86.4,
+        "expectedReductionPercent": 67.3
       }
     },
-    "task3_question_open_juno_replies": {
+    "task3_return_receipt_easy_submit": {
       "keyboard": {
-        "expectedReductionSeconds": 17.5,
-        "expectedReductionPercent": 66.8
+        "expectedReductionSeconds": 29.5,
+        "expectedReductionPercent": 71.8
       },
       "screenReader": {
-        "expectedReductionSeconds": 29.2,
-        "expectedReductionPercent": 67.6
+        "expectedReductionSeconds": 48.2,
+        "expectedReductionPercent": 72.2
       },
       "switch": {
-        "expectedReductionSeconds": 44.2,
-        "expectedReductionPercent": 71.2
+        "expectedReductionSeconds": 71.7,
+        "expectedReductionPercent": 76.1
       }
     }
   },
   "overall": {
     "keyboard": {
       "label": "키보드 사용자",
-      "variantAExpectedSeconds": 101,
-      "variantBExpectedSeconds": 34.1,
-      "expectedReductionSeconds": 66.9,
-      "expectedReductionPercent": 66.2
+      "variantAExpectedSeconds": 135.6,
+      "variantBExpectedSeconds": 45.5,
+      "expectedReductionSeconds": 90.1,
+      "expectedReductionPercent": 66.4
     },
     "screenReader": {
       "label": "화면낭독 사용자",
-      "variantAExpectedSeconds": 174.4,
-      "variantBExpectedSeconds": 56.7,
-      "expectedReductionSeconds": 117.7,
-      "expectedReductionPercent": 67.5
+      "variantAExpectedSeconds": 227.6,
+      "variantBExpectedSeconds": 74.8,
+      "expectedReductionSeconds": 152.8,
+      "expectedReductionPercent": 67.1
     },
     "switch": {
       "label": "스위치 사용자",
-      "variantAExpectedSeconds": 247.9,
-      "variantBExpectedSeconds": 78,
-      "expectedReductionSeconds": 169.9,
-      "expectedReductionPercent": 68.5
+      "variantAExpectedSeconds": 319,
+      "variantBExpectedSeconds": 94.9,
+      "expectedReductionSeconds": 224.1,
+      "expectedReductionPercent": 70.3
     }
   },
   "measurementRules": [
@@ -1502,5 +1502,5 @@ export const benchmarkResultsComments = {
     "수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.",
     "수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다."
   ],
-  "actualMeasurementScope": "과업 내용 확인은 메인 창에서 진행하고, 새 탭의 실제 댓글 목록 조작만 기록합니다."
-};
+  "actualMeasurementScope": "과업 내용 확인은 메인 창에서 진행하고, 새 탭의 실제 신청·결제 항목 선택과 제출 조작만 기록합니다."
+}
