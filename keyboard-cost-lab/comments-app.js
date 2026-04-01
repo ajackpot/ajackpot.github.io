@@ -37,9 +37,10 @@ import {
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
+import { renderStudyServiceCompletionCard, saveCompletedServiceRecord } from './lib/study-session.js';
 
 const APP_MODE = getAppMode();
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-comments-session-id';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-study-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-comments-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-comments-channel';
 const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-comments-channel-fallback';
@@ -588,6 +589,11 @@ function handleRootClick(event) {
       continueAfterCondition();
       return;
     }
+    if (action === 'save-service-evaluation') {
+      event.preventDefault();
+      saveServiceEvaluation();
+      return;
+    }
     return;
   }
 
@@ -643,6 +649,25 @@ function handleRootClick(event) {
     event.preventDefault();
     closeRunnerWindow();
   }
+}
+
+
+function saveServiceEvaluation() {
+  const form = document.querySelector('[data-service-survey-form]');
+  if (!(form instanceof HTMLFormElement)) return;
+  if (!form.reportValidity()) return;
+
+  saveCompletedServiceRecord({
+    sessionId: state.sessionId,
+    serviceId: 'comments',
+    serviceLabel: '댓글 목록',
+    order: state.order,
+    actualA: aggregateActualCondition(state.runs.variantA),
+    actualB: aggregateActualCondition(state.runs.variantB),
+    formElement: form,
+  });
+
+  goHome();
 }
 
 function handleRootChange(event) {
@@ -1355,7 +1380,6 @@ function renderFinalView() {
   const actualB = aggregateActualCondition(state.runs.variantB);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
-  const surveyUrl = buildSurveyUrl();
 
   return `
     <section class="card review-hero">
@@ -1374,13 +1398,13 @@ function renderFinalView() {
       </label>
       <div class="button-row">
         <a class="button button-secondary" download="comments-list-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
-        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
     <section class="comparison-grid">
       ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
     </section>
+    ${renderStudyServiceCompletionCard({ sessionId: state.sessionId, serviceId: 'comments', serviceLabel: '댓글 목록' })}
     <section class="card">
       <h2>실제 기록 비교</h2>
       <table class="summary-table">

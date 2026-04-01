@@ -1107,3 +1107,62 @@ input {
   width: auto;
   flex: 0 0 auto;
 }
+
+
+.study-progress-grid,
+.home-progress-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.service-status-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.service-status-list strong {
+  display: inline-block;
+  min-width: 96px;
+}
+
+.study-save-card {
+  display: grid;
+  gap: 16px;
+}
+
+.service-evaluation-form {
+  display: grid;
+  gap: 16px;
+}
+
+.survey-fieldset {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.survey-fieldset legend {
+  font-weight: 700;
+  padding: 0 6px;
+}
+
+.survey-choice-list {
+  display: grid;
+  gap: 10px;
+}
+
+.choice-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.choice-option input {
+  width: auto;
+  margin-top: 2px;
+  flex: 0 0 auto;
+}

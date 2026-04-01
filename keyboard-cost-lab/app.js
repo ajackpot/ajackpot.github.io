@@ -40,9 +40,17 @@ import {
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
+import {
+  renderStudyServiceCompletionCard,
+  saveCompletedServiceRecord,
+  getStudyProgress,
+  buildStudySurveyUrl,
+  getStudyServiceRecord,
+  clearStudyState,
+} from './lib/study-session.js';
 
 const APP_MODE = getAppMode();
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-study-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-channel';
 const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-channel-fallback';
@@ -654,6 +662,18 @@ function handleRootClick(event) {
       return;
     }
 
+    if (action === 'save-service-evaluation') {
+      event.preventDefault();
+      saveServiceEvaluation();
+      return;
+    }
+
+    if (action === 'reset-study-session') {
+      event.preventDefault();
+      resetStudySession();
+      return;
+    }
+
     return;
   }
 
@@ -711,6 +731,32 @@ function handleRootClick(event) {
     event.preventDefault();
     closeRunnerWindow();
   }
+}
+
+
+function resetStudySession() {
+  clearStudyState(state.sessionId);
+  window.localStorage.removeItem(STORAGE_KEY_SESSION);
+  window.location.href = './index.html';
+}
+
+function saveServiceEvaluation() {
+
+  const form = document.querySelector('[data-service-survey-form]');
+  if (!(form instanceof HTMLFormElement)) return;
+  if (!form.reportValidity()) return;
+
+  saveCompletedServiceRecord({
+    sessionId: state.sessionId,
+    serviceId: 'calendar',
+    serviceLabel: '예약 캘린더',
+    order: state.order,
+    actualA: aggregateActualCondition(state.runs.variantA),
+    actualB: aggregateActualCondition(state.runs.variantB),
+    formElement: form,
+  });
+
+  goHome();
 }
 
 function handleRootChange(event) {
@@ -1210,15 +1256,23 @@ function renderRunnerPage() {
   `;
 }
 
+
 function renderHomeView() {
+  const availableServices = SERVICE_TYPES.filter((service) => service.available);
+  const studyProgress = getStudyProgress({
+    sessionId: state.sessionId,
+    serviceIds: availableServices.map((service) => service.id),
+  });
+  const finalSurveyUrl = studyProgress.isComplete ? buildStudySurveyUrl({ sessionId: state.sessionId }) : '';
+
   return `
     <header class="hero card">
       <p class="eyebrow">실험 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
       <p>
         먼저 실험할 서비스 유형을 고르십시오. 현재 공개된 서비스는
-        ${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(', ')}이며,
-        이후 다른 서비스 유형도 같은 방식으로 하나씩 추가할 수 있습니다.
+        ${availableServices.map((service) => service.label).join(', ')}이며,
+        각 서비스를 끝낼 때마다 짧은 평가를 저장하고 마지막에 한 번만 설문지를 제출하게 됩니다.
       </p>
       <div class="hero-grid">
         <section>
@@ -1226,7 +1280,7 @@ function renderHomeView() {
           <ul>
             <li>서비스 유형을 먼저 고르고 해당 서비스 화면에서 과업을 준비합니다.</li>
             <li>과업 내용은 메인 창에서 먼저 읽고, 실제 수행은 새 탭에서 분리해 진행합니다.</li>
-            <li>실제 기록과 사전 계산 기준을 함께 남겨 후속 서비스 유형에 재사용합니다.</li>
+            <li>서비스별 짧은 평가는 즉시 저장하고, 마지막 설문지에서는 전체 응답만 마저 작성합니다.</li>
           </ul>
         </section>
         <section>
@@ -1234,11 +1288,54 @@ function renderHomeView() {
           <dl class="meta-list">
             <div><dt>실험 번호</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
             <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>현재 공개 범위</dt><dd>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</dd></div>
+            <div><dt>현재 공개 범위</dt><dd>${availableServices.map((service) => service.label).join(' · ')}</dd></div>
           </dl>
         </section>
       </div>
     </header>
+
+    <section class="review-grid home-progress-grid" aria-label="실험 진행 상황">
+      <article class="card">
+        <h2>현재 진행 상황</h2>
+        <dl class="meta-list">
+          <div><dt>완료한 서비스</dt><dd>${studyProgress.completedCount} / ${studyProgress.totalCount}</dd></div>
+          <div><dt>아직 남은 서비스</dt><dd>${studyProgress.pendingCount}</dd></div>
+        </dl>
+        <div class="status-box" role="status" aria-live="polite">
+          ${studyProgress.isComplete
+            ? '모든 서비스 평가가 저장되었습니다. 아래 버튼으로 마지막 설문지를 여십시오.'
+            : `아직 ${studyProgress.pendingCount}개 서비스가 남아 있습니다. 각 서비스의 최종 비교 화면에서 짧은 평가를 저장하면 이곳에 누적됩니다.`}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>서비스별 저장 상태</h2>
+        <ul class="service-status-list">
+          ${availableServices.map((service) => `
+            <li>
+              <strong>${escapeHtml(service.label)}</strong>
+              <span>${studyProgress.completedIds.includes(service.id) ? '평가 저장 완료' : '아직 수행 전 또는 저장 전'}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>마지막 설문지 작성</h2>
+        <p>
+          모든 서비스를 끝낸 뒤 아래 버튼을 누르면, 서비스별 비교 평점과 자동 기록이 미리 채워진 Google 설문지가 열립니다.
+          설문지 안에서는 전체 응답 항목만 마저 답하면 됩니다.
+        </p>
+        <p class="muted">직접 답하는 항목은 주 입력 방식, 함께 쓴 보조기술, 가장 부담이 컸던 서비스, 전체적으로 더 쉬운 구조, 자유 의견입니다.</p>
+        <div class="button-row">
+          ${finalSurveyUrl
+            ? `<a class="button button-primary" href="${escapeHtml(finalSurveyUrl)}" target="_blank" rel="noreferrer">마지막 설문지 열기</a>`
+            : '<span class="muted">모든 서비스 평가를 저장하면 마지막 설문지 버튼이 열립니다.</span>'}
+          <button class="button button-secondary" type="button" data-action="reset-study-session">새 실험 번호로 다시 시작</button>
+        </div>
+      </article>
+    </section>
+
     <section class="service-grid" aria-label="서비스 유형 목록">
       ${SERVICE_TYPES.map((service) => renderHomeServiceCard(service)).join('')}
     </section>
@@ -1246,22 +1343,32 @@ function renderHomeView() {
 }
 
 function renderHomeServiceCard(service) {
+  const serviceRecord = service.available
+    ? getStudyServiceRecord({ sessionId: state.sessionId, serviceId: service.id })
+    : null;
+  const statusLabel = service.available
+    ? (serviceRecord ? '평가 저장됨' : '아직 수행 전')
+    : service.statusLabel;
+  const buttonLabel = service.available
+    ? (serviceRecord ? `${service.label} 다시 진행` : formatServiceScreenButtonLabel(service.label))
+    : '준비 중';
+
   return `
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
         <div>
-          <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
+          <p class="eyebrow">${escapeHtml(statusLabel)}</p>
           <h2>${escapeHtml(service.label)}</h2>
         </div>
-        <span class="pill ${service.available ? '' : 'pill-warning'}">${escapeHtml(service.statusLabel)}</span>
+        <span class="pill ${service.available && !serviceRecord ? 'pill-warning' : ''}">${escapeHtml(statusLabel)}</span>
       </div>
       <p>${escapeHtml(service.summary)}</p>
       <ul>
         ${service.points.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
       </ul>
       <div class="button-row">
-        <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
-          ${service.available ? formatServiceScreenButtonLabel(service.label) : '준비 중'}
+        <button class="button ${service.available && !serviceRecord ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
+          ${escapeHtml(buttonLabel)}
         </button>
       </div>
     </article>
@@ -1486,7 +1593,6 @@ function renderFinalView() {
   const actualB = aggregateActualCondition(state.runs.variantB);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
-  const surveyUrl = buildSurveyUrl();
 
   return `
     <section class="card review-hero">
@@ -1505,13 +1611,13 @@ function renderFinalView() {
       </label>
       <div class="button-row">
         <a class="button button-secondary" download="reservation-calendar-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
-        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
     <section class="comparison-grid">
       ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
     </section>
+    ${renderStudyServiceCompletionCard({ sessionId: state.sessionId, serviceId: 'calendar', serviceLabel: '예약 캘린더' })}
     <section class="card">
       <h2>실제 기록 비교</h2>
       <table class="summary-table">
