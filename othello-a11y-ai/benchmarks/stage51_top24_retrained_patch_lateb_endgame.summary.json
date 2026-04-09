@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-04-03T10:39:04.303Z",
+  "inputPath": "/mnt/data/uploaded_tuple_pipeline/tuple-pipeline/top24/top24-retrain.retrained.calibrated.json",
+  "outputJsonPath": "/mnt/data/stage51_work/tools/evaluator-training/out/top24_retrained_patch_lateb_endgame.json",
+  "input": {
+    "name": "top24-retrain-retrained-calibrated",
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1-patched",
+    "tupleCount": 24,
+    "trainedBucketCount": 4,
+    "bucketKeys": [
+      "midgame-c",
+      "late-a",
+      "late-b",
+      "endgame"
+    ]
+  },
+  "output": {
+    "name": "top24-retrain-retrained-calibrated-lateb-endgame",
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1-patched-patched",
+    "tupleCount": 24,
+    "trainedBucketCount": 2,
+    "bucketKeys": [
+      "late-b",
+      "endgame"
+    ]
+  },
+  "tupleScoreMetric": "sum-abs",
+  "selectedTupleKeys": [
+    "A1-B1",
+    "B1-C1",
+    "C1-D1",
+    "E1-F1",
+    "F1-G1",
+    "A2-B2",
+    "A7-B7",
+    "B8-C8",
+    "C8-D8",
+    "E8-F8",
+    "F8-G8",
+    "G8-H8",
+    "A1-A2",
+    "A2-A3",
+    "A3-A4",
+    "A5-A6",
+    "A6-A7",
+    "B1-B2",
+    "G7-G8",
+    "H2-H3",
+    "H3-H4",
+    "H5-H6",
+    "H6-H7",
+    "H7-H8"
+  ]
+}

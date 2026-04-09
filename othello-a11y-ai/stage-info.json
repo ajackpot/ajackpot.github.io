@@ -1,0 +1,7 @@
+{
+  "stage": 87,
+  "tag": "stage87",
+  "label": "Stage 87",
+  "updatedAt": "2026-04-09T19:35:00+09:00",
+  "summary": "Root/runtime documentation now separates current AI architecture from stage history, and the missing Stage 86 runtime audit artifacts were backfilled into the repo"
+}

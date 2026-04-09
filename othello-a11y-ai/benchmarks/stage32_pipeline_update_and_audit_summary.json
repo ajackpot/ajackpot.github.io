@@ -1,0 +1,135 @@
+{
+  "generatedAt": "2026-03-27T17:35:25.126Z",
+  "stage": "stage32-move-ordering-pipeline-audit-update",
+  "changes": {
+    "rootCenteredTargetsDefault": true,
+    "defaultTargetMode": "root-mean",
+    "defaultRootWeighting": "uniform",
+    "supportsExcludedFeatures": true,
+    "includesAuditScript": true,
+    "includesFeatureAblation": true,
+    "includesResidualCorrelationDiagnostics": true
+  },
+  "smokeTraining": {
+    "profileName": "trained-move-ordering-linear-v2",
+    "acceptedRoots": 6,
+    "holdoutTop1": 0.3333333333333333,
+    "holdoutPairwise": 0.3333333333333333,
+    "holdoutWeightedPairwise": 0.24242424242424243
+  },
+  "smokeAudit": {
+    "top1": 0.6666666666666666,
+    "pairwise": 0.5789473684210527,
+    "weightedPairwise": 0.5485294117647059
+  },
+  "currentUploadedProfileAuditRawTarget": {
+    "profileName": "trained-move-ordering-linear-v1",
+    "top1": 0.6666666666666666,
+    "pairwise": 0.6902654867256637,
+    "weightedPairwise": 0.8427944341749933,
+    "meanRegretInDiscs": 0.18944666666666668,
+    "topOmittedResidualSignals": [
+      {
+        "key": "flipCount",
+        "count": 117,
+        "correlation": -0.18978598051368067,
+        "meanAbsFeature": 2.9316239316239314
+      },
+      {
+        "key": "riskCSquare",
+        "count": 117,
+        "correlation": -0.09728061394259113,
+        "meanAbsFeature": 0.19658119658119658
+      },
+      {
+        "key": "opponentCornerReplies",
+        "count": 117,
+        "correlation": 0.06781770393017991,
+        "meanAbsFeature": 1.1623931623931625
+      }
+    ],
+    "featureAblationTop": [
+      {
+        "key": "cornerPattern",
+        "holdoutRoots": {
+          "count": 15,
+          "top1Accuracy": 0.6666666666666666,
+          "top3Accuracy": 1,
+          "meanBestRank": 1.4666666666666666,
+          "meanRegret": 1894.4666666666667,
+          "meanRegretInDiscs": 0.18944666666666668,
+          "maxRegret": 20000,
+          "maxRegretInDiscs": 2
+        },
+        "pairwise": {
+          "comparablePairs": 339,
+          "correctPairs": 243,
+          "tiedTeacherPairs": 117,
+          "tiedPredictionPairs": 0,
+          "accuracy": 0.7168141592920354,
+          "weightedAccuracy": 0.8417432525355912,
+          "maxTeacherGap": 280000
+        },
+        "deltas": {
+          "top1Accuracy": 0,
+          "meanRegret": 0,
+          "pairwiseAccuracy": 0.026548672566371723
+        }
+      },
+      {
+        "key": "edgePattern",
+        "holdoutRoots": {
+          "count": 15,
+          "top1Accuracy": 0.6666666666666666,
+          "top3Accuracy": 1,
+          "meanBestRank": 1.4666666666666666,
+          "meanRegret": 1814.3333333333333,
+          "meanRegretInDiscs": 0.18143333333333334,
+          "maxRegret": 20000,
+          "maxRegretInDiscs": 2
+        },
+        "pairwise": {
+          "comparablePairs": 339,
+          "correctPairs": 239,
+          "tiedTeacherPairs": 117,
+          "tiedPredictionPairs": 0,
+          "accuracy": 0.7050147492625368,
+          "weightedAccuracy": 0.8560834043080322,
+          "maxTeacherGap": 280000
+        },
+        "deltas": {
+          "top1Accuracy": 0,
+          "meanRegret": -80.13333333333344,
+          "pairwiseAccuracy": 0.014749262536873142
+        }
+      },
+      {
+        "key": "corners",
+        "holdoutRoots": {
+          "count": 15,
+          "top1Accuracy": 0.6666666666666666,
+          "top3Accuracy": 1,
+          "meanBestRank": 1.4,
+          "meanRegret": 1894.4666666666667,
+          "meanRegretInDiscs": 0.18944666666666668,
+          "maxRegret": 20000,
+          "maxRegretInDiscs": 2
+        },
+        "pairwise": {
+          "comparablePairs": 339,
+          "correctPairs": 232,
+          "tiedTeacherPairs": 117,
+          "tiedPredictionPairs": 0,
+          "accuracy": 0.6843657817109144,
+          "weightedAccuracy": 0.8339602204032399,
+          "maxTeacherGap": 280000
+        },
+        "deltas": {
+          "top1Accuracy": 0,
+          "meanRegret": 0,
+          "pairwiseAccuracy": -0.005899705014749235
+        }
+      }
+    ]
+  }
+}

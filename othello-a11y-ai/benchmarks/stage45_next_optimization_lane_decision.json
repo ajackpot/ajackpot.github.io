@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-04-07T03:26:12.993Z",
+  "acceptedSegments": [
+    {
+      "from": "candidateC",
+      "to": "candidateD",
+      "sameRunCombinedDeltaPercent": -0.40843
+    },
+    {
+      "from": "candidateD",
+      "to": "candidateF",
+      "sameRunCombinedDeltaPercent": -0.28809
+    },
+    {
+      "from": "candidateF",
+      "to": "candidateH2",
+      "sameRunCombinedDeltaPercent": -0.01017
+    }
+  ],
+  "failedFollowUps": [
+    {
+      "candidate": "candidateE fallback@11-12",
+      "combinedNodeDeltaPercent": 5.75752
+    },
+    {
+      "candidate": "candidateG25 edgePattern@11-12=x0.25",
+      "combinedNodeDeltaPercent": 0.83593
+    },
+    {
+      "candidate": "candidateG0 edgePattern@11-12=x0",
+      "combinedNodeDeltaPercent": 0.69889
+    },
+    {
+      "candidate": "candidateH top-pair fastpilot winner",
+      "combinedNodeDeltaPercent": 0.98097
+    }
+  ],
+  "latestCurrent": {
+    "profileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "vsBaselineCombinedPercent": -2.49317,
+    "vsLegacyCombinedPercent": -6.88436
+  },
+  "stage42Decision": "keep candidateF active",
+  "stage43Decision": "keep candidateF active; retain candidateH2 as provisional until wider same-run validation is completed",
+  "chainReplay": null,
+  "moveOrderingPlateau": true,
+  "recommendation": {
+    "lane": "pivot-to-mpc-calibration-and-runtime-plumbing",
+    "continueMoveOrderingManualSearch": false,
+    "rationale": [
+      "최근 채택 이득이 candidateD→F -0.28809%, candidateF→H2 -0.01017%로 급격히 줄었습니다.",
+      "candidateE / candidateG / candidateH 등 follow-up 후보가 더 넓은 검증에서 유지되지 않았습니다.",
+      "Stage 35에서 이미 “evaluation / move-ordering이 안정화되면 MPC calibration/runtime 실험이 다음 축”으로 정리되어 있었습니다."
+    ],
+    "nextConcreteWork": [
+      "move-ordering은 candidateH2에서 동결하고 재현용 replay/orchestrator만 유지",
+      "real trained-mpc-profile.json이 들어오면 calibration profile을 generated module과 runtime option으로 연결",
+      "그 다음 conservative MPC benchmark를 current H2 baseline과 same-run으로 비교"
+    ],
+    "needsUserSuppliedCorpusForRealBenchmark": true,
+    "requestedUserArtifact": "Egaroucid_Train_Data 전체 또는 calibrated trained-mpc-profile.json"
+  }
+}

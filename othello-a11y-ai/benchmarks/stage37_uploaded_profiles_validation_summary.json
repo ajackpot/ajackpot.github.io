@@ -1,0 +1,96 @@
+{
+  "generatedAt": "2026-03-28T09:25:45.769372+00:00",
+  "installedModule": {
+    "generatedAt": "2026-03-28T09:12:19.762Z",
+    "evaluationJsonPath": "/mnt/data/trained-evaluation-profile.json",
+    "moveOrderingJsonPath": "/mnt/data/trained-move-ordering-profile.json",
+    "outputModulePath": "/mnt/data/stage37_repo/js/ai/learned-eval-profile.generated.js",
+    "outputModuleBytes": 36244,
+    "evaluationProfile": {
+      "version": 1,
+      "name": "trained-phase-linear-v1",
+      "phaseBucketCount": 8,
+      "holdoutMaeInStones": 6.221283187466277
+    },
+    "moveOrderingProfile": {
+      "version": 1,
+      "name": "trained-move-ordering-linear-v1",
+      "trainedBucketCount": 5,
+      "holdoutTop1Accuracy": 0.496,
+      "holdoutTop3Accuracy": 0.852
+    }
+  },
+  "benchmarks": {
+    "moveOrderingExactVsPhaseOnly": {
+      "cases": 12,
+      "sameScoreCases": 12,
+      "sameBestMoveCases": 10,
+      "baselineNodes": 104699,
+      "candidateNodes": 96817,
+      "baselineElapsedMs": 5866,
+      "candidateElapsedMs": 5367,
+      "nodeDeltaPercent": -7.528247643243965,
+      "elapsedDeltaPercent": -8.506648482782134
+    },
+    "moveOrderingDepthVsPhaseOnly": {
+      "cases": 24,
+      "sameBestMoveCases": 24,
+      "baselineNodes": 70640,
+      "candidateNodes": 69721,
+      "baselineElapsedMs": 7574,
+      "candidateElapsedMs": 7418,
+      "nodeDeltaPercent": -1.3009626274065684,
+      "elapsedDeltaPercent": -2.0596778452601003
+    },
+    "evaluationDepthVsLegacy": {
+      "cases": 24,
+      "sameBestMoveCases": 14,
+      "baselineNodes": 119367,
+      "candidateNodes": 91963,
+      "baselineElapsedMs": 11581,
+      "candidateElapsedMs": 8473,
+      "nodeDeltaPercent": -22.957768897601515,
+      "elapsedDeltaPercent": -26.837060702875398
+    },
+    "trineutronAggregate": {
+      "variants": [
+        {
+          "variantKey": "active",
+          "variantLabel": "active-generated+ordering (trained-phase-linear-v1 / trained-move-ordering-linear-v1)",
+          "games": 12,
+          "wins": 8,
+          "losses": 4,
+          "draws": 0,
+          "points": 8.0,
+          "scoreRate": 0.6666666666666666,
+          "averageDiscDiff": 7.166666666666667,
+          "exactAdjudications": 12
+        },
+        {
+          "variantKey": "phase-only",
+          "variantLabel": "active-phase-only (trained-phase-linear-v1 / no learned move-ordering)",
+          "games": 12,
+          "wins": 8,
+          "losses": 4,
+          "draws": 0,
+          "points": 8.0,
+          "scoreRate": 0.6666666666666666,
+          "averageDiscDiff": 8.833333333333334,
+          "exactAdjudications": 12
+        },
+        {
+          "variantKey": "legacy",
+          "variantLabel": "legacy-seed (legacy-seed-bucketed-v1)",
+          "games": 12,
+          "wins": 7,
+          "losses": 4,
+          "draws": 1,
+          "points": 7.5,
+          "scoreRate": 0.625,
+          "averageDiscDiff": -0.8333333333333334,
+          "exactAdjudications": 12
+        }
+      ]
+    }
+  }
+}

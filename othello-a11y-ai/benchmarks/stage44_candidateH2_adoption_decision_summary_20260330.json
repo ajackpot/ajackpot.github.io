@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-03-30T07:49:43.230Z",
+  "retrainingRequired": false,
+  "decision": "adopt-candidateH2",
+  "adoptedProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "adoptedProfilePath": "tools/evaluator-training/out/stage44_candidateH2_edgePattern125_cornerPattern125_11_12.json",
+  "activeProfilePath": "tools/evaluator-training/out/trained-move-ordering-profile.json",
+  "priorActiveProfileName": "stage41-candidateF-cornerPattern125-11-12",
+  "priorActiveBackupPath": "tools/evaluator-training/out/stage44_candidateF_before_candidateH2.json",
+  "sameRunValidation8Seed": {
+    "seedCount": 8,
+    "vsPriorActive": {
+      "depthNodes": {
+        "reference": 157937,
+        "candidate": 157917,
+        "deltaPercent": -0.01266327712948834
+      },
+      "exactNodes": {
+        "reference": 251346,
+        "candidate": 251234,
+        "deltaPercent": -0.04456008848360427
+      },
+      "combinedNodes": {
+        "reference": 409283,
+        "candidate": 409151,
+        "deltaPercent": -0.03225152278496786
+      }
+    },
+    "exactTieAudit": {
+      "totalCases": 32,
+      "sameScoreCases": 32,
+      "sameBestMoveCases": 32,
+      "scoreMismatchCases": 0,
+      "rawBestMoveMismatchCases": 0,
+      "verifiedTieSwapCases": 0,
+      "unverifiedBestMoveMismatchCases": 0
+    }
+  },
+  "sameRunValidation24Seed": {
+    "seedCount": 24,
+    "vsPriorActive": {
+      "depthNodes": {
+        "reference": 418583,
+        "candidate": 418572,
+        "deltaPercent": -0.0026279136993141144
+      },
+      "exactNodes": {
+        "reference": 751263,
+        "candidate": 751155,
+        "deltaPercent": -0.014375791167673638
+      },
+      "combinedNodes": {
+        "reference": 1169846,
+        "candidate": 1169727,
+        "deltaPercent": -0.010172279086307086
+      }
+    },
+    "vsBaseline": {
+      "combinedDeltaPercent": -2.4931729291218336
+    },
+    "vsLegacy": {
+      "combinedDeltaPercent": -6.884363987202767
+    },
+    "outputAgreementVsPriorActive": {
+      "depth": {
+        "sameScore": 120,
+        "sameBestMove": 120,
+        "total": 120
+      },
+      "exact": {
+        "sameScore": 96,
+        "sameBestMove": 96,
+        "total": 96
+      }
+    },
+    "exactByEmptiesNodeDeltaVsPriorActive": {
+      "14": -130,
+      "13": 22,
+      "12": 0,
+      "11": 0
+    },
+    "depthByEmptiesNodeDeltaVsPriorActive": {
+      "19": 0,
+      "18": 0,
+      "17": -10,
+      "16": 1,
+      "15": -2
+    }
+  },
+  "generatedModuleSummaryPath": "benchmarks/stage44_candidateH2_generated_profile_module_summary_20260330.json",
+  "smokeTests": {
+    "stage37_generated_module_builder_smoke": "pass",
+    "stage41_variant_provenance_smoke": "pass",
+    "stage43_top_pair_local_search_smoke": "pass"
+  },
+  "rationale": [
+    "24-seed same-run validation stayed on the improving side for both depth and exact nodes.",
+    "All tested root outputs vs prior active candidateF matched exactly in the 24-seed same-run benchmark.",
+    "The improvement is tiny, but it is positive on both the 8-seed and 24-seed same-run validations, so candidateH2 is the best validated known profile in the current manual-search space."
+  ]
+}

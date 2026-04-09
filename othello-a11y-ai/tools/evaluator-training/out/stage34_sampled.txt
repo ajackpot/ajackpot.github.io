@@ -1,0 +1,2 @@
+{"board":"------------------OX----X--XX----XOOO----XXO-------O-------O----","engineScore":-23429,"empties":50,"teacher":"evaluator"}
+{"board":"-----------------O--------OXX-----XOOO---X--XXX-----X-------X---","engineScore":-49517,"empties":50,"teacher":"evaluator"}

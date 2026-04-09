@@ -193,15 +193,30 @@ export class GameState {
       return null;
     }
 
-    return new GameState({
-      black: color === PLAYER_COLORS.BLACK ? result.player : result.opponent,
-      white: color === PLAYER_COLORS.WHITE ? result.player : result.opponent,
+    const nextBlack = color === PLAYER_COLORS.BLACK ? result.player : result.opponent;
+    const nextWhite = color === PLAYER_COLORS.WHITE ? result.player : result.opponent;
+    const nextState = new GameState({
+      black: nextBlack,
+      white: nextWhite,
       currentPlayer: opponentColor,
       consecutivePasses: 0,
       ply: this.ply + 1,
       moveHistory: this.moveHistory,
       lastAction: null,
     });
+
+    if (this._emptyBitboard !== undefined) {
+      nextState._emptyBitboard = this._emptyBitboard & ~moveBit;
+    }
+    if (this._emptyCount !== undefined) {
+      nextState._emptyCount = this._emptyCount - 1;
+    }
+
+    nextState._hashKey = nextBlack
+      | (nextWhite << HASH_WHITE_SHIFT)
+      | (opponentColor === PLAYER_COLORS.WHITE ? HASH_WHITE_TO_MOVE_BIT : 0n);
+
+    return nextState;
   }
 
   passTurn() {
@@ -222,15 +237,32 @@ export class GameState {
   }
 
   passTurnFast() {
-    return new GameState({
+    const nextPlayer = this.getOpponentColor(this.currentPlayer);
+    const nextState = new GameState({
       black: this.black,
       white: this.white,
-      currentPlayer: this.getOpponentColor(this.currentPlayer),
+      currentPlayer: nextPlayer,
       consecutivePasses: this.consecutivePasses + 1,
       ply: this.ply + 1,
       moveHistory: this.moveHistory,
       lastAction: null,
     });
+
+    if (this._emptyBitboard !== undefined) {
+      nextState._emptyBitboard = this._emptyBitboard;
+    }
+    if (this._emptyCount !== undefined) {
+      nextState._emptyCount = this._emptyCount;
+    }
+    if (this._discCounts !== undefined) {
+      nextState._discCounts = this._discCounts;
+    }
+
+    nextState._hashKey = this.black
+      | (this.white << HASH_WHITE_SHIFT)
+      | (nextPlayer === PLAYER_COLORS.WHITE ? HASH_WHITE_TO_MOVE_BIT : 0n);
+
+    return nextState;
   }
 
   getDiscCounts() {
@@ -363,6 +395,41 @@ function normalizeMoveSequenceInput(sequence) {
   return rawTokens.map(normalizeMoveToken);
 }
 
+export function serializeMoveHistoryCompact(moveHistory) {
+  if (!Array.isArray(moveHistory) || moveHistory.length === 0) {
+    return '';
+  }
+
+  return moveHistory.flatMap((action, index) => {
+    if (!action || typeof action !== 'object') {
+      throw new Error(`Invalid move history entry at step ${index + 1}.`);
+    }
+
+    if (action.type === 'pass') {
+      return [];
+    }
+
+    const coord = typeof action.coord === 'string'
+      ? action.coord.trim().toUpperCase()
+      : (Number.isInteger(action.index) ? indexToCoord(action.index) : '');
+
+    if (coordToIndex(coord) < 0) {
+      throw new Error(`Invalid move coordinate in history at step ${index + 1}.`);
+    }
+
+    return coord.toLowerCase();
+  }).join('');
+}
+
+function applyOmittedForcedPasses(state, history) {
+  let current = state;
+  while (!current.isTerminal() && current.getLegalMoves().length === 0) {
+    current = current.passTurn();
+    history.push(current);
+  }
+  return current;
+}
+
 export function createStateHistoryFromMoveSequence(sequence) {
   const moves = normalizeMoveSequenceInput(sequence);
   let state = GameState.initial();
@@ -386,6 +453,11 @@ export function createStateHistoryFromMoveSequence(sequence) {
       continue;
     }
 
+    state = applyOmittedForcedPasses(state, history);
+    if (state.isTerminal()) {
+      throw new Error(`Cannot apply step ${stepIndex + 1} (${move}) because the game is already over.`);
+    }
+
     const index = coordToIndex(move);
     const outcome = state.applyMove(index);
     if (!outcome) {
@@ -396,6 +468,7 @@ export function createStateHistoryFromMoveSequence(sequence) {
     history.push(state);
   }
 
+  state = applyOmittedForcedPasses(state, history);
   return history;
 }
 

@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-04-05T18:00:00+09:00",
+  "moduleFormat": "compact",
+  "inputModuleBytesBefore": 139726,
+  "outputModuleBytesAfter": 12032,
+  "ratio": 0.08611138943360577,
+  "evaluationProfileName": "trained-phase-linear-v1",
+  "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "tupleResidualProfileName": "top24-retrain-retrained-calibrated-lateb-endgame",
+  "mpcProfileName": null
+}

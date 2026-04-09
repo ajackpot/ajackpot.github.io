@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "name": "trained-move-ordering-linear-v1",
+  "description": "late move-ordering evaluator를 root search teacher로 재추정한 프로필입니다.",
+  "featureKeys": [
+    "mobility",
+    "corners",
+    "cornerAdjacency",
+    "edgePattern",
+    "cornerPattern",
+    "discDifferential",
+    "parity"
+  ],
+  "source": {
+    "inputFiles": [
+      "/mnt/data/othello_stage29_repo/othello-a11y-ai-stage29/tools/evaluator-training/out/stage29_move_ordering_smoke_input_mixed.jsonl"
+    ],
+    "teacherEvaluationProfileName": "trained-phase-linear-v1",
+    "teacherEvaluationProfilePath": null,
+    "teacherMoveOrderingProfileName": null,
+    "teacherMoveOrderingProfilePath": null,
+    "regularization": 5000,
+    "scannedSamples": 42,
+    "eligibleRoots": 6,
+    "acceptedRoots": 6
+  },
+  "diagnostics": {
+    "bucketCounts": [
+      {
+        "key": "child-10-10",
+        "minEmpties": 10,
+        "maxEmpties": 10,
+        "trainRootCount": 1,
+        "holdoutRootCount": 1,
+        "trainMoveCount": 9,
+        "holdoutMoveCount": 6,
+        "exactRootCount": 2,
+        "depthRootCount": 0
+      },
+      {
+        "key": "child-11-12",
+        "minEmpties": 11,
+        "maxEmpties": 12,
+        "trainRootCount": 1,
+        "holdoutRootCount": 1,
+        "trainMoveCount": 11,
+        "holdoutMoveCount": 8,
+        "exactRootCount": 2,
+        "depthRootCount": 0
+      },
+      {
+        "key": "child-13-14",
+        "minEmpties": 13,
+        "maxEmpties": 14,
+        "trainRootCount": 2,
+        "holdoutRootCount": 0,
+        "trainMoveCount": 16,
+        "holdoutMoveCount": 0,
+        "exactRootCount": 0,
+        "depthRootCount": 2
+      }
+    ],
+    "holdoutMoves": {
+      "count": 14,
+      "mae": 647850.8701037925,
+      "rmse": 658635.5571549592,
+      "meanResidual": 647850.8701037925,
+      "stdDevResidual": 118701.50485390874,
+      "maxAbsResidual": 930970.1698053351,
+      "maeInDiscs": 64.78508701037926,
+      "rmseInDiscs": 65.86355571549592
+    },
+    "holdoutRoots": {
+      "count": 2,
+      "top1Accuracy": 0.5,
+      "top3Accuracy": 1,
+      "meanBestRank": 1.5,
+      "meanRegret": 30000,
+      "meanRegretInDiscs": 3,
+      "maxRegret": 60000,
+      "maxRegretInDiscs": 6
+    },
+    "byBucket": [
+      {
+        "key": "child-10-10",
+        "minEmpties": 10,
+        "maxEmpties": 10,
+        "holdoutMoves": {
+          "count": 6,
+          "mae": 614266.9813696104,
+          "rmse": 618148.4669476433,
+          "meanResidual": 614266.9813696104,
+          "stdDevResidual": 69163.59438887145,
+          "maxAbsResidual": 768875.9526496297,
+          "maeInDiscs": 61.42669813696104,
+          "rmseInDiscs": 61.814846694764334
+        },
+        "holdoutRoots": {
+          "count": 1,
+          "top1Accuracy": 0,
+          "top3Accuracy": 1,
+          "meanBestRank": 2,
+          "meanRegret": 60000,
+          "meanRegretInDiscs": 6,
+          "maxRegret": 60000,
+          "maxRegretInDiscs": 6
+        }
+      },
+      {
+        "key": "child-11-12",
+        "minEmpties": 11,
+        "maxEmpties": 12,
+        "holdoutMoves": {
+          "count": 8,
+          "mae": 673038.7866544293,
+          "rmse": 687437.8150917724,
+          "meanResidual": 673038.7866544293,
+          "stdDevResidual": 139962.64243319887,
+          "maxAbsResidual": 930970.1698053351,
+          "maeInDiscs": 67.30387866544292,
+          "rmseInDiscs": 68.74378150917724
+        },
+        "holdoutRoots": {
+          "count": 1,
+          "top1Accuracy": 1,
+          "top3Accuracy": 1,
+          "meanBestRank": 1,
+          "meanRegret": 0,
+          "meanRegretInDiscs": 0,
+          "maxRegret": 0,
+          "maxRegretInDiscs": 0
+        }
+      },
+      {
+        "key": "child-13-14",
+        "minEmpties": 13,
+        "maxEmpties": 14,
+        "holdoutMoves": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInDiscs": null,
+          "rmseInDiscs": null
+        },
+        "holdoutRoots": {
+          "count": 0,
+          "top1Accuracy": null,
+          "top3Accuracy": null,
+          "meanBestRank": null,
+          "meanRegret": null,
+          "meanRegretInDiscs": null,
+          "maxRegret": null,
+          "maxRegretInDiscs": null
+        }
+      }
+    ],
+    "teacherConfig": {
+      "exactRootMaxEmpties": 12,
+      "exactRootTimeLimitMs": 15000,
+      "teacherDepth": 4,
+      "teacherTimeLimitMs": 800,
+      "teacherExactEndgameEmpties": 10
+    },
+    "sampling": {
+      "sampleStride": 1,
+      "sampleResidue": 0,
+      "maxRootsPerBucket": 2,
+      "holdoutMod": 3,
+      "holdoutResidue": 0
+    },
+    "scanSummary": {
+      "scannedSamples": 42,
+      "eligibleRoots": 6,
+      "acceptedRoots": 6,
+      "skipped": {
+        "rootRange": 0,
+        "noMoves": 0,
+        "singleMove": 0,
+        "stride": 0,
+        "bucketFull": 36,
+        "incomplete": 0,
+        "timeout": 0,
+        "depthShort": 0,
+        "other": 0
+      }
+    },
+    "createdAt": "2026-03-27T13:27:52.948Z"
+  },
+  "trainedBuckets": [
+    {
+      "key": "child-10-10",
+      "minEmpties": 10,
+      "maxEmpties": 10,
+      "weights": {
+        "mobility": 605.115185,
+        "corners": 2229.189383,
+        "cornerAdjacency": 377.444135,
+        "edgePattern": 805.293808,
+        "cornerPattern": 1112.288345,
+        "discDifferential": -298.412356,
+        "parity": 2744.350431
+      }
+    },
+    {
+      "key": "child-11-12",
+      "minEmpties": 11,
+      "maxEmpties": 12,
+      "weights": {
+        "mobility": 4486.081401,
+        "corners": 540.338203,
+        "cornerAdjacency": -3330.104941,
+        "edgePattern": -4345.746677,
+        "cornerPattern": 926.438466,
+        "discDifferential": 260.343867,
+        "parity": -1746.619017
+      }
+    },
+    {
+      "key": "child-13-14",
+      "minEmpties": 13,
+      "maxEmpties": 14,
+      "weights": {
+        "mobility": 1038.161549,
+        "corners": -24.555185,
+        "cornerAdjacency": 67.188474,
+        "edgePattern": 1151.932903,
+        "cornerPattern": -112.397806,
+        "discDifferential": 184.931932,
+        "parity": 0
+      }
+    }
+  ]
+}

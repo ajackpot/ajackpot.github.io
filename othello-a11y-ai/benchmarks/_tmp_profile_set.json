@@ -1,0 +1,515 @@
+{
+  "generatedAt": "2026-03-29T02:23:35.779Z",
+  "evaluationProfileName": "trained-phase-linear-v1",
+  "options": {
+    "seedStart": 1,
+    "seedCount": 1,
+    "repetitions": 1,
+    "suites": [
+      {
+        "key": "depth",
+        "emptiesList": [
+          19
+        ],
+        "options": {
+          "timeLimitMs": 1500,
+          "maxDepth": 6,
+          "exactEndgameEmpties": 10
+        }
+      },
+      {
+        "key": "exact",
+        "emptiesList": [
+          14
+        ],
+        "options": {
+          "timeLimitMs": 4000,
+          "maxDepth": 12,
+          "exactEndgameEmpties": 14
+        }
+      }
+    ]
+  },
+  "profiles": [
+    {
+      "key": "legacy",
+      "label": "legacy",
+      "profileName": null,
+      "inputPath": null,
+      "suites": {
+        "depth": {
+          "byEmpties": [
+            {
+              "empties": 19,
+              "cases": 1,
+              "nodes": 6725,
+              "elapsedMs": 608,
+              "ttHits": 629
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 6725,
+            "elapsedMs": 608,
+            "ttHits": 629,
+            "nodeDeltaVsLegacyPercent": 0,
+            "elapsedDeltaVsLegacyPercent": 0,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        },
+        "exact": {
+          "byEmpties": [
+            {
+              "empties": 14,
+              "cases": 1,
+              "nodes": 25358,
+              "elapsedMs": 1074,
+              "ttHits": 1482
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 25358,
+            "elapsedMs": 1074,
+            "ttHits": 1482,
+            "nodeDeltaVsLegacyPercent": 0,
+            "elapsedDeltaVsLegacyPercent": 0,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        }
+      },
+      "cases": [
+        {
+          "suite": "depth",
+          "empties": 19,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "white",
+            "empties": 19,
+            "legalMoves": 17,
+            "bestMove": "G7",
+            "score": 71015,
+            "outcome": "win",
+            "mode": "depth-limited",
+            "completion": "complete",
+            "exact": false,
+            "wld": false,
+            "completedDepth": 6,
+            "elapsedMs": 608,
+            "nodes": 6725,
+            "ttHits": 629,
+            "etcNodes": 596,
+            "etcChildTableHits": 1378,
+            "etcQualifiedBounds": 548,
+            "etcNarrowings": 34,
+            "etcCutoffs": 29,
+            "etcExactNodes": 596,
+            "etcExactChildTableHits": 1378,
+            "etcExactQualifiedBounds": 548,
+            "etcExactNarrowings": 34,
+            "etcExactCutoffs": 29,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 0,
+            "smallSolverNodes": 0,
+            "specializedFewEmptiesCalls": 0,
+            "specializedFewEmpties1Calls": 0,
+            "specializedFewEmpties2Calls": 0,
+            "specializedFewEmpties3Calls": 0,
+            "specializedFewEmpties4Calls": 0,
+            "fastestFirstExactSorts": 0,
+            "fastestFirstExactPassCandidates": 0,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        },
+        {
+          "suite": "exact",
+          "empties": 14,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "black",
+            "empties": 14,
+            "legalMoves": 9,
+            "bestMove": "D8",
+            "score": -60000,
+            "outcome": "loss",
+            "mode": "exact-endgame",
+            "completion": "complete",
+            "exact": true,
+            "wld": false,
+            "completedDepth": 12,
+            "elapsedMs": 1074,
+            "nodes": 25358,
+            "ttHits": 1482,
+            "etcNodes": 12167,
+            "etcChildTableHits": 2316,
+            "etcQualifiedBounds": 2316,
+            "etcNarrowings": 602,
+            "etcCutoffs": 601,
+            "etcExactNodes": 12167,
+            "etcExactChildTableHits": 2316,
+            "etcExactQualifiedBounds": 2316,
+            "etcExactNarrowings": 602,
+            "etcExactCutoffs": 601,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 11223,
+            "smallSolverNodes": 96775,
+            "specializedFewEmptiesCalls": 96775,
+            "specializedFewEmpties1Calls": 40096,
+            "specializedFewEmpties2Calls": 30596,
+            "specializedFewEmpties3Calls": 14529,
+            "specializedFewEmpties4Calls": 11554,
+            "fastestFirstExactSorts": 11483,
+            "fastestFirstExactPassCandidates": 450,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        }
+      ]
+    },
+    {
+      "key": "baseline",
+      "label": "baseline",
+      "profileName": "trained-move-ordering-linear-v2",
+      "inputPath": "/mnt/data/othello_stage3/othello-a11y-ai/tools/evaluator-training/out/stage38_baseline_trained_move_ordering_linear_v2.json",
+      "suites": {
+        "depth": {
+          "byEmpties": [
+            {
+              "empties": 19,
+              "cases": 1,
+              "nodes": 6725,
+              "elapsedMs": 559,
+              "ttHits": 629
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 6725,
+            "elapsedMs": 559,
+            "ttHits": 629,
+            "nodeDeltaVsLegacyPercent": 0,
+            "elapsedDeltaVsLegacyPercent": -8.05921052631579,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        },
+        "exact": {
+          "byEmpties": [
+            {
+              "empties": 14,
+              "cases": 1,
+              "nodes": 20749,
+              "elapsedMs": 764,
+              "ttHits": 1434
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 20749,
+            "elapsedMs": 764,
+            "ttHits": 1434,
+            "nodeDeltaVsLegacyPercent": -18.175723637510846,
+            "elapsedDeltaVsLegacyPercent": -28.86405959031657,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        }
+      },
+      "cases": [
+        {
+          "suite": "depth",
+          "empties": 19,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "white",
+            "empties": 19,
+            "legalMoves": 17,
+            "bestMove": "G7",
+            "score": 71015,
+            "outcome": "win",
+            "mode": "depth-limited",
+            "completion": "complete",
+            "exact": false,
+            "wld": false,
+            "completedDepth": 6,
+            "elapsedMs": 559,
+            "nodes": 6725,
+            "ttHits": 629,
+            "etcNodes": 596,
+            "etcChildTableHits": 1378,
+            "etcQualifiedBounds": 548,
+            "etcNarrowings": 34,
+            "etcCutoffs": 29,
+            "etcExactNodes": 596,
+            "etcExactChildTableHits": 1378,
+            "etcExactQualifiedBounds": 548,
+            "etcExactNarrowings": 34,
+            "etcExactCutoffs": 29,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 0,
+            "smallSolverNodes": 0,
+            "specializedFewEmptiesCalls": 0,
+            "specializedFewEmpties1Calls": 0,
+            "specializedFewEmpties2Calls": 0,
+            "specializedFewEmpties3Calls": 0,
+            "specializedFewEmpties4Calls": 0,
+            "fastestFirstExactSorts": 0,
+            "fastestFirstExactPassCandidates": 0,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        },
+        {
+          "suite": "exact",
+          "empties": 14,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "black",
+            "empties": 14,
+            "legalMoves": 9,
+            "bestMove": "D8",
+            "score": -60000,
+            "outcome": "loss",
+            "mode": "exact-endgame",
+            "completion": "complete",
+            "exact": true,
+            "wld": false,
+            "completedDepth": 12,
+            "elapsedMs": 764,
+            "nodes": 20749,
+            "ttHits": 1434,
+            "etcNodes": 10004,
+            "etcChildTableHits": 2172,
+            "etcQualifiedBounds": 2172,
+            "etcNarrowings": 511,
+            "etcCutoffs": 509,
+            "etcExactNodes": 10004,
+            "etcExactChildTableHits": 2172,
+            "etcExactQualifiedBounds": 2172,
+            "etcExactNarrowings": 511,
+            "etcExactCutoffs": 509,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 8999,
+            "smallSolverNodes": 77313,
+            "specializedFewEmptiesCalls": 77313,
+            "specializedFewEmpties1Calls": 31876,
+            "specializedFewEmpties2Calls": 24514,
+            "specializedFewEmpties3Calls": 11656,
+            "specializedFewEmpties4Calls": 9267,
+            "fastestFirstExactSorts": 9409,
+            "fastestFirstExactPassCandidates": 352,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        }
+      ]
+    },
+    {
+      "key": "active",
+      "label": "active",
+      "profileName": "stage38-candidateB-mob0-10-12-fallback13-14",
+      "inputPath": "/mnt/data/othello_stage3/othello-a11y-ai/tools/evaluator-training/out/trained-move-ordering-profile.json",
+      "suites": {
+        "depth": {
+          "byEmpties": [
+            {
+              "empties": 19,
+              "cases": 1,
+              "nodes": 6725,
+              "elapsedMs": 536,
+              "ttHits": 629
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 6725,
+            "elapsedMs": 536,
+            "ttHits": 629,
+            "nodeDeltaVsLegacyPercent": 0,
+            "elapsedDeltaVsLegacyPercent": -11.842105263157894,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        },
+        "exact": {
+          "byEmpties": [
+            {
+              "empties": 14,
+              "cases": 1,
+              "nodes": 20803,
+              "elapsedMs": 757,
+              "ttHits": 1661
+            }
+          ],
+          "overall": {
+            "cases": 1,
+            "nodes": 20803,
+            "elapsedMs": 757,
+            "ttHits": 1661,
+            "nodeDeltaVsLegacyPercent": -17.962773089360358,
+            "elapsedDeltaVsLegacyPercent": -29.51582867783985,
+            "nodeDeltaVsFullPercent": null,
+            "elapsedDeltaVsFullPercent": null
+          }
+        }
+      },
+      "cases": [
+        {
+          "suite": "depth",
+          "empties": 19,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "white",
+            "empties": 19,
+            "legalMoves": 17,
+            "bestMove": "G7",
+            "score": 71015,
+            "outcome": "win",
+            "mode": "depth-limited",
+            "completion": "complete",
+            "exact": false,
+            "wld": false,
+            "completedDepth": 6,
+            "elapsedMs": 536,
+            "nodes": 6725,
+            "ttHits": 629,
+            "etcNodes": 596,
+            "etcChildTableHits": 1378,
+            "etcQualifiedBounds": 548,
+            "etcNarrowings": 34,
+            "etcCutoffs": 29,
+            "etcExactNodes": 596,
+            "etcExactChildTableHits": 1378,
+            "etcExactQualifiedBounds": 548,
+            "etcExactNarrowings": 34,
+            "etcExactCutoffs": 29,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 0,
+            "smallSolverNodes": 0,
+            "specializedFewEmptiesCalls": 0,
+            "specializedFewEmpties1Calls": 0,
+            "specializedFewEmpties2Calls": 0,
+            "specializedFewEmpties3Calls": 0,
+            "specializedFewEmpties4Calls": 0,
+            "fastestFirstExactSorts": 0,
+            "fastestFirstExactPassCandidates": 0,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        },
+        {
+          "suite": "exact",
+          "empties": 14,
+          "seed": 1,
+          "summary": {
+            "seed": null,
+            "currentPlayer": "black",
+            "empties": 14,
+            "legalMoves": 9,
+            "bestMove": "D8",
+            "score": -60000,
+            "outcome": "loss",
+            "mode": "exact-endgame",
+            "completion": "complete",
+            "exact": true,
+            "wld": false,
+            "completedDepth": 12,
+            "elapsedMs": 757,
+            "nodes": 20803,
+            "ttHits": 1661,
+            "etcNodes": 9990,
+            "etcChildTableHits": 2404,
+            "etcQualifiedBounds": 2404,
+            "etcNarrowings": 506,
+            "etcCutoffs": 501,
+            "etcExactNodes": 9990,
+            "etcExactChildTableHits": 2404,
+            "etcExactQualifiedBounds": 2404,
+            "etcExactNarrowings": 506,
+            "etcExactCutoffs": 501,
+            "etcWldNodes": 0,
+            "etcWldChildTableHits": 0,
+            "etcWldQualifiedBounds": 0,
+            "etcWldNarrowings": 0,
+            "etcWldCutoffs": 0,
+            "wldNodes": 0,
+            "wldTtHits": 0,
+            "smallSolverCalls": 9002,
+            "smallSolverNodes": 77483,
+            "specializedFewEmptiesCalls": 77483,
+            "specializedFewEmpties1Calls": 31935,
+            "specializedFewEmpties2Calls": 24592,
+            "specializedFewEmpties3Calls": 11684,
+            "specializedFewEmpties4Calls": 9272,
+            "fastestFirstExactSorts": 9340,
+            "fastestFirstExactPassCandidates": 351,
+            "wldSmallSolverCalls": 0,
+            "wldSmallSolverNodes": 0,
+            "wldPreExactEmpties": 0,
+            "exactFastestFirstOrdering": true,
+            "enhancedTranspositionCutoff": true,
+            "enhancedTranspositionCutoffWld": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "inputFiles": [
+    "/mnt/data/othello_work/othello-a11y-ai-stage27/tools/evaluator-training/out/synthetic.jsonl"
+  ],
+  "totalInputBytes": 26538,
+  "sampleLimit": 200,
+  "seenSamples": 200,
+  "sampledBytes": 26538,
+  "averageBytesPerSample": 132.69,
+  "fitSeconds": 0.03,
+  "fitSamplesPerSecond": 6666.666666666667,
+  "diagnosticsSeconds": 0.014,
+  "diagnosticsSamplesPerSecond": 14285.714285714286,
+  "estimatedTotalSamples": 200,
+  "fitOnlySecondsEstimate": 0.03,
+  "fullRunSecondsEstimate": 0.044,
+  "optimisticSecondsEstimate": 0.037399999999999996,
+  "conservativeSecondsEstimate": 0.05499999999999999,
+  "skipDiagnostics": false,
+  "createdAt": "2026-03-27T10:59:20.870Z"
+}

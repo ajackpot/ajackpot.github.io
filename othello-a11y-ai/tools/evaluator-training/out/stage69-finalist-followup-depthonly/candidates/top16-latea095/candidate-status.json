@@ -1,0 +1,54 @@
+{
+  "candidate": {
+    "key": "top16-latea095",
+    "name": "diagonal-lite-top16 late-a 0.95x",
+    "sourceCandidateKey": null,
+    "sourceTupleProfilePath": "../../bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json"
+  },
+  "steps": {
+    "patch-tuple-residual-profile": {
+      "status": "success",
+      "description": "top16-latea095: patch tuple residual",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/patch-tuple-residual-profile.mjs --input /mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json --output-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/trained-tuple-residual-profile.patched.json --summary-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/tuple-residual-patch-summary.json --tuple-score sum-abs --global-scale 1 --bucket-scale late-a=0.95 --name top16-latea095-patched --description \"diagonal-lite-top16 late-a 0.95x patched tuple residual profile\"",
+      "signature": "7d063ae5f7f010e79858e528de60d5e6679c1740adcaf84ad6c2deecd9110764",
+      "outputs": [
+        "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/trained-tuple-residual-profile.patched.json",
+        "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/tuple-residual-patch-summary.json"
+      ],
+      "startedAt": "2026-04-07T01:04:51.286Z",
+      "finishedAt": "2026-04-07T01:04:51.671Z"
+    },
+    "export-preview-module": {
+      "status": "success",
+      "description": "top16-latea095: export preview generated module",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/export-profile-module.mjs --evaluation-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-evaluation-profile.snapshot.json --move-ordering-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-move-ordering-profile.snapshot.json --tuple-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/trained-tuple-residual-profile.patched.json --output-module /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/learned-eval-profile.preview.generated.js --module-format compact",
+      "signature": "4c1641e2b4bc300b0800dcf9ae49cc37870221f5308ab956a6a28c34c8ccd953",
+      "outputs": [
+        "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/learned-eval-profile.preview.generated.js"
+      ],
+      "startedAt": "2026-04-07T01:04:51.674Z",
+      "finishedAt": "2026-04-07T01:04:52.046Z"
+    },
+    "export-generated-module": {
+      "status": "success",
+      "description": "top16-latea095: export generated module",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/export-profile-module.mjs --evaluation-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-evaluation-profile.snapshot.json --move-ordering-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-move-ordering-profile.snapshot.json --tuple-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/trained-tuple-residual-profile.patched.json --output-module /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/learned-eval-profile.generated.js --module-format compact",
+      "signature": "dd8034b9cc815fb9580cc887f232f065b2bb88d61117ca02cc50494fa75ad1a7",
+      "outputs": [
+        "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/learned-eval-profile.generated.js"
+      ],
+      "startedAt": "2026-04-07T01:04:52.049Z",
+      "finishedAt": "2026-04-07T01:04:52.416Z"
+    },
+    "benchmark-depth": {
+      "status": "running",
+      "description": "top16-latea095: depth benchmark",
+      "command": "/opt/nvm/versions/node/v22.16.0/bin/node /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/benchmark-depth-search-profile.mjs --baseline-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-evaluation-profile.snapshot.json --candidate-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-evaluation-profile.snapshot.json --baseline-move-ordering-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-move-ordering-profile.snapshot.json --candidate-move-ordering-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-move-ordering-profile.snapshot.json --baseline-tuple-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/shared/active-tuple-residual-profile.snapshot.json --candidate-tuple-profile /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/trained-tuple-residual-profile.patched.json --empties 24,20,18 --seed-start 1 --seed-count 12 --repetitions 1 --time-limit-ms 2000 --max-depth 6 --exact-endgame-empties 10 --output-json /mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/benchmarks/depth.benchmark.json",
+      "signature": "49b807cef755076d21029cf89200d8b5c32e25635997eacced5a5eece99991aa",
+      "outputs": [
+        "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-latea095/benchmarks/depth.benchmark.json"
+      ],
+      "startedAt": "2026-04-07T01:04:52.419Z"
+    }
+  }
+}

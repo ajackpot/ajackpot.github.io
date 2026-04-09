@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-03-30T15:05:00+09:00",
+  "stage": "stage43",
+  "baseProfileName": "stage41-candidateF-cornerPattern125-11-12",
+  "provisionalCandidateName": "stage41-candidateF-cornerPattern125-11-12__local-search-r1-edgepattern-11-12-x1p25__cornerpattern-11-12-x1p25",
+  "activeProfileChanged": false,
+  "tooling": {
+    "allowedActionIdsInTuner": true,
+    "topPairWrapper": true,
+    "diversityAwareSingleSelection": true,
+    "smokeTest": "js/test/stage43_top_pair_local_search_smoke.mjs"
+  },
+  "validation": {
+    "seed1_4_fullsuite": {
+      "depthNodes": {
+        "candidateF": 24326,
+        "candidateH2": 24295,
+        "deltaPercent": -0.12743566554304037
+      },
+      "exactNodes": {
+        "candidateF": 128917,
+        "candidateH2": 128857,
+        "deltaPercent": -0.04654227565441316
+      },
+      "combinedNodes": {
+        "candidateF": 153243,
+        "candidateH2": 153152,
+        "deltaPercent": -0.05938528977545846
+      }
+    },
+    "exactOutputAuditSeed1_4": {
+      "sameScoreCases": 16,
+      "sameBestMoveCases": 16,
+      "verifiedTieSwapCases": 0
+    }
+  },
+  "decision": "keep candidateF active; retain candidateH2 as provisional until wider same-run validation is completed"
+}

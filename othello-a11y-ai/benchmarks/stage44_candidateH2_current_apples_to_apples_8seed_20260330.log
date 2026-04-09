@@ -1,0 +1,32 @@
+Evaluation profile : legacy-seed-bucketed-v1
+Profiles           : legacy=legacy, baseline=trained-move-ordering-linear-v2, full=stage41-candidateF-cornerPattern125-11-12, candidateH2=stage41-candidateF-cornerPattern125-11-12__local-search-r1-edgepattern-11-12-x1p25__cornerpattern-11-12-x1p25
+Seeds              : 1..8 | repetitions=1
+Depth suite        : empties=19, 18, 17, 16, 15 depth=6 exact=10
+Exact suite        : empties=14, 13, 12, 11 depth=12 exact=14
+
+[depth]
+  empties 19
+  empties 18
+  empties 17
+  empties 16
+  empties 15
+
+[exact]
+  empties 14
+  empties 13
+  empties 12
+  empties 11
+
+  depth overall:
+    baseline             nodes= 157,839 time=17,940ms vsLegacy= 99.9% vsFull= 99.9%
+    candidateH2          nodes= 157,917 time=17,802ms vsLegacy= 99.9% vsFull=100.0%
+    full                 nodes= 157,937 time=17,955ms vsLegacy= 99.9% vsFull=100.0%
+    legacy               nodes= 158,058 time=17,941ms vsLegacy=100.0% vsFull=100.1%
+
+  exact overall:
+    candidateH2          nodes= 251,234 time=14,256ms vsLegacy= 92.5% vsFull=100.0%
+    full                 nodes= 251,346 time=14,296ms vsLegacy= 92.5% vsFull=100.0%
+    legacy               nodes= 271,624 time=15,522ms vsLegacy=100.0% vsFull=108.1%
+    baseline             nodes= 273,233 time=15,651ms vsLegacy=100.6% vsFull=108.7%
+
+Saved benchmark summary to /mnt/data/stage44work/othello-a11y-ai/benchmarks/stage44_candidateH2_current_apples_to_apples_8seed_20260330.json

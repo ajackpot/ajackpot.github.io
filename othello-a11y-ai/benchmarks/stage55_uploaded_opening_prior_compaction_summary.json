@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-04T00:25:50.468Z",
+  "openingPriorJsonPath": "/mnt/data/othello-profile/trained-opening-prior-profile.json",
+  "openingPriorJsonBytes": 56314173,
+  "outputModulePath": "/mnt/data/othello-stage55/othello-a11y-ai/js/ai/opening-prior.generated.js",
+  "outputModuleBytes": 2705826,
+  "outputModuleRatio": 0.04804875674903367,
+  "moduleOptions": {
+    "format": "compact",
+    "hashEncoding": "hex",
+    "minPositionCount": 0,
+    "minMoveCount": 0
+  },
+  "openingPriorProfile": {
+    "version": 1,
+    "name": "trained-opening-prior-stage53",
+    "format": "compact-v1",
+    "hashEncoding": "hex",
+    "symmetry": "canonical-4",
+    "positionCount": 40192,
+    "moveCount": 102812,
+    "runtimePositionCount": 40192,
+    "runtimeMoveCount": 102812,
+    "holdoutCoverage": 0.8500605864770983,
+    "holdoutTop1Accuracy": 0.7231530183853689,
+    "holdoutTop3Accuracy": 0.9636683877816918
+  }
+}

@@ -1,0 +1,996 @@
+{
+  "generatedAt": "2026-03-30T05:13:49.169Z",
+  "evaluationProfileName": "trained-phase-linear-v1",
+  "referenceProfileName": "stage38-candidateC-disc0-10-12",
+  "candidateProfileName": "stage39-candidateD-fallback10-10",
+  "referenceProfilePath": "tools/evaluator-training/out/stage39_candidateC_before_candidateD.json",
+  "candidateProfilePath": "tools/evaluator-training/out/stage39_candidateD_fallback10_10.json",
+  "options": {
+    "emptiesList": [
+      11
+    ],
+    "seedStart": 21,
+    "seedCount": 1,
+    "timeLimitMs": 4000,
+    "maxDepth": 12,
+    "exactEndgameEmpties": 14,
+    "enumerateAllLegalMoves": true
+  },
+  "summary": {
+    "totalCases": 1,
+    "sameScoreCases": 1,
+    "sameBestMoveCases": 0,
+    "scoreMismatchCases": 0,
+    "rawBestMoveMismatchCases": 1,
+    "verifiedTieSwapCases": 1,
+    "unverifiedBestMoveMismatchCases": 0
+  },
+  "cases": [
+    {
+      "empties": 11,
+      "seed": 21,
+      "reference": {
+        "bestMove": "F1",
+        "score": -180000,
+        "nodes": 911,
+        "elapsedMs": 91
+      },
+      "candidate": {
+        "bestMove": "H2",
+        "score": -180000,
+        "nodes": 892,
+        "elapsedMs": 78
+      },
+      "audit": {
+        "sameScore": true,
+        "sameBestMove": false,
+        "sharedScore": -180000,
+        "reference": {
+          "bestMove": "F1",
+          "score": -180000
+        },
+        "candidate": {
+          "bestMove": "H2",
+          "score": -180000
+        },
+        "legalMoves": [
+          "A1",
+          "F1",
+          "H2",
+          "H6",
+          "G7",
+          "H7",
+          "G8"
+        ],
+        "verifiedTieSwap": true,
+        "referenceVerified": true,
+        "candidateVerified": true,
+        "optimalMoves": [
+          "F1",
+          "H2",
+          "G7"
+        ],
+        "scoredMoves": [
+          {
+            "coord": "F1",
+            "index": 5,
+            "exactScore": -180000,
+            "flipCount": 3
+          },
+          {
+            "coord": "H2",
+            "index": 15,
+            "exactScore": -180000,
+            "flipCount": 2
+          },
+          {
+            "coord": "G7",
+            "index": 54,
+            "exactScore": -180000,
+            "flipCount": 6
+          },
+          {
+            "coord": "A1",
+            "index": 0,
+            "exactScore": -220000,
+            "flipCount": 3
+          },
+          {
+            "coord": "H6",
+            "index": 47,
+            "exactScore": -220000,
+            "flipCount": 2
+          },
+          {
+            "coord": "H7",
+            "index": 55,
+            "exactScore": -220000,
+            "flipCount": 2
+          },
+          {
+            "coord": "G8",
+            "index": 62,
+            "exactScore": -240000,
+            "flipCount": 4
+          }
+        ],
+        "state": {
+          "black": "4051106835978211736",
+          "white": "362279511600672324",
+          "currentPlayer": "white",
+          "consecutivePasses": 0,
+          "ply": 50,
+          "moveHistory": [
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "C4",
+              "index": 26,
+              "bit": "67108864",
+              "flips": "134217728",
+              "flippedIndices": [
+                27
+              ],
+              "flippedCoords": [
+                "D4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "C3",
+              "index": 18,
+              "bit": "262144",
+              "flips": "134217728",
+              "flippedIndices": [
+                27
+              ],
+              "flippedCoords": [
+                "D4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "C2",
+              "index": 10,
+              "bit": "1024",
+              "flips": "262144",
+              "flippedIndices": [
+                18
+              ],
+              "flippedCoords": [
+                "C3"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "C5",
+              "index": 34,
+              "bit": "17179869184",
+              "flips": "34359738368",
+              "flippedIndices": [
+                35
+              ],
+              "flippedCoords": [
+                "D5"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "E6",
+              "index": 44,
+              "bit": "17592186044416",
+              "flips": "103079215104",
+              "flippedIndices": [
+                35,
+                36
+              ],
+              "flippedCoords": [
+                "D5",
+                "E5"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "C1",
+              "index": 2,
+              "bit": "4",
+              "flips": "67372032",
+              "flippedIndices": [
+                10,
+                18,
+                26
+              ],
+              "flippedCoords": [
+                "C2",
+                "C3",
+                "C4"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "B3",
+              "index": 17,
+              "bit": "131072",
+              "flips": "67108864",
+              "flippedIndices": [
+                26
+              ],
+              "flippedCoords": [
+                "C4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "F6",
+              "index": 45,
+              "bit": "35184372088832",
+              "flips": "68719476736",
+              "flippedIndices": [
+                36
+              ],
+              "flippedCoords": [
+                "E5"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "C6",
+              "index": 42,
+              "bit": "4398046511104",
+              "flips": "17179869184",
+              "flippedIndices": [
+                34
+              ],
+              "flippedCoords": [
+                "C5"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "E3",
+              "index": 20,
+              "bit": "1048576",
+              "flips": "268435456",
+              "flippedIndices": [
+                28
+              ],
+              "flippedCoords": [
+                "E4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "E2",
+              "index": 12,
+              "bit": "4096",
+              "flips": "68988960768",
+              "flippedIndices": [
+                20,
+                28,
+                36
+              ],
+              "flippedCoords": [
+                "E3",
+                "E4",
+                "E5"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "A3",
+              "index": 16,
+              "bit": "65536",
+              "flips": "131072",
+              "flippedIndices": [
+                17
+              ],
+              "flippedCoords": [
+                "B3"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "A2",
+              "index": 8,
+              "bit": "256",
+              "flips": "131072",
+              "flippedIndices": [
+                17
+              ],
+              "flippedCoords": [
+                "B3"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "F2",
+              "index": 13,
+              "bit": "8192",
+              "flips": "1048576",
+              "flippedIndices": [
+                20
+              ],
+              "flippedCoords": [
+                "E3"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "G6",
+              "index": 46,
+              "bit": "70368744177664",
+              "flips": "35184372088832",
+              "flippedIndices": [
+                45
+              ],
+              "flippedCoords": [
+                "F6"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "B6",
+              "index": 41,
+              "bit": "2199023255552",
+              "flips": "17179869184",
+              "flippedIndices": [
+                34
+              ],
+              "flippedCoords": [
+                "C5"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "G2",
+              "index": 14,
+              "bit": "16384",
+              "flips": "8192",
+              "flippedIndices": [
+                13
+              ],
+              "flippedCoords": [
+                "F2"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "E7",
+              "index": 52,
+              "bit": "4503599627370496",
+              "flips": "17661173956608",
+              "flippedIndices": [
+                28,
+                36,
+                44
+              ],
+              "flippedCoords": [
+                "E4",
+                "E5",
+                "E6"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "E8",
+              "index": 60,
+              "bit": "1152921504606846976",
+              "flips": "4521260802375680",
+              "flippedIndices": [
+                20,
+                28,
+                36,
+                44,
+                52
+              ],
+              "flippedCoords": [
+                "E3",
+                "E4",
+                "E5",
+                "E6",
+                "E7"
+              ],
+              "flipCount": 5
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "B4",
+              "index": 25,
+              "bit": "33554432",
+              "flips": "67108864",
+              "flippedIndices": [
+                26
+              ],
+              "flippedCoords": [
+                "C4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "A4",
+              "index": 24,
+              "bit": "16777216",
+              "flips": "234946560",
+              "flippedIndices": [
+                16,
+                25,
+                26,
+                27
+              ],
+              "flippedCoords": [
+                "A3",
+                "B4",
+                "C4",
+                "D4"
+              ],
+              "flipCount": 4
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "D6",
+              "index": 43,
+              "bit": "8796093022208",
+              "flips": "4398046511104",
+              "flippedIndices": [
+                42
+              ],
+              "flippedCoords": [
+                "C6"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "B7",
+              "index": 49,
+              "bit": "562949953421312",
+              "flips": "4398046511104",
+              "flippedIndices": [
+                42
+              ],
+              "flippedCoords": [
+                "C6"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "G1",
+              "index": 6,
+              "bit": "64",
+              "flips": "135274496",
+              "flippedIndices": [
+                13,
+                20,
+                27
+              ],
+              "flippedCoords": [
+                "F2",
+                "E3",
+                "D4"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "C7",
+              "index": 50,
+              "bit": "1125899906842624",
+              "flips": "8796093022208",
+              "flippedIndices": [
+                43
+              ],
+              "flippedCoords": [
+                "D6"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "F4",
+              "index": 29,
+              "bit": "536870912",
+              "flips": "268435456",
+              "flippedIndices": [
+                28
+              ],
+              "flippedCoords": [
+                "E4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "D2",
+              "index": 11,
+              "bit": "2048",
+              "flips": "262144",
+              "flippedIndices": [
+                18
+              ],
+              "flippedCoords": [
+                "C3"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "G3",
+              "index": 22,
+              "bit": "4194304",
+              "flips": "16384",
+              "flippedIndices": [
+                14
+              ],
+              "flippedCoords": [
+                "G2"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "D1",
+              "index": 3,
+              "bit": "8",
+              "flips": "1024",
+              "flippedIndices": [
+                10
+              ],
+              "flippedCoords": [
+                "C2"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "B2",
+              "index": 9,
+              "bit": "512",
+              "flips": "269312",
+              "flippedIndices": [
+                10,
+                11,
+                12,
+                18
+              ],
+              "flippedCoords": [
+                "C2",
+                "D2",
+                "E2",
+                "C3"
+              ],
+              "flipCount": 4
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "E1",
+              "index": 4,
+              "bit": "16",
+              "flips": "269752320",
+              "flippedIndices": [
+                11,
+                12,
+                18,
+                20,
+                28
+              ],
+              "flippedCoords": [
+                "D2",
+                "E2",
+                "C3",
+                "E3",
+                "E4"
+              ],
+              "flipCount": 5
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "C8",
+              "index": 58,
+              "bit": "288230376151711744",
+              "flips": "1130297953353728",
+              "flippedIndices": [
+                42,
+                50
+              ],
+              "flippedCoords": [
+                "C6",
+                "C7"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "D7",
+              "index": 51,
+              "bit": "2251799813685248",
+              "flips": "1125899906842624",
+              "flippedIndices": [
+                50
+              ],
+              "flippedCoords": [
+                "C7"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "A8",
+              "index": 56,
+              "bit": "72057594037927936",
+              "flips": "562949953421312",
+              "flippedIndices": [
+                49
+              ],
+              "flippedCoords": [
+                "B7"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "A7",
+              "index": 48,
+              "bit": "281474976710656",
+              "flips": "565166290763776",
+              "flippedIndices": [
+                27,
+                34,
+                41,
+                49
+              ],
+              "flippedCoords": [
+                "D4",
+                "C5",
+                "B6",
+                "B7"
+              ],
+              "flipCount": 4
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "A6",
+              "index": 40,
+              "bit": "1099511627776",
+              "flips": "846623953387520",
+              "flippedIndices": [
+                41,
+                48,
+                49
+              ],
+              "flippedCoords": [
+                "B6",
+                "A7",
+                "B7"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "G4",
+              "index": 30,
+              "bit": "1073741824",
+              "flips": "536870912",
+              "flippedIndices": [
+                29
+              ],
+              "flippedCoords": [
+                "F4"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "F3",
+              "index": 21,
+              "bit": "2097152",
+              "flips": "34628173824",
+              "flippedIndices": [
+                28,
+                35
+              ],
+              "flippedCoords": [
+                "E4",
+                "D5"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "H3",
+              "index": 23,
+              "bit": "8388608",
+              "flips": "6291456",
+              "flippedIndices": [
+                21,
+                22
+              ],
+              "flippedCoords": [
+                "F3",
+                "G3"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "G5",
+              "index": 38,
+              "bit": "274877906944",
+              "flips": "1615857664",
+              "flippedIndices": [
+                11,
+                20,
+                22,
+                29,
+                30
+              ],
+              "flippedCoords": [
+                "D2",
+                "E3",
+                "G3",
+                "F4",
+                "G4"
+              ],
+              "flipCount": 5
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "F5",
+              "index": 37,
+              "bit": "137438953472",
+              "flips": "1610612736",
+              "flippedIndices": [
+                29,
+                30
+              ],
+              "flippedCoords": [
+                "F4",
+                "G4"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "H4",
+              "index": 31,
+              "bit": "2147483648",
+              "flips": "1610612736",
+              "flippedIndices": [
+                29,
+                30
+              ],
+              "flippedCoords": [
+                "F4",
+                "G4"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "B5",
+              "index": 33,
+              "bit": "8589934592",
+              "flips": "4398046511104",
+              "flippedIndices": [
+                42
+              ],
+              "flippedCoords": [
+                "C6"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "F7",
+              "index": 53,
+              "bit": "9007199254740992",
+              "flips": "7934213344985088",
+              "flippedIndices": [
+                37,
+                44,
+                45,
+                50,
+                51,
+                52
+              ],
+              "flippedCoords": [
+                "F5",
+                "E6",
+                "F6",
+                "C7",
+                "D7",
+                "E7"
+              ],
+              "flipCount": 6
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "H1",
+              "index": 7,
+              "bit": "128",
+              "flips": "16384",
+              "flippedIndices": [
+                14
+              ],
+              "flippedCoords": [
+                "G2"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "D3",
+              "index": 19,
+              "bit": "524288",
+              "flips": "8791261184",
+              "flippedIndices": [
+                26,
+                27,
+                33
+              ],
+              "flippedCoords": [
+                "C4",
+                "D4",
+                "B5"
+              ],
+              "flipCount": 3
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "D8",
+              "index": 59,
+              "bit": "576460752303423488",
+              "flips": "2251799813685248",
+              "flippedIndices": [
+                51
+              ],
+              "flippedCoords": [
+                "D7"
+              ],
+              "flipCount": 1
+            },
+            {
+              "type": "move",
+              "color": "white",
+              "coord": "A5",
+              "index": 32,
+              "bit": "4294967296",
+              "flips": "33816576",
+              "flippedIndices": [
+                18,
+                25
+              ],
+              "flippedCoords": [
+                "C3",
+                "B4"
+              ],
+              "flipCount": 2
+            },
+            {
+              "type": "move",
+              "color": "black",
+              "coord": "F8",
+              "index": 61,
+              "bit": "2305843009213693952",
+              "flips": "13546121230024704",
+              "flippedIndices": [
+                29,
+                37,
+                45,
+                52,
+                53
+              ],
+              "flippedCoords": [
+                "F4",
+                "F5",
+                "F6",
+                "E7",
+                "F7"
+              ],
+              "flipCount": 5
+            }
+          ],
+          "lastAction": {
+            "type": "move",
+            "color": "black",
+            "coord": "F8",
+            "index": 61,
+            "bit": "2305843009213693952",
+            "flips": "13546121230024704",
+            "flippedIndices": [
+              29,
+              37,
+              45,
+              52,
+              53
+            ],
+            "flippedCoords": [
+              "F4",
+              "F5",
+              "F6",
+              "E7",
+              "F7"
+            ],
+            "flipCount": 5
+          }
+        },
+        "boardAscii": [
+          "8 W . W B B B . .",
+          "7 W W W B B B . .",
+          "6 W W B B W B B .",
+          "5 W W B W B B W .",
+          "4 B W W W W B W W",
+          "3 B B W W W B W B",
+          "2 B W W W B W B .",
+          "1 . . W B B . W B",
+          "  A B C D E F G H"
+        ]
+      }
+    }
+  ]
+}

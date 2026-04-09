@@ -1,0 +1,44 @@
+{
+  "stage": 26,
+  "summary": "Phase-bucket learned evaluator architecture and offline training pipeline smoke results.",
+  "runtimeSmoke": {
+    "coreSmoke": "pass",
+    "perftDepth8": "pass"
+  },
+  "evaluatorPerformance": {
+    "profile": "legacy-seed-bucketed-v1",
+    "sampleCount": 200,
+    "loops": 1000,
+    "elapsedMs": 7731,
+    "evals": 200000,
+    "evalsPerSec": 25870,
+    "checksum": 2888006000
+  },
+  "trainingPipelineSmoke": {
+    "syntheticCorpus": {
+      "path": "tools/evaluator-training/out/synthetic.jsonl",
+      "samples": 200,
+      "teacher": "evaluator",
+      "emptiesRange": [10, 30]
+    },
+    "trainCommand": {
+      "holdoutMod": 5,
+      "lambda": 10000,
+      "targetScale": 3000,
+      "outputJson": "tools/evaluator-training/out/trained-profile-smoke.json",
+      "outputModule": "js/ai/learned-eval-profile.generated.js",
+      "note": "Generated module application was smoke-tested and then restored to the null stub for delivery."
+    },
+    "holdoutMetrics": {
+      "mae": 0.07,
+      "rmse": 0.27
+    },
+    "candidateComparison": {
+      "baselineMae": 0.0,
+      "candidateMae": 0.05,
+      "baselineEvalsPerSec": 24096,
+      "candidateEvalsPerSec": 27972,
+      "note": "This candidate was trained on synthetic baseline-evaluator labels, so strength conclusions are not meaningful; the comparison exists only to verify the end-to-end tooling path."
+    }
+  }
+}

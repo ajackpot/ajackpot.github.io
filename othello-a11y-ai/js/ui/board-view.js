@@ -2,10 +2,23 @@ import { BOARD_SIZE, indexToCoord, rowColToIndex } from '../core/bitboard.js';
 import { escapeHtml, formatCellName } from './formatters.js';
 
 export class BoardView {
-  constructor({ container, onCellActivate }) {
+  constructor({
+    container,
+    onCellActivate,
+    onShortcutReadDiscSummary = null,
+    onShortcutReadLastMove = null,
+    onShortcutRequestManualMoveInput = null,
+    onShortcutNoPlayableMove = null,
+  }) {
     this.container = container;
     this.onCellActivate = onCellActivate;
+    this.onShortcutReadDiscSummary = onShortcutReadDiscSummary;
+    this.onShortcutReadLastMove = onShortcutReadLastMove;
+    this.onShortcutRequestManualMoveInput = onShortcutRequestManualMoveInput;
+    this.onShortcutNoPlayableMove = onShortcutNoPlayableMove;
     this.lastFocusedIndex = 0;
+    this.playableIndices = [];
+    this.shortcutsEnabled = true;
 
     this.container.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-board-index]');
@@ -54,6 +67,38 @@ export class BoardView {
       if (nextIndex !== null) {
         event.preventDefault();
         this.focusCell(nextIndex);
+        return;
+      }
+
+      if (!this.shortcutsEnabled || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      const normalizedKey = String(event.key ?? '').toLowerCase();
+      if (normalizedKey === 's') {
+        event.preventDefault();
+        this.onShortcutReadDiscSummary?.();
+        return;
+      }
+
+      if (normalizedKey === 'l') {
+        event.preventDefault();
+        this.onShortcutReadLastMove?.();
+        return;
+      }
+
+      if (normalizedKey === 'i') {
+        event.preventDefault();
+        this.onShortcutRequestManualMoveInput?.();
+        return;
+      }
+
+      if (normalizedKey === 'm') {
+        event.preventDefault();
+        const moved = this.focusRelativePlayableMove(event.shiftKey ? -1 : 1);
+        if (!moved) {
+          this.onShortcutNoPlayableMove?.();
+        }
       }
     });
 
@@ -72,10 +117,44 @@ export class BoardView {
     button?.focus();
   }
 
-  render({ state, legalMoves, humanColor, aiBusy, showLegalHints }, { restoreFocus = false } = {}) {
+  focusRelativePlayableMove(direction) {
+    if (!Array.isArray(this.playableIndices) || this.playableIndices.length === 0) {
+      return false;
+    }
+
+    const sortedIndices = [...this.playableIndices].sort((left, right) => left - right);
+    const currentIndex = Number.isInteger(this.lastFocusedIndex)
+      ? this.lastFocusedIndex
+      : sortedIndices[0];
+
+    let targetIndex = sortedIndices[0];
+    if (direction < 0) {
+      targetIndex = sortedIndices[sortedIndices.length - 1];
+      for (let cursor = sortedIndices.length - 1; cursor >= 0; cursor -= 1) {
+        if (sortedIndices[cursor] < currentIndex) {
+          targetIndex = sortedIndices[cursor];
+          break;
+        }
+      }
+    } else {
+      for (const candidate of sortedIndices) {
+        if (candidate > currentIndex) {
+          targetIndex = candidate;
+          break;
+        }
+      }
+    }
+
+    this.focusCell(targetIndex);
+    return true;
+  }
+
+  render({ state, legalMoves, humanColor, aiBusy, showLegalHints, enableBoardShortcuts }, { restoreFocus = false } = {}) {
     const legalMoveSet = new Set(legalMoves.map((move) => move.index));
     const humanTurn = !aiBusy && !state.isTerminal() && state.currentPlayer === humanColor;
     const playableSet = humanTurn ? legalMoveSet : new Set();
+    this.playableIndices = humanTurn ? legalMoves.map((move) => move.index) : [];
+    this.shortcutsEnabled = Boolean(enableBoardShortcuts);
     const lastAction = state.lastAction;
     const lastMoveIndex = lastAction?.type === 'move' ? lastAction.index : null;
     const lastFlippedSet = new Set(lastAction?.type === 'move' ? lastAction.flippedIndices : []);

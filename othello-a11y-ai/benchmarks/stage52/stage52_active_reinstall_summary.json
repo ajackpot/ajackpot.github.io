@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-04-03T13:59:50.966Z",
+  "tupleJsonPath": "/mnt/data/stage52_work/tools/evaluator-training/out/top24_retrained_patch_lateb_endgame.json",
+  "outputModulePath": "/mnt/data/stage52_work/js/ai/learned-eval-profile.generated.js",
+  "outputModuleBytes": 139726,
+  "evaluationProfileName": "trained-phase-linear-v1",
+  "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "tupleResidualProfileName": "top24-retrain-retrained-calibrated-lateb-endgame",
+  "tupleLayoutName": "orthogonal-adjacent-pairs-outer2-v1-patched-patched",
+  "tupleCount": 24,
+  "trainedBucketCount": 2,
+  "mpcProfileName": null
+}

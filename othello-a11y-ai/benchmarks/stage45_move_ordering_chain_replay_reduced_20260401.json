@@ -1,0 +1,210 @@
+{
+  "generatedAt": "2026-04-02T00:04:55.518Z",
+  "baselineProfilePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage38_baseline_trained_move_ordering_linear_v2.json",
+  "evaluationProfilePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/trained-evaluation-profile.json",
+  "outputDir": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen",
+  "benchmarkJsonPath": "/mnt/data/stage45work/othello-a11y-ai/benchmarks/stage45_move_ordering_chain_replay_reduced_20260401.benchmark.json",
+  "options": {
+    "seedStart": 1,
+    "seedCount": 1,
+    "repetitions": 1,
+    "depthEmpties": "15",
+    "exactEmpties": "13",
+    "depthTimeLimitMs": 250,
+    "depthMaxDepth": 4,
+    "depthExactEndgameEmpties": 10,
+    "exactTimeLimitMs": 1200,
+    "exactMaxDepth": 10,
+    "exactEndgameEmpties": 13
+  },
+  "replayedChain": [
+    {
+      "key": "candidateB",
+      "from": "baseline",
+      "generatedPath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen/stage38-candidateB-mob0-10-12-fallback13-14.json",
+      "storedReferencePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage38_candidateB_mob0_10_12_fallback13_14.json",
+      "matchesStoredReference": true,
+      "actionSummary": {
+        "scaleSpecs": [
+          "mobility@10-12=0"
+        ],
+        "dropRanges": [
+          "13-14"
+        ]
+      }
+    },
+    {
+      "key": "candidateC",
+      "from": "candidateB",
+      "generatedPath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen/stage38-candidateC-disc0-10-12.json",
+      "storedReferencePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage38_candidateC_disc0_10_12.json",
+      "matchesStoredReference": true,
+      "actionSummary": {
+        "scaleSpecs": [
+          "discDifferential@10-12=0"
+        ],
+        "dropRanges": []
+      }
+    },
+    {
+      "key": "candidateD",
+      "from": "candidateC",
+      "generatedPath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen/stage39-candidateD-fallback10-10.json",
+      "storedReferencePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage39_candidateD_fallback10_10.json",
+      "matchesStoredReference": true,
+      "actionSummary": {
+        "scaleSpecs": [],
+        "dropRanges": [
+          "10-10"
+        ]
+      }
+    },
+    {
+      "key": "candidateF",
+      "from": "candidateD",
+      "generatedPath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen/stage41-candidateF-cornerPattern125-11-12.json",
+      "storedReferencePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage41_candidateF_cornerPattern125_11_12.json",
+      "matchesStoredReference": true,
+      "actionSummary": {
+        "scaleSpecs": [
+          "cornerPattern@11-12=1.25"
+        ],
+        "dropRanges": []
+      }
+    },
+    {
+      "key": "candidateH2",
+      "from": "candidateF",
+      "generatedPath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage45_chain_replay_regen/stage44-candidateH2-edgePattern125-cornerPattern125-11-12.json",
+      "storedReferencePath": "/mnt/data/stage45work/othello-a11y-ai/tools/evaluator-training/out/stage44_candidateH2_edgePattern125_cornerPattern125_11_12.json",
+      "matchesStoredReference": true,
+      "actionSummary": {
+        "scaleSpecs": [
+          "edgePattern@11-12=1.25",
+          "cornerPattern@11-12=1.25"
+        ],
+        "dropRanges": []
+      }
+    }
+  ],
+  "benchmarkProfiles": [
+    {
+      "key": "legacy",
+      "label": "legacy",
+      "profileName": null,
+      "depthNodes": 829,
+      "exactNodes": 15947,
+      "combinedNodes": 16776
+    },
+    {
+      "key": "baseline",
+      "label": "baseline",
+      "profileName": "trained-move-ordering-linear-v2",
+      "depthNodes": 785,
+      "exactNodes": 11859,
+      "combinedNodes": 12644
+    },
+    {
+      "key": "candidateB",
+      "label": "candidateB",
+      "profileName": "stage38-candidateB-mob0-10-12-fallback13-14",
+      "depthNodes": 785,
+      "exactNodes": 11914,
+      "combinedNodes": 12699
+    },
+    {
+      "key": "candidateC",
+      "label": "candidateC",
+      "profileName": "stage38-candidateC-disc0-10-12",
+      "depthNodes": 785,
+      "exactNodes": 11914,
+      "combinedNodes": 12699
+    },
+    {
+      "key": "candidateD",
+      "label": "candidateD",
+      "profileName": "stage39-candidateD-fallback10-10",
+      "depthNodes": 785,
+      "exactNodes": 11992,
+      "combinedNodes": 12777
+    },
+    {
+      "key": "candidateF",
+      "label": "candidateF",
+      "profileName": "stage41-candidateF-cornerPattern125-11-12",
+      "depthNodes": 785,
+      "exactNodes": 11992,
+      "combinedNodes": 12777
+    },
+    {
+      "key": "candidateH2",
+      "label": "candidateH2",
+      "profileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+      "depthNodes": 785,
+      "exactNodes": 11992,
+      "combinedNodes": 12777
+    }
+  ],
+  "segmentDeltas": [
+    {
+      "from": "legacy",
+      "to": "baseline",
+      "fromCombinedNodes": 16776,
+      "toCombinedNodes": 12644,
+      "combinedNodeDeltaPercent": -24.63042441583214,
+      "depthNodeDeltaPercent": -5.307599517490953,
+      "exactNodeDeltaPercent": -25.634915658117514
+    },
+    {
+      "from": "baseline",
+      "to": "candidateB",
+      "fromCombinedNodes": 12644,
+      "toCombinedNodes": 12699,
+      "combinedNodeDeltaPercent": 0.4349889275545713,
+      "depthNodeDeltaPercent": 0,
+      "exactNodeDeltaPercent": 0.4637827810102032
+    },
+    {
+      "from": "candidateB",
+      "to": "candidateC",
+      "fromCombinedNodes": 12699,
+      "toCombinedNodes": 12699,
+      "combinedNodeDeltaPercent": 0,
+      "depthNodeDeltaPercent": 0,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "from": "candidateC",
+      "to": "candidateD",
+      "fromCombinedNodes": 12699,
+      "toCombinedNodes": 12777,
+      "combinedNodeDeltaPercent": 0.6142215922513584,
+      "depthNodeDeltaPercent": 0,
+      "exactNodeDeltaPercent": 0.6546919590397852
+    },
+    {
+      "from": "candidateD",
+      "to": "candidateF",
+      "fromCombinedNodes": 12777,
+      "toCombinedNodes": 12777,
+      "combinedNodeDeltaPercent": 0,
+      "depthNodeDeltaPercent": 0,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "from": "candidateF",
+      "to": "candidateH2",
+      "fromCombinedNodes": 12777,
+      "toCombinedNodes": 12777,
+      "combinedNodeDeltaPercent": 0,
+      "depthNodeDeltaPercent": 0,
+      "exactNodeDeltaPercent": 0
+    }
+  ],
+  "finalStatus": {
+    "currentBestKey": "candidateH2",
+    "currentBestProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "currentVsBaselineCombinedPercent": 1.0518823157228725,
+    "currentVsLegacyCombinedPercent": -23.837625178826897
+  }
+}

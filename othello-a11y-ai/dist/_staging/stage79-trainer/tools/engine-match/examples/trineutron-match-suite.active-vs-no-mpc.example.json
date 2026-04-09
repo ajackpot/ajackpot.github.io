@@ -1,0 +1,56 @@
+{
+  "defaults": {
+    "openingPlies": 20,
+    "ourMaxDepth": 6,
+    "theirMaxDepth": 18,
+    "exactEndgameEmpties": 10,
+    "solverAdjudicationEmpties": 14,
+    "solverAdjudicationTimeMs": 60000,
+    "solverAdjudicationMaxDepth": 14,
+    "variantSeedMode": "shared"
+  },
+  "referenceVariantId": "active-no-mpc",
+  "variants": [
+    {
+      "id": "active",
+      "variant": "active",
+      "label": "active-installed-high-tight"
+    },
+    {
+      "id": "active-no-mpc",
+      "type": "custom",
+      "label": "active-generated-without-mpc",
+      "generatedModule": "js/ai/learned-eval-profile.generated.js",
+      "disableMpc": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "fast-diagnostic",
+      "label": "fast deterministic pilot",
+      "seed": 11,
+      "games": 2,
+      "ourTimeMs": 60,
+      "theirTimeMs": 60,
+      "theirNoiseScale": 0
+    },
+    {
+      "id": "fast-noisy",
+      "label": "fast noisy pilot",
+      "seed": 21,
+      "games": 4,
+      "ourTimeMs": 100,
+      "theirTimeMs": 100,
+      "theirNoiseScale": 4
+    },
+    {
+      "id": "medium-noisy",
+      "label": "medium noisy follow-up",
+      "seed": 31,
+      "games": 6,
+      "ourTimeMs": 150,
+      "theirTimeMs": 150,
+      "theirNoiseScale": 4
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "name": "mpc-candidate-suite-train-plus-bench",
+  "outputDir": "tools/evaluator-training/out/mpc-candidate-training-suite-bench",
+  "moduleFormat": "compact",
+  "continueOnError": false,
+  "sharedProfiles": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active",
+    "baselineMpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active",
+    "mpcProfileJson": "active",
+    "mpcMode": "high"
+  },
+  "defaults": {
+    "sampleStride": 200,
+    "sampleResidue": 0,
+    "maxSamplesPerBucket": 400,
+    "holdoutMod": 10,
+    "holdoutResidue": 0,
+    "targetHoldoutCoverage": 0.99,
+    "targetHighHoldoutCoverage": 0.99,
+    "targetLowHoldoutCoverage": 0.99,
+    "timeLimitMs": 120000,
+    "progressEvery": 20,
+    "maxTableEntries": 200000,
+    "aspirationWindow": 40,
+    "zValues": [1, 1.5, 1.96, 2.5, 3],
+    "runtimeVariant": {
+      "defaultMode": "high",
+      "maxDepthDistance": 1,
+      "maxTriesPerNode": 1,
+      "intervalScale": 1.0,
+      "highResidualScale": 1.0,
+      "lowResidualScale": 1.0
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "depth": {
+        "enabled": true,
+        "empties": [18, 22, 26, 30],
+        "seedStart": 1,
+        "seedCount": 4,
+        "repetitions": 1,
+        "timeLimitMs": 2000,
+        "maxDepth": 8,
+        "exactEndgameEmpties": 10,
+        "baselineMpcMode": "high"
+      },
+      "exact": {
+        "enabled": true,
+        "empties": [10, 12, 14],
+        "seedStart": 1,
+        "seedCount": 4,
+        "repetitions": 1,
+        "timeLimitMs": 60000,
+        "maxDepth": 12,
+        "baselineMpcMode": "high"
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "baseline-4bucket-high",
+      "name": "baseline 4-bucket high-only",
+      "calibrationBuckets": ["18-21:4>8", "22-25:4>8", "26-29:6>10", "30-33:6>10"],
+      "runtimeVariant": { "defaultMode": "high", "maxDepthDistance": 1, "maxTriesPerNode": 1 }
+    },
+    {
+      "key": "overlap-8bucket-high-safe",
+      "name": "overlap 8-bucket high-only safe",
+      "calibrationBuckets": ["18-21:3>7", "18-21:4>8", "22-25:4>8", "22-25:4>9", "26-29:5>10", "26-29:6>10", "30-33:5>11", "30-33:6>10"],
+      "targetHighHoldoutCoverage": 0.995,
+      "targetLowHoldoutCoverage": 0.99,
+      "runtimeVariant": { "defaultMode": "high", "maxDepthDistance": 1, "maxTriesPerNode": 2 }
+    },
+    {
+      "key": "overlap-8bucket-high-tight",
+      "name": "overlap 8-bucket high-only tight",
+      "calibrationBuckets": ["18-21:3>7", "18-21:4>8", "22-25:4>8", "22-25:4>9", "26-29:5>10", "26-29:6>10", "30-33:5>11", "30-33:6>10"],
+      "targetHighHoldoutCoverage": 0.99,
+      "targetLowHoldoutCoverage": 0.95,
+      "runtimeVariant": {
+        "defaultMode": "high",
+        "maxDepthDistance": 1,
+        "maxTriesPerNode": 2,
+        "highResidualScale": 0.93
+      }
+    },
+    {
+      "key": "overlap-8bucket-both-softlow",
+      "name": "overlap 8-bucket both-mode soft-low",
+      "calibrationBuckets": ["18-21:3>7", "18-21:4>8", "22-25:4>8", "22-25:4>9", "26-29:5>10", "26-29:6>10", "30-33:5>11", "30-33:6>10"],
+      "targetHighHoldoutCoverage": 0.99,
+      "targetLowHoldoutCoverage": 0.95,
+      "runtimeVariant": {
+        "defaultMode": "both",
+        "maxDepthDistance": 1,
+        "maxTriesPerNode": 2,
+        "lowResidualScale": 0.9
+      }
+    }
+  ]
+}

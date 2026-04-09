@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-08T00:52:38.375Z",
+  "mpcJsonPath": "/mnt/data/stage74/tools/evaluator-training/out/stage74-selected-mpc-profile.json",
+  "outputModulePath": "/mnt/data/stage74/js/ai/learned-eval-profile.generated.js",
+  "moduleFormat": "compact",
+  "outputModuleBytes": 15085,
+  "evaluationProfileName": "trained-phase-linear-v1",
+  "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "tupleResidualProfileName": "top24-retrain-retrained-calibrated-lateb-endgame",
+  "mpcProfileName": "trained-mpc-overlap-8bucket-high-tight",
+  "mpcUsableCalibrationCount": 8,
+  "mpcTotalCalibrationCount": 8,
+  "mpcRuntime": {
+    "enableHighCut": true,
+    "enableLowCut": false,
+    "maxWindow": 1,
+    "maxChecksPerNode": 2,
+    "minDepth": 2,
+    "minDepthGap": 2,
+    "maxDepthDistance": 1,
+    "minPly": 1,
+    "highScale": 0.93,
+    "lowScale": 1,
+    "depthDistanceScale": 1.25,
+    "defaultMode": "high",
+    "maxTriesPerNode": 2
+  }
+}

@@ -1,3 +1,14 @@
+/*
+ * SearchEngine is the browser runtime AI orchestrator.
+ *
+ * Active lane order, in broad strokes:
+ * 1) opening-book / opening-prior hybrid at the root
+ * 2) iterative deepening alpha-beta / PVS with TT, LMR, ETC, and conservative MPC
+ * 3) exact endgame search from the preset threshold, with custom-only root WLD +2
+ * 4) specialized few-empties exact solvers and exact fastest-first ordering in the tail window
+ *
+ * Current default/runtime reference lives in docs/runtime-ai-reference.md.
+ */
 import {
   bitFromIndex,
   bitsToIndices,
@@ -19,12 +30,24 @@ import {
   OPENING_BOOK_ADVISORY_MAX_PLY,
   OPENING_BOOK_DIRECT_USE_MAX_PLY,
 } from './opening-book.js';
+import { lookupOpeningPrior } from './opening-prior.js';
 import {
+  DEFAULT_OPENING_HYBRID_TUNING_KEY,
+  resolveOpeningHybridTuning,
+} from './opening-tuning.js';
+import {
+  CUSTOM_ENGINE_FIELDS,
   DEFAULT_STYLE_KEY,
   ENGINE_PRESETS,
   ENGINE_STYLE_PRESETS,
   resolveEngineOptions,
 } from './presets.js';
+import {
+  ACTIVE_EVALUATION_PROFILE,
+  ACTIVE_MOVE_ORDERING_PROFILE,
+  ACTIVE_TUPLE_RESIDUAL_PROFILE,
+  compileMpcProfile,
+} from './evaluation-profiles.js';
 
 const INFINITY = 10 ** 9;
 const DEFAULT_PRESET_KEY = 'normal';
@@ -32,6 +55,8 @@ const ORDERING_PROBE_EMPTIES = 18;
 const ORDERING_LIGHTWEIGHT_EVAL_MAX_EMPTIES = 18;
 const REGION_PARITY_EMPTIES = 16;
 const SMALL_EXACT_SOLVER_EMPTIES = 4;
+const DEFAULT_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES = 6;
+const MAX_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES = 8;
 const WLD_RESULT_SCORE = 10000;
 const MAX_WLD_PRE_EXACT_EMPTIES = 2;
 const LMR_MIN_DEPTH = 4;
@@ -46,8 +71,10 @@ const CORNER_MOVE_MASK = CORNER_INDICES.reduce(
   0n,
 );
 const CORNER_INDEX_SET = new Set(CORNER_INDICES);
+let nextSearchEngineInstanceId = 1;
 const TABLE_RELEVANT_OPTION_KEYS = Object.freeze([
   'exactEndgameEmpties',
+  'wldPreExactEmpties',
   'mobilityScale',
   'potentialMobilityScale',
   'cornerScale',
@@ -61,8 +88,112 @@ const TABLE_RELEVANT_OPTION_KEYS = Object.freeze([
   'discScale',
   'riskPenaltyScale',
   'optimizedFewEmptiesExactSolver',
+  'optimizedFewEmptiesExactSolverEmpties',
   'specializedFewEmptiesExactSolver',
+  'evaluationProfile',
+  'moveOrderingProfile',
+  'tupleResidualProfile',
+  'mpcProfile',
 ]);
+const EXACT_LATE_ORDERING_PROFILE = Object.freeze({
+  killerPrimaryScale: 0.5,
+  killerSecondaryScale: 0.4,
+  historyScale: 0,
+  positionalScale: 0,
+  flipScale: 0,
+  riskScale: 0.25,
+  mobilityPenaltyScale: 1.2,
+  cornerReplyPenaltyScale: 1.25,
+  passBonusScale: 1,
+  parityScale: 1.25,
+  lightweightEvalScale: 4.5,
+});
+const LIGHTWEIGHT_LATE_ORDERING_PROFILE = Object.freeze({
+  killerPrimaryScale: 0.85,
+  killerSecondaryScale: 0.8,
+  historyScale: 0.45,
+  positionalScale: 0.55,
+  flipScale: 0.6,
+  riskScale: 0.75,
+  mobilityPenaltyScale: 1.05,
+  cornerReplyPenaltyScale: 1.1,
+  passBonusScale: 1,
+  parityScale: 1.05,
+  lightweightEvalScale: 1.75,
+});
+const GENERAL_LATE_ORDERING_PROFILE = Object.freeze({
+  killerPrimaryScale: 1,
+  killerSecondaryScale: 1,
+  historyScale: 1,
+  positionalScale: 1,
+  flipScale: 1,
+  riskScale: 1,
+  mobilityPenaltyScale: 1,
+  cornerReplyPenaltyScale: 1,
+  passBonusScale: 1,
+  parityScale: 1,
+  lightweightEvalScale: 1,
+});
+
+function clampTrackedEmptiesForOrdering(empties) {
+  if (!Number.isFinite(empties)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(64, Math.round(empties)));
+}
+
+function orderingActivationThreshold(exactEndgameEmpties) {
+  return Math.max(
+    10,
+    Math.min(ORDERING_LIGHTWEIGHT_EVAL_MAX_EMPTIES, exactEndgameEmpties + 4),
+  );
+}
+
+function buildLateOrderingProfileTable(exactEndgameEmpties) {
+  const threshold = orderingActivationThreshold(exactEndgameEmpties);
+  return Array.from({ length: 65 }, (_, empties) => {
+    if (empties <= exactEndgameEmpties) {
+      return EXACT_LATE_ORDERING_PROFILE;
+    }
+    if (empties <= threshold) {
+      return LIGHTWEIGHT_LATE_ORDERING_PROFILE;
+    }
+    return GENERAL_LATE_ORDERING_PROFILE;
+  });
+}
+
+function buildLightweightOrderingEligibilityTable(exactEndgameEmpties) {
+  const threshold = orderingActivationThreshold(exactEndgameEmpties);
+  return Array.from({ length: 65 }, (_, empties) => empties >= 10 && empties <= threshold);
+}
+
+function buildOrderingScoreTable(lateOrderingProfileTable, options = {}) {
+  const riskPenaltyScale = options.riskPenaltyScale ?? 1;
+  const mobilityScale = options.mobilityScale ?? 1;
+  const cornerAdjacencyScale = options.cornerAdjacencyScale ?? 1;
+  return lateOrderingProfileTable.map((profile, empties) => ({
+    killerPrimaryBonus: Math.round(1_500_000 * profile.killerPrimaryScale),
+    killerSecondaryBonus: Math.round(1_000_000 * profile.killerSecondaryScale),
+    historyWeight: 50 * profile.historyScale,
+    positionalWeight: 1000 * profile.positionalScale,
+    flipWeight: 30 * profile.flipScale,
+    xSquarePenalty: Math.round(150_000 * riskPenaltyScale * profile.riskScale),
+    cSquarePenalty: Math.round(80_000 * riskPenaltyScale * profile.riskScale),
+    mobilityPenaltyPerMove: Math.round(
+      (empties <= 14 ? 1800 : 1200)
+      * mobilityScale
+      * profile.mobilityPenaltyScale,
+    ),
+    cornerReplyPenaltyPerMove: Math.round(
+      (empties <= 14 ? 320_000 : 220_000)
+      * cornerAdjacencyScale
+      * profile.cornerReplyPenaltyScale,
+    ),
+    passBonus: Math.round((empties <= 12 ? 2_500_000 : 1_500_000) * profile.passBonusScale),
+    parityScale: profile.parityScale,
+    lightweightEvalScale: profile.lightweightEvalScale,
+  }));
+}
 
 export function createEmptySearchStats() {
   return {
@@ -75,6 +206,10 @@ export function createEmptySearchStats() {
     elapsedMs: 0,
     bookHits: 0,
     bookMoves: 0,
+    openingPriorHits: 0,
+    openingConfidenceSkips: 0,
+    openingPriorContradictionVetoes: 0,
+    openingHybridDirectMoves: 0,
     smallSolverCalls: 0,
     smallSolverNodes: 0,
     specializedFewEmptiesCalls: 0,
@@ -82,6 +217,12 @@ export function createEmptySearchStats() {
     specializedFewEmpties2Calls: 0,
     specializedFewEmpties3Calls: 0,
     specializedFewEmpties4Calls: 0,
+    optimizedFewEmpties5Calls: 0,
+    optimizedFewEmpties6Calls: 0,
+    optimizedFewEmpties7Calls: 0,
+    optimizedFewEmpties8Calls: 0,
+    optimizedFewEmptiesFastestFirstSorts: 0,
+    optimizedFewEmptiesFastestFirstPassCandidates: 0,
     fastestFirstExactSorts: 0,
     fastestFirstExactPassCandidates: 0,
     ttFirstSearches: 0,
@@ -105,11 +246,18 @@ export function createEmptySearchStats() {
     etcWldQualifiedBounds: 0,
     etcWldNarrowings: 0,
     etcWldCutoffs: 0,
+    etcPreparedChildTableReuseLookups: 0,
+    etcPreparedChildTableReuseHits: 0,
     wldRootSearches: 0,
     wldNodes: 0,
     wldTtHits: 0,
     wldSmallSolverCalls: 0,
     wldSmallSolverNodes: 0,
+    mpcProbes: 0,
+    mpcHighProbes: 0,
+    mpcHighCutoffs: 0,
+    mpcLowProbes: 0,
+    mpcLowCutoffs: 0,
   };
 }
 
@@ -154,6 +302,22 @@ function chooseRandomBest(scoredMoves, randomness) {
   return pool[0];
 }
 
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function clamp01(value) {
+  return clamp(value, 0, 1);
+}
+
+function openingEvidenceCoverage(totalEvidence) {
+  if (!Number.isFinite(totalEvidence) || totalEvidence <= 0) {
+    return 0;
+  }
+  return clamp01(Math.log2(totalEvidence + 1) / 16);
+}
+
 function cloneSearchResult(result) {
   if (!result) {
     return null;
@@ -187,21 +351,83 @@ function sanitizeExperimentalBoolean(value, fallback) {
   return typeof value === 'boolean' ? value : fallback;
 }
 
-function defaultWldPreExactEmptiesForOptions(resolvedOptions) {
-  if (!resolvedOptions) {
-    return 0;
+function sanitizeDirectPresetField(field, value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
   }
 
-  const strongLateSearch = (resolvedOptions.maxDepth ?? 0) >= 8
-    && (resolvedOptions.timeLimitMs ?? 0) >= 3000;
-  return strongLateSearch ? 2 : 0;
+  const clamped = Math.min(field.max, Math.max(field.min, parsed));
+  if (Number.isInteger(field.step)) {
+    return Math.round(clamped);
+  }
+
+  return Number(clamped.toFixed(2));
 }
 
+function applyDirectPresetOverrides(resolvedOptions, engineOptions) {
+  if (!engineOptions || typeof engineOptions !== 'object') {
+    return resolvedOptions;
+  }
+
+  const nextOptions = { ...resolvedOptions };
+  for (const field of CUSTOM_ENGINE_FIELDS) {
+    if (!Object.hasOwn(engineOptions, field.key)) {
+      continue;
+    }
+
+    nextOptions[field.key] = sanitizeDirectPresetField(
+      field,
+      engineOptions[field.key],
+      nextOptions[field.key],
+    );
+  }
+
+  return nextOptions;
+}
+
+function applyLegacyRandomnessOptionOverride(resolvedOptions, engineOptions) {
+  if (!engineOptions || typeof engineOptions !== 'object') {
+    return resolvedOptions;
+  }
+
+  const hasOpeningRandomness = Object.hasOwn(engineOptions, 'openingRandomness');
+  const hasSearchRandomness = Object.hasOwn(engineOptions, 'searchRandomness');
+  if ((hasOpeningRandomness || hasSearchRandomness) || !Object.hasOwn(engineOptions, 'randomness')) {
+    return resolvedOptions;
+  }
+
+  const legacyRandomness = sanitizeExperimentalInteger(
+    engineOptions.randomness,
+    resolvedOptions.searchRandomness ?? resolvedOptions.randomness ?? 0,
+    0,
+    500,
+  );
+  return {
+    ...resolvedOptions,
+    openingRandomness: legacyRandomness,
+    searchRandomness: legacyRandomness,
+    randomness: legacyRandomness,
+  };
+}
+
+const DEFAULT_WLD_PRE_EXACT_EMPTIES = 0;
+
 function resolveOptionsFromInput(engineOptions = {}, fallbackPresetKey = DEFAULT_PRESET_KEY, fallbackStyleKey = DEFAULT_STYLE_KEY) {
+  const hasExplicitPresetKey = typeof engineOptions.presetKey === 'string';
   const presetKey = engineOptions.presetKey ?? fallbackPresetKey;
   const styleKey = engineOptions.styleKey ?? fallbackStyleKey;
-  const resolved = resolveEngineOptions(presetKey, engineOptions, styleKey);
-  const defaultWldPreExactEmpties = defaultWldPreExactEmptiesForOptions(resolved);
+  let resolved = resolveEngineOptions(
+    presetKey,
+    hasExplicitPresetKey ? engineOptions : {},
+    styleKey,
+  );
+
+  if (!hasExplicitPresetKey) {
+    resolved = applyDirectPresetOverrides(resolved, engineOptions);
+    resolved = applyLegacyRandomnessOptionOverride(resolved, engineOptions);
+  }
+
   const enhancedTranspositionCutoff = sanitizeExperimentalBoolean(
     engineOptions.enhancedTranspositionCutoff,
     resolved.enhancedTranspositionCutoff ?? true,
@@ -209,6 +435,12 @@ function resolveOptionsFromInput(engineOptions = {}, fallbackPresetKey = DEFAULT
   const optimizedFewEmptiesExactSolver = sanitizeExperimentalBoolean(
     engineOptions.optimizedFewEmptiesExactSolver,
     resolved.optimizedFewEmptiesExactSolver ?? true,
+  );
+  const optimizedFewEmptiesExactSolverEmpties = sanitizeExperimentalInteger(
+    engineOptions.optimizedFewEmptiesExactSolverEmpties,
+    resolved.optimizedFewEmptiesExactSolverEmpties ?? DEFAULT_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES,
+    SMALL_EXACT_SOLVER_EMPTIES,
+    MAX_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES,
   );
   const specializedFewEmptiesExactSolver = sanitizeExperimentalBoolean(
     engineOptions.specializedFewEmptiesExactSolver,
@@ -218,24 +450,65 @@ function resolveOptionsFromInput(engineOptions = {}, fallbackPresetKey = DEFAULT
     engineOptions.exactFastestFirstOrdering,
     resolved.exactFastestFirstOrdering ?? true,
   );
+  const ttFirstInPlaceMoveExtraction = sanitizeExperimentalBoolean(
+    engineOptions.ttFirstInPlaceMoveExtraction,
+    resolved.ttFirstInPlaceMoveExtraction ?? true,
+  );
+  const etcInPlaceMovePreparation = sanitizeExperimentalBoolean(
+    engineOptions.etcInPlaceMovePreparation,
+    resolved.etcInPlaceMovePreparation ?? true,
+  );
+  const etcReusePreparedChildTableEntryForOrdering = sanitizeExperimentalBoolean(
+    engineOptions.etcReusePreparedChildTableEntryForOrdering,
+    resolved.etcReusePreparedChildTableEntryForOrdering ?? true,
+  );
   const enhancedTranspositionCutoffWld = sanitizeExperimentalBoolean(
     engineOptions.enhancedTranspositionCutoffWld,
     engineOptions.enhancedTranspositionCutoff ?? resolved.enhancedTranspositionCutoffWld ?? enhancedTranspositionCutoff,
   );
   return {
     ...resolved,
+    openingRandomness: resolved.openingRandomness ?? resolved.randomness ?? 0,
+    searchRandomness: resolved.searchRandomness ?? resolved.randomness ?? 0,
+    randomness: resolved.searchRandomness ?? resolved.randomness ?? 0,
     optimizedFewEmptiesExactSolver,
+    optimizedFewEmptiesExactSolverEmpties,
     specializedFewEmptiesExactSolver,
     exactFastestFirstOrdering,
+    ttFirstInPlaceMoveExtraction,
+    etcInPlaceMovePreparation,
+    etcReusePreparedChildTableEntryForOrdering,
     enhancedTranspositionCutoff,
     enhancedTranspositionCutoffWld,
+    evaluationProfile: Object.hasOwn(engineOptions, 'evaluationProfile')
+      ? engineOptions.evaluationProfile
+      : (resolved.evaluationProfile ?? ACTIVE_EVALUATION_PROFILE ?? null),
+    moveOrderingProfile: Object.hasOwn(engineOptions, 'moveOrderingProfile')
+      ? engineOptions.moveOrderingProfile
+      : (resolved.moveOrderingProfile ?? ACTIVE_MOVE_ORDERING_PROFILE ?? null),
+    tupleResidualProfile: Object.hasOwn(engineOptions, 'tupleResidualProfile')
+      ? engineOptions.tupleResidualProfile
+      : (resolved.tupleResidualProfile ?? ACTIVE_TUPLE_RESIDUAL_PROFILE ?? null),
+    mpcProfile: Object.hasOwn(engineOptions, 'mpcProfile')
+      ? engineOptions.mpcProfile
+      : (resolved.mpcProfile ?? null),
     wldPreExactEmpties: sanitizeExperimentalInteger(
       engineOptions.wldPreExactEmpties,
-      resolved.wldPreExactEmpties ?? defaultWldPreExactEmpties,
+      resolved.wldPreExactEmpties ?? DEFAULT_WLD_PRE_EXACT_EMPTIES,
       0,
       MAX_WLD_PRE_EXACT_EMPTIES,
     ),
   };
+}
+
+function resolveOpeningTuningFromInput(engineOptions = {}, fallbackTuningKey = DEFAULT_OPENING_HYBRID_TUNING_KEY) {
+  const tuningKey = typeof engineOptions?.openingTuningKey === 'string' && engineOptions.openingTuningKey.trim() !== ''
+    ? engineOptions.openingTuningKey.trim()
+    : fallbackTuningKey;
+  const tuningOverrides = engineOptions?.openingTuningProfile && typeof engineOptions.openingTuningProfile === 'object'
+    ? engineOptions.openingTuningProfile
+    : null;
+  return resolveOpeningHybridTuning(tuningKey, tuningOverrides);
 }
 
 function optionsShallowEqual(left, right) {
@@ -307,6 +580,34 @@ function bookSelectionBonus(weight) {
   return Math.round(Math.log2(Math.max(1, weight) + 1) * 120_000);
 }
 
+function openingPriorOrderingBonus(candidate, openingContext, openingTuning = null) {
+  if (!candidate) {
+    return 0;
+  }
+
+  const priorCoverage = openingContext?.priorCoverage ?? 0;
+  const priorCandidateCount = Math.max(1, openingContext?.priorCandidateCount ?? 1);
+  const averageShare = 1 / priorCandidateCount;
+  const count = Math.max(0, Number.isFinite(candidate?.count) ? candidate.count : 0);
+  const share = Number.isFinite(candidate?.share) ? candidate.share : 0;
+  const shareBonus = (share - averageShare) * 180_000;
+  const scoreDelta = clamp((Number.isFinite(candidate?.priorScoreDelta) ? candidate.priorScoreDelta : 0) / 6000, -3, 3);
+  const scoreBonus = scoreDelta * 110_000;
+  const countBonus = Math.log2(count + 1) * 18_000;
+  let scale = Number.isFinite(openingTuning?.orderingPriorScale)
+    ? openingTuning.orderingPriorScale
+    : 1;
+
+  if (openingContext?.bookByMove instanceof Map && openingContext.bookByMove.size > 0 && !openingContext.bookByMove.has(candidate.moveIndex)) {
+    const offBookScale = Number.isFinite(openingTuning?.orderingOffBookPriorScale)
+      ? openingTuning.orderingOffBookPriorScale
+      : 1;
+    scale *= offBookScale;
+  }
+
+  return Math.round(priorCoverage * (shareBonus + scoreBonus + countBonus) * scale);
+}
+
 function countCornerMoves(moveBitboard) {
   return popcount(moveBitboard & CORNER_MOVE_MASK);
 }
@@ -343,9 +644,15 @@ function buildParityRegionInfo(emptyBitboard) {
 
 export class SearchEngine {
   constructor(engineOptions = {}) {
+    this.instanceId = nextSearchEngineInstanceId;
+    nextSearchEngineInstanceId += 1;
     this.options = resolveOptionsFromInput(engineOptions);
+    this.openingTuning = resolveOpeningTuningFromInput(engineOptions);
     this.evaluator = new Evaluator(this.options);
     this.moveOrderingEvaluator = new MoveOrderingEvaluator(this.options);
+    this.compiledMpcProfile = compileMpcProfile(this.options.mpcProfile);
+    this.refreshDerivedCaches();
+    this.mpcSuppressionDepth = 0;
     this.transpositionTable = new Map();
     this.killerMoves = [];
     this.historyHeuristic = Array.from({ length: 2 }, () => Array(64).fill(0));
@@ -359,14 +666,23 @@ export class SearchEngine {
       this.options?.presetKey ?? DEFAULT_PRESET_KEY,
       this.options?.styleKey ?? DEFAULT_STYLE_KEY,
     );
+    const nextOpeningTuning = resolveOpeningTuningFromInput(
+      engineOptions,
+      this.openingTuning?.key ?? DEFAULT_OPENING_HYBRID_TUNING_KEY,
+    );
 
     const optionsChanged = !optionsShallowEqual(this.options, nextOptions);
     const shouldResetTable = tableSemanticsChanged(this.options, nextOptions);
 
     this.options = nextOptions;
+    this.openingTuning = nextOpeningTuning;
+    this.compiledMpcProfile = compileMpcProfile(this.options.mpcProfile);
     if (optionsChanged) {
       this.evaluator = new Evaluator(this.options);
       this.moveOrderingEvaluator = new MoveOrderingEvaluator(this.options);
+    }
+    if (optionsChanged) {
+      this.refreshDerivedCaches();
     }
     if (shouldResetTable) {
       this.transpositionTable.clear();
@@ -374,9 +690,270 @@ export class SearchEngine {
     this.trimTranspositionTable();
   }
 
+  refreshDerivedCaches() {
+    const exactEndgameEmpties = Math.max(0, Math.round(Number(this.options?.exactEndgameEmpties ?? 10)));
+    this.lateOrderingProfilesByEmptyCount = buildLateOrderingProfileTable(exactEndgameEmpties);
+    this.useLightweightOrderingEvaluatorByEmptyCount = buildLightweightOrderingEligibilityTable(exactEndgameEmpties);
+    this.orderingScoreTableByEmptyCount = buildOrderingScoreTable(
+      this.lateOrderingProfilesByEmptyCount,
+      this.options,
+    );
+  }
+
   resetStats() {
     this.stats = createEmptySearchStats();
     this.rootProgressSnapshot = null;
+  }
+
+  shouldReusePreparedChildTableEntryForOrdering() {
+    return this.options.etcReusePreparedChildTableEntryForOrdering !== false;
+  }
+
+  getPreparedChildTableEntryForOrdering(move) {
+    if (!this.shouldReusePreparedChildTableEntryForOrdering() || !move || typeof move !== 'object') {
+      return undefined;
+    }
+    if (move.etcPreparedChildTableEntryReady !== true) {
+      return undefined;
+    }
+    if (move.etcPreparedChildTableEntryOwnerId !== this.instanceId) {
+      return undefined;
+    }
+    if (move.etcPreparedChildTableEntryGeneration !== this.searchGeneration) {
+      return undefined;
+    }
+    if (move.etcPreparedChildTableEntryTtStores !== this.stats.ttStores) {
+      return undefined;
+    }
+    return move.etcPreparedChildTableEntry ?? null;
+  }
+
+  cachePreparedChildTableEntryForOrdering(move, childTableEntry) {
+    if (!this.shouldReusePreparedChildTableEntryForOrdering() || !move || typeof move !== 'object') {
+      return;
+    }
+    move.etcPreparedChildTableEntryReady = true;
+    move.etcPreparedChildTableEntry = childTableEntry ?? null;
+    move.etcPreparedChildTableEntryOwnerId = this.instanceId;
+    move.etcPreparedChildTableEntryGeneration = this.searchGeneration;
+    move.etcPreparedChildTableEntryTtStores = this.stats.ttStores;
+  }
+
+  createResultOptionsSnapshot() {
+    return {
+      ...this.options,
+      openingTuningKey: this.openingTuning?.key ?? DEFAULT_OPENING_HYBRID_TUNING_KEY,
+    };
+  }
+
+  runWithMpcSuppressed(callback) {
+    this.mpcSuppressionDepth = (this.mpcSuppressionDepth ?? 0) + 1;
+    try {
+      return callback();
+    } finally {
+      this.mpcSuppressionDepth = Math.max(0, (this.mpcSuppressionDepth ?? 1) - 1);
+    }
+  }
+
+  isMpcSuppressed() {
+    return (this.mpcSuppressionDepth ?? 0) > 0;
+  }
+
+  getMpcRuntimeConfig() {
+    return this.compiledMpcProfile?.runtime ?? null;
+  }
+
+  isMpcEnabled() {
+    if (this.isMpcSuppressed()) {
+      return false;
+    }
+
+    const runtime = this.getMpcRuntimeConfig();
+    const canTryHighCut = runtime?.enableHighCut !== false;
+    const canTryLowCut = runtime?.enableLowCut === true;
+    return Boolean(this.compiledMpcProfile?.usableCalibrations?.length) && (canTryHighCut || canTryLowCut);
+  }
+
+  adjustedMpcHalfWidth(calibration, depth, side = 'high') {
+    const runtime = this.getMpcRuntimeConfig();
+    const sideKey = side === 'low' ? 'lowIntervalHalfWidth' : 'highIntervalHalfWidth';
+    const sideScale = side === 'low'
+      ? Math.max(0, Number(runtime?.lowScale ?? 1))
+      : Math.max(0, Number(runtime?.highScale ?? 1));
+    const baseHalfWidth = Number(calibration?.[sideKey] ?? calibration?.intervalHalfWidth ?? NaN);
+    if (!Number.isFinite(baseHalfWidth) || baseHalfWidth < 0) {
+      return null;
+    }
+
+    const depthDistance = Math.abs((calibration?.deepDepth ?? depth) - depth);
+    const distanceScale = Math.max(1, Number(runtime?.depthDistanceScale ?? 1.25));
+    return baseHalfWidth * sideScale * (depthDistance === 0 ? 1 : Math.pow(distanceScale, depthDistance));
+  }
+
+  selectMpcCalibrations(empties, depth) {
+    if (!this.isMpcEnabled() || !Number.isInteger(empties) || empties < 0 || empties > 60) {
+      return [];
+    }
+
+    const runtime = this.getMpcRuntimeConfig();
+    if (!Number.isInteger(depth) || depth < Math.max(1, runtime?.minDepth ?? 2)) {
+      return [];
+    }
+
+    const candidates = this.compiledMpcProfile?.calibrationsByEmptyCount?.[empties];
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return [];
+    }
+
+    const maxChecksPerNode = Math.max(1, Math.round(Number(runtime?.maxChecksPerNode ?? 1)));
+    const minDepthGap = Math.max(1, Math.round(Number(runtime?.minDepthGap ?? 2)));
+    const maxDepthDistance = Math.max(0, Math.round(Number(runtime?.maxDepthDistance ?? 1)));
+    const canTryHighCut = runtime?.enableHighCut !== false;
+    const canTryLowCut = runtime?.enableLowCut === true;
+
+    return candidates
+      .filter((calibration) => {
+        if (!calibration?.usable) {
+          return false;
+        }
+        if (!Number.isFinite(calibration.intercept) || !Number.isFinite(calibration.slope) || calibration.slope <= 0) {
+          return false;
+        }
+        if (!Number.isInteger(calibration.shallowDepth) || calibration.shallowDepth >= depth) {
+          return false;
+        }
+        if ((depth - calibration.shallowDepth) < minDepthGap) {
+          return false;
+        }
+
+        const distance = Math.abs(depth - calibration.deepDepth);
+        if (distance > maxDepthDistance) {
+          return false;
+        }
+
+        if (canTryHighCut && Number.isFinite(this.adjustedMpcHalfWidth(calibration, depth, 'high'))) {
+          return true;
+        }
+        if (canTryLowCut && Number.isFinite(this.adjustedMpcHalfWidth(calibration, depth, 'low'))) {
+          return true;
+        }
+        return false;
+      })
+      .sort((left, right) => {
+        const leftDistance = Math.abs(depth - (left?.deepDepth ?? depth));
+        const rightDistance = Math.abs(depth - (right?.deepDepth ?? depth));
+        if (leftDistance !== rightDistance) {
+          return leftDistance - rightDistance;
+        }
+        if ((right.deepDepth ?? 0) !== (left.deepDepth ?? 0)) {
+          return (right.deepDepth ?? 0) - (left.deepDepth ?? 0);
+        }
+        if ((right.shallowDepth ?? 0) !== (left.shallowDepth ?? 0)) {
+          return (right.shallowDepth ?? 0) - (left.shallowDepth ?? 0);
+        }
+
+        const leftHalfWidth = Math.min(
+          canTryHighCut ? (this.adjustedMpcHalfWidth(left, depth, 'high') ?? Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY,
+          canTryLowCut ? (this.adjustedMpcHalfWidth(left, depth, 'low') ?? Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY,
+        );
+        const rightHalfWidth = Math.min(
+          canTryHighCut ? (this.adjustedMpcHalfWidth(right, depth, 'high') ?? Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY,
+          canTryLowCut ? (this.adjustedMpcHalfWidth(right, depth, 'low') ?? Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY,
+        );
+        return leftHalfWidth - rightHalfWidth;
+      })
+      .slice(0, maxChecksPerNode);
+  }
+
+  tryMpcCut(state, depth, alpha, beta, ply, exactEndgame = false) {
+    if (exactEndgame || !this.isMpcEnabled()) {
+      return null;
+    }
+    if (!(state instanceof GameState)) {
+      return null;
+    }
+    if (!Number.isFinite(alpha) || !Number.isFinite(beta) || alpha <= -INFINITY || beta >= INFINITY) {
+      return null;
+    }
+
+    const runtime = this.getMpcRuntimeConfig();
+    const maxWindow = Math.max(1, Math.round(Number(runtime?.maxWindow ?? 1)));
+    if ((beta - alpha) > maxWindow) {
+      return null;
+    }
+
+    const minPly = Math.max(0, Math.round(Number(runtime?.minPly ?? 1)));
+    if (!Number.isInteger(ply) || ply < minPly) {
+      return null;
+    }
+
+    const calibrations = this.selectMpcCalibrations(state.getEmptyCount(), depth);
+    if (!Array.isArray(calibrations) || calibrations.length === 0) {
+      return null;
+    }
+
+    const canTryHighCut = runtime?.enableHighCut !== false;
+    const canTryLowCut = runtime?.enableLowCut === true;
+
+    for (const calibration of calibrations) {
+      if (canTryHighCut) {
+        const adjustedHalfWidth = this.adjustedMpcHalfWidth(calibration, depth, 'high');
+        if (Number.isFinite(adjustedHalfWidth)) {
+          const rawThreshold = (beta - calibration.intercept + adjustedHalfWidth) / calibration.slope;
+          if (Number.isFinite(rawThreshold)) {
+            const threshold = clamp(Math.round(rawThreshold), -INFINITY + 2, INFINITY - 1);
+            this.stats.mpcProbes += 1;
+            this.stats.mpcHighProbes += 1;
+
+            const probeResult = this.runWithMpcSuppressed(() => (
+              this.negamax(state, calibration.shallowDepth, threshold - 1, threshold, ply, false)
+            ));
+
+            if (probeResult.score >= threshold) {
+              this.stats.mpcHighCutoffs += 1;
+              return {
+                score: beta,
+                flag: 'lower',
+                shallowScore: probeResult.score,
+                threshold,
+                calibration,
+                side: 'high',
+              };
+            }
+          }
+        }
+      }
+
+      if (canTryLowCut) {
+        const adjustedHalfWidth = this.adjustedMpcHalfWidth(calibration, depth, 'low');
+        if (Number.isFinite(adjustedHalfWidth)) {
+          const rawThreshold = (alpha - calibration.intercept - adjustedHalfWidth) / calibration.slope;
+          if (Number.isFinite(rawThreshold)) {
+            const threshold = clamp(Math.round(rawThreshold), -INFINITY + 1, INFINITY - 2);
+            this.stats.mpcProbes += 1;
+            this.stats.mpcLowProbes += 1;
+
+            const probeResult = this.runWithMpcSuppressed(() => (
+              this.negamax(state, calibration.shallowDepth, threshold, threshold + 1, ply, false)
+            ));
+
+            if (probeResult.score <= threshold) {
+              this.stats.mpcLowCutoffs += 1;
+              return {
+                score: alpha,
+                flag: 'upper',
+                shallowScore: probeResult.score,
+                threshold,
+                calibration,
+                side: 'low',
+              };
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   recordEtcActivity(bucket, metric) {
@@ -388,6 +965,30 @@ export class SearchEngine {
 
   isOptimizedFewEmptiesExactSolverEnabled() {
     return this.options.optimizedFewEmptiesExactSolver !== false;
+  }
+
+  getOptimizedFewEmptiesExactSolverThreshold() {
+    return Math.max(
+      SMALL_EXACT_SOLVER_EMPTIES,
+      Math.min(
+        MAX_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES,
+        Math.round(Number(
+          this.options.optimizedFewEmptiesExactSolverEmpties
+            ?? DEFAULT_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES
+        )),
+      ),
+    );
+  }
+
+  recordOptimizedFewEmptiesCall(empties) {
+    const clampedEmpties = Math.max(5, Math.min(
+      MAX_OPTIMIZED_FEW_EMPTIES_EXACT_SOLVER_EMPTIES,
+      Math.round(empties),
+    ));
+    const stageKey = `optimizedFewEmpties${clampedEmpties}Calls`;
+    if (Object.hasOwn(this.stats, stageKey)) {
+      this.stats[stageKey] += 1;
+    }
   }
 
   isSpecializedFewEmptiesExactSolverEnabled() {
@@ -574,6 +1175,9 @@ export class SearchEngine {
 
   generateFewEmptiesExactMoves(player, opponent, emptyBits) {
     const moves = [];
+    const empties = popcount(emptyBits);
+    const useFastestFirst = this.isExactFastestFirstOrderingEnabled()
+      && empties >= EXACT_FASTEST_FIRST_MIN_EMPTIES;
     let cursor = emptyBits;
 
     while (cursor !== 0n) {
@@ -588,6 +1192,9 @@ export class SearchEngine {
       const index = indexFromBit(moveBit);
       const nextPlayerBoard = player | moveBit | flips;
       const nextOpponentBoard = opponent & ~flips;
+      const opponentMoveCount = useFastestFirst
+        ? popcount(legalMovesBitboard(nextOpponentBoard, nextPlayerBoard))
+        : null;
 
       moves.push({
         index,
@@ -597,7 +1204,33 @@ export class SearchEngine {
         nextOpponentBoard,
         remainingEmptyBits: emptyBits & ~moveBit,
         orderingScore: this.scoreFewEmptiesExactMove(index),
+        opponentMoveCount,
       });
+    }
+
+    if (useFastestFirst) {
+      this.stats.optimizedFewEmptiesFastestFirstSorts += 1;
+      if (moves.some((move) => move.opponentMoveCount === 0)) {
+        this.stats.optimizedFewEmptiesFastestFirstPassCandidates += 1;
+      }
+
+      moves.sort((left, right) => {
+        const leftReplyCount = Number.isFinite(left.opponentMoveCount)
+          ? left.opponentMoveCount
+          : Number.POSITIVE_INFINITY;
+        const rightReplyCount = Number.isFinite(right.opponentMoveCount)
+          ? right.opponentMoveCount
+          : Number.POSITIVE_INFINITY;
+        if (leftReplyCount !== rightReplyCount) {
+          return leftReplyCount - rightReplyCount;
+        }
+        if (right.orderingScore !== left.orderingScore) {
+          return right.orderingScore - left.orderingScore;
+        }
+        return left.index - right.index;
+      });
+
+      return moves;
     }
 
     moves.sort((left, right) => {
@@ -961,7 +1594,8 @@ export class SearchEngine {
       return this.solveSmallExactBoardsFullWidth(player, opponent, emptyBits, consecutivePasses);
     }
 
-    if (this.isSpecializedFewEmptiesExactSolverEnabled() && popcount(emptyBits) <= SMALL_EXACT_SOLVER_EMPTIES) {
+    const empties = popcount(emptyBits);
+    if (this.isSpecializedFewEmptiesExactSolverEnabled() && empties <= SMALL_EXACT_SOLVER_EMPTIES) {
       return this.solveSpecializedFewEmptiesExactBoards(
         player,
         opponent,
@@ -974,6 +1608,9 @@ export class SearchEngine {
 
     this.checkDeadline();
     this.stats.smallSolverNodes += 1;
+    if (empties > SMALL_EXACT_SOLVER_EMPTIES) {
+      this.recordOptimizedFewEmptiesCall(empties);
+    }
 
     if (emptyBits === 0n) {
       return this.exactTerminalScoreFromBoards(player, opponent);
@@ -1036,25 +1673,250 @@ export class SearchEngine {
       return { preferredMove: null, remainingMoves: moves };
     }
 
-    const preferredIndex = moves.findIndex((move) => move.index === preferredMoveIndex);
+    const useInPlaceExtraction = this.options.ttFirstInPlaceMoveExtraction !== false;
+    let preferredIndex = -1;
+
+    if (useInPlaceExtraction) {
+      for (let index = 0; index < moves.length; index += 1) {
+        if (moves[index]?.index === preferredMoveIndex) {
+          preferredIndex = index;
+          break;
+        }
+      }
+    } else {
+      preferredIndex = moves.findIndex((move) => move.index === preferredMoveIndex);
+    }
+
     if (preferredIndex < 0) {
       return { preferredMove: null, remainingMoves: moves };
     }
 
     const preferredMove = moves[preferredIndex];
-    const remainingMoves = [
-      ...moves.slice(0, preferredIndex),
-      ...moves.slice(preferredIndex + 1),
-    ];
+    if (!useInPlaceExtraction) {
+      const remainingMoves = [
+        ...moves.slice(0, preferredIndex),
+        ...moves.slice(preferredIndex + 1),
+      ];
+      return { preferredMove, remainingMoves };
+    }
 
-    return { preferredMove, remainingMoves };
+    for (let index = preferredIndex + 1; index < moves.length; index += 1) {
+      moves[index - 1] = moves[index];
+    }
+    moves.pop();
+
+    return { preferredMove, remainingMoves: moves };
   }
 
-  shouldUseOpeningBookDirect(state, bookHit) {
-    if (!bookHit || bookHit.candidateCount === 0) {
-      return false;
+  createRootOpeningContext(bookHit, priorHit) {
+    const bookTotalWeight = bookHit?.totalWeight ?? 0;
+    const bookByMove = new Map((bookHit?.candidates ?? []).map((candidate) => [
+      candidate.moveIndex,
+      {
+        ...candidate,
+        share: bookTotalWeight > 0 ? candidate.weight / bookTotalWeight : 0,
+      },
+    ]));
+
+    const priorMoves = Array.isArray(priorHit?.moves) ? priorHit.moves : [];
+    const priorTotalCount = Math.max(
+      0,
+      Number.isFinite(priorHit?.totalCount)
+        ? priorHit.totalCount
+        : priorMoves.reduce((sum, move) => sum + (Number.isFinite(move?.count) ? move.count : 0), 0),
+    );
+    const finitePriorMoves = priorMoves.filter((move) => Number.isFinite(move?.priorScore));
+    const priorScoreWeightedSum = finitePriorMoves.reduce(
+      (sum, move) => sum + (move.priorScore * Math.max(1, Number.isFinite(move?.count) ? move.count : 1)),
+      0,
+    );
+    const priorScoreWeight = finitePriorMoves.reduce(
+      (sum, move) => sum + Math.max(1, Number.isFinite(move?.count) ? move.count : 1),
+      0,
+    );
+    const priorMeanScore = priorScoreWeight > 0 ? priorScoreWeightedSum / priorScoreWeight : 0;
+    const priorByMove = new Map(priorMoves.map((move) => [
+      move.moveIndex,
+      {
+        ...move,
+        share: priorTotalCount > 0 ? (move.count ?? 0) / priorTotalCount : 0,
+        priorScoreDelta: Number.isFinite(move?.priorScore) ? move.priorScore - priorMeanScore : 0,
+      },
+    ]));
+
+    return {
+      bookHit,
+      priorHit,
+      bookByMove,
+      bookWeights: bookByMove.size > 0
+        ? new Map([...bookByMove.values()].map((candidate) => [candidate.moveIndex, candidate.weight]))
+        : null,
+      bookTotalWeight,
+      bookCoverage: openingEvidenceCoverage(bookTotalWeight),
+      priorByMove,
+      priorTotalCount,
+      priorCandidateCount: priorMoves.length,
+      priorCoverage: openingEvidenceCoverage(priorTotalCount),
+      priorMeanScore,
+      priorBestScore: priorMoves.length > 0
+        ? Math.max(...priorMoves.map((move) => (Number.isFinite(move?.priorScore) ? move.priorScore : -INFINITY)))
+        : null,
+    };
+  }
+
+  getOpeningPriorContradiction(state, selection = null, openingContext = null) {
+    const tuning = this.openingTuning ?? resolveOpeningHybridTuning();
+    const minPly = Number.isFinite(tuning?.priorContradictionVetoMinPly)
+      ? Math.max(0, Math.round(tuning.priorContradictionVetoMinPly))
+      : (OPENING_BOOK_DIRECT_USE_MAX_PLY + 1);
+    if ((state?.moveHistory.length ?? 0) < minPly) {
+      return null;
     }
-    return state.moveHistory.length <= OPENING_BOOK_DIRECT_USE_MAX_PLY;
+
+    const topCandidate = selection?.scoredCandidates?.[0] ?? null;
+    const priorBest = openingContext?.priorHit?.moves?.[0] ?? null;
+    if (!topCandidate || !priorBest) {
+      return null;
+    }
+    if (topCandidate.index === priorBest.moveIndex) {
+      return null;
+    }
+
+    const priorTotalCount = Math.max(
+      0,
+      Number.isFinite(openingContext?.priorTotalCount) ? openingContext.priorTotalCount : 0,
+    );
+    const minCount = Number.isFinite(tuning?.priorContradictionVetoMinCount)
+      ? Math.max(0, Math.round(tuning.priorContradictionVetoMinCount))
+      : Number.POSITIVE_INFINITY;
+    if (priorTotalCount < minCount) {
+      return null;
+    }
+
+    const selectedPriorRank = Number.isFinite(topCandidate.priorRank)
+      ? topCandidate.priorRank
+      : Number.POSITIVE_INFINITY;
+    const minRank = Number.isFinite(tuning?.priorContradictionVetoMinRank)
+      ? Math.max(2, Math.round(tuning.priorContradictionVetoMinRank))
+      : Number.POSITIVE_INFINITY;
+    if (selectedPriorRank < minRank) {
+      return null;
+    }
+
+    const selectedPriorShare = Number.isFinite(topCandidate.priorShare) ? topCandidate.priorShare : 0;
+    const bestPriorShare = Number.isFinite(priorBest.share) ? priorBest.share : 0;
+    const shareDelta = bestPriorShare - selectedPriorShare;
+    const minShareDelta = Number.isFinite(tuning?.priorContradictionVetoMinShareDelta)
+      ? Math.max(0, tuning.priorContradictionVetoMinShareDelta)
+      : 1;
+    if (shareDelta < minShareDelta) {
+      return null;
+    }
+
+    return {
+      selectedMoveIndex: topCandidate.index,
+      selectedMoveCoord: topCandidate.coord,
+      selectedPriorRank: Number.isFinite(selectedPriorRank) ? selectedPriorRank : null,
+      selectedPriorShare,
+      bestMoveIndex: priorBest.moveIndex,
+      bestMoveCoord: priorBest.coord,
+      bestPriorRank: Number.isFinite(priorBest.rank) ? priorBest.rank : 1,
+      bestPriorShare,
+      shareDelta,
+      priorTotalCount,
+    };
+  }
+
+  getOpeningBookDirectDecision(state, bookHit, selection = null, openingContext = null) {
+    if (!bookHit || bookHit.candidateCount === 0 || !selection?.scoredCandidates?.length) {
+      return { allowDirect: false, reason: 'no-candidate', contradiction: null };
+    }
+
+    const tuning = this.openingTuning ?? resolveOpeningHybridTuning();
+    const directUseMaxPly = Math.min(
+      OPENING_BOOK_DIRECT_USE_MAX_PLY,
+      Number.isFinite(tuning?.directUseMaxPly) ? tuning.directUseMaxPly : OPENING_BOOK_DIRECT_USE_MAX_PLY,
+    );
+    if (directUseMaxPly < 0 || state.moveHistory.length > directUseMaxPly) {
+      return { allowDirect: false, reason: 'ply-cap', contradiction: null };
+    }
+
+    const contradiction = this.getOpeningPriorContradiction(state, selection, openingContext);
+    if (state.moveHistory.length <= (tuning?.directAlwaysUseMaxPly ?? -1)) {
+      return contradiction
+        ? { allowDirect: false, reason: 'prior-contradiction', contradiction }
+        : { allowDirect: true, reason: 'always-use', contradiction: null };
+    }
+
+    const [topCandidate, secondCandidate] = selection.scoredCandidates;
+    if (!topCandidate) {
+      return { allowDirect: false, reason: 'no-candidate', contradiction: null };
+    }
+
+    let allowDirect = false;
+    if (!secondCandidate) {
+      allowDirect = (topCandidate.weight ?? 0) >= (tuning?.singleMoveMinWeight ?? 1)
+        || (
+          (topCandidate.priorCount ?? 0) >= (tuning?.singleMovePriorSupportMinCount ?? 0)
+          && (topCandidate.priorShare ?? 0) >= (tuning?.singleMovePriorSupportMinShare ?? 1)
+        )
+        || (
+          (topCandidate.priorCount ?? 0) >= (tuning?.singleMoveElitePriorSupportMinCount ?? Number.POSITIVE_INFINITY)
+          && (topCandidate.priorShare ?? 0) >= (tuning?.singleMoveElitePriorSupportMinShare ?? 1)
+        );
+    } else {
+      const scoreGap = Number.isFinite(selection.scoreGap)
+        ? selection.scoreGap
+        : (topCandidate.score - secondCandidate.score);
+      if (scoreGap >= (tuning?.highConfidenceScoreGap ?? 0)) {
+        allowDirect = true;
+      }
+      if (
+        !allowDirect
+        && scoreGap >= (tuning?.mediumConfidenceScoreGap ?? 0)
+        && (topCandidate.bookShare ?? 0) >= (tuning?.mediumBookShare ?? 1)
+      ) {
+        allowDirect = true;
+      }
+      if (
+        !allowDirect
+        && scoreGap >= (tuning?.priorSupportScoreGap ?? 0)
+        && (topCandidate.bookShare ?? 0) >= (tuning?.priorSupportBookShare ?? 1)
+        && (topCandidate.priorCount ?? 0) >= (tuning?.priorSupportMinCount ?? 0)
+        && (topCandidate.priorShare ?? 0) >= (tuning?.priorSupportMinShare ?? 1)
+      ) {
+        allowDirect = true;
+      }
+    }
+
+    if (!allowDirect) {
+      return { allowDirect: false, reason: 'low-confidence', contradiction: null };
+    }
+    if (contradiction) {
+      return { allowDirect: false, reason: 'prior-contradiction', contradiction };
+    }
+    return { allowDirect: true, reason: 'confidence', contradiction: null };
+  }
+
+  shouldUseOpeningBookDirect(state, bookHit, selection = null, openingContext = null) {
+    return this.getOpeningBookDirectDecision(state, bookHit, selection, openingContext).allowDirect;
+  }
+
+  describeOpeningPriorContradiction(contradiction = null) {
+    if (!contradiction) {
+      return null;
+    }
+
+    return {
+      selectedMoveCoord: contradiction.selectedMoveCoord,
+      selectedPriorRank: contradiction.selectedPriorRank,
+      selectedPriorShare: contradiction.selectedPriorShare,
+      bestMoveCoord: contradiction.bestMoveCoord,
+      bestPriorRank: contradiction.bestPriorRank,
+      bestPriorShare: contradiction.bestPriorShare,
+      shareDelta: contradiction.shareDelta,
+      priorTotalCount: contradiction.priorTotalCount,
+    };
   }
 
   describeBookHit(bookHit, selectedMoveIndex = null, usedDirectly = false) {
@@ -1070,26 +1932,75 @@ export class SearchEngine {
       topNames: bookHit.topNames.map((entry) => entry.name),
       matchedMoveCoord: matchedCandidate?.coord ?? null,
       matchedMoveWeight: matchedCandidate?.weight ?? 0,
+      matchedMoveShare: matchedCandidate && bookHit.totalWeight > 0
+        ? matchedCandidate.weight / bookHit.totalWeight
+        : 0,
       matchedNames: matchedCandidate ? matchedCandidate.topNames.map((entry) => entry.name) : [],
     };
   }
 
-  scoreMoveForBookSelection(state, move, popularityWeight) {
-    let score = bookSelectionBonus(popularityWeight);
-
-    if (CORNER_INDEX_SET.has(move.index)) {
-      score += Math.round(650_000 * (this.options.cornerScale ?? 1));
+  describeOpeningPriorHit(priorHit, selectedMoveIndex = null, usedDirectly = false) {
+    if (!priorHit) {
+      return null;
     }
 
-    score += Math.round(POSITIONAL_WEIGHTS[move.index] * 1400 * (this.options.positionalScale ?? 1));
-    score += move.flipCount * 25;
+    const matchedMove = Number.isInteger(selectedMoveIndex)
+      ? priorHit.moves.find((move) => move.moveIndex === selectedMoveIndex) ?? null
+      : null;
+
+    return {
+      usedDirectly,
+      depthPly: priorHit.ply,
+      candidateCount: priorHit.moves.length,
+      totalCount: priorHit.totalCount,
+      matchedMoveCoord: matchedMove?.coord ?? null,
+      matchedMoveCount: matchedMove?.count ?? 0,
+      matchedMoveShare: matchedMove?.share ?? 0,
+      matchedMoveRank: matchedMove?.rank ?? null,
+      matchedMovePriorScore: matchedMove?.priorScore ?? null,
+      topMoves: priorHit.moves.slice(0, 3).map((move) => move.coord),
+    };
+  }
+
+  scoreMoveForOpeningSelection(state, move, openingContext = null) {
+    const bookCandidate = openingContext?.bookByMove?.get(move.index) ?? null;
+    const priorCandidate = openingContext?.priorByMove?.get(move.index) ?? null;
+    const tuning = this.openingTuning ?? resolveOpeningHybridTuning();
+    let score = 0;
+
+    if (bookCandidate) {
+      if ((openingContext?.bookHit?.candidateCount ?? 0) <= 1) {
+        score += 34 + Math.min(24, Math.log2((bookCandidate.weight ?? 0) + 1) * 2.4);
+      } else {
+        const averageShare = 1 / Math.max(1, openingContext?.bookHit?.candidateCount ?? 1);
+        score += ((bookCandidate.share ?? 0) - averageShare) * 120;
+        score += Math.min(26, Math.log2((bookCandidate.weight ?? 0) + 1) * 2.1);
+      }
+    }
+
+    if (priorCandidate) {
+      const averageShare = 1 / Math.max(1, openingContext?.priorCandidateCount ?? 1);
+      const priorOutcomeScore = clamp((priorCandidate.priorScoreDelta ?? 0) / 6000, -3, 3) * 14;
+      score += (openingContext?.priorCoverage ?? 0) * (tuning?.selectionPriorScale ?? 1) * (
+        ((priorCandidate.share ?? 0) - averageShare) * 110 + priorOutcomeScore
+      );
+    } else if ((openingContext?.priorCoverage ?? 0) >= 0.7 && (openingContext?.priorCandidateCount ?? 0) > 0) {
+      score -= 12 * openingContext.priorCoverage * (tuning?.selectionMissingPriorPenaltyScale ?? 1);
+    }
+
+    if (CORNER_INDEX_SET.has(move.index)) {
+      score += 22 * (this.options.cornerScale ?? 1);
+    }
+
+    score += POSITIONAL_WEIGHTS[move.index] * 0.85 * (this.options.positionalScale ?? 1);
+    score += move.flipCount * 0.35;
 
     const riskPenaltyScale = this.options.riskPenaltyScale ?? 1;
     const riskType = getPositionalRisk(move.index);
     if (riskType === 'x-square') {
-      score -= Math.round(240_000 * riskPenaltyScale);
+      score -= 9 * riskPenaltyScale;
     } else if (riskType === 'c-square') {
-      score -= Math.round(135_000 * riskPenaltyScale);
+      score -= 5 * riskPenaltyScale;
     }
 
     const childState = state.applyMoveFast(move.index, move.flips ?? null);
@@ -1097,15 +2008,18 @@ export class SearchEngine {
       const childBoards = childState.getPlayerBoards();
       const opponentMovesBitboard = legalMovesBitboard(childBoards.player, childBoards.opponent);
       const opponentMoveCount = popcount(opponentMovesBitboard);
-      score -= opponentMoveCount * Math.round(1600 * (this.options.mobilityScale ?? 1));
       const opponentCornerReplies = countCornerMoves(opponentMovesBitboard);
-      score -= opponentCornerReplies * Math.round(240_000 * (this.options.cornerAdjacencyScale ?? 1));
+      score -= opponentMoveCount * 0.75 * (this.options.mobilityScale ?? 1);
+      score -= opponentCornerReplies * 10 * (this.options.cornerAdjacencyScale ?? 1);
+      if (opponentMoveCount === 0) {
+        score += 12;
+      }
     }
 
-    return score;
+    return Number(score.toFixed(2));
   }
 
-  selectOpeningBookMove(state, legalMoves, bookHit) {
+  selectOpeningBookMove(state, legalMoves, bookHit, openingContext = null) {
     const legalMoveMap = new Map(legalMoves.map((move) => [move.index, move]));
     const scoredCandidates = bookHit.candidates
       .map((candidate) => {
@@ -1114,12 +2028,18 @@ export class SearchEngine {
           return null;
         }
 
-        const score = this.scoreMoveForBookSelection(state, move, candidate.weight);
+        const priorCandidate = openingContext?.priorByMove?.get(candidate.moveIndex) ?? null;
+        const score = this.scoreMoveForOpeningSelection(state, move, openingContext);
         return {
           index: candidate.moveIndex,
           coord: candidate.coord,
           score,
           weight: candidate.weight,
+          bookShare: candidate.share ?? (bookHit.totalWeight > 0 ? candidate.weight / bookHit.totalWeight : 0),
+          priorCount: priorCandidate?.count ?? 0,
+          priorShare: priorCandidate?.share ?? 0,
+          priorRank: priorCandidate?.rank ?? null,
+          priorScore: priorCandidate?.priorScore ?? null,
           topNames: candidate.topNames.map((entry) => entry.name),
           flipCount: move.flipCount,
         };
@@ -1128,6 +2048,9 @@ export class SearchEngine {
       .sort((left, right) => {
         if (right.score !== left.score) {
           return right.score - left.score;
+        }
+        if ((right.priorScore ?? -INFINITY) !== (left.priorScore ?? -INFINITY)) {
+          return (right.priorScore ?? -INFINITY) - (left.priorScore ?? -INFINITY);
         }
         if (right.weight !== left.weight) {
           return right.weight - left.weight;
@@ -1141,35 +2064,49 @@ export class SearchEngine {
 
     return {
       scoredCandidates,
-      chosen: chooseRandomBest(scoredCandidates, this.options.randomness) ?? scoredCandidates[0],
+      chosen: chooseRandomBest(
+        scoredCandidates,
+        this.options.openingRandomness ?? this.options.randomness ?? 0,
+      ) ?? scoredCandidates[0],
+      scoreGap: scoredCandidates.length > 1
+        ? scoredCandidates[0].score - scoredCandidates[1].score
+        : Number.POSITIVE_INFINITY,
     };
   }
 
-  createOpeningBookResult(state, legalMoves, bookHit, startedAt) {
-    const selection = this.selectOpeningBookMove(state, legalMoves, bookHit);
-    if (!selection) {
+  createOpeningBookResult(state, legalMoves, bookHit, openingContext, selection, startedAt) {
+    const resolvedSelection = selection ?? this.selectOpeningBookMove(state, legalMoves, bookHit, openingContext);
+    if (!resolvedSelection) {
       return null;
     }
 
     this.stats.bookMoves += 1;
+    if (openingContext?.priorHit) {
+      this.stats.openingHybridDirectMoves += 1;
+    }
     this.stats.elapsedMs = Math.round(now() - startedAt);
 
     return {
-      bestMoveIndex: selection.chosen.index,
-      bestMoveCoord: selection.chosen.coord,
-      score: selection.chosen.score,
-      principalVariation: [selection.chosen.index],
-      analyzedMoves: selection.scoredCandidates.map((candidate) => ({
+      bestMoveIndex: resolvedSelection.chosen.index,
+      bestMoveCoord: resolvedSelection.chosen.coord,
+      score: resolvedSelection.chosen.score,
+      principalVariation: [resolvedSelection.chosen.index],
+      analyzedMoves: resolvedSelection.scoredCandidates.map((candidate) => ({
         index: candidate.index,
         coord: candidate.coord,
         score: candidate.score,
         principalVariation: [candidate.index],
         weight: candidate.weight,
+        bookShare: candidate.bookShare,
+        priorCount: candidate.priorCount,
+        priorShare: candidate.priorShare,
+        priorRank: candidate.priorRank,
+        priorScore: candidate.priorScore,
         flipCount: candidate.flipCount,
       })),
       didPass: false,
       stats: { ...this.stats },
-      options: { ...this.options },
+      options: this.createResultOptionsSnapshot(),
       source: 'opening-book',
       searchMode: 'opening-book',
       searchCompletion: 'opening-book',
@@ -1177,14 +2114,19 @@ export class SearchEngine {
       rootEmptyCount: state.getEmptyCount(),
       exactThreshold: this.options.exactEndgameEmpties,
       bookHit: {
-        ...this.describeBookHit(bookHit, selection.chosen.index, true),
-        chosenNames: selection.chosen.topNames,
+        ...this.describeBookHit(bookHit, resolvedSelection.chosen.index, true),
+        chosenNames: resolvedSelection.chosen.topNames,
+        openingScoreGap: Number.isFinite(resolvedSelection.scoreGap) ? resolvedSelection.scoreGap : null,
+        matchedMovePriorShare: resolvedSelection.chosen.priorShare ?? 0,
       },
+      ...(openingContext?.priorHit
+        ? { openingPriorHit: this.describeOpeningPriorHit(openingContext.priorHit, resolvedSelection.chosen.index, true) }
+        : {}),
     };
   }
 
-  buildRootFallback(state, legalMoves, bookWeights = null) {
-    const orderedMoves = this.orderMoves(state, legalMoves, 0, 1, null, bookWeights, 'general');
+  buildRootFallback(state, legalMoves, openingContext = null) {
+    const orderedMoves = this.orderMoves(state, legalMoves, 0, 1, null, openingContext, 'general');
     const analyzedMoves = [];
 
     for (const move of orderedMoves) {
@@ -1228,7 +2170,7 @@ export class SearchEngine {
       analyzedMoves,
       didPass: false,
       stats: { ...this.stats },
-      options: { ...this.options },
+      options: this.createResultOptionsSnapshot(),
       source: 'search',
       searchCompletion: 'heuristic-fallback',
       rootAnalyzedMoveCount: analyzedMoves.length,
@@ -1351,7 +2293,7 @@ export class SearchEngine {
           analyzedMoves: [],
           didPass: false,
           stats: { ...this.stats, elapsedMs: Math.round(now() - startedAt) },
-          options: { ...this.options },
+          options: this.createResultOptionsSnapshot(),
           source: 'search',
           searchMode: 'terminal',
           searchCompletion: 'complete',
@@ -1370,7 +2312,7 @@ export class SearchEngine {
         analyzedMoves: [],
         didPass: true,
         stats: { ...this.stats },
-        options: { ...this.options },
+        options: this.createResultOptionsSnapshot(),
         source: 'search',
         searchCompletion: 'heuristic-fallback',
         rootAnalyzedMoveCount: 0,
@@ -1396,7 +2338,7 @@ export class SearchEngine {
       return {
         ...finalResult,
         stats: { ...this.stats },
-        options: { ...this.options },
+        options: this.createResultOptionsSnapshot(),
         source: 'search',
         searchMode: rootSearchMode,
         searchCompletion: finalSearchCompletion,
@@ -1411,37 +2353,61 @@ export class SearchEngine {
     const bookHit = state.moveHistory.length <= OPENING_BOOK_ADVISORY_MAX_PLY
       ? lookupOpeningBook(state)
       : null;
+    const priorHit = lookupOpeningPrior(state);
+    const openingContext = (bookHit || priorHit)
+      ? this.createRootOpeningContext(bookHit, priorHit)
+      : null;
 
     if (bookHit) {
       this.stats.bookHits += 1;
-      if (this.shouldUseOpeningBookDirect(state, bookHit)) {
-        const bookResult = this.createOpeningBookResult(state, legalMoves, bookHit, startedAt);
-        if (bookResult) {
-          return bookResult;
-        }
+    }
+    if (priorHit) {
+      this.stats.openingPriorHits += 1;
+    }
+
+    const openingSelection = bookHit
+      ? this.selectOpeningBookMove(state, legalMoves, bookHit, openingContext)
+      : null;
+    const openingDirectDecision = bookHit && openingSelection
+      ? this.getOpeningBookDirectDecision(state, bookHit, openingSelection, openingContext)
+      : null;
+    const directUseMaxPly = Math.min(
+      OPENING_BOOK_DIRECT_USE_MAX_PLY,
+      Number.isFinite(this.openingTuning?.directUseMaxPly) ? this.openingTuning.directUseMaxPly : OPENING_BOOK_DIRECT_USE_MAX_PLY,
+    );
+    if (bookHit && openingSelection && openingDirectDecision?.allowDirect) {
+      const bookResult = this.createOpeningBookResult(state, legalMoves, bookHit, openingContext, openingSelection, startedAt);
+      if (bookResult) {
+        return bookResult;
+      }
+    } else if (bookHit && openingSelection && directUseMaxPly >= 0 && state.moveHistory.length <= directUseMaxPly) {
+      if (openingDirectDecision?.reason === 'prior-contradiction') {
+        this.stats.openingPriorContradictionVetoes += 1;
+      } else if (openingDirectDecision?.reason === 'low-confidence') {
+        this.stats.openingConfidenceSkips += 1;
       }
     }
 
-    const bookWeights = bookHit
-      ? new Map(bookHit.candidates.map((candidate) => [candidate.moveIndex, candidate.weight]))
-      : null;
-    const fallback = this.buildRootFallback(state, legalMoves, bookWeights);
+    const fallback = this.buildRootFallback(state, legalMoves, openingContext);
 
     const finalResult = rootExactEndgame
       // Exact root search does not need iterative deepening. Run the full exact solve once
       // at the configured top depth so move-ordering heuristics still see the late-game
       // depth horizon, but avoid repeating the exact tree for depths 1..maxDepth.
       ? this.runSingleDepthSearch(this.options.maxDepth, (depth, alpha, beta) => (
-        this.searchRoot(state, legalMoves, depth, alpha, beta, bookWeights, rootExactEndgame)
+        this.searchRoot(state, legalMoves, depth, alpha, beta, openingContext, rootExactEndgame)
       )) ?? fallback
       : rootWldEndgame
         ? this.runSingleDepthSearch(this.options.maxDepth, (depth) => (
-          this.searchWldRoot(state, legalMoves, depth, -WLD_RESULT_SCORE, WLD_RESULT_SCORE, bookWeights)
+          this.searchWldRoot(state, legalMoves, depth, -WLD_RESULT_SCORE, WLD_RESULT_SCORE, openingContext)
         )) ?? fallback
         : this.runIterativeDeepening((depth, alpha, beta) => (
-          this.searchRoot(state, legalMoves, depth, alpha, beta, bookWeights, rootExactEndgame)
+          this.searchRoot(state, legalMoves, depth, alpha, beta, openingContext, rootExactEndgame)
         )) ?? fallback;
-    const chosen = chooseRandomBest(finalResult.analyzedMoves, this.options.randomness) ?? finalResult.analyzedMoves[0] ?? null;
+    const chosen = chooseRandomBest(
+      finalResult.analyzedMoves,
+      this.options.searchRandomness ?? this.options.randomness ?? 0,
+    ) ?? finalResult.analyzedMoves[0] ?? null;
     const selectedMove = chosen?.index ?? finalResult.bestMoveIndex;
     const selectedCoord = chosen?.coord ?? (
       selectedMove === null || selectedMove === undefined
@@ -1465,7 +2431,7 @@ export class SearchEngine {
       score: selectedScore,
       principalVariation: selectedPrincipalVariation,
       stats: { ...this.stats },
-      options: { ...this.options },
+      options: this.createResultOptionsSnapshot(),
       source: 'search',
       searchMode: rootSearchMode,
       searchCompletion: finalSearchCompletion,
@@ -1474,11 +2440,21 @@ export class SearchEngine {
       wldOutcome: finalWldOutcome,
       rootEmptyCount,
       exactThreshold: this.options.exactEndgameEmpties,
-      ...(bookHit ? { bookHit: this.describeBookHit(bookHit, selectedMove, false) } : {}),
+      ...(bookHit
+        ? {
+          bookHit: {
+            ...this.describeBookHit(bookHit, selectedMove, false),
+            ...(openingDirectDecision?.reason === 'prior-contradiction'
+              ? { priorContradictionVeto: this.describeOpeningPriorContradiction(openingDirectDecision.contradiction) }
+              : {}),
+          },
+        }
+        : {}),
+      ...(priorHit ? { openingPriorHit: this.describeOpeningPriorHit(priorHit, selectedMove, false) } : {}),
     };
   }
 
-  searchRoot(state, rootMoves, depth, alpha, beta, bookWeights = null, rootExactEndgame = false) {
+  searchRoot(state, rootMoves, depth, alpha, beta, openingContext = null, rootExactEndgame = false) {
     const alphaStart = alpha;
     const betaStart = beta;
     const ttEntry = this.lookupTransposition(state);
@@ -1489,7 +2465,10 @@ export class SearchEngine {
     let bestPv = [];
     const analyzedMoves = [];
 
-    const { preferredMove, remainingMoves } = this.pullPreferredMove(rootMoves, ttMoveIndex);
+    const rootMoveSelectionInput = this.options.ttFirstInPlaceMoveExtraction !== false && Number.isInteger(ttMoveIndex)
+      ? [...rootMoves]
+      : rootMoves;
+    const { preferredMove, remainingMoves } = this.pullPreferredMove(rootMoveSelectionInput, ttMoveIndex);
     if (preferredMove) {
       this.stats.ttFirstSearches += 1;
       const preferredOutcome = state.applyMoveFast(preferredMove.index, preferredMove.flips ?? null);
@@ -1538,7 +2517,7 @@ export class SearchEngine {
       }
     }
 
-    const moves = this.orderMoves(state, remainingMoves, 0, depth, preferredMove ? null : ttMoveIndex, bookWeights, rootExactEndgame ? 'exact' : 'general');
+    const moves = this.orderMoves(state, remainingMoves, 0, depth, preferredMove ? null : ttMoveIndex, openingContext, rootExactEndgame ? 'exact' : 'general');
 
     for (let orderedMoveIndex = 0; orderedMoveIndex < moves.length; orderedMoveIndex += 1) {
       this.checkDeadline();
@@ -1609,7 +2588,7 @@ export class SearchEngine {
     };
   }
 
-  searchWldRoot(state, rootMoves, depth, alpha, beta, bookWeights = null) {
+  searchWldRoot(state, rootMoves, depth, alpha, beta, openingContext = null) {
     const alphaStart = alpha;
     const betaStart = beta;
     const tableDepth = state.getEmptyCount() + 1;
@@ -1622,7 +2601,10 @@ export class SearchEngine {
     let bestPv = [];
     const analyzedMoves = [];
 
-    const { preferredMove, remainingMoves } = this.pullPreferredMove(rootMoves, ttMoveIndex);
+    const rootMoveSelectionInput = this.options.ttFirstInPlaceMoveExtraction !== false && Number.isInteger(ttMoveIndex)
+      ? [...rootMoves]
+      : rootMoves;
+    const { preferredMove, remainingMoves } = this.pullPreferredMove(rootMoveSelectionInput, ttMoveIndex);
     if (preferredMove) {
       this.stats.ttFirstSearches += 1;
       const preferredOutcome = state.applyMoveFast(preferredMove.index, preferredMove.flips ?? null);
@@ -1671,7 +2653,7 @@ export class SearchEngine {
       }
     }
 
-    const moves = this.orderMoves(state, remainingMoves, 0, orderingDepth, preferredMove ? null : ttMoveIndex, bookWeights, 'wld');
+    const moves = this.orderMoves(state, remainingMoves, 0, orderingDepth, preferredMove ? null : ttMoveIndex, openingContext, 'wld');
 
     for (let orderedMoveIndex = 0; orderedMoveIndex < moves.length; orderedMoveIndex += 1) {
       this.checkDeadline();
@@ -1982,7 +2964,7 @@ export class SearchEngine {
       }
     }
 
-    if (exactEndgame && empties <= SMALL_EXACT_SOLVER_EMPTIES) {
+    if (exactEndgame && empties <= this.getOptimizedFewEmptiesExactSolverThreshold()) {
       const score = this.solveSmallExact(state, alpha, beta);
       const flag = this.computeTableFlag(score, alphaStart, betaStart);
       this.storeTransposition(state, {
@@ -2033,6 +3015,20 @@ export class SearchEngine {
     if (depth <= 0 && !exactEndgame) {
       return {
         score: this.evaluator.evaluate(state),
+        principalVariation: [],
+      };
+    }
+
+    const mpcCut = this.tryMpcCut(state, depth, alpha, beta, ply, exactEndgame);
+    if (mpcCut) {
+      this.storeTransposition(state, {
+        depth: tableDepth,
+        value: mpcCut.score,
+        flag: mpcCut.flag ?? this.computeTableFlag(mpcCut.score, alphaStart, betaStart),
+        bestMoveIndex: null,
+      });
+      return {
+        score: mpcCut.score,
         principalVariation: [],
       };
     }
@@ -2298,7 +3294,10 @@ export class SearchEngine {
     const requiredDepth = this.requiredChildTranspositionDepth(parentEmptyCount, depthRemaining, exactEndgame);
     const alphaStart = alpha;
     const betaStart = beta;
-    const preparedMoves = legalMoves.map((move) => ({ ...move }));
+    const reusePreparedMoves = this.options.etcInPlaceMovePreparation !== false;
+    const preparedMoves = reusePreparedMoves
+      ? legalMoves
+      : legalMoves.map((move) => ({ ...move }));
     let parentLowerBound = null;
     let parentUpperBound = null;
     let lowerBoundMoveIndex = null;
@@ -2315,9 +3314,17 @@ export class SearchEngine {
       }
 
       move.orderingOutcome = outcome;
-      const childTableEntry = move.childTableEntry ?? this.lookupTransposition(outcome);
+      const preparedChildTableEntry = this.getPreparedChildTableEntryForOrdering(move);
+      const childTableEntry = preparedChildTableEntry !== undefined
+        ? preparedChildTableEntry
+        : this.lookupTransposition(outcome);
+      if (preparedChildTableEntry === undefined) {
+        this.cachePreparedChildTableEntryForOrdering(move, childTableEntry);
+      }
       if (childTableEntry) {
-        move.childTableEntry = childTableEntry;
+        if (!reusePreparedMoves) {
+          move.childTableEntry = childTableEntry;
+        }
         this.recordEtcActivity(bucket, 'ChildTableHits');
       }
       if (!childTableEntry || childTableEntry.depth < requiredDepth) {
@@ -2431,70 +3438,18 @@ export class SearchEngine {
     if (depthRemaining <= 1) {
       return false;
     }
-
-    const activationThreshold = Math.max(
-      10,
-      Math.min(ORDERING_LIGHTWEIGHT_EVAL_MAX_EMPTIES, (this.options.exactEndgameEmpties ?? 10) + 4),
-    );
-
-    return empties >= 10 && empties <= activationThreshold;
+    return this.useLightweightOrderingEvaluatorByEmptyCount[
+      clampTrackedEmptiesForOrdering(empties)
+    ] === true;
   }
 
   selectLateOrderingProfile(empties) {
-    const exactEndgameEmpties = this.options.exactEndgameEmpties ?? 10;
-    const activationThreshold = Math.max(
-      10,
-      Math.min(ORDERING_LIGHTWEIGHT_EVAL_MAX_EMPTIES, exactEndgameEmpties + 4),
-    );
-
-    if (empties <= exactEndgameEmpties) {
-      // Once the node is already inside the exact window, generic midgame ordering
-      // signals add more noise than value. Favor the trained late-ordering score and
-      // tactical late-game constraints instead.
-      return {
-        killerPrimaryScale: 0.5,
-        killerSecondaryScale: 0.4,
-        historyScale: 0,
-        positionalScale: 0,
-        flipScale: 0,
-        riskScale: 0.25,
-        mobilityPenaltyScale: 1.2,
-        cornerReplyPenaltyScale: 1.25,
-        passBonusScale: 1,
-        parityScale: 1.25,
-        lightweightEvalScale: 4.5,
-      };
-    }
-
-    if (empties <= activationThreshold) {
-      return {
-        killerPrimaryScale: 0.85,
-        killerSecondaryScale: 0.8,
-        historyScale: 0.45,
-        positionalScale: 0.55,
-        flipScale: 0.6,
-        riskScale: 0.75,
-        mobilityPenaltyScale: 1.05,
-        cornerReplyPenaltyScale: 1.1,
-        passBonusScale: 1,
-        parityScale: 1.05,
-        lightweightEvalScale: 1.75,
-      };
-    }
-
-    return {
-      killerPrimaryScale: 1,
-      killerSecondaryScale: 1,
-      historyScale: 1,
-      positionalScale: 1,
-      flipScale: 1,
-      riskScale: 1,
-      mobilityPenaltyScale: 1,
-      cornerReplyPenaltyScale: 1,
-      passBonusScale: 1,
-      parityScale: 1,
-      lightweightEvalScale: 1,
-    };
+    // Once the node is already inside the exact window, generic midgame ordering
+    // signals add more noise than value. Favor the trained late-ordering score and
+    // tactical late-game constraints instead.
+    return this.lateOrderingProfilesByEmptyCount[
+      clampTrackedEmptiesForOrdering(empties)
+    ] ?? GENERAL_LATE_ORDERING_PROFILE;
   }
 
   scoreLightweightOrderingEvaluation(state, perspectiveColor, empties, opponentMoveCount) {
@@ -2587,62 +3542,91 @@ export class SearchEngine {
     return moves;
   }
 
-  orderMoves(state, moves, ply, depthRemaining, ttMoveIndex = null, bookWeights = null, bucket = 'general') {
+  orderMoves(state, moves, ply, depthRemaining, ttMoveIndex = null, openingContext = null, bucket = 'general') {
     const empties = state.getEmptyCount();
     const useExactFastestOrdering = this.shouldUseExactFastestFirstOrdering(bucket, empties, depthRemaining);
     const shouldPrecomputeOutcome = this.shouldPrecomputeOrderingOutcome(empties, ply) || useExactFastestOrdering;
+    const lateOrderingProfile = this.selectLateOrderingProfile(empties);
+    const orderingScoreTable = this.orderingScoreTableByEmptyCount[
+      clampTrackedEmptiesForOrdering(empties)
+    ];
+    const useLightweightOrderingEvaluator = this.shouldUseLightweightOrderingEvaluator(empties, depthRemaining);
+    const historyBucket = this.historyHeuristic[colorIndex(state.currentPlayer)];
+    const killerMoves = this.killerMoves[ply] ?? null;
     const parityRegionInfo = empties <= REGION_PARITY_EMPTIES
       ? buildParityRegionInfo(state.getEmptyBitboard())
       : null;
 
-    const ordered = moves.map((move) => {
+    for (let moveIndex = 0; moveIndex < moves.length; moveIndex += 1) {
+      const move = moves[moveIndex];
       const orderingOutcome = move.orderingOutcome ?? (
         shouldPrecomputeOutcome
           ? state.applyMoveFast(move.index, move.flips ?? null)
           : null
       );
-      const childTableEntry = move.childTableEntry ?? (orderingOutcome ? this.lookupTransposition(orderingOutcome) : null);
+      let childTableEntry = null;
+      if (orderingOutcome) {
+        const preparedChildTableEntry = this.getPreparedChildTableEntryForOrdering(move);
+        if (preparedChildTableEntry !== undefined) {
+          childTableEntry = preparedChildTableEntry;
+          this.stats.etcPreparedChildTableReuseLookups += 1;
+          if (childTableEntry) {
+            this.stats.etcPreparedChildTableReuseHits += 1;
+          }
+        } else {
+          childTableEntry = this.lookupTransposition(orderingOutcome);
+          this.cachePreparedChildTableEntryForOrdering(move, childTableEntry);
+        }
+      }
 
       let opponentMoveCount = null;
       let opponentCornerReplies = null;
       if (orderingOutcome) {
-        const childBoards = orderingOutcome.getPlayerBoards();
-        const opponentMovesBitboard = legalMovesBitboard(childBoards.player, childBoards.opponent);
+        const childPlayer = orderingOutcome.currentPlayer === 'black'
+          ? orderingOutcome.black
+          : orderingOutcome.white;
+        const childOpponent = orderingOutcome.currentPlayer === 'black'
+          ? orderingOutcome.white
+          : orderingOutcome.black;
+        const opponentMovesBitboard = legalMovesBitboard(childPlayer, childOpponent);
         opponentMoveCount = popcount(opponentMovesBitboard);
         opponentCornerReplies = countCornerMoves(opponentMovesBitboard);
       }
 
-      return {
-        ...move,
-        ...(orderingOutcome ? { orderingOutcome } : {}),
-        ...(childTableEntry ? { childTableEntry } : {}),
-        ...(Number.isFinite(opponentMoveCount) ? { opponentMoveCount } : {}),
-        ...(Number.isFinite(opponentCornerReplies) ? { opponentCornerReplies } : {}),
-        orderingScore: this.scoreMoveForOrdering(
-          state,
-          move,
-          {
-            ply,
-            depthRemaining,
-            ttMoveIndex,
-            bookWeights,
-            empties,
-            orderingOutcome,
-            childTableEntry,
-            opponentMoveCount,
-            opponentCornerReplies,
-            parityRegionInfo,
-          },
-        ),
-      };
-    });
-
-    if (useExactFastestOrdering) {
-      return this.orderExactFastestFirstMoves(ordered);
+      move.orderingOutcome = orderingOutcome;
+      move.childTableEntry = childTableEntry;
+      move.opponentMoveCount = opponentMoveCount;
+      move.opponentCornerReplies = opponentCornerReplies;
+      move.orderingScore = this.scoreMoveForOrdering(
+        state,
+        move,
+        {
+          ply,
+          depthRemaining,
+          ttMoveIndex,
+          openingContext,
+          empties,
+          lateOrderingProfile,
+          orderingScoreTable,
+          useLightweightOrderingEvaluator,
+          historyBucket,
+          killerMoves,
+          shouldInspectChild: shouldPrecomputeOutcome,
+          orderingOutcome,
+          childTableEntry,
+          opponentMoveCount,
+          opponentCornerReplies,
+          parityRegionInfo,
+        },
+      );
     }
 
-    ordered.sort((left, right) => right.orderingScore - left.orderingScore);
-    return ordered;
+    if (useExactFastestOrdering) {
+      return this.orderExactFastestFirstMoves(moves);
+    }
+
+    moves.sort((left, right) => right.orderingScore - left.orderingScore);
+    return moves;
   }
 
   scoreMoveForOrdering(state, move, context) {
@@ -2650,8 +3634,14 @@ export class SearchEngine {
       ply,
       depthRemaining,
       ttMoveIndex,
-      bookWeights = null,
+      openingContext = null,
       empties,
+      lateOrderingProfile,
+      orderingScoreTable,
+      useLightweightOrderingEvaluator,
+      historyBucket,
+      killerMoves,
+      shouldInspectChild = false,
       orderingOutcome = null,
       childTableEntry = null,
       opponentMoveCount = null,
@@ -2660,7 +3650,8 @@ export class SearchEngine {
     } = context;
 
     let score = 0;
-    const lateOrderingProfile = this.selectLateOrderingProfile(empties);
+    const killerPrimaryIndex = killerMoves?.[0] ?? null;
+    const killerSecondaryIndex = killerMoves?.[1] ?? null;
 
     if (move.index === ttMoveIndex) {
       score += 10_000_000;
@@ -2670,33 +3661,37 @@ export class SearchEngine {
       score += 5_000_000;
     }
 
-    if (bookWeights?.has(move.index)) {
-      score += bookOrderingBonus(bookWeights.get(move.index));
+    const bookWeight = openingContext?.bookWeights?.get(move.index) ?? null;
+    if (Number.isFinite(bookWeight)) {
+      score += bookOrderingBonus(bookWeight);
     }
 
-    if (this.killerMoves[ply]?.[0] === move.index) {
-      score += Math.round(1_500_000 * lateOrderingProfile.killerPrimaryScale);
-    } else if (this.killerMoves[ply]?.[1] === move.index) {
-      score += Math.round(1_000_000 * lateOrderingProfile.killerSecondaryScale);
+    const openingPriorCandidate = openingContext?.priorByMove?.get(move.index) ?? null;
+    if (openingPriorCandidate) {
+      score += openingPriorOrderingBonus(openingPriorCandidate, openingContext, this.openingTuning);
     }
 
-    score += Math.round(this.historyHeuristic[colorIndex(state.currentPlayer)][move.index] * 50 * lateOrderingProfile.historyScale);
-    score += Math.round(POSITIONAL_WEIGHTS[move.index] * 1000 * lateOrderingProfile.positionalScale);
-    score += Math.round(move.flipCount * 30 * lateOrderingProfile.flipScale);
+    if (killerPrimaryIndex === move.index) {
+      score += orderingScoreTable.killerPrimaryBonus;
+    } else if (killerSecondaryIndex === move.index) {
+      score += orderingScoreTable.killerSecondaryBonus;
+    }
 
-    const riskPenaltyScale = (this.options.riskPenaltyScale ?? 1) * lateOrderingProfile.riskScale;
+    score += Math.round((historyBucket?.[move.index] ?? 0) * orderingScoreTable.historyWeight);
+    score += Math.round(POSITIONAL_WEIGHTS[move.index] * orderingScoreTable.positionalWeight);
+    score += Math.round(move.flipCount * orderingScoreTable.flipWeight);
+
     const riskType = getPositionalRisk(move.index);
     if (riskType === 'x-square') {
-      score -= Math.round(150_000 * riskPenaltyScale);
+      score -= orderingScoreTable.xSquarePenalty;
     } else if (riskType === 'c-square') {
-      score -= Math.round(80_000 * riskPenaltyScale);
+      score -= orderingScoreTable.cSquarePenalty;
     }
 
     let outcome = orderingOutcome;
-    const shouldInspectChild = Boolean(outcome)
-      || this.shouldPrecomputeOrderingOutcome(empties, ply);
+    const shouldInspectMoveChild = Boolean(outcome) || shouldInspectChild;
 
-    if (shouldInspectChild && !outcome) {
+    if (shouldInspectMoveChild && !outcome) {
       outcome = state.applyMoveFast(move.index, move.flips ?? null);
     }
 
@@ -2718,34 +3713,24 @@ export class SearchEngine {
         }
       }
 
-      const mobilityPenaltyBase = empties <= 14 ? 1800 : 1200;
-      score -= resolvedOpponentMoveCount * Math.round(
-        mobilityPenaltyBase
-        * (this.options.mobilityScale ?? 1)
-        * lateOrderingProfile.mobilityPenaltyScale,
-      );
+      score -= resolvedOpponentMoveCount * orderingScoreTable.mobilityPenaltyPerMove;
 
       if (resolvedOpponentCornerReplies > 0) {
-        const cornerReplyPenaltyBase = empties <= 14 ? 320_000 : 220_000;
-        score -= resolvedOpponentCornerReplies * Math.round(
-          cornerReplyPenaltyBase
-          * (this.options.cornerAdjacencyScale ?? 1)
-          * lateOrderingProfile.cornerReplyPenaltyScale,
-        );
+        score -= resolvedOpponentCornerReplies * orderingScoreTable.cornerReplyPenaltyPerMove;
       }
 
       if (resolvedOpponentMoveCount === 0) {
-        score += Math.round((empties <= 12 ? 2_500_000 : 1_500_000) * lateOrderingProfile.passBonusScale);
+        score += orderingScoreTable.passBonus;
       }
 
       if (empties <= REGION_PARITY_EMPTIES) {
         score += Math.round(
           this.getRegionParityOrderingBonus(move.index, empties, parityRegionInfo)
-          * lateOrderingProfile.parityScale,
+          * orderingScoreTable.parityScale,
         );
       }
 
-      if (this.shouldUseLightweightOrderingEvaluator(empties, depthRemaining)) {
+      if (useLightweightOrderingEvaluator) {
         score += Math.round(
           this.scoreLightweightOrderingEvaluation(
             childState,
@@ -2753,7 +3738,7 @@ export class SearchEngine {
             childState.getEmptyCount(),
             resolvedOpponentMoveCount,
           )
-          * lateOrderingProfile.lightweightEvalScale,
+          * orderingScoreTable.lightweightEvalScale,
         );
       }
     }

@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-04-07T01:03:12.292Z",
+  "completedAt": null,
+  "outputDir": "tools/evaluator-training/out/stage69-finalist-followup",
+  "sourceSuiteDir": null,
+  "dryRun": false,
+  "resume": true,
+  "continueOnError": false,
+  "candidateCount": 8,
+  "successCount": 0,
+  "failureCount": 0,
+  "candidates": []
+}

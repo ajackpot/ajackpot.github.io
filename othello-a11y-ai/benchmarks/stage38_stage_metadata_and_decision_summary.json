@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-03-28T16:40:00+09:00",
+  "stage": {
+    "number": 38,
+    "tag": "stage38",
+    "file": "stage-info.json"
+  },
+  "defaultProfileNames": {
+    "evaluation": "trained-phase-linear-stage38",
+    "moveOrdering": "trained-move-ordering-stage38"
+  },
+  "decision": {
+    "evaluationProfile": "continue",
+    "moveOrderingProfile": "freeze-current-training-pipeline",
+    "reason": "current move-ordering trainer optimizes value ranking more directly than actual search-cost / cutoff efficiency, so additional long retraining is not recommended before running search-cost audit"
+  },
+  "newTools": [
+    "tools/evaluator-training/audit-move-ordering-search-cost.mjs",
+    "tools/evaluator-training/audit-move-ordering-search-cost.bat"
+  ],
+  "newTests": [
+    "js/test/stage38_stage_metadata_and_ordering_audit_smoke.mjs"
+  ]
+}

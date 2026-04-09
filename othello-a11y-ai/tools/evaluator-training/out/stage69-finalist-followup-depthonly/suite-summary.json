@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-04-07T01:04:28.997Z",
+  "completedAt": null,
+  "outputDir": "tools/evaluator-training/out/stage69-finalist-followup-depthonly",
+  "sourceSuiteDir": null,
+  "dryRun": false,
+  "resume": false,
+  "continueOnError": false,
+  "candidateCount": 8,
+  "successCount": 0,
+  "failureCount": 0,
+  "candidates": [
+    {
+      "key": "top16-control",
+      "name": "diagonal-lite-top16 control",
+      "sourceCandidateKey": null,
+      "sourceTupleProfilePath": "../../bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+      "status": "success",
+      "steps": {
+        "patch": "success",
+        "previewModule": "success",
+        "calibration": "disabled",
+        "exportModule": "success",
+        "profileBenchmark": "disabled",
+        "depthBenchmark": "success",
+        "exactBenchmark": "disabled"
+      },
+      "outputs": {
+        "key": "top16-control",
+        "name": "diagonal-lite-top16 control",
+        "sourceCandidateKey": null,
+        "sourceTupleProfilePath": "../../bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+        "tupleCount": 16,
+        "totalTableSize": 144,
+        "patchedTupleProfilePath": "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-control/trained-tuple-residual-profile.patched.json",
+        "finalTupleProfilePath": "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-control/trained-tuple-residual-profile.patched.json",
+        "previewModulePath": "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-control/learned-eval-profile.preview.generated.js",
+        "generatedModulePath": "tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-control/learned-eval-profile.generated.js",
+        "generatedModuleBytes": 13660,
+        "patch": {
+          "generatedAt": "2026-04-07T01:04:29.351Z",
+          "inputPath": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+          "outputJsonPath": "/mnt/data/stage69_work/src/othello-a11y-ai/tools/evaluator-training/out/stage69-finalist-followup-depthonly/candidates/top16-control/trained-tuple-residual-profile.patched.json",
+          "input": {
+            "name": "diagonal-lite-top16-patched",
+            "layoutName": "diagonal-adjacent-pairs-full-v1-patched",
+            "tupleCount": 16,
+            "trainedBucketCount": 4,
+            "bucketKeys": [
+              "midgame-c",
+              "late-a",
+              "late-b",
+              "endgame"
+            ]
+          },
+          "output": {
+            "name": "top16-control-patched",
+            "layoutName": "diagonal-adjacent-pairs-full-v1-patched-patched",
+            "tupleCount": 16,
+            "trainedBucketCount": 4,
+            "bucketKeys": [
+              "midgame-c",
+              "late-a",
+              "late-b",
+              "endgame"
+            ]
+          },
+          "tupleScoreMetric": "sum-abs",
+          "globalScale": 1,
+          "selectedTupleKeys": [
+            "A1-B2",
+            "B1-C2",
+            "F1-G2",
+            "A2-B3",
+            "G2-H3",
+            "G5-H6",
+            "A6-B7",
+            "G6-H7",
+            "B7-C8",
+            "F7-G8",
+            "G7-H8",
+            "C1-B2",
+            "B2-A3",
+            "H6-G7",
+            "B7-A8",
+            "G7-F8"
+          ],
+          "selectedBucketKeys": [
+            "midgame-c",
+            "late-a",
+            "late-b",
+            "endgame"
+          ],
+          "bucketScales": [],
+          "tupleScales": []
+        },
+        "calibration": {
+          "rawHoldoutSelectedMaeInStones": null,
+          "rawHoldoutSelectedMaeDeltaInStones": null,
+          "rawHoldoutSelectedRmseInStones": null,
+          "calibrationScope": null,
+          "calibrationBiasDeltas": null,
+          "verifiedHoldoutSelectedMaeInStones": null,
+          "verifiedHoldoutSelectedMaeDeltaInStones": null,
+          "verifiedHoldoutSelectedRmseInStones": null
+        },
+        "profileBenchmark": null,
+        "depthBenchmark": {
+          "cases": 36,
+          "identicalBestMoveCases": 32,
+          "nodeDeltaPercent": 0.1623302041378888,
+          "elapsedDeltaPercent": 0.6029955261622253
+        },
+        "exactBenchmark": null
+      }
+    }
+  ]
+}

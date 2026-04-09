@@ -1,0 +1,93 @@
+{
+  "name": "tuple-patch-suite-finalist-followup-search",
+  "outputDir": "tools/evaluator-training/out/stage69-finalist-followup",
+  "moduleFormat": "compact",
+  "sharedProfiles": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "mpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active"
+  },
+  "defaults": {
+    "sourceProfileKind": "auto",
+    "tupleScore": "sum-abs",
+    "globalScale": 1,
+    "calibration": {
+      "enabled": false
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "depth": {
+        "enabled": true,
+        "empties": [24, 20, 18],
+        "seedStart": 1,
+        "seedCount": 12,
+        "repetitions": 1,
+        "timeLimitMs": 2000,
+        "maxDepth": 6,
+        "exactEndgameEmpties": 10
+      },
+      "exact": {
+        "enabled": true,
+        "empties": [14, 13, 12, 11, 10],
+        "seedStart": 1,
+        "seedCount": 8,
+        "repetitions": 3,
+        "timeLimitMs": 60000,
+        "maxDepth": 12
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "top16-control",
+      "name": "diagonal-lite-top16 control",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json"
+    },
+    {
+      "key": "top16-latea095",
+      "name": "diagonal-lite-top16 late-a 0.95x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+      "bucketScales": {"late-a": 0.95}
+    },
+    {
+      "key": "top16-latea090",
+      "name": "diagonal-lite-top16 late-a 0.90x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+      "bucketScales": {"late-a": 0.90}
+    },
+    {
+      "key": "top16-midc095-latea095",
+      "name": "diagonal-lite-top16 midgame-c 0.95x + late-a 0.95x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+      "bucketScales": {"midgame-c": 0.95, "late-a": 0.95}
+    },
+    {
+      "key": "top16-midc090-latea095",
+      "name": "diagonal-lite-top16 midgame-c 0.90x + late-a 0.95x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+      "bucketScales": {"midgame-c": 0.90, "late-a": 0.95}
+    },
+    {
+      "key": "latea-control",
+      "name": "diagonal-latea-endgame-top24 control",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-latea-endgame-top24/tuple.json"
+    },
+    {
+      "key": "latea-latea095",
+      "name": "diagonal-latea-endgame-top24 late-a 0.95x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-latea-endgame-top24/tuple.json",
+      "bucketScales": {"late-a": 0.95}
+    },
+    {
+      "key": "latea-latea090",
+      "name": "diagonal-latea-endgame-top24 late-a 0.90x",
+      "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-latea-endgame-top24/tuple.json",
+      "bucketScales": {"late-a": 0.90}
+    }
+  ]
+}

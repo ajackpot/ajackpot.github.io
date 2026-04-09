@@ -52,6 +52,14 @@ export function formatDiscSummary(counts) {
   return `흑 ${counts.black}, 백 ${counts.white}`;
 }
 
+export function formatWldPreExactSetting(value, { compact = false } = {}) {
+  const numericValue = Math.max(0, Math.round(Number.isFinite(Number(value)) ? Number(value) : 0));
+  if (numericValue <= 0) {
+    return compact ? '끔' : '사용 안 함';
+  }
+  return compact ? `+${numericValue}` : `+${numericValue} 사용`;
+}
+
 export function formatLegalMovesList(legalMoves) {
   if (!legalMoves || legalMoves.length === 0) {
     return '없음';
@@ -96,6 +104,19 @@ export function formatMoveLogEntry(action, moveNumber) {
   return `${prefix}${playerName(action.color)} ${action.coord} 착수, ${flippedText}`;
 }
 
+export function formatLastActionSummary(action, moveNumber) {
+  if (!action) {
+    return '아직 착수가 없습니다.';
+  }
+
+  if (action.type === 'pass') {
+    return `가장 최근 행동은 ${playerName(action.color)} 패스입니다.`;
+  }
+
+  const movePrefix = Number.isFinite(moveNumber) ? `${moveNumber}수째 ` : '';
+  return `가장 최근 착수는 ${movePrefix}${playerName(action.color)} ${action.coord}입니다.`;
+}
+
 export function formatResolvedOptionsList(options) {
   if (!options) {
     return [];
@@ -107,8 +128,10 @@ export function formatResolvedOptionsList(options) {
     { label: '최대 탐색 깊이', value: String(options.maxDepth) },
     { label: '수 읽기 제한 시간', value: `${options.timeLimitMs}ms` },
     { label: '후반 완전 탐색 시작 빈칸 수', value: String(options.exactEndgameEmpties) },
+    { label: '사전 승무패 탐색 범위', value: formatWldPreExactSetting(options.wldPreExactEmpties) },
     { label: '흡입 창 크기', value: String(options.aspirationWindow) },
-    { label: '초근접 수 무작위성 범위', value: String(options.randomness) },
+    { label: '오프닝 수 무작위성 범위', value: String(options.openingRandomness ?? options.randomness ?? 0) },
+    { label: '중반 이후 근접 수 무작위성 범위', value: String(options.searchRandomness ?? options.randomness ?? 0) },
     { label: '전이표 최대 엔트리 수', value: String(options.maxTableEntries) },
     { label: '기동성 배율', value: String(options.mobilityScale) },
     { label: '잠재 기동성 배율', value: String(options.potentialMobilityScale) },
@@ -131,7 +154,7 @@ export function formatEngineSummaryLine(options) {
   const styleLabel = options.styleApplied === false
     ? '스타일 적용 안 함'
     : options.styleLabel ?? options.styleKey ?? '알 수 없음';
-  return `${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하`;
+  return `${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하 · 사전 WLD ${formatWldPreExactSetting(options.wldPreExactEmpties, { compact: true })}`;
 }
 
 function formatWldOutcome(outcome, score) {

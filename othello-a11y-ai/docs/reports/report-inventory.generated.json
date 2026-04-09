@@ -1,0 +1,483 @@
+{
+  "generatedAt": "2026-04-09T19:35:00+09:00",
+  "stageInfo": {
+    "stage": 87,
+    "tag": "stage87",
+    "label": "Stage 87",
+    "updatedAt": "2026-04-09T19:35:00+09:00",
+    "summary": "Root/runtime documentation now separates current AI architecture from stage history, and the missing Stage 86 runtime audit artifacts were backfilled into the repo"
+  },
+  "totalDocumentCount": 70,
+  "quickLinks": [
+    {
+      "label": "AI 구현 체크리스트",
+      "relativePath": "checklists/ai-implementation-checklist.md"
+    },
+    {
+      "label": "최신 구현 보고서 (Stage 87)",
+      "relativePath": "implementation/impl-stage-87-runtime-documentation-closeout.md"
+    },
+    {
+      "label": "생성된 리포트 인벤토리 JSON",
+      "relativePath": "report-inventory.generated.json"
+    }
+  ],
+  "categories": [
+    {
+      "key": "checklists",
+      "label": "체크리스트",
+      "description": "현재 구현 상태를 빠르게 확인하는 운영 문서",
+      "count": 1,
+      "latestStage": null,
+      "entries": [
+        {
+          "fileName": "ai-implementation-checklist.md",
+          "title": "AI 구현 체크리스트",
+          "relativePath": "checklists/ai-implementation-checklist.md",
+          "stageNumber": null
+        }
+      ]
+    },
+    {
+      "key": "implementation",
+      "label": "구현",
+      "description": "실제 코드 변경이 반영된 구현 보고서",
+      "count": 46,
+      "latestStage": 87,
+      "entries": [
+        {
+          "fileName": "impl-stage-87-runtime-documentation-closeout.md",
+          "title": "구현 보고서 Stage 87 — 런타임 문서 정리 마감",
+          "relativePath": "implementation/impl-stage-87-runtime-documentation-closeout.md",
+          "stageNumber": 87
+        },
+        {
+          "fileName": "impl-stage-86-runtime-stability-hotpath-audit.md",
+          "title": "구현 보고서 Stage 86 — 런타임 stability hotpath audit / refactor",
+          "relativePath": "implementation/impl-stage-86-runtime-stability-hotpath-audit.md",
+          "stageNumber": 86
+        },
+        {
+          "fileName": "impl-stage-85-report-hub-and-ai-checklist-closeout.md",
+          "title": "구현 보고서 Stage 85 — 리포트 허브/AI 체크리스트 마감 리팩토링",
+          "relativePath": "implementation/impl-stage-85-report-hub-and-ai-checklist-closeout.md",
+          "stageNumber": 85
+        },
+        {
+          "fileName": "impl-stage-84-exact-micro-solver-threshold-extension.md",
+          "title": "Stage 84 Implementation - Exact micro-solver threshold extension",
+          "relativePath": "implementation/impl-stage-84-exact-micro-solver-threshold-extension.md",
+          "stageNumber": 84
+        },
+        {
+          "fileName": "impl-stage-80-etc-inplace-preparation-cleanup.md",
+          "title": "Stage 80 — ETC in-place prepared-move cleanup",
+          "relativePath": "implementation/impl-stage-80-etc-inplace-preparation-cleanup.md",
+          "stageNumber": 80
+        },
+        {
+          "fileName": "impl-stage-63-multi-candidate-training-suite.md",
+          "title": "Stage 63 training pipeline hardening",
+          "relativePath": "implementation/impl-stage-63-multi-candidate-training-suite.md",
+          "stageNumber": 63
+        },
+        {
+          "fileName": "impl-stage-60-evaluator-training-package-refresh.md",
+          "title": "Stage 60 — evaluator training package refresh",
+          "relativePath": "implementation/impl-stage-60-evaluator-training-package-refresh.md",
+          "stageNumber": 60
+        },
+        {
+          "fileName": "impl-stage-59-opening-wrapup-candidates.md",
+          "title": "구현 보고서 Stage 59 — Opening wrap-up 후보 적용/채택",
+          "relativePath": "implementation/impl-stage-59-opening-wrapup-candidates.md",
+          "stageNumber": 59
+        },
+        {
+          "fileName": "impl-stage-58-opening-hybrid-reference-suite.md",
+          "title": "구현 보고서 Stage 58 — Stronger opening hybrid reference suite benchmark",
+          "relativePath": "implementation/impl-stage-58-opening-hybrid-reference-suite.md",
+          "stageNumber": 58
+        },
+        {
+          "fileName": "impl-stage-57-opening-hybrid-tuning-benchmark.md",
+          "title": "구현 보고서 Stage 57 — Opening hybrid tuning benchmark",
+          "relativePath": "implementation/impl-stage-57-opening-hybrid-tuning-benchmark.md",
+          "stageNumber": 57
+        },
+        {
+          "fileName": "impl-stage-56-opening-prior-search-integration.md",
+          "title": "구현 보고서 Stage 56 — Opening prior search integration",
+          "relativePath": "implementation/impl-stage-56-opening-prior-search-integration.md",
+          "stageNumber": 56
+        },
+        {
+          "fileName": "impl-stage-55-opening-prior-runtime-compaction.md",
+          "title": "Stage 55 구현 보고서 — opening prior runtime compaction",
+          "relativePath": "implementation/impl-stage-55-opening-prior-runtime-compaction.md",
+          "stageNumber": 55
+        },
+        {
+          "fileName": "impl-stage-54-opening-book-named-expansion.md",
+          "title": "Stage 54 구현 보고서 — opening book named expansion",
+          "relativePath": "implementation/impl-stage-54-opening-book-named-expansion.md",
+          "stageNumber": 54
+        },
+        {
+          "fileName": "impl-stage-45-move-ordering-replay-and-next-lane-decision.md",
+          "title": "Stage 45 - Move-ordering replay/orchestrator, optional MPC module slot, and next-lane decision",
+          "relativePath": "implementation/impl-stage-45-move-ordering-replay-and-next-lane-decision.md",
+          "stageNumber": 45
+        },
+        {
+          "fileName": "impl-stage-43-top-pair-move-ordering-local-search.md",
+          "title": "Stage 43: top-pair move-ordering local search",
+          "relativePath": "implementation/impl-stage-43-top-pair-move-ordering-local-search.md",
+          "stageNumber": 43
+        },
+        {
+          "fileName": "impl-stage-42-multi-action-move-ordering-local-search.md",
+          "title": "Stage 42 - Multi-action move-ordering local-search support and candidateF follow-up",
+          "relativePath": "implementation/impl-stage-42-multi-action-move-ordering-local-search.md",
+          "stageNumber": 42
+        },
+        {
+          "fileName": "impl-stage-39-search-cost-local-search-tuner.md",
+          "title": "Stage 39 — move-ordering search-cost local-search tuner",
+          "relativePath": "implementation/impl-stage-39-search-cost-local-search-tuner.md",
+          "stageNumber": 39
+        },
+        {
+          "fileName": "impl-stage-38-stage-metadata-and-move-ordering-decision.md",
+          "title": "Stage 38 — stage metadata 정리와 move-ordering 학습 방향 결정",
+          "relativePath": "implementation/impl-stage-38-stage-metadata-and-move-ordering-decision.md",
+          "stageNumber": 38
+        },
+        {
+          "fileName": "impl-stage-37-json-profile-module-builder-and-uploaded-weight-benchmarking.md",
+          "title": "Stage 37 — JSON 기반 generated module 재구성 및 업로드 가중치 검증",
+          "relativePath": "implementation/impl-stage-37-json-profile-module-builder-and-uploaded-weight-benchmarking.md",
+          "stageNumber": 37
+        },
+        {
+          "fileName": "impl-stage-36-package-slimming-and-release-profiles.md",
+          "title": "Stage 36 구현 보고서 - 패키지 경량화 분석과 release profile 도입",
+          "relativePath": "implementation/impl-stage-36-package-slimming-and-release-profiles.md",
+          "stageNumber": 36
+        },
+        {
+          "fileName": "impl-stage-35-mpc-calibration-harness-and-next-pipeline-decision.md",
+          "title": "Stage 35 — MPC calibration harness and next-pipeline decision",
+          "relativePath": "implementation/impl-stage-35-mpc-calibration-harness-and-next-pipeline-decision.md",
+          "stageNumber": 35
+        },
+        {
+          "fileName": "impl-stage-34-cwd-independent-training-path-resolution.md",
+          "title": "Stage 34 — cwd-independent training tool path resolution",
+          "relativePath": "implementation/impl-stage-34-cwd-independent-training-path-resolution.md",
+          "stageNumber": 34
+        },
+        {
+          "fileName": "impl-stage-33-evaluation-profile-audit-and-bucket-exclusions.md",
+          "title": "Stage 33 — evaluation profile audit / parity alias canonicalization / bucket exclusion pipeline",
+          "relativePath": "implementation/impl-stage-33-evaluation-profile-audit-and-bucket-exclusions.md",
+          "stageNumber": 33
+        },
+        {
+          "fileName": "impl-stage-32-move-ordering-root-centered-pipeline-and-audit.md",
+          "title": "Stage 32 — move-ordering 파이프라인 보강: root-centered target, root-uniform weighting, audit 도구",
+          "relativePath": "implementation/impl-stage-32-move-ordering-root-centered-pipeline-and-audit.md",
+          "stageNumber": 32
+        },
+        {
+          "fileName": "impl-stage-31-uploaded-move-ordering-validation-and-trineutron-solver-cutoff-benchmarking.md",
+          "title": "Stage 31 — 업로드된 move-ordering 가중치 검증 및 trineutron solver-cutoff 실전 벤치마크",
+          "relativePath": "implementation/impl-stage-31-uploaded-move-ordering-validation-and-trineutron-solver-cutoff-benchmarking.md",
+          "stageNumber": 31
+        },
+        {
+          "fileName": "impl-stage-30-trineutron-match-benchmarking.md",
+          "title": "Stage 30 — trineutron 대국 벤치마크 도입 및 실전 비교",
+          "relativePath": "implementation/impl-stage-30-trineutron-match-benchmarking.md",
+          "stageNumber": 30
+        },
+        {
+          "fileName": "impl-stage-29-move-ordering-profile-training-and-combined-export.md",
+          "title": "Stage 29 — late move-ordering 학습 도구 및 combined export 정비",
+          "relativePath": "implementation/impl-stage-29-move-ordering-profile-training-and-combined-export.md",
+          "stageNumber": 29
+        },
+        {
+          "fileName": "impl-stage-28-uploaded-profile-validation-bias-fix-and-search-benchmarks.md",
+          "title": "Stage 28 — uploaded profile validation, side-to-move bias fix, and search benchmark tooling",
+          "relativePath": "implementation/impl-stage-28-uploaded-profile-validation-bias-fix-and-search-benchmarks.md",
+          "stageNumber": 28
+        },
+        {
+          "fileName": "impl-stage-27-training-eta-progress-and-sampling-tooling.md",
+          "title": "Stage 27 — learned evaluator training ETA / progress / sampling tooling",
+          "relativePath": "implementation/impl-stage-27-training-eta-progress-and-sampling-tooling.md",
+          "stageNumber": 27
+        },
+        {
+          "fileName": "impl-stage-26-phase-bucket-learned-evaluator-tooling.md",
+          "title": "Stage 26 구현 보고서 - phase-bucket learned evaluator 구조와 오프라인 학습 도구",
+          "relativePath": "implementation/impl-stage-26-phase-bucket-learned-evaluator-tooling.md",
+          "stageNumber": 26
+        },
+        {
+          "fileName": "impl-stage-25-runtime-option-cleanup-and-dormant-logic-removal.md",
+          "title": "구현 보고서 Stage 25 — 런타임 옵션 정리와 dormant 로직 제거",
+          "relativePath": "implementation/impl-stage-25-runtime-option-cleanup-and-dormant-logic-removal.md",
+          "stageNumber": 25
+        },
+        {
+          "fileName": "impl-stage-24-exact-fastest-first-ordering.md",
+          "title": "Stage 24 Implementation - Exact-only fastest-first ordering with cut-aware screening",
+          "relativePath": "implementation/impl-stage-24-exact-fastest-first-ordering.md",
+          "stageNumber": 24
+        },
+        {
+          "fileName": "impl-stage-23-specialized-few-empties-exact-solver.md",
+          "title": "Stage 23 Implementation - Specialized exact few-empties solver family",
+          "relativePath": "implementation/impl-stage-23-specialized-few-empties-exact-solver.md",
+          "stageNumber": 23
+        },
+        {
+          "fileName": "impl-stage-22-exact-only-few-empties-solver-and-stats-cleanup.md",
+          "title": "Stage 22 Implementation - Exact-only few-empties solver and stats cleanup",
+          "relativePath": "implementation/impl-stage-22-exact-only-few-empties-solver-and-stats-cleanup.md",
+          "stageNumber": 22
+        },
+        {
+          "fileName": "impl-stage-21-wld-only-stability-cutoff-prototype.md",
+          "title": "구현 보고서 Stage 21 — WLD 전용 Stability Cutoff 프로토타입",
+          "relativePath": "implementation/impl-stage-21-wld-only-stability-cutoff-prototype.md",
+          "stageNumber": 21
+        },
+        {
+          "fileName": "impl-stage-19-wld-range2-default-adoption-and-black-parity.md",
+          "title": "구현 보고서 Stage 19 — WLD `+2` 기본 채택 및 흑 차례 parity 구간 도달",
+          "relativePath": "implementation/impl-stage-19-wld-range2-default-adoption-and-black-parity.md",
+          "stageNumber": 19
+        },
+        {
+          "fileName": "impl-stage-18-strict-root-wld-pre-exact-mode.md",
+          "title": "구현 보고서 Stage 18 — Strict Root-Only WLD Pre-Exact 모드 도입",
+          "relativePath": "implementation/impl-stage-18-strict-root-wld-pre-exact-mode.md",
+          "stageNumber": 18
+        },
+        {
+          "fileName": "impl-stage-17-conservative-enhanced-transposition-cutoff.md",
+          "title": "구현 보고서 Stage 17 — Conservative Enhanced Transposition Cutoff 도입",
+          "relativePath": "implementation/impl-stage-17-conservative-enhanced-transposition-cutoff.md",
+          "stageNumber": 17
+        },
+        {
+          "fileName": "impl-stage-15-exact-root-single-shot-and-ui-mode-annotation.md",
+          "title": "구현 보고서 Stage 15 — exact root 단일 탐색화 및 UI 모드 표기",
+          "relativePath": "implementation/impl-stage-15-exact-root-single-shot-and-ui-mode-annotation.md",
+          "stageNumber": 15
+        },
+        {
+          "fileName": "impl-stage-14-root-exact-endgame-boundary-and-fallback-hardening.md",
+          "title": "구현 보고서 Stage 14 — root exact endgame 경계 수정 및 fallback 하드닝",
+          "relativePath": "implementation/impl-stage-14-root-exact-endgame-boundary-and-fallback-hardening.md",
+          "stageNumber": 14
+        },
+        {
+          "fileName": "impl-stage-13-evaluator-corner-access-and-audit-tuning.md",
+          "title": "구현 보고서 Stage 13 — 평가 함수 감사와 corner-access 보강",
+          "relativePath": "implementation/impl-stage-13-evaluator-corner-access-and-audit-tuning.md",
+          "stageNumber": 13
+        },
+        {
+          "fileName": "impl-stage-12-packed-hash-key-optimization.md",
+          "title": "구현 보고서 Stage 12 — Packed Hash Key 최적화",
+          "relativePath": "implementation/impl-stage-12-packed-hash-key-optimization.md",
+          "stageNumber": 12
+        },
+        {
+          "fileName": "impl-stage-06-search-overhead-reduction-and-tt-first-search.md",
+          "title": "Step 6 Implementation Report — Search Overhead Reduction and TT-First Search",
+          "relativePath": "implementation/impl-stage-06-search-overhead-reduction-and-tt-first-search.md",
+          "stageNumber": 6
+        },
+        {
+          "fileName": "impl-stage-05-exact-endgame-small-solver.md",
+          "title": "Step 5 Implementation Report — Exact Endgame Small-Solver",
+          "relativePath": "implementation/impl-stage-05-exact-endgame-small-solver.md",
+          "stageNumber": 5
+        },
+        {
+          "fileName": "impl-stage-04-pattern-edge-evaluation-upgrade.md",
+          "title": "Step 4 Implementation Report — Pattern / Edge Evaluation Upgrade",
+          "relativePath": "implementation/impl-stage-04-pattern-edge-evaluation-upgrade.md",
+          "stageNumber": 4
+        },
+        {
+          "fileName": "impl-stage-03-search-engine-comparison-and-optimization.md",
+          "title": "Step 3 report: search-engine comparison and optimization",
+          "relativePath": "implementation/impl-stage-03-search-engine-comparison-and-optimization.md",
+          "stageNumber": 3
+        }
+      ]
+    },
+    {
+      "key": "review",
+      "label": "검토",
+      "description": "실험, 검토, 채택/비채택 판단 문서",
+      "count": 22,
+      "latestStage": 25,
+      "entries": [
+        {
+          "fileName": "review-stage-25-dormant-runtime-logic-classification.md",
+          "title": "검토 보고서 Stage 25 — dormant 런타임 로직 분류와 처리 기준",
+          "relativePath": "review/review-stage-25-dormant-runtime-logic-classification.md",
+          "stageNumber": 25
+        },
+        {
+          "fileName": "review-stage-24-exact-fastest-first-and-cut-aware-audit.md",
+          "title": "Stage 24 Review - Exact fastest-first and cut-aware ordering audit",
+          "relativePath": "review/review-stage-24-exact-fastest-first-and-cut-aware-audit.md",
+          "stageNumber": 24
+        },
+        {
+          "fileName": "review-stage-23-specialized-few-empties-exact-solver.md",
+          "title": "Stage 23 Review - Specialized exact few-empties solver audit",
+          "relativePath": "review/review-stage-23-specialized-few-empties-exact-solver.md",
+          "stageNumber": 23
+        },
+        {
+          "fileName": "review-stage-22-few-empties-exact-vs-wld-buckets.md",
+          "title": "Stage 22 Review - Few-empties exact solver audit and next candidates",
+          "relativePath": "review/review-stage-22-few-empties-exact-vs-wld-buckets.md",
+          "stageNumber": 22
+        },
+        {
+          "fileName": "review-stage-21-wld-only-stability-cutoff-spotcheck.md",
+          "title": "검토 보고서 Stage 21 — WLD 전용 Stability Cutoff spot-check",
+          "relativePath": "review/review-stage-21-wld-only-stability-cutoff-spotcheck.md",
+          "stageNumber": 21
+        },
+        {
+          "fileName": "review-stage-19-wld-range2-black-parity-benchmark.md",
+          "title": "검토 보고서 Stage 19 — WLD `+2` black parity 벤치마크 및 채택 판단",
+          "relativePath": "review/review-stage-19-wld-range2-black-parity-benchmark.md",
+          "stageNumber": 19
+        },
+        {
+          "fileName": "review-stage-18-wld-pre-exact-root-benchmark.md",
+          "title": "검토 보고서 Stage 18 — WLD Pre-Exact Root 벤치마크 및 채택 판단",
+          "relativePath": "review/review-stage-18-wld-pre-exact-root-benchmark.md",
+          "stageNumber": 18
+        },
+        {
+          "fileName": "review-stage-17-enhanced-transposition-cutoff-benchmark.md",
+          "title": "검토 보고서 Stage 17 — Enhanced Transposition Cutoff 벤치마크 및 채택 판단",
+          "relativePath": "review/review-stage-17-enhanced-transposition-cutoff-benchmark.md",
+          "stageNumber": 17
+        },
+        {
+          "fileName": "review-stage-16-stability-cutoff-prototype-screening.md",
+          "title": "검토 보고서 Stage 16 — Stability Cutoff 프로토타입 스크리닝",
+          "relativePath": "review/review-stage-16-stability-cutoff-prototype-screening.md",
+          "stageNumber": 16
+        },
+        {
+          "fileName": "review-stage-15-exact-root-ux-and-overhead-audit.md",
+          "title": "검토 보고서 Stage 15 — exact root UX 및 중복 비용 감사",
+          "relativePath": "review/review-stage-15-exact-root-ux-and-overhead-audit.md",
+          "stageNumber": 15
+        },
+        {
+          "fileName": "review-stage-14-late-game-boundary-bug-audit.md",
+          "title": "검토 보고서 Stage 14 — late-game boundary bug 감사",
+          "relativePath": "review/review-stage-14-late-game-boundary-bug-audit.md",
+          "stageNumber": 14
+        },
+        {
+          "fileName": "review-stage-13-traditional-evaluator-audit.md",
+          "title": "검토 보고서 Stage 13 — 전통 evaluator 종합 감사",
+          "relativePath": "review/review-stage-13-traditional-evaluator-audit.md",
+          "stageNumber": 13
+        },
+        {
+          "fileName": "review-stage-12-external-engine-technique-survey-and-adoption-candidates.md",
+          "title": "검토 보고서 Stage 12 — 외부 Othello 엔진/학습 사례 조사와 도입 후보",
+          "relativePath": "review/review-stage-12-external-engine-technique-survey-and-adoption-candidates.md",
+          "stageNumber": 12
+        },
+        {
+          "fileName": "review-stage-11-15-16-bucket-17-18-pre-exact-profile-experiment.md",
+          "title": "구현 검토 보고서 Stage 11 — `15~16` bucket / `17~18` pre-exact profile 실험 결과",
+          "relativePath": "review/review-stage-11-15-16-bucket-17-18-pre-exact-profile-experiment.md",
+          "stageNumber": 11
+        },
+        {
+          "fileName": "review-stage-10-exact-window-ordering-profile-retuning.md",
+          "title": "구현 검토 보고서 Stage 10 — exact window ordering profile 재튜닝",
+          "relativePath": "review/review-stage-10-exact-window-ordering-profile-retuning.md",
+          "stageNumber": 10
+        },
+        {
+          "fileName": "review-stage-09-exact-window-late-ordering-profile-redesign.md",
+          "title": "구현 검토 보고서 Stage 9 — exact window 전용 late ordering profile 재설계",
+          "relativePath": "review/review-stage-09-exact-window-late-ordering-profile-redesign.md",
+          "stageNumber": 9
+        },
+        {
+          "fileName": "review-stage-08-exact-teacher-late-ordering-tuning.md",
+          "title": "구현 검토 보고서 Stage 8 — exact teacher 기반 late ordering 튜닝",
+          "relativePath": "review/review-stage-08-exact-teacher-late-ordering-tuning.md",
+          "stageNumber": 8
+        },
+        {
+          "fileName": "review-stage-07-lightweight-move-ordering-evaluator-experiment.md",
+          "title": "구현 검토 보고서 Stage 7 — 경량 move ordering 평가기 실험",
+          "relativePath": "review/review-stage-07-lightweight-move-ordering-evaluator-experiment.md",
+          "stageNumber": 7
+        },
+        {
+          "fileName": "review-stage-06-zero-sum-evaluation-and-audit.md",
+          "title": "구현 검토 보고서 Stage 6",
+          "relativePath": "review/review-stage-06-zero-sum-evaluation-and-audit.md",
+          "stageNumber": 6
+        },
+        {
+          "fileName": "review-stage-05-conservative-selective-search-lmr.md",
+          "title": "Review Stage 5 Implementation Report — Conservative Selective Search (LMR)",
+          "relativePath": "review/review-stage-05-conservative-selective-search-lmr.md",
+          "stageNumber": 5
+        },
+        {
+          "fileName": "review-stage-04-engine-audit.md",
+          "title": "Engine Audit Review - Stage 4",
+          "relativePath": "review/review-stage-04-engine-audit.md",
+          "stageNumber": 4
+        },
+        {
+          "fileName": "review-stage-03-engine-audit.md",
+          "title": "Engine Audit Review - Stage 3",
+          "relativePath": "review/review-stage-03-engine-audit.md",
+          "stageNumber": 3
+        }
+      ]
+    },
+    {
+      "key": "features",
+      "label": "기능",
+      "description": "특정 기능 단위의 보충 설계/통합 문서",
+      "count": 1,
+      "latestStage": null,
+      "entries": [
+        {
+          "fileName": "feature-opening-book-integration.md",
+          "title": "오프닝북 통합 보고서",
+          "relativePath": "features/feature-opening-book-integration.md",
+          "stageNumber": null
+        }
+      ]
+    }
+  ]
+}

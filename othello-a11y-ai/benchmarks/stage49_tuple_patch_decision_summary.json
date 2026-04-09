@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-04-03T03:45:00+09:00",
+  "uploadedProfiles": {
+    "rawProfileName": "trained-tuple-residual-stage38",
+    "calibratedProfileName": "trained-tuple-residual-stage38-calibrated",
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+    "tupleCount": 56,
+    "holdoutSelectedMaeInStones": {
+      "phaseLinearBase": 6.772339152164027,
+      "rawTuple": 6.6738665962087,
+      "calibratedTuple": 6.66958178752899,
+      "calibratedVsBaseDelta": -0.10275736463503726,
+      "calibratedVsRawDelta": -0.004284808679710039
+    },
+    "selectedAllMaeInStones": {
+      "phaseLinearBase": 6.766749057925926,
+      "calibratedTuple": 6.663841290074075,
+      "calibratedVsBaseDelta": -0.10290776785185152
+    },
+    "allSamplesMaeInStones": {
+      "phaseLinearBase": 6.21716347628006,
+      "calibratedTuple": 6.1627129948070145,
+      "calibratedVsBaseDelta": -0.05445048147304554
+    },
+    "holdoutSelectedMeanResidualInStones": {
+      "rawTuple": -0.3054884956508129,
+      "calibratedTuple": -1.2516534416025906e-07
+    }
+  },
+  "searchBenchmarks": {
+    "fullCalibratedVsNoTuple": {
+      "depth": {
+        "cases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 91969,
+        "candidateNodes": 93683,
+        "baselineElapsedMs": 11114,
+        "candidateElapsedMs": 12386,
+        "baselineTtHits": 9497,
+        "candidateTtHits": 9545,
+        "nodeDeltaPercent": 1.8636714545118462,
+        "elapsedDeltaPercent": 11.445024293683643,
+        "ttHitDeltaPercent": 0.5054227650837106
+      },
+      "exact": {
+        "cases": 24,
+        "exactCases": 24,
+        "identicalScoreCases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 169139,
+        "candidateNodes": 169139,
+        "baselineElapsedMs": 11573,
+        "candidateElapsedMs": 11226,
+        "baselineTtHits": 16514,
+        "candidateTtHits": 16514,
+        "nodeRatio": 1,
+        "elapsedRatio": 0.9700164175235462,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -2.9983582476453816
+      }
+    },
+    "top24PatchVsNoTuple": {
+      "depth": {
+        "cases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 91969,
+        "candidateNodes": 91902,
+        "baselineElapsedMs": 12041,
+        "candidateElapsedMs": 12539,
+        "baselineTtHits": 9497,
+        "candidateTtHits": 9526,
+        "nodeDeltaPercent": -0.07285063445291348,
+        "elapsedDeltaPercent": 4.135869113860975,
+        "ttHitDeltaPercent": 0.3053595872380752
+      },
+      "exact": {
+        "cases": 24,
+        "exactCases": 24,
+        "identicalScoreCases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 169139,
+        "candidateNodes": 169139,
+        "baselineElapsedMs": 12793,
+        "candidateElapsedMs": 12366,
+        "baselineTtHits": 16514,
+        "candidateTtHits": 16514,
+        "nodeRatio": 1,
+        "elapsedRatio": 0.966622371609474,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -3.337762839052607
+      }
+    },
+    "lateBEndgamePatchVsNoTuple": {
+      "depth": {
+        "cases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 91969,
+        "candidateNodes": 91581,
+        "baselineElapsedMs": 11896,
+        "candidateElapsedMs": 11900,
+        "baselineTtHits": 9497,
+        "candidateTtHits": 9522,
+        "nodeDeltaPercent": -0.4218812860855288,
+        "elapsedDeltaPercent": 0.03362474781439139,
+        "ttHitDeltaPercent": 0.2632410234810993
+      },
+      "exact": {
+        "cases": 24,
+        "exactCases": 24,
+        "identicalScoreCases": 24,
+        "identicalBestMoveCases": 24,
+        "baselineNodes": 169139,
+        "candidateNodes": 169139,
+        "baselineElapsedMs": 13375,
+        "candidateElapsedMs": 12850,
+        "baselineTtHits": 16514,
+        "candidateTtHits": 16514,
+        "nodeRatio": 1,
+        "elapsedRatio": 0.9607476635514018,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -3.925233644859813
+      }
+    }
+  },
+  "decision": {
+    "recommendation": "do-not-retrain-full-56tuple-yet",
+    "why": [
+      "calibrated evaluator quality clearly improved versus phase-linear base",
+      "but full 56-tuple profile still increased depth-search time in the local benchmark",
+      "runtime cost will not be fixed by retraining the same layout again",
+      "next action should be patch/prune screening, then optional warm-start retraining on the reduced layout only"
+    ],
+    "immediatePatchCandidate": "late-b,endgame-only for safe neutral-cost adoption OR top24 patch for wider coverage with smaller overhead",
+    "retrainCandidate": "warm-start from tuple_patch_top24.json using the patch file as both seed-profile and layout-json"
+  }
+}

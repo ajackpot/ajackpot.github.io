@@ -1,0 +1,3 @@
+{"layout": "orthogonal-adjacent-pairs-full-v1", "coreSmokePassed": true, "packageSmokePassed": true, "coreSmokeTail": "core-smoke: all assertions passed\n", "packageSmokeTail": "stage36 package profile smoke passed\n"}
+{"layout": "diagonal-adjacent-pairs-full-v1", "coreSmokePassed": true, "packageSmokePassed": true, "coreSmokeTail": "core-smoke: all assertions passed\n", "packageSmokeTail": "stage36 package profile smoke passed\n"}
+{"layout": "straight-adjacent-pairs-full-v1", "coreSmokePassed": true, "packageSmokePassed": true, "coreSmokeTail": "core-smoke: all assertions passed\n", "packageSmokeTail": "stage36 package profile smoke passed\n"}

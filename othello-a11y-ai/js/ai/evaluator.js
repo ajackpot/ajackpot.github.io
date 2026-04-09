@@ -1,3 +1,15 @@
+/*
+ * Evaluator contains the phase-bucket evaluation pipeline used by the runtime AI.
+ *
+ * Responsibilities:
+ * - compile/generated evaluation profile application
+ * - tuple residual contribution
+ * - stability/frontier/corner/pattern feature extraction
+ * - lightweight move-ordering evaluation for late-game ordering lanes
+ *
+ * Stage 86 flattened the stability hotpath so this file remains one of the main
+ * runtime performance reference points when profiling the engine.
+ */
 import {
   bitFromIndex,
   clamp,
@@ -13,12 +25,19 @@ import {
   FILE_H,
   RANK_1,
   RANK_8,
+  indexFromBit,
   indexToCoord,
   indexToRowCol,
   lerp,
   rowColToIndex,
 } from '../core/bitboard.js';
 import { legalMovesBitboard, PLAYER_COLORS } from '../core/rules.js';
+import {
+  compileEvaluationProfile,
+  compileTupleResidualProfile,
+  moveOrderingFallbackWeightsForEmpties,
+  resolveMoveOrderingBuckets,
+} from './evaluation-profiles.js';
 
 const INDEX_BITS = Object.freeze(Array.from({ length: 64 }, (_, index) => bitFromIndex(index)));
 const POWERS_OF_THREE = Object.freeze(Array.from({ length: 10 }, (_, exponent) => 3 ** exponent));
@@ -37,53 +56,11 @@ const DEFAULT_EVALUATION_OPTIONS = Object.freeze({
   discScale: 1,
 });
 
-const ORDERING_TRAINED_WEIGHT_BUCKETS = Object.freeze([
-  Object.freeze({
-    minEmpties: 9,
-    maxEmpties: 10,
-    weights: Object.freeze({
-      mobility: 10_000,
-      corners: 0,
-      cornerAdjacency: -5_000,
-      edgePattern: 0,
-      cornerPattern: 0,
-      discDifferential: 0,
-      parity: 0,
-    }),
-  }),
-  Object.freeze({
-    minEmpties: 11,
-    maxEmpties: 12,
-    weights: Object.freeze({
-      mobility: 5_000,
-      corners: 0,
-      cornerAdjacency: -5_000,
-      edgePattern: -5_000,
-      cornerPattern: 0,
-      discDifferential: 0,
-      parity: 0,
-    }),
-  }),
-  Object.freeze({
-    minEmpties: 13,
-    maxEmpties: 14,
-    weights: Object.freeze({
-      mobility: 2_000,
-      corners: 0,
-      cornerAdjacency: 0,
-      edgePattern: 1_000,
-      cornerPattern: 0,
-      discDifferential: 0,
-      parity: 0,
-    }),
-  }),
-]);
-
 const CORNER_ADJACENCY_GROUPS = Object.freeze([
-  { corner: 0, adjacent: [1, 8, 9] },
-  { corner: 7, adjacent: [6, 14, 15] },
-  { corner: 56, adjacent: [48, 49, 57] },
-  { corner: 63, adjacent: [54, 55, 62] },
+  { corner: 0, adjacent: [1, 8, 9], orthogonal: [1, 8], diagonal: [9] },
+  { corner: 7, adjacent: [6, 14, 15], orthogonal: [6, 15], diagonal: [14] },
+  { corner: 56, adjacent: [48, 49, 57], orthogonal: [48, 57], diagonal: [49] },
+  { corner: 63, adjacent: [54, 55, 62], orthogonal: [55, 62], diagonal: [54] },
 ]);
 
 const EDGE_GROUPS = Object.freeze([
@@ -113,36 +90,47 @@ const EDGE_EMPTY_CORNER_EXPOSURE_PENALTY = Object.freeze([0, 4, 10, 18]);
 const EDGE_PATTERN_TABLE = buildPatternTable(8, scoreEdgePatternConfiguration);
 const CORNER_PATTERN_TABLE = buildPatternTable(9, scoreCornerPatternConfiguration);
 const STABILITY_REFINEMENT_MAX_EMPTIES = 26;
-const STABILITY_DIRECTION_SPECS = Object.freeze([
-  { key: 'W', deltaRow: 0, deltaCol: -1 },
-  { key: 'E', deltaRow: 0, deltaCol: 1 },
-  { key: 'N', deltaRow: -1, deltaCol: 0 },
-  { key: 'S', deltaRow: 1, deltaCol: 0 },
-  { key: 'NW', deltaRow: -1, deltaCol: -1 },
-  { key: 'SE', deltaRow: 1, deltaCol: 1 },
-  { key: 'NE', deltaRow: -1, deltaCol: 1 },
-  { key: 'SW', deltaRow: 1, deltaCol: -1 },
-]);
-const STABILITY_AXIS_CONFIGS = Object.freeze([
-  { lineKey: 'horizontal', directions: Object.freeze(['W', 'E']) },
-  { lineKey: 'vertical', directions: Object.freeze(['N', 'S']) },
-  { lineKey: 'diagonal', directions: Object.freeze(['NW', 'SE']) },
-  { lineKey: 'antiDiagonal', directions: Object.freeze(['NE', 'SW']) },
-]);
-const STABILITY_DIRECTION_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => Object.freeze(
-  Object.fromEntries(
-    STABILITY_DIRECTION_SPECS.map((spec) => [
-      spec.key,
-      buildDirectionMask(index, spec.deltaRow, spec.deltaCol),
-    ]),
-  ),
-)));
-const STABILITY_AXIS_LINE_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => Object.freeze({
-  horizontal: buildAxisLineMask(index, 0, 1),
-  vertical: buildAxisLineMask(index, 1, 0),
-  diagonal: buildAxisLineMask(index, 1, 1),
-  antiDiagonal: buildAxisLineMask(index, 1, -1),
-})));
+const STABILITY_WEST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, 0, -1)));
+const STABILITY_EAST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, 0, 1)));
+const STABILITY_NORTH_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, -1, 0)));
+const STABILITY_SOUTH_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, 1, 0)));
+const STABILITY_NORTH_WEST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, -1, -1)));
+const STABILITY_SOUTH_EAST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, 1, 1)));
+const STABILITY_NORTH_EAST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, -1, 1)));
+const STABILITY_SOUTH_WEST_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildDirectionMask(index, 1, -1)));
+const STABILITY_HORIZONTAL_LINE_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildAxisLineMask(index, 0, 1)));
+const STABILITY_VERTICAL_LINE_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildAxisLineMask(index, 1, 0)));
+const STABILITY_DIAGONAL_LINE_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildAxisLineMask(index, 1, 1)));
+const STABILITY_ANTI_DIAGONAL_LINE_MASKS = Object.freeze(Array.from({ length: 64 }, (_, index) => buildAxisLineMask(index, 1, -1)));
+const POSITIONAL_RISK_BY_INDEX = Object.freeze(Array.from({ length: 64 }, (_, index) => {
+  if (CORNER_INDICES.includes(index)) {
+    return 'corner';
+  }
+  if (X_SQUARE_INDICES.includes(index)) {
+    return 'x-square';
+  }
+  if (C_SQUARE_INDICES.includes(index)) {
+    return 'c-square';
+  }
+  return 'normal';
+}));
+const MOVE_ORDERING_FALLBACK_WEIGHTS_BY_EMPTY_COUNT = Object.freeze(
+  Array.from({ length: 65 }, (_, empties) => moveOrderingFallbackWeightsForEmpties(empties)),
+);
+
+function clampTrackedMoveOrderingEmpties(empties) {
+  return clamp(Number.isFinite(empties) ? Math.round(empties) : 0, 0, 64);
+}
+
+function compileMoveOrderingBucketsByEmptyCount(trainedWeightBuckets) {
+  const bucketsByEmptyCount = Array(65).fill(null);
+  for (let empties = 0; empties < bucketsByEmptyCount.length; empties += 1) {
+    bucketsByEmptyCount[empties] = trainedWeightBuckets.find((bucket) => (
+      empties >= bucket.minEmpties && empties <= bucket.maxEmpties
+    )) ?? null;
+  }
+  return bucketsByEmptyCount;
+}
 
 function isOnBoard(row, col) {
   return row >= 0 && row < 8 && col >= 0 && col < 8;
@@ -457,9 +445,13 @@ function cornerScore(player, opponent) {
   return normalizeDifference(myCorners, oppCorners);
 }
 
-function cornerAdjacencyScore(player, opponent) {
-  let myPenalty = 0;
-  let oppPenalty = 0;
+function cornerAdjacencyBreakdown(player, opponent) {
+  let myTotalPenalty = 0;
+  let oppTotalPenalty = 0;
+  let myOrthogonalPenalty = 0;
+  let oppOrthogonalPenalty = 0;
+  let myDiagonalPenalty = 0;
+  let oppDiagonalPenalty = 0;
 
   for (const group of CORNER_ADJACENCY_GROUPS) {
     const cornerBit = INDEX_BITS[group.corner];
@@ -467,11 +459,38 @@ function cornerAdjacencyScore(player, opponent) {
       continue;
     }
 
-    myPenalty += countBitsInIndices(player, group.adjacent);
-    oppPenalty += countBitsInIndices(opponent, group.adjacent);
+    const myAdjacent = countBitsInIndices(player, group.adjacent);
+    const oppAdjacent = countBitsInIndices(opponent, group.adjacent);
+    const myOrthogonal = countBitsInIndices(player, group.orthogonal);
+    const oppOrthogonal = countBitsInIndices(opponent, group.orthogonal);
+    const myDiagonal = countBitsInIndices(player, group.diagonal);
+    const oppDiagonal = countBitsInIndices(opponent, group.diagonal);
+
+    myTotalPenalty += myAdjacent;
+    oppTotalPenalty += oppAdjacent;
+    myOrthogonalPenalty += myOrthogonal;
+    oppOrthogonalPenalty += oppOrthogonal;
+    myDiagonalPenalty += myDiagonal;
+    oppDiagonalPenalty += oppDiagonal;
   }
 
-  return normalizeDifference(oppPenalty, myPenalty);
+  return {
+    total: normalizeDifference(oppTotalPenalty, myTotalPenalty),
+    orthogonal: normalizeDifference(oppOrthogonalPenalty, myOrthogonalPenalty),
+    diagonal: normalizeDifference(oppDiagonalPenalty, myDiagonalPenalty),
+  };
+}
+
+function cornerAdjacencyScore(player, opponent) {
+  return cornerAdjacencyBreakdown(player, opponent).total;
+}
+
+function cornerOrthAdjacencyScore(player, opponent) {
+  return cornerAdjacencyBreakdown(player, opponent).orthogonal;
+}
+
+function cornerDiagonalAdjacencyScore(player, opponent) {
+  return cornerAdjacencyBreakdown(player, opponent).diagonal;
 }
 
 function edgePatternScore(player, opponent) {
@@ -504,7 +523,7 @@ function anchoredEdgeFromCorner(player, cornerIndex, step) {
   return stable;
 }
 
-function baseStableEdgeDiscs(player, opponent) {
+function baseStableEdgeDiscs(player, occupied) {
   let stable = 0n;
 
   if ((player & INDEX_BITS[0]) !== 0n) {
@@ -525,8 +544,7 @@ function baseStableEdgeDiscs(player, opponent) {
   }
 
   for (const edge of EDGE_GROUPS) {
-    const occupiedOnEdge = (player | opponent) & edge.mask;
-    if (occupiedOnEdge !== edge.mask) {
+    if ((occupied & edge.mask) !== edge.mask) {
       continue;
     }
 
@@ -536,30 +554,47 @@ function baseStableEdgeDiscs(player, opponent) {
   return stable;
 }
 
-function directionProtectedByStableChain(index, directionKey, player, stable) {
-  const mask = STABILITY_DIRECTION_MASKS[index][directionKey];
-  if (mask === 0n) {
-    return true;
+function isConservativelyStable(index, occupied, stable) {
+  // `stable` is always a subset of the current player's discs, so a fully-covered
+  // stable-chain mask already implies color ownership. Flatten the four axis checks
+  // to keep this hot path free of per-axis object lookups and callback allocation.
+  const horizontalLineMask = STABILITY_HORIZONTAL_LINE_MASKS[index];
+  if ((occupied & horizontalLineMask) !== horizontalLineMask) {
+    const westMask = STABILITY_WEST_MASKS[index];
+    const eastMask = STABILITY_EAST_MASKS[index];
+    if ((stable & westMask) !== westMask && (stable & eastMask) !== eastMask) {
+      return false;
+    }
   }
 
-  return (player & mask) === mask && (stable & mask) === mask;
-}
-
-function isStabilityAxisProtected(index, axisConfig, player, occupied, stable) {
-  const lineMask = STABILITY_AXIS_LINE_MASKS[index][axisConfig.lineKey];
-  if ((occupied & lineMask) === lineMask) {
-    return true;
+  const verticalLineMask = STABILITY_VERTICAL_LINE_MASKS[index];
+  if ((occupied & verticalLineMask) !== verticalLineMask) {
+    const northMask = STABILITY_NORTH_MASKS[index];
+    const southMask = STABILITY_SOUTH_MASKS[index];
+    if ((stable & northMask) !== northMask && (stable & southMask) !== southMask) {
+      return false;
+    }
   }
 
-  return axisConfig.directions.some((directionKey) => (
-    directionProtectedByStableChain(index, directionKey, player, stable)
-  ));
-}
+  const diagonalLineMask = STABILITY_DIAGONAL_LINE_MASKS[index];
+  if ((occupied & diagonalLineMask) !== diagonalLineMask) {
+    const northWestMask = STABILITY_NORTH_WEST_MASKS[index];
+    const southEastMask = STABILITY_SOUTH_EAST_MASKS[index];
+    if ((stable & northWestMask) !== northWestMask && (stable & southEastMask) !== southEastMask) {
+      return false;
+    }
+  }
 
-function isConservativelyStable(index, player, occupied, stable) {
-  return STABILITY_AXIS_CONFIGS.every((axisConfig) => (
-    isStabilityAxisProtected(index, axisConfig, player, occupied, stable)
-  ));
+  const antiDiagonalLineMask = STABILITY_ANTI_DIAGONAL_LINE_MASKS[index];
+  if ((occupied & antiDiagonalLineMask) !== antiDiagonalLineMask) {
+    const northEastMask = STABILITY_NORTH_EAST_MASKS[index];
+    const southWestMask = STABILITY_SOUTH_WEST_MASKS[index];
+    if ((stable & northEastMask) !== northEastMask && (stable & southWestMask) !== southWestMask) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function refineStableDiscs(player, occupied, stable) {
@@ -567,16 +602,16 @@ function refineStableDiscs(player, occupied, stable) {
 
   for (let pass = 0; pass < 64; pass += 1) {
     let additions = 0n;
+    // Only revisit the current player's unstable discs instead of rescanning all 64 squares.
+    let remainingCandidates = player & ~currentStable;
 
-    for (let index = 0; index < 64; index += 1) {
-      const bit = INDEX_BITS[index];
-      if ((player & bit) === 0n || (currentStable & bit) !== 0n) {
-        continue;
+    while (remainingCandidates !== 0n) {
+      const candidateBit = remainingCandidates & -remainingCandidates;
+      const candidateIndex = indexFromBit(candidateBit);
+      if (isConservativelyStable(candidateIndex, occupied, currentStable)) {
+        additions |= candidateBit;
       }
-
-      if (isConservativelyStable(index, player, occupied, currentStable)) {
-        additions |= bit;
-      }
+      remainingCandidates ^= candidateBit;
     }
 
     if (additions === 0n) {
@@ -588,19 +623,20 @@ function refineStableDiscs(player, occupied, stable) {
   return currentStable;
 }
 
-function approximateStableDiscs(player, opponent, emptyCount = popcount(FULL_BOARD & ~(player | opponent))) {
-  const stable = baseStableEdgeDiscs(player, opponent);
+function approximateStableDiscs(player, occupied, emptyCount) {
+  const stable = baseStableEdgeDiscs(player, occupied);
   if (stable === 0n || emptyCount > STABILITY_REFINEMENT_MAX_EMPTIES) {
     return stable;
   }
 
-  return refineStableDiscs(player, player | opponent, stable);
+  return refineStableDiscs(player, occupied, stable);
 }
 
 function stabilityCounts(player, opponent, emptyCount) {
+  const occupied = player | opponent;
   return {
-    player: popcount(approximateStableDiscs(player, opponent, emptyCount)),
-    opponent: popcount(approximateStableDiscs(opponent, player, emptyCount)),
+    player: popcount(approximateStableDiscs(player, occupied, emptyCount)),
+    opponent: popcount(approximateStableDiscs(opponent, occupied, emptyCount)),
   };
 }
 
@@ -724,71 +760,304 @@ function describeParityHeuristic(state, color = state.currentPlayer, { includeRe
   };
 }
 
+export function createEmptyEvaluationFeatureRecord() {
+  return {
+    mobility: 0,
+    potentialMobility: 0,
+    corners: 0,
+    cornerAccess: 0,
+    cornerMoveBalance: 0,
+    cornerAdjacency: 0,
+    cornerOrthAdjacency: 0,
+    cornerDiagonalAdjacency: 0,
+    frontier: 0,
+    positional: 0,
+    edgePattern: 0,
+    cornerPattern: 0,
+    stability: 0,
+    stableDiscDifferential: 0,
+    stableDiscs: 0,
+    opponentStableDiscs: 0,
+    discDifferential: 0,
+    discDifferentialRaw: 0,
+    parity: 0,
+    parityGlobal: 0,
+    parityRegion: 0,
+    parityRegionCount: 0,
+    parityOddRegions: 0,
+    parityEvenRegions: 0,
+    myMoveCount: 0,
+    opponentMoveCount: 0,
+    cornerMoveCount: 0,
+    opponentCornerMoveCount: 0,
+    empties: 0,
+    currentPlayer: PLAYER_COLORS.BLACK,
+    cornerMoves: undefined,
+    opponentCornerMoves: undefined,
+    legalMoves: undefined,
+  };
+}
+
+export function populateEvaluationFeatureRecord(
+  target = createEmptyEvaluationFeatureRecord(),
+  state,
+  color = state.currentPlayer,
+  { includeDiagnostics = false } = {},
+) {
+  const perspectiveBoards = color === PLAYER_COLORS.BLACK
+    ? { player: state.black, opponent: state.white }
+    : { player: state.white, opponent: state.black };
+
+  const { player, opponent } = perspectiveBoards;
+  const empty = FULL_BOARD & ~(player | opponent);
+  const empties = state.getEmptyCount();
+  const myMovesBitboard = legalMovesBitboard(player, opponent);
+  const opponentMovesBitboard = legalMovesBitboard(opponent, player);
+  const myMoveCount = popcount(myMovesBitboard);
+  const opponentMoveCount = popcount(opponentMovesBitboard);
+  const cornerMoveCount = countCornerMoves(myMovesBitboard);
+  const opponentCornerMoveCount = countCornerMoves(opponentMovesBitboard);
+  const adjacencyBreakdown = cornerAdjacencyBreakdown(player, opponent);
+  const stableCounts = stabilityCounts(player, opponent, empties);
+  const playerDiscCount = popcount(player);
+  const opponentDiscCount = popcount(opponent);
+  const parityBreakdown = describeParityHeuristic(state, color, {
+    includeRegionBreakdown: includeDiagnostics || empties <= 18,
+  });
+
+  target.mobility = actualMobilityScoreFromMoveCounts(myMoveCount, opponentMoveCount);
+  target.potentialMobility = potentialMobilityScore(player, opponent, empty);
+  target.corners = cornerScore(player, opponent);
+  target.cornerAccess = normalizeDifference(cornerMoveCount, opponentCornerMoveCount);
+  target.cornerMoveBalance = cornerMoveCount - opponentCornerMoveCount;
+  target.cornerAdjacency = adjacencyBreakdown.total;
+  target.cornerOrthAdjacency = adjacencyBreakdown.orthogonal;
+  target.cornerDiagonalAdjacency = adjacencyBreakdown.diagonal;
+  target.frontier = frontierScore(player, opponent, empty);
+  target.positional = positionalScore(player, opponent);
+  target.edgePattern = edgePatternScore(player, opponent);
+  target.cornerPattern = cornerPatternScore(player, opponent);
+  target.stability = normalizeDifference(stableCounts.player, stableCounts.opponent);
+  target.stableDiscDifferential = stableCounts.player - stableCounts.opponent;
+  target.stableDiscs = stableCounts.player;
+  target.opponentStableDiscs = stableCounts.opponent;
+  target.discDifferential = normalizeDifference(playerDiscCount, opponentDiscCount);
+  target.discDifferentialRaw = playerDiscCount - opponentDiscCount;
+  target.parity = parityBreakdown.score;
+  target.parityGlobal = parityBreakdown.global;
+  target.parityRegion = parityBreakdown.regionScore;
+  target.parityRegionCount = parityBreakdown.regionCount;
+  target.parityOddRegions = parityBreakdown.oddRegions;
+  target.parityEvenRegions = parityBreakdown.evenRegions;
+  target.myMoveCount = myMoveCount;
+  target.opponentMoveCount = opponentMoveCount;
+  target.cornerMoveCount = cornerMoveCount;
+  target.opponentCornerMoveCount = opponentCornerMoveCount;
+  target.empties = empties;
+  target.currentPlayer = color;
+
+  if (includeDiagnostics) {
+    target.cornerMoves = coordsForCornerMoves(myMovesBitboard);
+    target.opponentCornerMoves = coordsForCornerMoves(opponentMovesBitboard);
+    target.legalMoves = bitsToCoords(myMovesBitboard);
+  } else {
+    target.cornerMoves = undefined;
+    target.opponentCornerMoves = undefined;
+    target.legalMoves = undefined;
+  }
+
+  return target;
+}
+
+export function createEmptyMoveOrderingFeatureRecord() {
+  return {
+    mobility: 0,
+    corners: 0,
+    cornerAdjacency: 0,
+    edgePattern: 0,
+    cornerPattern: 0,
+    discDifferential: 0,
+    parity: 0,
+    myMoveCount: 0,
+    opponentMoveCount: 0,
+    myMoveCountRaw: 0,
+    opponentMoveCountRaw: 0,
+    opponentCornerReplies: 0,
+    passFlag: 0,
+    flipCount: 0,
+    riskXSquare: 0,
+    riskCSquare: 0,
+    empties: 0,
+    currentPlayer: PLAYER_COLORS.BLACK,
+  };
+}
+
+export function populateMoveOrderingFeatureRecord(
+  target = createEmptyMoveOrderingFeatureRecord(),
+  state,
+  color = state.currentPlayer,
+  context = {},
+) {
+  const perspectiveBoards = color === PLAYER_COLORS.BLACK
+    ? { player: state.black, opponent: state.white }
+    : { player: state.white, opponent: state.black };
+
+  const { player, opponent } = perspectiveBoards;
+  const empties = context.empties ?? state.getEmptyCount();
+  const myMoveCount = popcount(legalMovesBitboard(player, opponent));
+  const opponentMoveCount = context.opponentMoveCount ?? popcount(legalMovesBitboard(opponent, player));
+  const opponentCornerReplies = Number.isFinite(context.opponentCornerReplies)
+    ? Number(context.opponentCornerReplies)
+    : 0;
+  const flipCount = Number.isFinite(context.flipCount)
+    ? Number(context.flipCount)
+    : 0;
+  const riskType = context.riskType ?? null;
+
+  target.mobility = normalizeDifference(myMoveCount, opponentMoveCount);
+  target.corners = cornerScore(player, opponent);
+  target.cornerAdjacency = cornerAdjacencyScore(player, opponent);
+  target.edgePattern = edgePatternScore(player, opponent);
+  target.cornerPattern = cornerPatternScore(player, opponent);
+  target.discDifferential = discDifferentialScore(player, opponent);
+  target.parity = empties <= 12 ? globalParityScore(state, color) : 0;
+  target.myMoveCount = myMoveCount;
+  target.opponentMoveCount = opponentMoveCount;
+  target.myMoveCountRaw = myMoveCount;
+  target.opponentMoveCountRaw = opponentMoveCount;
+  target.opponentCornerReplies = opponentCornerReplies;
+  target.passFlag = opponentMoveCount === 0 ? 1 : 0;
+  target.flipCount = flipCount;
+  target.riskXSquare = riskType === 'x-square' ? 1 : 0;
+  target.riskCSquare = riskType === 'c-square' ? 1 : 0;
+  target.empties = empties;
+  target.currentPlayer = color;
+
+  return target;
+}
+
+function perspectiveBoardsForColor(state, color) {
+  return color === PLAYER_COLORS.BLACK
+    ? { player: state.black, opponent: state.white }
+    : { player: state.white, opponent: state.black };
+}
+
+function clampTrackedEmpties(empties) {
+  return Math.max(0, Math.min(60, empties));
+}
+
+function tupleIndexForPerspectiveBoards(player, opponent, squares) {
+  let index = 0;
+  for (const square of squares) {
+    index *= 3;
+    const bit = INDEX_BITS[square];
+    if ((player & bit) !== 0n) {
+      index += 1;
+    } else if ((opponent & bit) !== 0n) {
+      index += 2;
+    }
+  }
+  return index;
+}
+
+function scoreTupleResidualBucket(tupleBucket, tupleLayout, player, opponent, { captureDetails = false } = {}) {
+  if (!tupleBucket || !tupleLayout || tupleLayout.length === 0) {
+    return captureDetails
+      ? { totalContribution: 0, patternContribution: 0, bias: 0, entries: [] }
+      : { totalContribution: 0, patternContribution: 0, bias: 0 };
+  }
+
+  const bias = Number.isFinite(tupleBucket.bias) ? tupleBucket.bias : 0;
+  let patternContribution = 0;
+  const scale = Number.isFinite(tupleBucket.scale) ? tupleBucket.scale : 1;
+  const entries = captureDetails ? [] : null;
+
+  for (let tupleIndex = 0; tupleIndex < tupleLayout.length; tupleIndex += 1) {
+    const tuple = tupleLayout[tupleIndex];
+    const patternIndex = tupleIndexForPerspectiveBoards(player, opponent, tuple.squares);
+    const rawValue = tupleBucket.tupleWeights?.[tupleIndex]?.[patternIndex] ?? 0;
+    const value = rawValue * scale;
+    patternContribution += value;
+
+    if (captureDetails) {
+      entries.push({
+        key: tuple.key,
+        patternIndex,
+        value,
+      });
+    }
+  }
+
+  const totalContribution = patternContribution + bias;
+  return captureDetails
+    ? { totalContribution, patternContribution, bias, entries }
+    : { totalContribution, patternContribution, bias };
+}
+
 export class Evaluator {
   constructor(options = {}) {
     this.options = {
       ...DEFAULT_EVALUATION_OPTIONS,
       ...options,
     };
+    this.evaluationProfile = compileEvaluationProfile(options.evaluationProfile);
+    this.phaseBucketsByEmptyCount = this.evaluationProfile.bucketsByEmptyCount;
+    this.tupleResidualProfile = compileTupleResidualProfile(options.tupleResidualProfile);
+    this.tupleResidualBucketsByEmptyCount = this.tupleResidualProfile?.bucketsByEmptyCount ?? null;
+    this.scratchFeatureRecord = createEmptyEvaluationFeatureRecord();
+  }
+
+  selectPhaseBucket(empties) {
+    const clampedEmpties = clampTrackedEmpties(empties);
+    return this.phaseBucketsByEmptyCount[clampedEmpties]
+      ?? this.phaseBucketsByEmptyCount[this.phaseBucketsByEmptyCount.length - 1];
   }
 
   evaluate(state, color = state.currentPlayer) {
-    const perspectiveBoards = color === PLAYER_COLORS.BLACK
-      ? { player: state.black, opponent: state.white }
-      : { player: state.white, opponent: state.black };
-
-    const { player, opponent } = perspectiveBoards;
-    const empty = FULL_BOARD & ~(player | opponent);
-    const empties = state.getEmptyCount();
-    const phase = clamp((64 - empties) / 64, 0, 1);
-
-    const myMovesBitboard = legalMovesBitboard(player, opponent);
-    const opponentMovesBitboard = legalMovesBitboard(opponent, player);
-    const myMoveCount = popcount(myMovesBitboard);
-    const opponentMoveCount = popcount(opponentMovesBitboard);
-    const mobility = actualMobilityScoreFromMoveCounts(myMoveCount, opponentMoveCount);
-    const potentialMobility = potentialMobilityScore(player, opponent, empty);
-    const corners = cornerScore(player, opponent);
-    const cornerAccess = cornerAccessScoreFromMoveBitboards(myMovesBitboard, opponentMovesBitboard);
-    const cornerAdjacency = cornerAdjacencyScore(player, opponent);
-    const frontier = frontierScore(player, opponent, empty);
-    const positional = positionalScore(player, opponent);
-    const edgePatterns = edgePatternScore(player, opponent);
-    const cornerPatterns = cornerPatternScore(player, opponent);
-    const stability = stabilityScore(player, opponent, empties);
-
-    const mobilityWeight = lerp(135, 35, phase) * this.options.mobilityScale;
-    const potentialMobilityWeight = lerp(55, 12, phase) * this.options.potentialMobilityScale;
-    const cornersWeight = 850 * this.options.cornerScale;
-    const cornerAccessWeight = lerp(200, 650, phase) * this.options.cornerScale;
-    const cornerAdjacencyWeight = lerp(300, 90, phase) * this.options.cornerAdjacencyScale;
-    const frontierWeight = lerp(80, 20, phase) * this.options.frontierScale;
-    const positionalWeight = lerp(14, 8, phase) * this.options.positionalScale;
-    const edgePatternWeight = lerp(85, 165, phase) * this.options.edgePatternScale;
-    const cornerPatternWeight = lerp(95, 175, phase) * this.options.cornerPatternScale;
-    const stabilityWeight = lerp(120, 320, phase) * this.options.stabilityScale;
-    const parityWeight = (empties <= 14 ? lerp(25, 80, 1 - (empties / 14)) : 0) * this.options.parityScale;
-    const discWeight = (empties <= 18 ? lerp(12, 120, 1 - (empties / 18)) : 0) * this.options.discScale;
-
-    const discDiff = discWeight > 0 ? discDifferentialScore(player, opponent) : 0;
-    const parity = parityWeight > 0 ? describeParityHeuristic(state, color).score : 0;
-
+    const features = populateEvaluationFeatureRecord(this.scratchFeatureRecord, state, color);
+    const weights = this.selectPhaseBucket(features.empties).weights;
+    const bias = color === state.currentPlayer ? weights.bias : -weights.bias;
     const weighted = (
-      (mobility * mobilityWeight)
-      + (potentialMobility * potentialMobilityWeight)
-      + (corners * cornersWeight)
-      + (cornerAccess * cornerAccessWeight)
-      + (cornerAdjacency * cornerAdjacencyWeight)
-      + (frontier * frontierWeight)
-      + (positional * positionalWeight)
-      + (edgePatterns * edgePatternWeight)
-      + (cornerPatterns * cornerPatternWeight)
-      + (stability * stabilityWeight)
-      + (discDiff * discWeight)
-      + (parity * parityWeight)
+      bias
+      + (features.mobility * weights.mobility * this.options.mobilityScale)
+      + (features.potentialMobility * weights.potentialMobility * this.options.potentialMobilityScale)
+      + (features.corners * weights.corners * this.options.cornerScale)
+      + (features.cornerAccess * weights.cornerAccess * this.options.cornerScale)
+      + (features.cornerMoveBalance * weights.cornerMoveBalance * this.options.cornerScale)
+      + (features.cornerAdjacency * weights.cornerAdjacency * this.options.cornerAdjacencyScale)
+      + (features.cornerOrthAdjacency * weights.cornerOrthAdjacency * this.options.cornerAdjacencyScale)
+      + (features.cornerDiagonalAdjacency * weights.cornerDiagonalAdjacency * this.options.cornerAdjacencyScale)
+      + (features.frontier * weights.frontier * this.options.frontierScale)
+      + (features.positional * weights.positional * this.options.positionalScale)
+      + (features.edgePattern * weights.edgePattern * this.options.edgePatternScale)
+      + (features.cornerPattern * weights.cornerPattern * this.options.cornerPatternScale)
+      + (features.stability * weights.stability * this.options.stabilityScale)
+      + (features.stableDiscDifferential * weights.stableDiscDifferential * this.options.stabilityScale)
+      + (features.discDifferential * weights.discDifferential * this.options.discScale)
+      + (features.discDifferentialRaw * weights.discDifferentialRaw * this.options.discScale)
+      + (features.parity * weights.parity * this.options.parityScale)
+      + (features.parityGlobal * weights.parityGlobal * this.options.parityScale)
+      + (features.parityRegion * weights.parityRegion * this.options.parityScale)
     );
 
-    return symmetricRound(weighted);
+    let tupleResidualContribution = 0;
+    if (this.tupleResidualBucketsByEmptyCount) {
+      const tupleBucket = this.tupleResidualBucketsByEmptyCount[clampTrackedEmpties(features.empties)];
+      if (tupleBucket) {
+        const sideToMoveBoards = perspectiveBoardsForColor(state, state.currentPlayer);
+        const tupleSideToMoveContribution = scoreTupleResidualBucket(
+          tupleBucket,
+          this.tupleResidualProfile.layout.tuples,
+          sideToMoveBoards.player,
+          sideToMoveBoards.opponent,
+        ).totalContribution;
+        tupleResidualContribution = color === state.currentPlayer
+          ? tupleSideToMoveContribution
+          : -tupleSideToMoveContribution;
+      }
+    }
+
+    return symmetricRound(weighted + tupleResidualContribution);
   }
 
   evaluateTerminal(state, color = state.currentPlayer) {
@@ -797,44 +1066,50 @@ export class Evaluator {
   }
 
   explainFeatures(state, color = state.currentPlayer) {
-    const perspectiveBoards = color === PLAYER_COLORS.BLACK
-      ? { player: state.black, opponent: state.white }
-      : { player: state.white, opponent: state.black };
-    const { player, opponent } = perspectiveBoards;
-    const empty = FULL_BOARD & ~(player | opponent);
-    const empties = state.getEmptyCount();
-    const myMovesBitboard = legalMovesBitboard(player, opponent);
-    const opponentMovesBitboard = legalMovesBitboard(opponent, player);
-    const stableCounts = stabilityCounts(player, opponent, empties);
-    const parityBreakdown = describeParityHeuristic(state, color, { includeRegionBreakdown: true });
+    const featureRecord = populateEvaluationFeatureRecord(
+      createEmptyEvaluationFeatureRecord(),
+      state,
+      color,
+      { includeDiagnostics: true },
+    );
+    const bucket = this.selectPhaseBucket(featureRecord.empties);
+    const tupleBucket = this.tupleResidualBucketsByEmptyCount?.[clampTrackedEmpties(featureRecord.empties)] ?? null;
+    const sideToMoveBoards = perspectiveBoardsForColor(state, state.currentPlayer);
+    const tupleDetails = tupleBucket
+      ? scoreTupleResidualBucket(
+        tupleBucket,
+        this.tupleResidualProfile.layout.tuples,
+        sideToMoveBoards.player,
+        sideToMoveBoards.opponent,
+        { captureDetails: true },
+      )
+      : { totalContribution: 0, patternContribution: 0, bias: 0, entries: [] };
+    const tupleResidualContribution = color === state.currentPlayer
+      ? tupleDetails.totalContribution
+      : -tupleDetails.totalContribution;
+    const tupleResidualPatternContribution = color === state.currentPlayer
+      ? tupleDetails.patternContribution
+      : -tupleDetails.patternContribution;
+    const tupleResidualBiasContribution = color === state.currentPlayer
+      ? tupleDetails.bias
+      : -tupleDetails.bias;
 
     return {
-      mobility: actualMobilityScoreFromMoveCounts(
-        popcount(myMovesBitboard),
-        popcount(opponentMovesBitboard),
-      ),
-      potentialMobility: potentialMobilityScore(player, opponent, empty),
-      corners: cornerScore(player, opponent),
-      cornerAccess: cornerAccessScoreFromMoveBitboards(myMovesBitboard, opponentMovesBitboard),
-      cornerMoves: coordsForCornerMoves(myMovesBitboard),
-      opponentCornerMoves: coordsForCornerMoves(opponentMovesBitboard),
-      cornerAdjacency: cornerAdjacencyScore(player, opponent),
-      frontier: frontierScore(player, opponent, empty),
-      positional: positionalScore(player, opponent),
-      edgePattern: edgePatternScore(player, opponent),
-      cornerPattern: cornerPatternScore(player, opponent),
-      stability: normalizeDifference(stableCounts.player, stableCounts.opponent),
-      stableDiscs: stableCounts.player,
-      opponentStableDiscs: stableCounts.opponent,
-      discDifferential: discDifferentialScore(player, opponent),
-      parity: parityBreakdown.score,
-      parityGlobal: parityBreakdown.global,
-      parityRegion: parityBreakdown.regionScore,
-      parityRegionCount: parityBreakdown.regionCount,
-      parityOddRegions: parityBreakdown.oddRegions,
-      parityEvenRegions: parityBreakdown.evenRegions,
-      currentPlayer: color,
-      legalMoves: bitsToCoords(myMovesBitboard),
+      ...featureRecord,
+      phaseBucketKey: bucket.key,
+      evaluationProfileName: this.evaluationProfile.name,
+      bucketWeights: bucket.weights,
+      tupleResidualProfileName: this.tupleResidualProfile?.name ?? null,
+      tupleResidualBucketKey: tupleBucket?.key ?? null,
+      tupleResidualContribution,
+      tupleResidualTotalContribution: tupleResidualContribution,
+      tupleResidualPatternContribution,
+      tupleResidualBiasContribution,
+      tupleResidualSideToMoveContribution: tupleDetails.totalContribution,
+      tupleResidualSideToMoveTotalContribution: tupleDetails.totalContribution,
+      tupleResidualSideToMovePatternContribution: tupleDetails.patternContribution,
+      tupleResidualSideToMoveBiasContribution: tupleDetails.bias,
+      tupleResidualEntries: tupleDetails.entries,
     };
   }
 }
@@ -846,90 +1121,54 @@ export class MoveOrderingEvaluator {
       ...DEFAULT_EVALUATION_OPTIONS,
       ...options,
     };
+    this.trainedWeightBuckets = resolveMoveOrderingBuckets(options.moveOrderingProfile);
+    this.trainedWeightBucketsByEmptyCount = compileMoveOrderingBucketsByEmptyCount(this.trainedWeightBuckets);
+    this.scratchFeatureRecord = createEmptyMoveOrderingFeatureRecord();
   }
 
   selectTrainedBucket(empties) {
-    return ORDERING_TRAINED_WEIGHT_BUCKETS.find((bucket) => (
-      empties >= bucket.minEmpties && empties <= bucket.maxEmpties
-    )) ?? null;
+    return this.trainedWeightBucketsByEmptyCount[clampTrackedMoveOrderingEmpties(empties)] ?? null;
   }
 
   evaluate(state, color = state.currentPlayer, context = {}) {
-    const perspectiveBoards = color === PLAYER_COLORS.BLACK
-      ? { player: state.black, opponent: state.white }
-      : { player: state.white, opponent: state.black };
-
-    const { player, opponent } = perspectiveBoards;
-    const empties = context.empties ?? state.getEmptyCount();
-    const phase = clamp((18 - empties) / 12, 0, 1);
-    const myMoveCount = popcount(legalMovesBitboard(player, opponent));
-    const opponentMoveCount = context.opponentMoveCount ?? popcount(legalMovesBitboard(opponent, player));
-    const mobility = normalizeDifference(myMoveCount, opponentMoveCount);
-    const corners = cornerScore(player, opponent);
-    const cornerAdjacency = cornerAdjacencyScore(player, opponent);
-    const edgePatterns = edgePatternScore(player, opponent);
-    const cornerPatterns = cornerPatternScore(player, opponent);
-    const discDiff = discDifferentialScore(player, opponent);
-    const parity = empties <= 12 ? globalParityScore(state, color) : 0;
-
-    const trainedBucket = this.selectTrainedBucket(empties);
+    const features = populateMoveOrderingFeatureRecord(this.scratchFeatureRecord, state, color, context);
+    const trainedBucket = this.selectTrainedBucket(features.empties);
     if (trainedBucket) {
       const weighted = (
-        (mobility * trainedBucket.weights.mobility * this.options.mobilityScale)
-        + (corners * trainedBucket.weights.corners * this.options.cornerScale)
-        + (cornerAdjacency * trainedBucket.weights.cornerAdjacency * this.options.cornerAdjacencyScale)
-        + (edgePatterns * trainedBucket.weights.edgePattern * this.options.edgePatternScale)
-        + (cornerPatterns * trainedBucket.weights.cornerPattern * this.options.cornerPatternScale)
-        + (discDiff * trainedBucket.weights.discDifferential * this.options.discScale)
-        + (parity * trainedBucket.weights.parity * this.options.parityScale)
+        (features.mobility * trainedBucket.weights.mobility * this.options.mobilityScale)
+        + (features.corners * trainedBucket.weights.corners * this.options.cornerScale)
+        + (features.cornerAdjacency * trainedBucket.weights.cornerAdjacency * this.options.cornerAdjacencyScale)
+        + (features.edgePattern * trainedBucket.weights.edgePattern * this.options.edgePatternScale)
+        + (features.cornerPattern * trainedBucket.weights.cornerPattern * this.options.cornerPatternScale)
+        + (features.discDifferential * trainedBucket.weights.discDifferential * this.options.discScale)
+        + (features.parity * trainedBucket.weights.parity * this.options.parityScale)
       );
       return clamp(symmetricRound(weighted), -900_000, 900_000);
     }
 
-    const mobilityWeight = lerp(720, 480, phase) * this.options.mobilityScale;
-    const cornerWeight = lerp(2200, 2600, phase) * this.options.cornerScale;
-    const cornerAdjacencyWeight = lerp(820, 300, phase) * this.options.cornerAdjacencyScale;
-    const edgePatternWeight = lerp(720, 1080, phase) * this.options.edgePatternScale;
-    const cornerPatternWeight = lerp(980, 1280, phase) * this.options.cornerPatternScale;
-    const discWeight = (empties <= 10 ? lerp(160, 480, 1 - (empties / 10)) : 0) * this.options.discScale;
-    const parityWeight = (empties <= 12 ? lerp(80, 220, 1 - (empties / 12)) : 0) * this.options.parityScale;
-
+    const fallbackWeights = MOVE_ORDERING_FALLBACK_WEIGHTS_BY_EMPTY_COUNT[
+      clampTrackedMoveOrderingEmpties(features.empties)
+    ];
     const weighted = (
-      (mobility * mobilityWeight)
-      + (corners * cornerWeight)
-      + (cornerAdjacency * cornerAdjacencyWeight)
-      + (edgePatterns * edgePatternWeight)
-      + (cornerPatterns * cornerPatternWeight)
-      + (discDiff * discWeight)
-      + (parity * parityWeight)
+      (features.mobility * fallbackWeights.mobility * this.options.mobilityScale)
+      + (features.corners * fallbackWeights.corners * this.options.cornerScale)
+      + (features.cornerAdjacency * fallbackWeights.cornerAdjacency * this.options.cornerAdjacencyScale)
+      + (features.edgePattern * fallbackWeights.edgePattern * this.options.edgePatternScale)
+      + (features.cornerPattern * fallbackWeights.cornerPattern * this.options.cornerPatternScale)
+      + (features.discDifferential * fallbackWeights.discDifferential * this.options.discScale)
+      + (features.parity * fallbackWeights.parity * this.options.parityScale)
     );
 
     return clamp(symmetricRound(weighted), -900_000, 900_000);
   }
 
   explainFeatures(state, color = state.currentPlayer, context = {}) {
-    const perspectiveBoards = color === PLAYER_COLORS.BLACK
-      ? { player: state.black, opponent: state.white }
-      : { player: state.white, opponent: state.black };
-
-    const { player, opponent } = perspectiveBoards;
-    const empties = context.empties ?? state.getEmptyCount();
-    const myMoveCount = popcount(legalMovesBitboard(player, opponent));
-    const opponentMoveCount = context.opponentMoveCount ?? popcount(legalMovesBitboard(opponent, player));
-
-    return {
-      mobility: normalizeDifference(myMoveCount, opponentMoveCount),
-      myMoveCount,
-      opponentMoveCount,
-      corners: cornerScore(player, opponent),
-      cornerAdjacency: cornerAdjacencyScore(player, opponent),
-      edgePattern: edgePatternScore(player, opponent),
-      cornerPattern: cornerPatternScore(player, opponent),
-      discDifferential: discDifferentialScore(player, opponent),
-      parity: empties <= 12 ? globalParityScore(state, color) : 0,
-      empties,
-      currentPlayer: color,
-    };
+    return populateMoveOrderingFeatureRecord(
+      createEmptyMoveOrderingFeatureRecord(),
+      state,
+      color,
+      context,
+    );
   }
 }
 
@@ -952,14 +1191,5 @@ function bitsToCoords(bitboard) {
 }
 
 export function getPositionalRisk(index) {
-  if (CORNER_INDICES.includes(index)) {
-    return 'corner';
-  }
-  if (X_SQUARE_INDICES.includes(index)) {
-    return 'x-square';
-  }
-  if (C_SQUARE_INDICES.includes(index)) {
-    return 'c-square';
-  }
-  return 'normal';
+  return POSITIONAL_RISK_BY_INDEX[index] ?? 'normal';
 }

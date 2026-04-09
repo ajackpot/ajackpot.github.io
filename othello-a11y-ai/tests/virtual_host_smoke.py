@@ -85,6 +85,7 @@ async def main() -> None:
         assert await page.locator('button[data-board-index]').count() == 64
         assert await page.evaluate("document.querySelector('#settings-collapsible-content').hidden") is True
         assert await page.locator('#new-game-button').is_visible() is True
+        assert await page.locator('#xot-game-button').is_visible() is True
         assert await page.evaluate("document.querySelector('#engine-metrics-content').hidden") is True
         assert await page.locator('button[data-board-index="35"]').get_attribute('aria-label') == '검은 돌 D5'
         assert await page.locator('button[data-board-index="26"]').get_attribute('aria-label') == '둘 수 있는 빈칸 C4'
@@ -98,6 +99,36 @@ async def main() -> None:
         await page.locator('#settings-toggle-button').click()
         await page.wait_for_timeout(50)
         assert await page.evaluate("document.querySelector('#settings-collapsible-content').hidden") is False
+        assert await page.locator('section[aria-labelledby="engine-settings-title"]').count() == 1
+        assert await page.locator('section[aria-labelledby="accessibility-settings-title"]').count() == 1
+        assert await page.locator('section[aria-labelledby="accessibility-settings-title"] input[name="enableBoardShortcuts"]').count() == 1
+        assert await page.locator('section[aria-labelledby="engine-settings-title"] input[name="enableBoardShortcuts"]').count() == 0
+        assert await page.is_checked('input[name="enableBoardShortcuts"]') is True
+        assert await page.is_checked('input[name="themeMode"][value="system"]') is True
+        await page.locator('input[name="themeMode"][value="dark"]').check()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.documentElement.dataset.theme") == 'dark'
+        await page.locator('input[name="themeMode"][value="high-contrast"]').check()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.documentElement.dataset.theme") == 'high-contrast'
+        assert await page.is_checked('input[name="themeMode"][value="dark"]') is False
+        await page.locator('input[name="themeMode"][value="system"]').check()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.documentElement.hasAttribute('data-theme')") is False
+
+        await page.locator('button[data-board-index="0"]').focus()
+        await page.keyboard.press('m')
+        assert await page.evaluate("document.activeElement?.getAttribute('data-board-index')") == '19'
+        await page.locator('input[name="enableBoardShortcuts"]').uncheck()
+        await page.wait_for_timeout(50)
+        await page.locator('button[data-board-index="0"]').focus()
+        await page.keyboard.press('m')
+        assert await page.evaluate("document.activeElement?.getAttribute('data-board-index')") == '0'
+        await page.keyboard.press('i')
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("Boolean(document.querySelector('#manual-move-dialog')?.open)") is False
+        await page.locator('input[name="enableBoardShortcuts"]').check()
+        await page.wait_for_timeout(50)
 
         preset_values = await page.evaluate("Array.from(document.querySelectorAll('#preset-select option')).map((option) => option.value)")
         assert preset_values == ['beginner', 'easy', 'normal', 'hard', 'expert', 'impossible', 'custom']
@@ -156,6 +187,17 @@ async def main() -> None:
         assert await page.locator('button[data-board-index="18"]').get_attribute('aria-label') == '흰 돌 C3'
         live_text = (await page.locator('#live-region').text_content()) or ''
         assert '2수 위치' in live_text
+
+        await page.evaluate('Math.random = () => 0')
+        await page.locator('#xot-game-button').click()
+        await page.wait_for_timeout(80)
+        assert await page.locator('.move-log-list li').count() == 8
+        status_text = (await page.locator('#status-container').text_content()) or ''
+        assert '시작 방식:' in status_text and 'XOT 1/3623' in status_text
+        assert 'F5 D6 C4 D3 C2 B3 B4 B5' in status_text
+        assert await page.input_value('#position-sequence-input') == 'F5 D6 C4 D3 C2 B3 B4 B5'
+        live_text = (await page.locator('#live-region').text_content()) or ''
+        assert 'XOT 모드로 새 게임을 시작했습니다' in live_text
 
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)

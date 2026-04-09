@@ -1,0 +1,850 @@
+{
+  "version": 1,
+  "name": "trained-mpc-overlap-8bucket-high-tight",
+  "description": "overlap 8-bucket high-only tight runtime-tuned MPC variant",
+  "runtime": {
+    "enableHighCut": true,
+    "enableLowCut": false,
+    "maxWindow": 1,
+    "maxChecksPerNode": 2,
+    "minDepth": 2,
+    "minDepthGap": 2,
+    "maxDepthDistance": 1,
+    "minPly": 1,
+    "highScale": 0.93,
+    "lowScale": 1,
+    "depthDistanceScale": 1.25,
+    "defaultMode": "high",
+    "maxTriesPerNode": 2
+  },
+  "calibrations": [
+    {
+      "key": "mpc-18-21-d3-d7",
+      "label": "18-21 / d3→d7",
+      "minEmpties": 18,
+      "maxEmpties": 21,
+      "shallowDepth": 3,
+      "deepDepth": 7,
+      "usable": true,
+      "intercept": -3543.88745302091,
+      "slope": 1.0647489457857746,
+      "correlation": 0.9722346317718615,
+      "rSquared": 0.9452401792165672,
+      "intervalHalfWidth": 52534.37923726777,
+      "recommendedZ": {
+        "z": 3,
+        "coverage": 0.95,
+        "intervalHalfWidth": 52534.37923726777
+      },
+      "regression": {
+        "intercept": -3543.88745302091,
+        "slope": 1.0647489457857746,
+        "correlation": 0.9722346317718615,
+        "rSquared": 0.9452401792165672,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 13416.809493959212,
+        "rmse": 17511.459745755925,
+        "meanResidual": -2.627429138455126e-13,
+        "stdDevResidual": 17511.459745755925,
+        "maxAbsResidual": 82215.66920800252
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 14277.412863874348,
+        "rmse": 22636.279227272513,
+        "meanResidual": 1443.0915840324135,
+        "stdDevResidual": 22590.232932290535,
+        "maxAbsResidual": 99320.44992380918
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.775,
+          "intervalHalfWidth": 17511.459745755925
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.875,
+          "intervalHalfWidth": 26267.189618633885
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.9,
+          "intervalHalfWidth": 34322.46110168161
+        },
+        {
+          "z": 2.5,
+          "coverage": 0.95,
+          "intervalHalfWidth": 43778.649364389814
+        },
+        {
+          "z": 3,
+          "coverage": 0.95,
+          "intervalHalfWidth": 52534.37923726777
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 91993,
+        "elapsedMs": 5482,
+        "averageNodesPerSearch": 229.9825,
+        "averageElapsedMsPerSearch": 13.705
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 3638632,
+        "elapsedMs": 195403,
+        "averageNodesPerSearch": 9096.58,
+        "averageElapsedMsPerSearch": 488.5075
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-18-21-d4-d8",
+      "label": "18-21 / d4→d8",
+      "minEmpties": 18,
+      "maxEmpties": 21,
+      "shallowDepth": 4,
+      "deepDepth": 8,
+      "usable": true,
+      "intercept": 2848.6226018926122,
+      "slope": 1.0129921446201469,
+      "correlation": 0.9769362628511629,
+      "rSquared": 0.9544044616735964,
+      "intervalHalfWidth": 39787.20681755191,
+      "recommendedZ": {
+        "z": 2.5,
+        "coverage": 1,
+        "intervalHalfWidth": 39787.20681755191
+      },
+      "regression": {
+        "intercept": 2848.6226018926122,
+        "slope": 1.0129921446201469,
+        "correlation": 0.9769362628511629,
+        "rSquared": 0.9544044616735964,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 11924.369000056604,
+        "rmse": 15914.882727020762,
+        "meanResidual": -5.153803310046593e-13,
+        "stdDevResidual": 15914.882727020762,
+        "maxAbsResidual": 90366.69126752886
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 10067.533181323623,
+        "rmse": 12735.245108282492,
+        "meanResidual": -2041.5404497367113,
+        "stdDevResidual": 12570.544163246153,
+        "maxAbsResidual": 31288.864209408857
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.775,
+          "intervalHalfWidth": 15914.882727020762
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.925,
+          "intervalHalfWidth": 23872.324090531143
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.975,
+          "intervalHalfWidth": 31193.17014496069
+        },
+        {
+          "z": 2.5,
+          "coverage": 1,
+          "intervalHalfWidth": 39787.20681755191
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 47744.648181062286
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 271771,
+        "elapsedMs": 14031,
+        "averageNodesPerSearch": 679.4275,
+        "averageElapsedMsPerSearch": 35.0775
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 7626183,
+        "elapsedMs": 404418,
+        "averageNodesPerSearch": 19065.4575,
+        "averageElapsedMsPerSearch": 1011.045
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-22-25-d4-d8",
+      "label": "22-25 / d4→d8",
+      "minEmpties": 22,
+      "maxEmpties": 25,
+      "shallowDepth": 4,
+      "deepDepth": 8,
+      "usable": true,
+      "intercept": 2964.5786720257006,
+      "slope": 1.025715619557693,
+      "correlation": 0.9768521031433863,
+      "rSquared": 0.954240031415657,
+      "intervalHalfWidth": 31917.03279652294,
+      "recommendedZ": {
+        "z": 1.96,
+        "coverage": 1,
+        "intervalHalfWidth": 31917.03279652294
+      },
+      "regression": {
+        "intercept": 2964.5786720257006,
+        "slope": 1.025715619557693,
+        "correlation": 0.9768521031433863,
+        "rSquared": 0.954240031415657,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 12835.064313235356,
+        "rmse": 16284.200406389256,
+        "meanResidual": 2.213103774314125e-12,
+        "stdDevResidual": 16284.200406389256,
+        "maxAbsResidual": 48375.99979848182
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 10573.579324796749,
+        "rmse": 14039.932617618137,
+        "meanResidual": 6188.272617717272,
+        "stdDevResidual": 12602.578701046397,
+        "maxAbsResidual": 30329.126171452255
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.7,
+          "intervalHalfWidth": 16284.200406389256
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.9,
+          "intervalHalfWidth": 24426.300609583886
+        },
+        {
+          "z": 1.96,
+          "coverage": 1,
+          "intervalHalfWidth": 31917.03279652294
+        },
+        {
+          "z": 2.5,
+          "coverage": 1,
+          "intervalHalfWidth": 40710.50101597314
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 48852.60121916777
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 323489,
+        "elapsedMs": 12730,
+        "averageNodesPerSearch": 808.7225,
+        "averageElapsedMsPerSearch": 31.825
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 11281810,
+        "elapsedMs": 529067,
+        "averageNodesPerSearch": 28204.525,
+        "averageElapsedMsPerSearch": 1322.6675
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-22-25-d4-d9",
+      "label": "22-25 / d4→d9",
+      "minEmpties": 22,
+      "maxEmpties": 25,
+      "shallowDepth": 4,
+      "deepDepth": 9,
+      "usable": true,
+      "intercept": 8625.253636123229,
+      "slope": 1.0659941814585956,
+      "correlation": 0.9717989627329093,
+      "rSquared": 0.9443932239687585,
+      "intervalHalfWidth": 36755.620523458696,
+      "recommendedZ": {
+        "z": 1.96,
+        "coverage": 1,
+        "intervalHalfWidth": 36755.620523458696
+      },
+      "regression": {
+        "intercept": 8625.253636123229,
+        "slope": 1.0659941814585956,
+        "correlation": 0.9717989627329093,
+        "rSquared": 0.9443932239687585,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 14822.966772734686,
+        "rmse": 18752.867614009538,
+        "meanResidual": 9.499166885183918e-13,
+        "stdDevResidual": 18752.867614009538,
+        "maxAbsResidual": 56655.16466809789
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 11285.666002807844,
+        "rmse": 15315.817513777129,
+        "meanResidual": 6754.418905107625,
+        "stdDevResidual": 13745.984554394308,
+        "maxAbsResidual": 36113.66770913813
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.775,
+          "intervalHalfWidth": 18752.867614009538
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.9,
+          "intervalHalfWidth": 28129.30142101431
+        },
+        {
+          "z": 1.96,
+          "coverage": 1,
+          "intervalHalfWidth": 36755.620523458696
+        },
+        {
+          "z": 2.5,
+          "coverage": 1,
+          "intervalHalfWidth": 46882.16903502384
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 56258.60284202862
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 323489,
+        "elapsedMs": 12730,
+        "averageNodesPerSearch": 808.7225,
+        "averageElapsedMsPerSearch": 31.825
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 23100786,
+        "elapsedMs": 1126925,
+        "averageNodesPerSearch": 57751.965,
+        "averageElapsedMsPerSearch": 2817.3125
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-26-29-d5-d10",
+      "label": "26-29 / d5→d10",
+      "minEmpties": 26,
+      "maxEmpties": 29,
+      "shallowDepth": 5,
+      "deepDepth": 10,
+      "usable": true,
+      "intercept": -7310.826368575696,
+      "slope": 0.9536859670266822,
+      "correlation": 0.9839182418828323,
+      "rSquared": 0.9680951067098037,
+      "intervalHalfWidth": 40128.12150155635,
+      "recommendedZ": {
+        "z": 3,
+        "coverage": 1,
+        "intervalHalfWidth": 40128.12150155635
+      },
+      "regression": {
+        "intercept": -7310.826368575696,
+        "slope": 0.9536859670266822,
+        "correlation": 0.9839182418828323,
+        "rSquared": 0.9680951067098037,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 10109.42420665642,
+        "rmse": 13376.040500518782,
+        "meanResidual": 5.355913243773911e-13,
+        "stdDevResidual": 13376.040500518782,
+        "maxAbsResidual": 66381.51196769238
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 9119.94416837976,
+        "rmse": 11594.068795062989,
+        "meanResidual": 301.6598690258402,
+        "stdDevResidual": 11590.143767359948,
+        "maxAbsResidual": 35458.827024338236
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.775,
+          "intervalHalfWidth": 13376.040500518782
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.9,
+          "intervalHalfWidth": 20064.060750778175
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.975,
+          "intervalHalfWidth": 26217.039381016813
+        },
+        {
+          "z": 2.5,
+          "coverage": 0.975,
+          "intervalHalfWidth": 33440.101251296954
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 40128.12150155635
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 1213917,
+        "elapsedMs": 44197,
+        "averageNodesPerSearch": 3034.7925,
+        "averageElapsedMsPerSearch": 110.4925
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 74829304,
+        "elapsedMs": 2720919,
+        "averageNodesPerSearch": 187073.26,
+        "averageElapsedMsPerSearch": 6802.2975
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-26-29-d6-d10",
+      "label": "26-29 / d6→d10",
+      "minEmpties": 26,
+      "maxEmpties": 29,
+      "shallowDepth": 6,
+      "deepDepth": 10,
+      "usable": true,
+      "intercept": 2941.932361775012,
+      "slope": 0.9184785622697675,
+      "correlation": 0.9882082355707928,
+      "rSquared": 0.9765555168499396,
+      "intervalHalfWidth": 28665.48320693371,
+      "recommendedZ": {
+        "z": 2.5,
+        "coverage": 1,
+        "intervalHalfWidth": 28665.48320693371
+      },
+      "regression": {
+        "intercept": 2941.932361775012,
+        "slope": 0.9184785622697675,
+        "correlation": 0.9882082355707928,
+        "rSquared": 0.9765555168499396,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 8484.239836473686,
+        "rmse": 11466.193282773484,
+        "meanResidual": -1.2227650990502703e-12,
+        "stdDevResidual": 11466.193282773484,
+        "maxAbsResidual": 61111.91467264772
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 6995.025253525336,
+        "rmse": 9068.904981200689,
+        "meanResidual": -1334.9747518728932,
+        "stdDevResidual": 8970.110365536679,
+        "maxAbsResidual": 24431.67863875035
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.8,
+          "intervalHalfWidth": 11466.193282773484
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.925,
+          "intervalHalfWidth": 17199.289924160224
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.975,
+          "intervalHalfWidth": 22473.73883423603
+        },
+        {
+          "z": 2.5,
+          "coverage": 1,
+          "intervalHalfWidth": 28665.48320693371
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 34398.57984832045
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 2351335,
+        "elapsedMs": 76016,
+        "averageNodesPerSearch": 5878.3375,
+        "averageElapsedMsPerSearch": 190.04
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 74829304,
+        "elapsedMs": 2720919,
+        "averageNodesPerSearch": 187073.26,
+        "averageElapsedMsPerSearch": 6802.2975
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-30-33-d5-d11",
+      "label": "30-33 / d5→d11",
+      "minEmpties": 30,
+      "maxEmpties": 33,
+      "shallowDepth": 5,
+      "deepDepth": 11,
+      "usable": true,
+      "intercept": -6365.276994638801,
+      "slope": 1.1175046435299405,
+      "correlation": 0.9792262270063318,
+      "rSquared": 0.9588840036570561,
+      "intervalHalfWidth": 50041.576280654626,
+      "recommendedZ": {
+        "z": 3,
+        "coverage": 0.95,
+        "intervalHalfWidth": 50041.576280654626
+      },
+      "regression": {
+        "intercept": -6365.276994638801,
+        "slope": 1.1175046435299405,
+        "correlation": 0.9792262270063318,
+        "rSquared": 0.9588840036570561,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 12704.775682398966,
+        "rmse": 16680.525426884877,
+        "meanResidual": -6.265407945546839e-13,
+        "stdDevResidual": 16680.525426884877,
+        "maxAbsResidual": 55797.20115459924
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 14754.97367178032,
+        "rmse": 20067.320823977796,
+        "meanResidual": -1331.021827301916,
+        "stdDevResidual": 20023.130273453717,
+        "maxAbsResidual": 62499.657810579025
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.75,
+          "intervalHalfWidth": 16680.525426884877
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.85,
+          "intervalHalfWidth": 25020.788140327313
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.9,
+          "intervalHalfWidth": 32693.829836694356
+        },
+        {
+          "z": 2.5,
+          "coverage": 0.95,
+          "intervalHalfWidth": 41701.31356721219
+        },
+        {
+          "z": 3,
+          "coverage": 0.95,
+          "intervalHalfWidth": 50041.576280654626
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 1301251,
+        "elapsedMs": 44462,
+        "averageNodesPerSearch": 3253.1275,
+        "averageElapsedMsPerSearch": 111.155
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 137441433,
+        "elapsedMs": 4596910,
+        "averageNodesPerSearch": 343603.5825,
+        "averageElapsedMsPerSearch": 11492.275
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    },
+    {
+      "key": "mpc-30-33-d6-d10",
+      "label": "30-33 / d6→d10",
+      "minEmpties": 30,
+      "maxEmpties": 33,
+      "shallowDepth": 6,
+      "deepDepth": 10,
+      "usable": true,
+      "intercept": 2688.569404209984,
+      "slope": 1.154509720763056,
+      "correlation": 0.9920017077297041,
+      "rSquared": 0.9840673881386492,
+      "intervalHalfWidth": 31461.433402136645,
+      "recommendedZ": {
+        "z": 3,
+        "coverage": 1,
+        "intervalHalfWidth": 31461.433402136645
+      },
+      "regression": {
+        "intercept": 2688.569404209984,
+        "slope": 1.154509720763056,
+        "correlation": 0.9920017077297041,
+        "rSquared": 0.9840673881386492,
+        "sampleCount": 360
+      },
+      "trainMetrics": {
+        "count": 360,
+        "mae": 7647.248609630439,
+        "rmse": 10487.144467378881,
+        "meanResidual": -1.8189894035458566e-13,
+        "stdDevResidual": 10487.144467378881,
+        "maxAbsResidual": 41760.43023063635
+      },
+      "holdoutMetrics": {
+        "count": 40,
+        "mae": 9419.405393711006,
+        "rmse": 12129.501346501542,
+        "meanResidual": -4111.504453472272,
+        "stdDevResidual": 11411.412447364277,
+        "maxAbsResidual": 29444.635008060177
+      },
+      "zCoverage": [
+        {
+          "z": 1,
+          "coverage": 0.675,
+          "intervalHalfWidth": 10487.144467378881
+        },
+        {
+          "z": 1.5,
+          "coverage": 0.775,
+          "intervalHalfWidth": 15730.716701068322
+        },
+        {
+          "z": 1.96,
+          "coverage": 0.925,
+          "intervalHalfWidth": 20554.803156062608
+        },
+        {
+          "z": 2.5,
+          "coverage": 0.925,
+          "intervalHalfWidth": 26217.8611684472
+        },
+        {
+          "z": 3,
+          "coverage": 1,
+          "intervalHalfWidth": 31461.433402136645
+        }
+      ],
+      "shallowSearchCost": {
+        "searches": 400,
+        "nodes": 2656671,
+        "elapsedMs": 83581,
+        "averageNodesPerSearch": 6641.6775,
+        "averageElapsedMsPerSearch": 208.9525
+      },
+      "deepSearchCost": {
+        "searches": 400,
+        "nodes": 81457546,
+        "elapsedMs": 2756939,
+        "averageNodesPerSearch": 203643.865,
+        "averageElapsedMsPerSearch": 6892.3475
+      },
+      "sampleCount": 400,
+      "trainSampleCount": 360,
+      "holdoutSampleCount": 40,
+      "skippedPass": 0,
+      "skippedInvalid": 0
+    }
+  ],
+  "source": {
+    "inputCount": 26,
+    "inputPaths": [
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000000.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000001.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000002.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000003.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000004.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000005.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000006.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000007.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000008.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000009.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000010.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000011.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000012.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000013.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000014.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000015.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000016.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000017.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000018.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000019.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000020.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000021.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000022.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000023.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000024.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000025.txt"
+    ],
+    "estimatedInputSamples": 25514097,
+    "sampleStride": 200,
+    "sampleResidue": 0,
+    "maxSamplesPerBucket": 400,
+    "holdoutMod": 10,
+    "holdoutResidue": 0,
+    "timeLimitMs": 120000,
+    "aspirationWindow": 40,
+    "maxTableEntries": 200000,
+    "zValues": [
+      1,
+      1.5,
+      1.96,
+      2.5,
+      3
+    ],
+    "targetHoldoutCoverage": 0.99,
+    "evaluationProfileName": "trained-phase-linear-v1",
+    "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "derivedFromProfileName": "calibrated-mpc-profile-v1",
+    "derivedFromProfilePath": "out/mpc-suite/candidates/overlap-8bucket-high-tight/trained-mpc-profile.raw.json",
+    "derivedAt": "2026-04-07T20:04:57.078Z",
+    "runtimeVariant": {
+      "intervalScale": 1,
+      "mode": "high",
+      "runtime": {
+        "enableHighCut": true,
+        "enableLowCut": false,
+        "maxWindow": 1,
+        "maxChecksPerNode": 2,
+        "minDepth": 2,
+        "minDepthGap": 2,
+        "maxDepthDistance": 1,
+        "minPly": 1,
+        "highScale": 0.93,
+        "lowScale": 1,
+        "depthDistanceScale": 1.25,
+        "defaultMode": "high",
+        "maxTriesPerNode": 2
+      }
+    }
+  },
+  "diagnostics": {
+    "visitedSamples": 1273401,
+    "matchedSamples": 3200,
+    "acceptedSamples": 3200,
+    "usableCalibrationCount": 8,
+    "shallowSearchCost": {
+      "searches": 3200,
+      "nodes": 8533916,
+      "elapsedMs": 293229,
+      "averageNodesPerSearch": 2666.84875,
+      "averageElapsedMsPerSearch": 91.6340625
+    },
+    "deepSearchCost": {
+      "searches": 3200,
+      "nodes": 414204998,
+      "elapsedMs": 15051500,
+      "averageNodesPerSearch": 129439.061875,
+      "averageElapsedMsPerSearch": 4703.59375
+    },
+    "elapsedSeconds": 12619.668,
+    "runtimeVariant": {
+      "baseProfileName": "calibrated-mpc-profile-v1",
+      "intervalScale": 1,
+      "mode": "high",
+      "runtime": {
+        "enableHighCut": true,
+        "enableLowCut": false,
+        "maxWindow": 1,
+        "maxChecksPerNode": 2,
+        "minDepth": 2,
+        "minDepthGap": 2,
+        "maxDepthDistance": 1,
+        "minPly": 1,
+        "highScale": 0.93,
+        "lowScale": 1,
+        "depthDistanceScale": 1.25,
+        "defaultMode": "high",
+        "maxTriesPerNode": 2
+      }
+    }
+  },
+  "stage": {
+    "number": 73,
+    "tag": "stage73",
+    "file": "stage-info.json",
+    "label": "Stage 73",
+    "updatedAt": "2026-04-07T11:40:00+09:00",
+    "kind": "mpc-profile",
+    "status": "runtime-variant",
+    "derivedFromProfileName": "calibrated-mpc-profile-v1",
+    "derivedFromProfilePath": "out/mpc-suite/candidates/overlap-8bucket-high-tight/trained-mpc-profile.raw.json"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "format": "compact-v1",
+  "name": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "stage": {
+    "number": 38,
+    "tag": "stage38",
+    "file": "stage-info.json",
+    "label": "Stage 38",
+    "updatedAt": "2026-03-30T16:54:58+09:00",
+    "kind": "move-ordering-profile",
+    "status": "active-adopted-candidateH2",
+    "adoptedFrom": "tools/evaluator-training/out/stage44_candidateH2_edgePattern125_cornerPattern125_11_12.json"
+  },
+  "trainedBuckets": [
+    {
+      "key": "child-11-12",
+      "minEmpties": 11,
+      "maxEmpties": 12,
+      "weights": {
+        "mobility": 0,
+        "corners": 6.411028,
+        "cornerAdjacency": -28.093532,
+        "edgePattern": -183.444529,
+        "cornerPattern": 461.787356,
+        "discDifferential": 0,
+        "parity": 2.261603
+      }
+    },
+    {
+      "key": "child-15-16",
+      "minEmpties": 15,
+      "maxEmpties": 16,
+      "weights": {
+        "mobility": 30.294982,
+        "corners": -3.826455,
+        "cornerAdjacency": -1.419264,
+        "edgePattern": -28.068467,
+        "cornerPattern": 87.712837,
+        "discDifferential": 8.814233,
+        "parity": 0
+      }
+    },
+    {
+      "key": "child-17-18",
+      "minEmpties": 17,
+      "maxEmpties": 18,
+      "weights": {
+        "mobility": 28.839259,
+        "corners": -0.772686,
+        "cornerAdjacency": 2.923797,
+        "edgePattern": -46.615311,
+        "cornerPattern": 115.962661,
+        "discDifferential": 5.858417,
+        "parity": 0
+      }
+    }
+  ]
+}

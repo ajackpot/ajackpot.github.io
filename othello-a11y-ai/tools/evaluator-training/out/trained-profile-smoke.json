@@ -1,0 +1,554 @@
+{
+  "version": 1,
+  "name": "trained-phase-linear-v1",
+  "description": "회귀 기반으로 재추정한 phase-bucket linear evaluator입니다.",
+  "source": {
+    "inputFiles": [
+      "/mnt/data/othello_work/othello-a11y-ai-stage25/tools/evaluator-training/out/synthetic.jsonl"
+    ],
+    "targetScale": 3000,
+    "holdoutMod": 5,
+    "holdoutResidue": 0,
+    "regularization": 10000,
+    "seenSamples": 200
+  },
+  "diagnostics": {
+    "trainCountsByBucket": [
+      {
+        "key": "opening-a",
+        "minEmpties": 52,
+        "maxEmpties": 60,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "opening-b",
+        "minEmpties": 44,
+        "maxEmpties": 51,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "midgame-a",
+        "minEmpties": 36,
+        "maxEmpties": 43,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "midgame-b",
+        "minEmpties": 28,
+        "maxEmpties": 35,
+        "trainCount": 160,
+        "holdoutCount": 40
+      },
+      {
+        "key": "midgame-c",
+        "minEmpties": 20,
+        "maxEmpties": 27,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "late-a",
+        "minEmpties": 13,
+        "maxEmpties": 19,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "late-b",
+        "minEmpties": 7,
+        "maxEmpties": 12,
+        "trainCount": 0,
+        "holdoutCount": 0
+      },
+      {
+        "key": "endgame",
+        "minEmpties": 0,
+        "maxEmpties": 6,
+        "trainCount": 0,
+        "holdoutCount": 0
+      }
+    ],
+    "all": {
+      "count": 200,
+      "mae": 0.05,
+      "rmse": 0.22360679774997896,
+      "meanResidual": -0.03,
+      "stdDevResidual": 0.2215851980616034,
+      "maxAbsResidual": 1,
+      "maeInStones": 0.000016666666666666667,
+      "rmseInStones": 0.00007453559924999299,
+      "meanResidualInStones": -0.000009999999999999999,
+      "stdDevResidualInStones": 0.00007386173268720113,
+      "maxAbsResidualInStones": 0.0003333333333333333
+    },
+    "holdout": {
+      "count": 40,
+      "mae": 0.075,
+      "rmse": 0.27386127875258304,
+      "meanResidual": -0.075,
+      "stdDevResidual": 0.26339134382131846,
+      "maxAbsResidual": 1,
+      "maeInStones": 0.000024999999999999998,
+      "rmseInStones": 0.00009128709291752768,
+      "meanResidualInStones": -0.000024999999999999998,
+      "stdDevResidualInStones": 0.00008779711460710615,
+      "maxAbsResidualInStones": 0.0003333333333333333
+    },
+    "byBucket": [
+      {
+        "key": "opening-a",
+        "minEmpties": 52,
+        "maxEmpties": 60,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "opening-b",
+        "minEmpties": 44,
+        "maxEmpties": 51,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "midgame-a",
+        "minEmpties": 36,
+        "maxEmpties": 43,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "midgame-b",
+        "minEmpties": 28,
+        "maxEmpties": 35,
+        "trainCount": 160,
+        "holdoutCount": 40,
+        "mpcResidualMean": -0.075,
+        "mpcResidualStdDev": 0.26339134382131846,
+        "holdout": {
+          "count": 40,
+          "mae": 0.075,
+          "rmse": 0.27386127875258304,
+          "meanResidual": -0.075,
+          "stdDevResidual": 0.26339134382131846,
+          "maxAbsResidual": 1,
+          "maeInStones": 0.000024999999999999998,
+          "rmseInStones": 0.00009128709291752768
+        },
+        "all": {
+          "count": 200,
+          "mae": 0.05,
+          "rmse": 0.22360679774997896,
+          "meanResidual": -0.03,
+          "stdDevResidual": 0.2215851980616034,
+          "maxAbsResidual": 1,
+          "maeInStones": 0.000016666666666666667,
+          "rmseInStones": 0.00007453559924999299
+        }
+      },
+      {
+        "key": "midgame-c",
+        "minEmpties": 20,
+        "maxEmpties": 27,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "late-a",
+        "minEmpties": 13,
+        "maxEmpties": 19,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "late-b",
+        "minEmpties": 7,
+        "maxEmpties": 12,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      },
+      {
+        "key": "endgame",
+        "minEmpties": 0,
+        "maxEmpties": 6,
+        "trainCount": 0,
+        "holdoutCount": 0,
+        "mpcResidualMean": null,
+        "mpcResidualStdDev": null,
+        "holdout": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        },
+        "all": {
+          "count": 0,
+          "mae": null,
+          "rmse": null,
+          "meanResidual": null,
+          "stdDevResidual": null,
+          "maxAbsResidual": null,
+          "maeInStones": null,
+          "rmseInStones": null
+        }
+      }
+    ],
+    "createdAt": "2026-03-27T03:57:36.482Z"
+  },
+  "phaseBuckets": [
+    {
+      "key": "opening-a",
+      "minEmpties": 52,
+      "maxEmpties": 60,
+      "weights": {
+        "bias": 0,
+        "mobility": 122.5,
+        "potentialMobility": 49.625,
+        "corners": 850,
+        "cornerAccess": 256.25,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 273.75,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 72.5,
+        "positional": 13.25,
+        "edgePattern": 95,
+        "cornerPattern": 105,
+        "stability": 145,
+        "stableDiscDifferential": 0,
+        "discDifferential": 0,
+        "discDifferentialRaw": 0,
+        "parity": 0,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "opening-b",
+      "minEmpties": 44,
+      "maxEmpties": 51,
+      "weights": {
+        "bias": 0,
+        "mobility": 109.21875,
+        "potentialMobility": 43.914063,
+        "corners": 850,
+        "cornerAccess": 316.015625,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 245.859375,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 64.53125,
+        "positional": 12.453125,
+        "edgePattern": 105.625,
+        "cornerPattern": 115.625,
+        "stability": 171.5625,
+        "stableDiscDifferential": 0,
+        "discDifferential": 0,
+        "discDifferentialRaw": 0,
+        "parity": 0,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "midgame-a",
+      "minEmpties": 36,
+      "maxEmpties": 43,
+      "weights": {
+        "bias": 0,
+        "mobility": 96.71875,
+        "potentialMobility": 38.539063,
+        "corners": 850,
+        "cornerAccess": 372.265625,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 219.609375,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 57.03125,
+        "positional": 11.703125,
+        "edgePattern": 115.625,
+        "cornerPattern": 125.625,
+        "stability": 196.5625,
+        "stableDiscDifferential": 0,
+        "discDifferential": 0,
+        "discDifferentialRaw": 0,
+        "parity": 0,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "midgame-b",
+      "minEmpties": 28,
+      "maxEmpties": 35,
+      "weights": {
+        "bias": -0.000001,
+        "mobility": 84.217375,
+        "potentialMobility": 33.163236,
+        "corners": 850.000871,
+        "cornerAccess": 428.515505,
+        "cornerMoveBalance": 0.00006,
+        "cornerAdjacency": 193.359368,
+        "cornerOrthAdjacency": -0.000417,
+        "cornerDiagonalAdjacency": 0.000221,
+        "frontier": 49.530772,
+        "positional": 10.95366,
+        "edgePattern": 125.625513,
+        "cornerPattern": 135.626999,
+        "stability": 221.560416,
+        "stableDiscDifferential": 0.000494,
+        "discDifferential": -0.0002,
+        "discDifferentialRaw": -0.000068,
+        "parity": 0.000116,
+        "parityGlobal": 0.000116,
+        "parityRegion": 0.000116
+      }
+    },
+    {
+      "key": "midgame-c",
+      "minEmpties": 20,
+      "maxEmpties": 27,
+      "weights": {
+        "bias": 0,
+        "mobility": 71.71875,
+        "potentialMobility": 27.789063,
+        "corners": 850,
+        "cornerAccess": 484.765625,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 167.109375,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 42.03125,
+        "positional": 10.203125,
+        "edgePattern": 135.625,
+        "cornerPattern": 145.625,
+        "stability": 246.5625,
+        "stableDiscDifferential": 0,
+        "discDifferential": 0,
+        "discDifferentialRaw": 0,
+        "parity": 0,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "late-a",
+      "minEmpties": 13,
+      "maxEmpties": 19,
+      "weights": {
+        "bias": 0,
+        "mobility": 60,
+        "potentialMobility": 22.75,
+        "corners": 850,
+        "cornerAccess": 537.5,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 142.5,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 35,
+        "positional": 9.5,
+        "edgePattern": 145,
+        "cornerPattern": 155,
+        "stability": 270,
+        "stableDiscDifferential": 0,
+        "discDifferential": 24,
+        "discDifferentialRaw": 0,
+        "parity": 0,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "late-b",
+      "minEmpties": 7,
+      "maxEmpties": 12,
+      "weights": {
+        "bias": 0,
+        "mobility": 49.84375,
+        "potentialMobility": 18.382813,
+        "corners": 850,
+        "cornerAccess": 583.203125,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 121.171875,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 28.90625,
+        "positional": 8.890625,
+        "edgePattern": 153.125,
+        "cornerPattern": 163.125,
+        "stability": 290.3125,
+        "stableDiscDifferential": 0,
+        "discDifferential": 63,
+        "discDifferentialRaw": 0,
+        "parity": 42.678571,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    },
+    {
+      "key": "endgame",
+      "minEmpties": 0,
+      "maxEmpties": 6,
+      "weights": {
+        "bias": 0,
+        "mobility": 39.6875,
+        "potentialMobility": 14.015625,
+        "corners": 850,
+        "cornerAccess": 628.90625,
+        "cornerMoveBalance": 0,
+        "cornerAdjacency": 99.84375,
+        "cornerOrthAdjacency": 0,
+        "cornerDiagonalAdjacency": 0,
+        "frontier": 22.8125,
+        "positional": 8.28125,
+        "edgePattern": 161.25,
+        "cornerPattern": 171.25,
+        "stability": 310.625,
+        "stableDiscDifferential": 0,
+        "discDifferential": 102,
+        "discDifferentialRaw": 0,
+        "parity": 68.214286,
+        "parityGlobal": 0,
+        "parityRegion": 0
+      }
+    }
+  ]
+}

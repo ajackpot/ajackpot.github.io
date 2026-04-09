@@ -1,0 +1,105 @@
+{
+  "name": "tuple-patch-suite-final-entry-followup",
+  "outputDir": "tools/evaluator-training/out/stage70-entry-followup",
+  "moduleFormat": "compact",
+  "sharedProfiles": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "mpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active"
+  },
+  "defaults": {
+    "sourceProfileKind": "auto",
+    "tupleScore": "sum-abs",
+    "globalScale": 1,
+    "calibration": {
+      "enabled": false
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "depth": {
+        "enabled": true,
+        "empties": [24, 20, 18],
+        "seedStart": 1,
+        "seedCount": 12,
+        "repetitions": 1,
+        "timeLimitMs": 2000,
+        "maxDepth": 6,
+        "exactEndgameEmpties": 10
+      },
+      "exact": {
+        "enabled": false
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "top16-control",
+      "name": "top16 control",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/top16-midc090-latea080/tuple.json"
+    },
+    {
+      "key": "top16-e24-a6b7p7-080",
+      "name": "top16 e24 A6-B7@7 0.80x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/top16-midc090-latea080/tuple.json",
+      "entryScales": { "midgame-c:A6-B7@7": 0.8 }
+    },
+    {
+      "key": "top16-e24-b7a8p4-080",
+      "name": "top16 e24 B7-A8@4 0.80x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/top16-midc090-latea080/tuple.json",
+      "entryScales": { "midgame-c:B7-A8@4": 0.8 }
+    },
+    {
+      "key": "top16-e24-combo080",
+      "name": "top16 e24 combo 0.80x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/top16-midc090-latea080/tuple.json",
+      "entryScales": {
+        "midgame-c:A6-B7@7": 0.8,
+        "midgame-c:B7-A8@4": 0.8,
+        "midgame-c:G2-H3@8": 0.8
+      }
+    },
+    {
+      "key": "top16-e24-combo080-f1g2p5-115",
+      "name": "top16 e24 combo + F1-G2@5 1.15x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/top16-midc090-latea080/tuple.json",
+      "entryScales": {
+        "midgame-c:A6-B7@7": 0.8,
+        "midgame-c:B7-A8@4": 0.8,
+        "midgame-c:G2-H3@8": 0.8,
+        "midgame-c:F1-G2@5": 1.15
+      }
+    },
+    {
+      "key": "latea-control",
+      "name": "latea control",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/latea-latea080/tuple.json"
+    },
+    {
+      "key": "latea-e20-f1g2p8-050",
+      "name": "latea e20 F1-G2@8 0.50x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/latea-latea080/tuple.json",
+      "entryScales": { "late-a:F1-G2@8": 0.5 }
+    },
+    {
+      "key": "latea-e20-f1g2p8-050-g1f2p8-150",
+      "name": "latea e20 F1-G2@8 0.50x + G1-F2@8 1.50x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/latea-latea080/tuple.json",
+      "entryScales": {
+        "late-a:F1-G2@8": 0.5,
+        "late-a:G1-F2@8": 1.5
+      }
+    },
+    {
+      "key": "latea-e20-f1g2p8-070",
+      "name": "latea e20 F1-G2@8 0.70x",
+      "sourceTupleProfileJson": "/tmp/stage70/bundle/stage69_work/manual_stage69/candidates/latea-latea080/tuple.json",
+      "entryScales": { "late-a:F1-G2@8": 0.7 }
+    }
+  ]
+}

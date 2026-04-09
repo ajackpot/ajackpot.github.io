@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-04-03T04:43:55.599Z",
+  "variants": {
+    "full_calibrated": {
+      "depth": {
+        "cases": 40,
+        "identicalBestMoveCases": 39,
+        "nodeDeltaPercent": 1.4347059019340236,
+        "elapsedDeltaPercent": 10.08094800968038,
+        "mismatchCases": [
+          {
+            "empties": 22,
+            "seed": 8,
+            "baselineBestMove": "H1",
+            "candidateBestMove": "G6",
+            "baselineScore": -46782,
+            "candidateScore": -48371
+          }
+        ]
+      },
+      "exact": {
+        "cases": 30,
+        "identicalScoreCases": 30,
+        "identicalBestMoveCases": 30,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -2.5513513513513515
+      }
+    },
+    "lateb_endgame": {
+      "depth": {
+        "cases": 40,
+        "identicalBestMoveCases": 40,
+        "nodeDeltaPercent": -0.32488931793215936,
+        "elapsedDeltaPercent": -0.2642120514787352,
+        "mismatchCases": []
+      },
+      "exact": {
+        "cases": 30,
+        "identicalScoreCases": 30,
+        "identicalBestMoveCases": 30,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -2.4819251106075324
+      }
+    },
+    "top24": {
+      "depth": {
+        "cases": 40,
+        "identicalBestMoveCases": 39,
+        "nodeDeltaPercent": -2.5884624346726137,
+        "elapsedDeltaPercent": 0.43806906029891773,
+        "mismatchCases": [
+          {
+            "empties": 22,
+            "seed": 8,
+            "baselineBestMove": "H1",
+            "candidateBestMove": "G6",
+            "baselineScore": -46782,
+            "candidateScore": -48733
+          }
+        ]
+      },
+      "exact": {
+        "cases": 30,
+        "identicalScoreCases": 30,
+        "identicalBestMoveCases": 30,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -0.9380053908355794
+      }
+    }
+  },
+  "recommendation": [
+    "late-b/endgame patch is the safest immediate adoption candidate.",
+    "top24 patch is the strongest reduced-layout retrain seed candidate.",
+    "full 56-tuple layout still looks too expensive to justify a full retrain on the same shape."
+  ]
+}

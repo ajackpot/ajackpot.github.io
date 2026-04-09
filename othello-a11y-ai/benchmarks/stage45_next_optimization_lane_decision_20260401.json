@@ -1,0 +1,127 @@
+{
+  "generatedAt": "2026-04-02T00:05:02.186Z",
+  "acceptedSegments": [
+    {
+      "from": "candidateC",
+      "to": "candidateD",
+      "sameRunCombinedDeltaPercent": -0.40843
+    },
+    {
+      "from": "candidateD",
+      "to": "candidateF",
+      "sameRunCombinedDeltaPercent": -0.28809
+    },
+    {
+      "from": "candidateF",
+      "to": "candidateH2",
+      "sameRunCombinedDeltaPercent": -0.01017
+    }
+  ],
+  "failedFollowUps": [
+    {
+      "candidate": "candidateE fallback@11-12",
+      "combinedNodeDeltaPercent": 5.75752
+    },
+    {
+      "candidate": "candidateG25 edgePattern@11-12=x0.25",
+      "combinedNodeDeltaPercent": 0.83593
+    },
+    {
+      "candidate": "candidateG0 edgePattern@11-12=x0",
+      "combinedNodeDeltaPercent": 0.69889
+    },
+    {
+      "candidate": "candidateH top-pair fastpilot winner",
+      "combinedNodeDeltaPercent": 0.98097
+    }
+  ],
+  "latestCurrent": {
+    "profileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "vsBaselineCombinedPercent": -2.49317,
+    "vsLegacyCombinedPercent": -6.88436
+  },
+  "stage42Decision": "keep candidateF active",
+  "stage43Decision": "keep candidateF active; retain candidateH2 as provisional until wider same-run validation is completed",
+  "chainReplay": {
+    "path": "/mnt/data/stage45work/othello-a11y-ai/benchmarks/stage45_move_ordering_chain_replay_reduced_20260401.json",
+    "finalStatus": {
+      "currentBestKey": "candidateH2",
+      "currentBestProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+      "currentVsBaselineCombinedPercent": 1.0518823157228725,
+      "currentVsLegacyCombinedPercent": -23.837625178826897
+    },
+    "segmentDeltas": [
+      {
+        "from": "legacy",
+        "to": "baseline",
+        "fromCombinedNodes": 16776,
+        "toCombinedNodes": 12644,
+        "combinedNodeDeltaPercent": -24.63042441583214,
+        "depthNodeDeltaPercent": -5.307599517490953,
+        "exactNodeDeltaPercent": -25.634915658117514
+      },
+      {
+        "from": "baseline",
+        "to": "candidateB",
+        "fromCombinedNodes": 12644,
+        "toCombinedNodes": 12699,
+        "combinedNodeDeltaPercent": 0.4349889275545713,
+        "depthNodeDeltaPercent": 0,
+        "exactNodeDeltaPercent": 0.4637827810102032
+      },
+      {
+        "from": "candidateB",
+        "to": "candidateC",
+        "fromCombinedNodes": 12699,
+        "toCombinedNodes": 12699,
+        "combinedNodeDeltaPercent": 0,
+        "depthNodeDeltaPercent": 0,
+        "exactNodeDeltaPercent": 0
+      },
+      {
+        "from": "candidateC",
+        "to": "candidateD",
+        "fromCombinedNodes": 12699,
+        "toCombinedNodes": 12777,
+        "combinedNodeDeltaPercent": 0.6142215922513584,
+        "depthNodeDeltaPercent": 0,
+        "exactNodeDeltaPercent": 0.6546919590397852
+      },
+      {
+        "from": "candidateD",
+        "to": "candidateF",
+        "fromCombinedNodes": 12777,
+        "toCombinedNodes": 12777,
+        "combinedNodeDeltaPercent": 0,
+        "depthNodeDeltaPercent": 0,
+        "exactNodeDeltaPercent": 0
+      },
+      {
+        "from": "candidateF",
+        "to": "candidateH2",
+        "fromCombinedNodes": 12777,
+        "toCombinedNodes": 12777,
+        "combinedNodeDeltaPercent": 0,
+        "depthNodeDeltaPercent": 0,
+        "exactNodeDeltaPercent": 0
+      }
+    ]
+  },
+  "moveOrderingPlateau": true,
+  "recommendation": {
+    "lane": "pivot-to-mpc-calibration-and-runtime-plumbing",
+    "continueMoveOrderingManualSearch": false,
+    "rationale": [
+      "최근 채택 이득이 candidateD→F -0.28809%, candidateF→H2 -0.01017%로 급격히 줄었습니다.",
+      "candidateE / candidateG / candidateH 등 follow-up 후보가 더 넓은 검증에서 유지되지 않았습니다.",
+      "Stage 35에서 이미 “evaluation / move-ordering이 안정화되면 MPC calibration/runtime 실험이 다음 축”으로 정리되어 있었습니다."
+    ],
+    "nextConcreteWork": [
+      "move-ordering은 candidateH2에서 동결하고 재현용 replay/orchestrator만 유지",
+      "real trained-mpc-profile.json이 들어오면 calibration profile을 generated module과 runtime option으로 연결",
+      "그 다음 conservative MPC benchmark를 current H2 baseline과 same-run으로 비교"
+    ],
+    "needsUserSuppliedCorpusForRealBenchmark": true,
+    "requestedUserArtifact": "Egaroucid_Train_Data 전체 또는 calibrated trained-mpc-profile.json"
+  }
+}

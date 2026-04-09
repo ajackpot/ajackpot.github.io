@@ -1,0 +1,11 @@
+@echo off
+for %%I in ("%~dp0.") do set "EVALUATOR_TRAINING_DIR=%%~fI"
+for %%I in ("%EVALUATOR_TRAINING_DIR%\..\..") do set "OTHELLO_REPO_ROOT=%%~fI"
+set "EVALUATOR_TRAINING_OUT=%EVALUATOR_TRAINING_DIR%\out"
+set "OTHELLO_JS_AI_DIR=%OTHELLO_REPO_ROOT%\js\ai"
+set "EVALUATOR_GENERATED_MODULE=%OTHELLO_JS_AI_DIR%\learned-eval-profile.generated.js"
+set "EVALUATOR_OPENING_PRIOR_MODULE=%OTHELLO_JS_AI_DIR%\opening-prior.generated.js"
+set "EVALUATOR_TRAINING_OUT_GENERATED_MODULE=%EVALUATOR_TRAINING_OUT%\learned-eval-profile.generated.js"
+set "EVALUATOR_TRAINING_OUT_OPENING_PRIOR_MODULE=%EVALUATOR_TRAINING_OUT%\opening-prior.generated.js"
+set "OTHELLO_BENCHMARK_DIR=%OTHELLO_REPO_ROOT%\benchmarks"
+goto :eof

@@ -1,0 +1,48 @@
+{
+  "source": "tools/engine-match/run-trineutron-match-suite.mjs",
+  "suiteSummary": "/mnt/data/stage76-bench-pilot/suite-summary.json",
+  "referenceVariantId": "active-no-mpc",
+  "overall": {
+    "active": {
+      "games": 12,
+      "points": 7,
+      "scoreRate": 0.5833333333333334,
+      "averageDiscDiff": 6.5,
+      "averageOurTimeMsPerGame": 2276.25,
+      "averageOurNodesPerGame": 27254.75
+    },
+    "activeNoMpc": {
+      "games": 12,
+      "points": 7,
+      "scoreRate": 0.5833333333333334,
+      "averageDiscDiff": 2.8333333333333335,
+      "averageOurTimeMsPerGame": 2349.5833333333335,
+      "averageOurNodesPerGame": 28446.5
+    },
+    "relative": {
+      "scoreRateDelta": 0.0,
+      "averageDiscDiffDelta": 3.6666666666666665,
+      "averageOurTimePctVsNoMpc": 96.87887923390672,
+      "averageOurNodesPctVsNoMpc": 95.81055665899144
+    }
+  },
+  "scenarios": [
+    {
+      "scenarioId": "fast-diagnostic",
+      "activeScoreRate": 0.75,
+      "noMpcScoreRate": 0.75,
+      "averageDiscDiffDelta": 3.0,
+      "averageOurTimePctVsNoMpc": 87.22112047595438,
+      "averageOurNodesPctVsNoMpc": 82.21034758290052
+    },
+    {
+      "scenarioId": "fast-noisy",
+      "activeScoreRate": 0.5,
+      "noMpcScoreRate": 0.5,
+      "averageDiscDiffDelta": 4.0,
+      "averageOurTimePctVsNoMpc": 100.75023600139117,
+      "averageOurNodesPctVsNoMpc": 101.45499465258376
+    }
+  ],
+  "conclusion": "Pilot Trineutron match results do not justify further MPC retraining. Keep overlap-8bucket-high-tight provisionally adopted and move to larger match batches or non-MPC micro-patches."
+}

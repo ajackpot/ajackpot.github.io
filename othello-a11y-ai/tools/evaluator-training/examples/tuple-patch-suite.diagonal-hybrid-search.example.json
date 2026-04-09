@@ -1,0 +1,71 @@
+{
+  "name": "tuple-patch-suite-diagonal-hybrid-search",
+  "outputDir": "tools/evaluator-training/out/tuple-patch-diagonal-hybrid-search",
+  "moduleFormat": "compact",
+  "sharedProfiles": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "mpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active"
+  },
+  "defaults": {
+    "sourceProfileKind": "auto",
+    "tupleScore": "sum-abs",
+    "globalScale": 1,
+    "calibration": {
+      "enabled": false
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "depth": {
+        "enabled": true,
+        "empties": [
+          24,
+          20,
+          18
+        ],
+        "seedStart": 1,
+        "seedCount": 4,
+        "repetitions": 1,
+        "timeLimitMs": 2000,
+        "maxDepth": 6,
+        "exactEndgameEmpties": 10
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "diagonal-latea-endgame-top24",
+      "name": "diagonal late-a+endgame top24",
+      "sourceCandidateKey": "diagonal-adjacent-pairs-full-v1",
+      "keepBuckets": [
+        "late-a",
+        "endgame"
+      ],
+      "keepTopTuples": 24
+    },
+    {
+      "key": "diagonal-lite-top16",
+      "name": "diagonal top16 + late-b 0.5x",
+      "sourceCandidateKey": "diagonal-adjacent-pairs-full-v1",
+      "keepTopTuples": 16,
+      "bucketScales": {
+        "late-b": 0.5
+      }
+    },
+    {
+      "key": "diagonal-latea-endgame-top16",
+      "name": "diagonal late-a+endgame top16",
+      "sourceCandidateKey": "diagonal-adjacent-pairs-full-v1",
+      "keepBuckets": [
+        "late-a",
+        "endgame"
+      ],
+      "keepTopTuples": 16
+    }
+  ]
+}

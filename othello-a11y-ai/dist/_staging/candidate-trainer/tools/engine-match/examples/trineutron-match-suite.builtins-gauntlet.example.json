@@ -1,0 +1,60 @@
+{
+  "defaults": {
+    "games": 4,
+    "openingPlies": 20,
+    "seed": 11,
+    "ourTimeMs": 100,
+    "theirTimeMs": 100,
+    "ourMaxDepth": 6,
+    "theirMaxDepth": 18,
+    "exactEndgameEmpties": 10,
+    "solverAdjudicationEmpties": 14,
+    "solverAdjudicationTimeMs": 60000,
+    "solverAdjudicationMaxDepth": 14,
+    "theirNoiseScale": 4,
+    "variantSeedMode": "shared"
+  },
+  "referenceVariantId": "legacy",
+  "variants": [
+    {
+      "id": "active",
+      "variant": "active",
+      "label": "active-installed-high-tight"
+    },
+    {
+      "id": "phase-only",
+      "variant": "phase-only",
+      "label": "active-phase-only"
+    },
+    {
+      "id": "legacy",
+      "variant": "legacy",
+      "label": "legacy-seed"
+    },
+    {
+      "id": "active-no-mpc",
+      "type": "custom",
+      "label": "active-generated-without-mpc",
+      "generatedModule": "js/ai/learned-eval-profile.generated.js",
+      "disableMpc": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "fast-noisy",
+      "seed": 21,
+      "games": 4,
+      "ourTimeMs": 100,
+      "theirTimeMs": 100,
+      "theirNoiseScale": 4
+    },
+    {
+      "id": "medium-noisy",
+      "seed": 31,
+      "games": 6,
+      "ourTimeMs": 150,
+      "theirTimeMs": 150,
+      "theirNoiseScale": 4
+    }
+  ]
+}

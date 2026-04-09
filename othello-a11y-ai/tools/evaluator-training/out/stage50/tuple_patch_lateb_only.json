@@ -1,0 +1,1315 @@
+{
+  "version": 1,
+  "name": "tuple-patch-lateb-only",
+  "description": "phase-linear evaluator 위에 얹는 tuple residual evaluator입니다. (bucket bias recentered) (patched)",
+  "stage": {
+    "number": 38,
+    "tag": "stage38",
+    "file": "stage-info.json",
+    "label": "Stage 38",
+    "updatedAt": "2026-04-02T09:06:54+09:00",
+    "kind": "tuple-residual-profile"
+  },
+  "featureEncoding": "ternary-side-to-move",
+  "layout": {
+    "version": 1,
+    "name": "orthogonal-adjacent-pairs-outer2-v1-patched",
+    "description": "바깥쪽 두 줄/두 칸(file/rank)의 인접 가로/세로 pair 56개로 만든 compact residual layout입니다. (patched)",
+    "tupleCount": 56,
+    "maxTupleLength": 2,
+    "totalTableSize": 504,
+    "tuples": [
+      {
+        "key": "A1-B1",
+        "squares": [
+          0,
+          1
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B1-C1",
+        "squares": [
+          1,
+          2
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C1-D1",
+        "squares": [
+          2,
+          3
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "D1-E1",
+        "squares": [
+          3,
+          4
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E1-F1",
+        "squares": [
+          4,
+          5
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F1-G1",
+        "squares": [
+          5,
+          6
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G1-H1",
+        "squares": [
+          6,
+          7
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A2-B2",
+        "squares": [
+          8,
+          9
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B2-C2",
+        "squares": [
+          9,
+          10
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C2-D2",
+        "squares": [
+          10,
+          11
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "D2-E2",
+        "squares": [
+          11,
+          12
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E2-F2",
+        "squares": [
+          12,
+          13
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F2-G2",
+        "squares": [
+          13,
+          14
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G2-H2",
+        "squares": [
+          14,
+          15
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A7-B7",
+        "squares": [
+          48,
+          49
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B7-C7",
+        "squares": [
+          49,
+          50
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C7-D7",
+        "squares": [
+          50,
+          51
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "D7-E7",
+        "squares": [
+          51,
+          52
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E7-F7",
+        "squares": [
+          52,
+          53
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F7-G7",
+        "squares": [
+          53,
+          54
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G7-H7",
+        "squares": [
+          54,
+          55
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A8-B8",
+        "squares": [
+          56,
+          57
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B8-C8",
+        "squares": [
+          57,
+          58
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C8-D8",
+        "squares": [
+          58,
+          59
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "D8-E8",
+        "squares": [
+          59,
+          60
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E8-F8",
+        "squares": [
+          60,
+          61
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F8-G8",
+        "squares": [
+          61,
+          62
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G8-H8",
+        "squares": [
+          62,
+          63
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A1-A2",
+        "squares": [
+          0,
+          8
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A2-A3",
+        "squares": [
+          8,
+          16
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A3-A4",
+        "squares": [
+          16,
+          24
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A4-A5",
+        "squares": [
+          24,
+          32
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A5-A6",
+        "squares": [
+          32,
+          40
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A6-A7",
+        "squares": [
+          40,
+          48
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A7-A8",
+        "squares": [
+          48,
+          56
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B1-B2",
+        "squares": [
+          1,
+          9
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B2-B3",
+        "squares": [
+          9,
+          17
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B3-B4",
+        "squares": [
+          17,
+          25
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B4-B5",
+        "squares": [
+          25,
+          33
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B5-B6",
+        "squares": [
+          33,
+          41
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B6-B7",
+        "squares": [
+          41,
+          49
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B7-B8",
+        "squares": [
+          49,
+          57
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G1-G2",
+        "squares": [
+          6,
+          14
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G2-G3",
+        "squares": [
+          14,
+          22
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G3-G4",
+        "squares": [
+          22,
+          30
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G4-G5",
+        "squares": [
+          30,
+          38
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G5-G6",
+        "squares": [
+          38,
+          46
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G6-G7",
+        "squares": [
+          46,
+          54
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G7-G8",
+        "squares": [
+          54,
+          62
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H1-H2",
+        "squares": [
+          7,
+          15
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H2-H3",
+        "squares": [
+          15,
+          23
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H3-H4",
+        "squares": [
+          23,
+          31
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H4-H5",
+        "squares": [
+          31,
+          39
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H5-H6",
+        "squares": [
+          39,
+          47
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H6-H7",
+        "squares": [
+          47,
+          55
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H7-H8",
+        "squares": [
+          55,
+          63
+        ],
+        "length": 2,
+        "tableSize": 9
+      }
+    ]
+  },
+  "source": {
+    "inputFiles": [
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000000.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000001.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000002.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000003.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000004.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000005.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000006.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000007.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000008.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000009.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000010.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000011.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000012.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000013.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000014.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000015.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000016.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000017.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000018.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000019.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000020.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000021.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000022.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000023.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000024.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000025.txt"
+    ],
+    "evaluationProfileName": "trained-phase-linear-v1",
+    "evaluationProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\trained-evaluation-profile.json",
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+    "phaseBuckets": [
+      {
+        "key": "midgame-c",
+        "minEmpties": 20,
+        "maxEmpties": 27
+      },
+      {
+        "key": "late-a",
+        "minEmpties": 13,
+        "maxEmpties": 19
+      },
+      {
+        "key": "late-b",
+        "minEmpties": 7,
+        "maxEmpties": 12
+      },
+      {
+        "key": "endgame",
+        "minEmpties": 0,
+        "maxEmpties": 6
+      }
+    ],
+    "targetScale": 3000,
+    "holdoutMod": 10,
+    "holdoutResidue": 0,
+    "sampleStride": 4,
+    "sampleResidue": 0,
+    "epochs": 1,
+    "learningRate": 0.05,
+    "regularization": 0.0005,
+    "gradientClip": 90000,
+    "minVisits": 32,
+    "seenSamples": 25514097,
+    "selectedTrainSamples": 2700351,
+    "seedProfileName": null,
+    "patchedFromProfileName": "trained-tuple-residual-stage38-calibrated",
+    "patchedFromProfileStage": {
+      "number": 38,
+      "tag": "stage38",
+      "file": "stage-info.json",
+      "label": "Stage 38",
+      "updatedAt": "2026-04-02T09:06:54+09:00",
+      "kind": "tuple-residual-profile"
+    }
+  },
+  "diagnostics": null,
+  "trainedBuckets": [
+    {
+      "key": "late-b",
+      "minEmpties": 7,
+      "maxEmpties": 12,
+      "scale": 1,
+      "bias": 290.1272690250953,
+      "tupleWeights": [
+        [
+          -49.211452,
+          25.430075,
+          347.637342,
+          825.930119,
+          -100.948905,
+          413.509065,
+          -201.065087,
+          -467.084175,
+          -310.89455
+        ],
+        [
+          -18.97972,
+          -860.81027,
+          1227.535833,
+          -393.964522,
+          -166.788697,
+          143.695537,
+          512.343827,
+          22.268578,
+          -114.655455
+        ],
+        [
+          -38.496296,
+          -68.210141,
+          175.34938,
+          -417.906359,
+          -422.665478,
+          -3.978159,
+          574.284027,
+          288.758746,
+          277.658099
+        ],
+        [
+          23.727837,
+          -99.401512,
+          232.803802,
+          -99.183396,
+          -357.021794,
+          207.118267,
+          155.168303,
+          114.240167,
+          245.494824
+        ],
+        [
+          -75.261362,
+          -367.244197,
+          520.695695,
+          -189.088418,
+          -406.550828,
+          258.221493,
+          419.584663,
+          62.446557,
+          194.004054
+        ],
+        [
+          -85.263913,
+          -244.078844,
+          542.648717,
+          -700.389774,
+          -222.22433,
+          156.334668,
+          911.686197,
+          143.229671,
+          -62.088456
+        ],
+        [
+          -212.041407,
+          694.432642,
+          -65.494292,
+          158.157457,
+          -286.497696,
+          -254.929674,
+          388.438838,
+          219.829497,
+          -176.333186
+        ],
+        [
+          -166.421159,
+          21.871746,
+          343.869035,
+          159.479036,
+          -174.626946,
+          -305.220233,
+          265.896191,
+          252.837347,
+          -49.408499
+        ],
+        [
+          72.582983,
+          19.870636,
+          144.487042,
+          -51.705146,
+          -7.872325,
+          79.852583,
+          136.005638,
+          282.088871,
+          -198.549627
+        ],
+        [
+          -266.759874,
+          54.311387,
+          141.05812,
+          -21.184285,
+          262.835171,
+          -50.440992,
+          208.656936,
+          192.139827,
+          -243.072715
+        ],
+        [
+          -85.640633,
+          58.18059,
+          27.12765,
+          -50.236248,
+          362.496866,
+          64.679183,
+          5.607364,
+          77.154045,
+          -281.95576
+        ],
+        [
+          -27.419729,
+          -140.163461,
+          79.862853,
+          2.674586,
+          227.814779,
+          306.735281,
+          77.502639,
+          -118.640527,
+          -206.219505
+        ],
+        [
+          -196.811733,
+          74.666914,
+          148.676739,
+          5.054165,
+          -65.137585,
+          188.790681,
+          256.314726,
+          25.123849,
+          -157.434127
+        ],
+        [
+          -132.566572,
+          182.875455,
+          244.012134,
+          132.078722,
+          -230.415796,
+          154.45711,
+          315.825227,
+          -428.912017,
+          76.160394
+        ],
+        [
+          -170.756513,
+          146.6999,
+          304.217002,
+          68.099602,
+          -202.386743,
+          -204.264625,
+          420.250421,
+          131.055211,
+          -66.281758
+        ],
+        [
+          -141.79225,
+          -68.004811,
+          294.858079,
+          95.338557,
+          4.307436,
+          -50.78612,
+          50.489024,
+          328.474281,
+          -184.253786
+        ],
+        [
+          -128.216985,
+          -8.344742,
+          74.109428,
+          46.706433,
+          231.402549,
+          -61.508326,
+          141.992664,
+          159.048635,
+          -191.243661
+        ],
+        [
+          1.049794,
+          48.10928,
+          48.476348,
+          76.981168,
+          303.925192,
+          -6.628298,
+          94.103203,
+          83.151103,
+          -272.557661
+        ],
+        [
+          -70.292464,
+          116.597774,
+          117.55881,
+          -114.539504,
+          200.35806,
+          293.172208,
+          190.786424,
+          -96.040066,
+          -261.556173
+        ],
+        [
+          -261.13723,
+          34.232092,
+          142.883583,
+          -34.819055,
+          -3.061847,
+          274.900862,
+          285.163209,
+          -20.504196,
+          -197.376506
+        ],
+        [
+          -168.152107,
+          49.915261,
+          355.67472,
+          90.464981,
+          -134.51261,
+          129.268027,
+          395.53036,
+          -194.056631,
+          -148.519942
+        ],
+        [
+          -131.485967,
+          81.631483,
+          295.190657,
+          710.352298,
+          -300.974424,
+          310.516326,
+          -44.466489,
+          -258.108934,
+          -151.518605
+        ],
+        [
+          -103.730238,
+          -610.097295,
+          967.318802,
+          -270.794816,
+          -275.616863,
+          100.312457,
+          529.106746,
+          159.468168,
+          -89.885451
+        ],
+        [
+          -51.474689,
+          -206.018411,
+          436.903026,
+          -313.008632,
+          -360.382217,
+          -55.833566,
+          412.120404,
+          222.950967,
+          268.668342
+        ],
+        [
+          -60.181323,
+          -206.285584,
+          280.011903,
+          -43.031376,
+          -357.121584,
+          30.673108,
+          258.288086,
+          111.510865,
+          300.822742
+        ],
+        [
+          -79.99353,
+          -345.847034,
+          564.585701,
+          -125.674823,
+          -416.449253,
+          153.464475,
+          379.586622,
+          -64.375472,
+          283.81096
+        ],
+        [
+          -6.585969,
+          -230.295411,
+          452.547462,
+          -791.586754,
+          -144.45165,
+          -7.108438,
+          1093.747049,
+          59.316796,
+          -44.344285
+        ],
+        [
+          -194.220261,
+          916.791435,
+          -197.874929,
+          142.710471,
+          -141.765722,
+          -432.219393,
+          364.13726,
+          279.484263,
+          -281.409525
+        ],
+        [
+          -112.114949,
+          79.768373,
+          350.860506,
+          822.181962,
+          -123.783628,
+          448.089926,
+          -291.413431,
+          -433.437524,
+          -285.696027
+        ],
+        [
+          -24.500046,
+          -762.850026,
+          996.013165,
+          -293.870969,
+          -208.141704,
+          186.678911,
+          504.02496,
+          20.370712,
+          -15.921479
+        ],
+        [
+          12.978304,
+          -151.874368,
+          298.442117,
+          -327.024293,
+          -454.477177,
+          -30.636085,
+          575.62225,
+          214.834085,
+          269.481622
+        ],
+        [
+          98.740908,
+          -86.208072,
+          249.414715,
+          -83.943733,
+          -464.489952,
+          219.545321,
+          195.648461,
+          58.092957,
+          280.193743
+        ],
+        [
+          70.744584,
+          -262.896599,
+          400.100912,
+          -234.74191,
+          -404.42676,
+          112.1143,
+          376.769632,
+          80.009553,
+          268.880305
+        ],
+        [
+          -15.622497,
+          -201.715264,
+          454.795325,
+          -643.830737,
+          -197.783269,
+          172.110115,
+          904.498244,
+          76.377686,
+          -94.899901
+        ],
+        [
+          -118.896134,
+          740.321871,
+          -81.956824,
+          105.45662,
+          -270.192661,
+          -204.441385,
+          289.508838,
+          254.030643,
+          -169.549994
+        ],
+        [
+          -162.299988,
+          54.297537,
+          453.366628,
+          202.126838,
+          -190.688681,
+          -391.562099,
+          258.221371,
+          238.284468,
+          -77.71536
+        ],
+        [
+          -71.817685,
+          -28.360313,
+          220.047261,
+          6.154636,
+          37.118842,
+          -46.928924,
+          170.199719,
+          219.788386,
+          -178.412936
+        ],
+        [
+          -40.855738,
+          63.503671,
+          69.255606,
+          79.447888,
+          211.229187,
+          -100.738418,
+          152.849801,
+          164.628156,
+          -233.019869
+        ],
+        [
+          -28.589643,
+          19.533578,
+          200.688421,
+          95.185995,
+          284.414708,
+          15.904001,
+          -52.302849,
+          42.08206,
+          -250.101278
+        ],
+        [
+          -81.133086,
+          -135.677984,
+          209.812996,
+          -69.188983,
+          276.752113,
+          124.10263,
+          120.549287,
+          -95.97635,
+          -157.82846
+        ],
+        [
+          -123.196291,
+          76.711155,
+          50.432686,
+          -50.683499,
+          -51.44652,
+          347.26344,
+          262.371986,
+          14.820711,
+          -208.277373
+        ],
+        [
+          -115.45053,
+          63.018733,
+          317.676552,
+          96.237008,
+          -203.801201,
+          177.686828,
+          315.352079,
+          -320.899258,
+          1.294826
+        ],
+        [
+          -152.753579,
+          61.981214,
+          241.667694,
+          181.282488,
+          -271.266645,
+          -237.3307,
+          266.257442,
+          310.12006,
+          -10.408776
+        ],
+        [
+          -51.586093,
+          24.293847,
+          180.7372,
+          -86.741069,
+          -20.522836,
+          45.882012,
+          198.430262,
+          312.851355,
+          -223.168254
+        ],
+        [
+          -86.526634,
+          -141.953659,
+          197.194087,
+          -65.902963,
+          312.530331,
+          -96.757538,
+          266.035065,
+          207.711463,
+          -301.806485
+        ],
+        [
+          -127.401293,
+          141.152757,
+          52.797262,
+          68.597582,
+          323.394578,
+          66.781541,
+          -35.242049,
+          -56.516831,
+          -239.54081
+        ],
+        [
+          -41.414846,
+          -6.915048,
+          -15.32711,
+          -127.887347,
+          247.525017,
+          214.989573,
+          251.871187,
+          -165.163667,
+          -163.453083
+        ],
+        [
+          -147.143403,
+          57.610146,
+          169.396863,
+          -82.287366,
+          5.662294,
+          215.924722,
+          248.118115,
+          -28.109146,
+          -157.651962
+        ],
+        [
+          -164.584095,
+          77.752653,
+          316.712923,
+          10.829487,
+          -114.081748,
+          182.431533,
+          418.211099,
+          -290.394825,
+          -71.048945
+        ],
+        [
+          -129.215952,
+          90.219058,
+          365.790502,
+          726.772983,
+          -304.565318,
+          219.34541,
+          -45.979786,
+          -334.068722,
+          -150.317771
+        ],
+        [
+          15.123327,
+          -652.806204,
+          935.943667,
+          -288.621649,
+          -258.092505,
+          63.227176,
+          484.643114,
+          123.215189,
+          -23.920894
+        ],
+        [
+          -21.099014,
+          -286.346948,
+          424.522189,
+          -276.745622,
+          -395.180865,
+          -62.164942,
+          372.478322,
+          246.17967,
+          298.802575
+        ],
+        [
+          5.692648,
+          -61.284951,
+          164.368151,
+          -126.949077,
+          -428.370753,
+          132.933422,
+          239.101314,
+          180.890923,
+          284.112361
+        ],
+        [
+          -116.081978,
+          -348.11915,
+          550.567104,
+          -157.749437,
+          -428.578727,
+          260.178473,
+          452.474354,
+          -144.866732,
+          248.854806
+        ],
+        [
+          -29.075236,
+          -208.366684,
+          466.120875,
+          -757.733115,
+          -197.472605,
+          -86.200932,
+          1116.455722,
+          119.542365,
+          -97.095472
+        ],
+        [
+          -138.962057,
+          864.969406,
+          -158.718987,
+          191.820826,
+          -147.312413,
+          -405.990017,
+          290.35381,
+          349.364422,
+          -329.938057
+        ]
+      ]
+    }
+  ],
+  "patch": {
+    "version": 1,
+    "mode": "prune",
+    "generatedAt": "2026-04-03T04:42:51.226Z",
+    "sourceTupleProfileName": "trained-tuple-residual-stage38-calibrated",
+    "sourceTupleProfileStage": {
+      "number": 38,
+      "tag": "stage38",
+      "file": "stage-info.json",
+      "label": "Stage 38",
+      "updatedAt": "2026-04-02T09:06:54+09:00",
+      "kind": "tuple-residual-profile"
+    },
+    "sourceTupleCount": 56,
+    "selectedTupleCount": 56,
+    "selectedTupleKeys": [
+      "A1-B1",
+      "B1-C1",
+      "C1-D1",
+      "D1-E1",
+      "E1-F1",
+      "F1-G1",
+      "G1-H1",
+      "A2-B2",
+      "B2-C2",
+      "C2-D2",
+      "D2-E2",
+      "E2-F2",
+      "F2-G2",
+      "G2-H2",
+      "A7-B7",
+      "B7-C7",
+      "C7-D7",
+      "D7-E7",
+      "E7-F7",
+      "F7-G7",
+      "G7-H7",
+      "A8-B8",
+      "B8-C8",
+      "C8-D8",
+      "D8-E8",
+      "E8-F8",
+      "F8-G8",
+      "G8-H8",
+      "A1-A2",
+      "A2-A3",
+      "A3-A4",
+      "A4-A5",
+      "A5-A6",
+      "A6-A7",
+      "A7-A8",
+      "B1-B2",
+      "B2-B3",
+      "B3-B4",
+      "B4-B5",
+      "B5-B6",
+      "B6-B7",
+      "B7-B8",
+      "G1-G2",
+      "G2-G3",
+      "G3-G4",
+      "G4-G5",
+      "G5-G6",
+      "G6-G7",
+      "G7-G8",
+      "H1-H2",
+      "H2-H3",
+      "H3-H4",
+      "H4-H5",
+      "H5-H6",
+      "H6-H7",
+      "H7-H8"
+    ],
+    "selectedBucketKeys": [
+      "late-b"
+    ],
+    "tupleScoreMetric": "sum-abs",
+    "keepBuckets": [
+      "late-b"
+    ],
+    "diagnosticsStatus": "stale-removed"
+  }
+}

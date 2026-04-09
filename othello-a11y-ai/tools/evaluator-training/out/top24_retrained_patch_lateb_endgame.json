@@ -1,0 +1,919 @@
+{
+  "version": 1,
+  "name": "top24-retrain-retrained-calibrated-lateb-endgame",
+  "description": "retr. calibrated top24 patched to late-b,endgame",
+  "stage": {
+    "number": 38,
+    "tag": "stage38",
+    "file": "stage-info.json",
+    "label": "Stage 38",
+    "updatedAt": "2026-04-02T09:06:54+09:00",
+    "kind": "tuple-residual-profile"
+  },
+  "featureEncoding": "ternary-side-to-move",
+  "layout": {
+    "version": 1,
+    "name": "orthogonal-adjacent-pairs-outer2-v1-patched-patched",
+    "description": "바깥쪽 두 줄/두 칸(file/rank)의 인접 가로/세로 pair 56개로 만든 compact residual layout입니다. (patched) (patched)",
+    "tupleCount": 24,
+    "maxTupleLength": 2,
+    "totalTableSize": 216,
+    "tuples": [
+      {
+        "key": "A1-B1",
+        "squares": [
+          0,
+          1
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B1-C1",
+        "squares": [
+          1,
+          2
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C1-D1",
+        "squares": [
+          2,
+          3
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E1-F1",
+        "squares": [
+          4,
+          5
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F1-G1",
+        "squares": [
+          5,
+          6
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A2-B2",
+        "squares": [
+          8,
+          9
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A7-B7",
+        "squares": [
+          48,
+          49
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B8-C8",
+        "squares": [
+          57,
+          58
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "C8-D8",
+        "squares": [
+          58,
+          59
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "E8-F8",
+        "squares": [
+          60,
+          61
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "F8-G8",
+        "squares": [
+          61,
+          62
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G8-H8",
+        "squares": [
+          62,
+          63
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A1-A2",
+        "squares": [
+          0,
+          8
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A2-A3",
+        "squares": [
+          8,
+          16
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A3-A4",
+        "squares": [
+          16,
+          24
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A5-A6",
+        "squares": [
+          32,
+          40
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "A6-A7",
+        "squares": [
+          40,
+          48
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "B1-B2",
+        "squares": [
+          1,
+          9
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "G7-G8",
+        "squares": [
+          54,
+          62
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H2-H3",
+        "squares": [
+          15,
+          23
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H3-H4",
+        "squares": [
+          23,
+          31
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H5-H6",
+        "squares": [
+          39,
+          47
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H6-H7",
+        "squares": [
+          47,
+          55
+        ],
+        "length": 2,
+        "tableSize": 9
+      },
+      {
+        "key": "H7-H8",
+        "squares": [
+          55,
+          63
+        ],
+        "length": 2,
+        "tableSize": 9
+      }
+    ]
+  },
+  "source": {
+    "inputFiles": [
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000000.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000001.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000002.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000003.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000004.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000005.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000006.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000007.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000008.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000009.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000010.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000011.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000012.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000013.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000014.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000015.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000016.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000017.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000018.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000019.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000020.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000021.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000022.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000023.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000024.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000025.txt"
+    ],
+    "evaluationProfileName": "trained-phase-linear-v1",
+    "evaluationProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\trained-evaluation-profile.json",
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1-patched",
+    "phaseBuckets": [
+      {
+        "key": "midgame-c",
+        "minEmpties": 20,
+        "maxEmpties": 27
+      },
+      {
+        "key": "late-a",
+        "minEmpties": 13,
+        "maxEmpties": 19
+      },
+      {
+        "key": "late-b",
+        "minEmpties": 7,
+        "maxEmpties": 12
+      },
+      {
+        "key": "endgame",
+        "minEmpties": 0,
+        "maxEmpties": 6
+      }
+    ],
+    "targetScale": 3000,
+    "holdoutMod": 10,
+    "holdoutResidue": 0,
+    "sampleStride": 4,
+    "sampleResidue": 0,
+    "epochs": 1,
+    "learningRate": 0.05,
+    "biasLearningRate": 0.05,
+    "regularization": 0.0005,
+    "gradientClip": 90000,
+    "minVisits": 32,
+    "seenSamples": 25514097,
+    "selectedTrainSamples": 2700351,
+    "seedProfileName": "top24-retrain-seed-patch",
+    "patchedFromProfileName": "top24-retrain-retrained-calibrated",
+    "patchedFromProfileStage": {
+      "number": 38,
+      "tag": "stage38",
+      "file": "stage-info.json",
+      "label": "Stage 38",
+      "updatedAt": "2026-04-02T09:06:54+09:00",
+      "kind": "tuple-residual-profile"
+    }
+  },
+  "diagnostics": null,
+  "trainedBuckets": [
+    {
+      "key": "late-b",
+      "minEmpties": 7,
+      "maxEmpties": 12,
+      "scale": 1,
+      "bias": 1287.146624396591,
+      "tupleWeights": [
+        [
+          -204.643521,
+          60.363601,
+          548.131574,
+          1745.554124,
+          -333.810909,
+          721.882576,
+          -536.341672,
+          -902.088665,
+          -369.249542
+        ],
+        [
+          -24.811794,
+          -1613.481251,
+          2134.803925,
+          -980.573816,
+          -311.658088,
+          286.23537,
+          1190.170934,
+          14.589869,
+          -257.485147
+        ],
+        [
+          -29.806179,
+          -227.469352,
+          354.318994,
+          -858.715212,
+          -762.930243,
+          160.496706,
+          1076.403418,
+          395.324056,
+          411.6297
+        ],
+        [
+          -90.013859,
+          -801.305962,
+          1016.181157,
+          -483.650302,
+          -835.785792,
+          314.179749,
+          940.840152,
+          198.727701,
+          330.431223
+        ],
+        [
+          -190.77372,
+          -829.115887,
+          1486.803639,
+          -1341.303282,
+          -622.443705,
+          445.515272,
+          1682.071666,
+          137.985301,
+          -79.806533
+        ],
+        [
+          -228.642127,
+          -183.843343,
+          716.498306,
+          317.586906,
+          -404.209193,
+          -747.160353,
+          603.2537,
+          425.927482,
+          -81.004706
+        ],
+        [
+          -403.974803,
+          378.20723,
+          543.936339,
+          217.496299,
+          -556.797608,
+          -565.958294,
+          1123.35425,
+          157.557154,
+          -103.690692
+        ],
+        [
+          -174.451966,
+          -1117.261031,
+          1789.745452,
+          -921.140373,
+          -678.83571,
+          79.993565,
+          1393.173582,
+          356.743627,
+          -196.53779
+        ],
+        [
+          -42.363087,
+          -479.518746,
+          1021.321259,
+          -696.479129,
+          -719.739967,
+          2.626064,
+          781.787959,
+          291.93867,
+          446.566916
+        ],
+        [
+          -92.587187,
+          -693.061689,
+          1140.091317,
+          -389.304186,
+          -864.990142,
+          135.42475,
+          819.630466,
+          28.018821,
+          480.977137
+        ],
+        [
+          -45.634452,
+          -618.583887,
+          1093.56489,
+          -1490.198962,
+          -347.753629,
+          20.389776,
+          1988.60328,
+          54.130687,
+          -42.321015
+        ],
+        [
+          -468.825337,
+          1907.357376,
+          -536.148665,
+          297.154375,
+          -515.114527,
+          -846.836932,
+          602.945158,
+          493.292118,
+          -312.917647
+        ],
+        [
+          -265.321879,
+          115.732424,
+          484.13032,
+          1745.558604,
+          -362.630921,
+          762.776572,
+          -683.918499,
+          -836.801259,
+          -353.528343
+        ],
+        [
+          -41.267929,
+          -1440.204577,
+          1833.407773,
+          -788.549847,
+          -416.928246,
+          364.779387,
+          1137.258093,
+          -7.509753,
+          -54.016239
+        ],
+        [
+          65.179944,
+          -416.176623,
+          618.376478,
+          -646.935065,
+          -911.764191,
+          91.161317,
+          1213.75373,
+          251.049664,
+          414.824586
+        ],
+        [
+          195.81951,
+          -550.252319,
+          800.621708,
+          -642.132691,
+          -808.665426,
+          17.892087,
+          874.358965,
+          320.633647,
+          468.909488
+        ],
+        [
+          -40.663818,
+          -705.461696,
+          1192.795421,
+          -1254.939459,
+          -424.641447,
+          378.651672,
+          1699.230831,
+          138.830099,
+          -247.121409
+        ],
+        [
+          -225.976876,
+          -164.484816,
+          872.83819,
+          483.042968,
+          -472.487881,
+          -923.892609,
+          585.772281,
+          494.234421,
+          -93.161667
+        ],
+        [
+          -196.44034,
+          132.728035,
+          679.531798,
+          -400.293829,
+          -430.51812,
+          303.040707,
+          950.798451,
+          -595.811516,
+          30.188583
+        ],
+        [
+          109.439954,
+          -1122.666529,
+          1734.362907,
+          -970.831092,
+          -725.239164,
+          -108.690143,
+          1420.155019,
+          371.759498,
+          -52.050023
+        ],
+        [
+          46.266309,
+          -693.982779,
+          948.413661,
+          -582.232025,
+          -789.814448,
+          -7.095744,
+          696.956605,
+          303.799221,
+          494.038478
+        ],
+        [
+          -196.053399,
+          -752.694235,
+          1130.988289,
+          -436.335607,
+          -890.683621,
+          375.094477,
+          930.127274,
+          -238.100864,
+          424.79913
+        ],
+        [
+          -55.716803,
+          -684.279124,
+          1111.354718,
+          -1421.46702,
+          -505.255583,
+          -229.615444,
+          2067.07104,
+          150.787177,
+          -143.565453
+        ],
+        [
+          -385.082743,
+          1764.706553,
+          -275.185691,
+          404.682995,
+          -498.623005,
+          -932.170952,
+          537.581711,
+          626.915774,
+          -455.071566
+        ]
+      ]
+    },
+    {
+      "key": "endgame",
+      "minEmpties": 0,
+      "maxEmpties": 6,
+      "scale": 1,
+      "bias": 5405.904340478754,
+      "tupleWeights": [
+        [
+          -174.950245,
+          -114.070023,
+          365.448284,
+          1990.218855,
+          -543.638099,
+          644.453908,
+          -158.51691,
+          19.928702,
+          -575.02853
+        ],
+        [
+          222.204295,
+          -1425.047211,
+          2509.376252,
+          -37.630554,
+          -636.780116,
+          495.645383,
+          1740.324054,
+          -226.385616,
+          -378.476048
+        ],
+        [
+          1061.022937,
+          -787.599238,
+          1861.379121,
+          -265.585252,
+          -947.912621,
+          -255.497619,
+          1886.634432,
+          254.581614,
+          76.912161
+        ],
+        [
+          808.424694,
+          -246.896106,
+          1808.028056,
+          -659.084711,
+          -1105.317266,
+          357.126156,
+          2114.7048,
+          -40.328428,
+          27.893459
+        ],
+        [
+          764.15065,
+          -59.263541,
+          1650.12242,
+          -483.940393,
+          -906.991172,
+          -437.218572,
+          3271.429743,
+          80.336767,
+          -611.40063
+        ],
+        [
+          493.727242,
+          -631.308922,
+          1515.846063,
+          2029.544847,
+          -542.449986,
+          -553.7541,
+          309.538142,
+          455.555464,
+          -359.140451
+        ],
+        [
+          489.841497,
+          -65.407436,
+          1554.208058,
+          2404.569132,
+          -942.417732,
+          -481.564567,
+          1038.103989,
+          123.655655,
+          -561.050487
+        ],
+        [
+          646.148503,
+          -534.56989,
+          3005.22869,
+          -239.875016,
+          -795.648599,
+          196.414103,
+          1715.59118,
+          -235.163666,
+          -576.879357
+        ],
+        [
+          765.046176,
+          -439.136495,
+          1863.368509,
+          62.987654,
+          -961.671849,
+          -224.011256,
+          1550.557098,
+          430.047626,
+          128.601267
+        ],
+        [
+          493.832761,
+          14.653731,
+          1788.060285,
+          -770.869593,
+          -988.50236,
+          564.866358,
+          1839.360869,
+          -45.135093,
+          98.013947
+        ],
+        [
+          224.21108,
+          -263.240489,
+          1640.570391,
+          -1145.554632,
+          -574.995916,
+          4.074335,
+          2556.207482,
+          615.872876,
+          -425.739449
+        ],
+        [
+          -43.168147,
+          2068.22088,
+          -70.87445,
+          87.047151,
+          -566.891596,
+          25.298728,
+          419.560978,
+          650.894995,
+          -543.771258
+        ],
+        [
+          -165.005647,
+          -24.257845,
+          313.543903,
+          1911.643916,
+          -471.213317,
+          763.418878,
+          34.643534,
+          -148.405997,
+          -624.336299
+        ],
+        [
+          32.590594,
+          -1236.94888,
+          2394.280558,
+          -151.461767,
+          -518.807362,
+          426.66283,
+          1674.223326,
+          -67.88049,
+          -454.590872
+        ],
+        [
+          636.669842,
+          -554.642586,
+          1609.864844,
+          -275.196508,
+          -795.526999,
+          -128.188515,
+          1768.341815,
+          92.305782,
+          107.72432
+        ],
+        [
+          792.532152,
+          -185.843539,
+          1600.234402,
+          -945.866707,
+          -1079.657004,
+          289.13164,
+          2087.712266,
+          112.049673,
+          132.452475
+        ],
+        [
+          349.668294,
+          64.5128,
+          1589.438062,
+          -1057.547253,
+          -751.011399,
+          -175.980829,
+          2589.598851,
+          337.148864,
+          -537.631834
+        ],
+        [
+          193.605724,
+          -612.918143,
+          1669.076576,
+          1823.952988,
+          -518.646829,
+          -621.21989,
+          731.836972,
+          262.094428,
+          -414.727128
+        ],
+        [
+          594.885841,
+          2197.324869,
+          978.939195,
+          -675.064352,
+          -708.008905,
+          207.380757,
+          1715.065386,
+          -502.411646,
+          -385.180484
+        ],
+        [
+          746.929053,
+          -492.202783,
+          3080.606708,
+          60.408129,
+          -944.05242,
+          150.097911,
+          1754.84035,
+          -153.083925,
+          -679.847253
+        ],
+        [
+          852.115027,
+          -688.691787,
+          2420.543414,
+          -24.694956,
+          -1035.54008,
+          -203.421719,
+          1514.888552,
+          149.791829,
+          160.221837
+        ],
+        [
+          705.378142,
+          106.192816,
+          1947.679188,
+          -653.843215,
+          -1057.003761,
+          121.680584,
+          1878.729172,
+          -228.425957,
+          95.398963
+        ],
+        [
+          331.841699,
+          -220.048468,
+          1779.037334,
+          -1001.412909,
+          -567.578255,
+          -239.776934,
+          2740.117002,
+          331.035121,
+          -549.561005
+        ],
+        [
+          74.515588,
+          2073.412217,
+          414.389973,
+          220.697405,
+          -562.114248,
+          -236.435819,
+          197.375122,
+          610.210764,
+          -606.59157
+        ]
+      ]
+    }
+  ],
+  "patch": {
+    "version": 1,
+    "mode": "prune",
+    "generatedAt": "2026-04-03T10:39:04.302Z",
+    "sourceTupleProfileName": "top24-retrain-retrained-calibrated",
+    "sourceTupleProfileStage": {
+      "number": 38,
+      "tag": "stage38",
+      "file": "stage-info.json",
+      "label": "Stage 38",
+      "updatedAt": "2026-04-02T09:06:54+09:00",
+      "kind": "tuple-residual-profile"
+    },
+    "sourceTupleCount": 24,
+    "selectedTupleCount": 24,
+    "selectedTupleKeys": [
+      "A1-B1",
+      "B1-C1",
+      "C1-D1",
+      "E1-F1",
+      "F1-G1",
+      "A2-B2",
+      "A7-B7",
+      "B8-C8",
+      "C8-D8",
+      "E8-F8",
+      "F8-G8",
+      "G8-H8",
+      "A1-A2",
+      "A2-A3",
+      "A3-A4",
+      "A5-A6",
+      "A6-A7",
+      "B1-B2",
+      "G7-G8",
+      "H2-H3",
+      "H3-H4",
+      "H5-H6",
+      "H6-H7",
+      "H7-H8"
+    ],
+    "selectedBucketKeys": [
+      "late-b",
+      "endgame"
+    ],
+    "tupleScoreMetric": "sum-abs",
+    "keepBuckets": [
+      "late-b",
+      "endgame"
+    ],
+    "diagnosticsStatus": "stale-removed"
+  }
+}

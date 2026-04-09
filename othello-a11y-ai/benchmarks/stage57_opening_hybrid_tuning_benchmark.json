@@ -1,0 +1,2949 @@
+{
+  "generatedAt": "2026-04-04T03:45:50.073Z",
+  "corpus": {
+    "source": "opening-book seed prefix states",
+    "minPly": 0,
+    "maxPly": 12,
+    "stateCount": 182,
+    "stateLimit": 0,
+    "samplePrefixes": [
+      {
+        "ply": 0,
+        "prefixSequence": "",
+        "topNames": [
+          "Perpendicular Opening",
+          "Diagonal Opening",
+          "Parallel Opening",
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow"
+        ]
+      },
+      {
+        "ply": 1,
+        "prefixSequence": "C4",
+        "topNames": [
+          "Perpendicular Opening",
+          "Diagonal Opening",
+          "Parallel Opening",
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow"
+        ]
+      },
+      {
+        "ply": 1,
+        "prefixSequence": "F5",
+        "topNames": [
+          "Perpendicular Opening",
+          "Diagonal Opening",
+          "Parallel Opening",
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow"
+        ]
+      },
+      {
+        "ply": 2,
+        "prefixSequence": "C4C3",
+        "topNames": [
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow",
+          "Snake, Peasant",
+          "Buffalo, Kenichi Variation",
+          "Rose-v-Toth"
+        ]
+      },
+      {
+        "ply": 2,
+        "prefixSequence": "C4E3",
+        "topNames": [
+          "Tiger",
+          "Rose",
+          "Stephenson",
+          "No-Cat",
+          "COMP'OTH"
+        ]
+      },
+      {
+        "ply": 2,
+        "prefixSequence": "F5D6",
+        "topNames": [
+          "Tiger",
+          "Rose",
+          "Stephenson",
+          "No-Cat",
+          "COMP'OTH"
+        ]
+      },
+      {
+        "ply": 2,
+        "prefixSequence": "F5F6",
+        "topNames": [
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow",
+          "Snake, Peasant",
+          "Buffalo, Kenichi Variation",
+          "Rose-v-Toth"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4C3D3",
+        "topNames": [
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow",
+          "Snake, Peasant",
+          "Buffalo, Kenichi Variation",
+          "Rose-v-Toth"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4C3E6",
+        "topNames": [
+          "Wing Variation"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4C3F5",
+        "topNames": [
+          "Semi-Wing Variation"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4E3F4",
+        "topNames": [
+          "Rose",
+          "Rose-Birth",
+          "Flat",
+          "Horse",
+          "Ralle"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4E3F5",
+        "topNames": [
+          "No-Cat",
+          "Cat",
+          "Swallow",
+          "Italian",
+          "Sakaguchi"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "C4E3F6",
+        "topNames": [
+          "Tiger",
+          "Stephenson",
+          "COMP'OTH",
+          "Rose-BILL",
+          "No-Kung"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "F5D6C3",
+        "topNames": [
+          "Tiger",
+          "Stephenson",
+          "COMP'OTH",
+          "Rose-BILL",
+          "No-Kung"
+        ]
+      },
+      {
+        "ply": 3,
+        "prefixSequence": "F5F6E6",
+        "topNames": [
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow",
+          "Snake, Peasant",
+          "Buffalo, Kenichi Variation",
+          "Rose-v-Toth"
+        ]
+      },
+      {
+        "ply": 4,
+        "prefixSequence": "C4C3D3C5",
+        "topNames": [
+          "Heath, Tobidashi \"Jumping Out\"",
+          "Cow",
+          "Snake, Peasant",
+          "Buffalo, Kenichi Variation",
+          "Rose-v-Toth"
+        ]
+      }
+    ]
+  },
+  "benchmarkConfig": {
+    "repetitions": 1,
+    "candidate": {
+      "maxDepth": 4,
+      "timeLimitMs": 450,
+      "exactEndgameEmpties": 8
+    },
+    "reference": {
+      "maxDepth": 6,
+      "timeLimitMs": 900,
+      "exactEndgameEmpties": 8,
+      "openingTuningKey": "search-reference"
+    }
+  },
+  "unresolvedRequestedProfileKeys": [],
+  "profiles": [
+    {
+      "profileKey": "stage57-book-led",
+      "profileLabel": "Book-led hybrid",
+      "description": "초반 curated opening book를 더 존중하고, book이 있을 때 off-book prior bonus를 줄인 profile입니다.",
+      "profile": {
+        "key": "stage57-book-led",
+        "label": "Book-led hybrid",
+        "description": "초반 curated opening book를 더 존중하고, book이 있을 때 off-book prior bonus를 줄인 profile입니다.",
+        "directUseMaxPly": 12,
+        "directAlwaysUseMaxPly": 2,
+        "singleMoveMinWeight": 3,
+        "singleMovePriorSupportMinCount": 64,
+        "singleMovePriorSupportMinShare": 0.55,
+        "singleMoveElitePriorSupportMinCount": 1024,
+        "singleMoveElitePriorSupportMinShare": 0.4,
+        "highConfidenceScoreGap": 24,
+        "mediumConfidenceScoreGap": 14,
+        "mediumBookShare": 0.62,
+        "priorSupportScoreGap": 10,
+        "priorSupportBookShare": 0.54,
+        "priorSupportMinCount": 96,
+        "priorSupportMinShare": 0.49,
+        "selectionPriorScale": 0.9,
+        "selectionMissingPriorPenaltyScale": 0.8,
+        "orderingPriorScale": 0.9,
+        "orderingOffBookPriorScale": 0.3
+      },
+      "cases": 182,
+      "agreementCount": 107,
+      "agreementRate": 0.5879120879120879,
+      "directCount": 165,
+      "directRate": 0.9065934065934066,
+      "searchCount": 17,
+      "directAgreementCount": 99,
+      "searchAgreementCount": 8,
+      "bookBackedChoiceCount": 175,
+      "bookBackedChoiceRate": 0.9615384615384616,
+      "offBookChoiceCount": 7,
+      "offBookChoiceRate": 0.038461538461538464,
+      "confidenceSkipCount": 17,
+      "openingPriorHitCount": 182,
+      "openingHybridDirectMoves": 165,
+      "averageNodes": 62.71978021978022,
+      "averageElapsedMs": 1.6923076923076923,
+      "averageCompletedDepth": 0.37362637362637363,
+      "byPly": [
+        {
+          "ply": 0,
+          "cases": 1,
+          "agreementCount": 0,
+          "directCount": 1,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 1,
+          "cases": 2,
+          "agreementCount": 2,
+          "directCount": 2,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 1,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 2,
+          "cases": 4,
+          "agreementCount": 2,
+          "directCount": 4,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 3,
+          "cases": 8,
+          "agreementCount": 4,
+          "directCount": 6,
+          "searchCount": 2,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 0.75,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 4,
+          "cases": 8,
+          "agreementCount": 7,
+          "directCount": 5,
+          "searchCount": 3,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.875,
+          "directRate": 0.625,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 5,
+          "cases": 17,
+          "agreementCount": 13,
+          "directCount": 15,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.7647058823529411,
+          "directRate": 0.8823529411764706,
+          "offBookChoiceRate": 0.11764705882352941
+        },
+        {
+          "ply": 6,
+          "cases": 19,
+          "agreementCount": 8,
+          "directCount": 19,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.42105263157894735,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 7,
+          "cases": 21,
+          "agreementCount": 8,
+          "directCount": 21,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.38095238095238093,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 8,
+          "cases": 28,
+          "agreementCount": 14,
+          "directCount": 22,
+          "searchCount": 6,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5,
+          "directRate": 0.7857142857142857,
+          "offBookChoiceRate": 0.07142857142857142
+        },
+        {
+          "ply": 9,
+          "cases": 25,
+          "agreementCount": 20,
+          "directCount": 24,
+          "searchCount": 1,
+          "offBookChoiceCount": 1,
+          "agreementRate": 0.8,
+          "directRate": 0.96,
+          "offBookChoiceRate": 0.04
+        },
+        {
+          "ply": 10,
+          "cases": 19,
+          "agreementCount": 11,
+          "directCount": 19,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5789473684210527,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 11,
+          "cases": 15,
+          "agreementCount": 10,
+          "directCount": 15,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.6666666666666666,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 12,
+          "cases": 15,
+          "agreementCount": 8,
+          "directCount": 12,
+          "searchCount": 3,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5333333333333333,
+          "directRate": 0.8,
+          "offBookChoiceRate": 0.13333333333333333
+        }
+      ],
+      "mismatches": [
+        {
+          "ply": 0,
+          "prefixSequence": "",
+          "topNames": [
+            "Perpendicular Opening",
+            "Diagonal Opening",
+            "Parallel Opening",
+            "Heath, Tobidashi \"Jumping Out\"",
+            "Cow"
+          ],
+          "resultMove": "C4",
+          "resultSource": "opening-book",
+          "referenceMove": "D3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C4",
+            "D3",
+            "E6",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "C4E3",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "F6",
+          "resultSource": "opening-book",
+          "referenceMove": "F5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F6",
+            "F4",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "F5D6",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "C3",
+          "resultSource": "opening-book",
+          "referenceMove": "C4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C3",
+            "C5",
+            "C4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4C3F5",
+          "topNames": [
+            "Semi-Wing Variation"
+          ],
+          "resultMove": "C5",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C5"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F5",
+          "topNames": [
+            "No-Cat",
+            "Cat",
+            "Swallow",
+            "Italian",
+            "Sakaguchi"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "B4",
+            "E6"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F6",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "E6",
+            "B4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "F5D6C3",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "D3",
+          "resultSource": "opening-book",
+          "referenceMove": "F4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D3",
+            "G5"
+          ]
+        },
+        {
+          "ply": 4,
+          "prefixSequence": "C4E3F5E6",
+          "topNames": [
+            "Cat",
+            "Italian",
+            "Sakaguchi",
+            "Berner"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "F6",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4",
+            "D3"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5B3",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "E3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "D2",
+          "resultSource": "search",
+          "referenceMove": "E2",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "E2",
+            "E3",
+            "F5"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3C2",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "D6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D6"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "B4",
+          "resultSource": "search",
+          "referenceMove": "B5",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "B5",
+            "C5",
+            "E6"
+          ]
+        }
+      ]
+    },
+    {
+      "profileKey": "stage57-prior-light",
+      "profileLabel": "Prior-light hybrid",
+      "description": "book direct gate는 크게 바꾸지 않되, prior bonus만 약하게 섞는 profile입니다.",
+      "profile": {
+        "key": "stage57-prior-light",
+        "label": "Prior-light hybrid",
+        "description": "book direct gate는 크게 바꾸지 않되, prior bonus만 약하게 섞는 profile입니다.",
+        "directUseMaxPly": 12,
+        "directAlwaysUseMaxPly": 2,
+        "singleMoveMinWeight": 3,
+        "singleMovePriorSupportMinCount": 64,
+        "singleMovePriorSupportMinShare": 0.55,
+        "singleMoveElitePriorSupportMinCount": 5000,
+        "singleMoveElitePriorSupportMinShare": 1,
+        "highConfidenceScoreGap": 26,
+        "mediumConfidenceScoreGap": 16,
+        "mediumBookShare": 0.66,
+        "priorSupportScoreGap": 11,
+        "priorSupportBookShare": 0.56,
+        "priorSupportMinCount": 112,
+        "priorSupportMinShare": 0.5,
+        "selectionPriorScale": 0.75,
+        "selectionMissingPriorPenaltyScale": 0.75,
+        "orderingPriorScale": 0.7,
+        "orderingOffBookPriorScale": 0.2
+      },
+      "cases": 182,
+      "agreementCount": 106,
+      "agreementRate": 0.5824175824175825,
+      "directCount": 163,
+      "directRate": 0.8956043956043956,
+      "searchCount": 19,
+      "directAgreementCount": 98,
+      "searchAgreementCount": 8,
+      "bookBackedChoiceCount": 174,
+      "bookBackedChoiceRate": 0.9560439560439561,
+      "offBookChoiceCount": 8,
+      "offBookChoiceRate": 0.04395604395604396,
+      "confidenceSkipCount": 19,
+      "openingPriorHitCount": 182,
+      "openingHybridDirectMoves": 163,
+      "averageNodes": 70.32967032967034,
+      "averageElapsedMs": 1.9175824175824177,
+      "averageCompletedDepth": 0.4175824175824176,
+      "byPly": [
+        {
+          "ply": 0,
+          "cases": 1,
+          "agreementCount": 0,
+          "directCount": 1,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 1,
+          "cases": 2,
+          "agreementCount": 2,
+          "directCount": 2,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 1,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 2,
+          "cases": 4,
+          "agreementCount": 2,
+          "directCount": 4,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 3,
+          "cases": 8,
+          "agreementCount": 4,
+          "directCount": 6,
+          "searchCount": 2,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 0.75,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 4,
+          "cases": 8,
+          "agreementCount": 7,
+          "directCount": 5,
+          "searchCount": 3,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.875,
+          "directRate": 0.625,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 5,
+          "cases": 17,
+          "agreementCount": 13,
+          "directCount": 15,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.7647058823529411,
+          "directRate": 0.8823529411764706,
+          "offBookChoiceRate": 0.11764705882352941
+        },
+        {
+          "ply": 6,
+          "cases": 19,
+          "agreementCount": 8,
+          "directCount": 19,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.42105263157894735,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 7,
+          "cases": 21,
+          "agreementCount": 8,
+          "directCount": 21,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.38095238095238093,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 8,
+          "cases": 28,
+          "agreementCount": 14,
+          "directCount": 22,
+          "searchCount": 6,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5,
+          "directRate": 0.7857142857142857,
+          "offBookChoiceRate": 0.07142857142857142
+        },
+        {
+          "ply": 9,
+          "cases": 25,
+          "agreementCount": 19,
+          "directCount": 23,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.76,
+          "directRate": 0.92,
+          "offBookChoiceRate": 0.08
+        },
+        {
+          "ply": 10,
+          "cases": 19,
+          "agreementCount": 11,
+          "directCount": 18,
+          "searchCount": 1,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5789473684210527,
+          "directRate": 0.9473684210526315,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 11,
+          "cases": 15,
+          "agreementCount": 10,
+          "directCount": 15,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.6666666666666666,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 12,
+          "cases": 15,
+          "agreementCount": 8,
+          "directCount": 12,
+          "searchCount": 3,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5333333333333333,
+          "directRate": 0.8,
+          "offBookChoiceRate": 0.13333333333333333
+        }
+      ],
+      "mismatches": [
+        {
+          "ply": 0,
+          "prefixSequence": "",
+          "topNames": [
+            "Perpendicular Opening",
+            "Diagonal Opening",
+            "Parallel Opening",
+            "Heath, Tobidashi \"Jumping Out\"",
+            "Cow"
+          ],
+          "resultMove": "C4",
+          "resultSource": "opening-book",
+          "referenceMove": "D3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C4",
+            "D3",
+            "E6",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "C4E3",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "F6",
+          "resultSource": "opening-book",
+          "referenceMove": "F5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F6",
+            "F4",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "F5D6",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "C3",
+          "resultSource": "opening-book",
+          "referenceMove": "C4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C3",
+            "C5",
+            "C4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4C3F5",
+          "topNames": [
+            "Semi-Wing Variation"
+          ],
+          "resultMove": "C5",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C5"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F5",
+          "topNames": [
+            "No-Cat",
+            "Cat",
+            "Swallow",
+            "Italian",
+            "Sakaguchi"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "B4",
+            "E6"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F6",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "E6",
+            "B4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "F5D6C3",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "D3",
+          "resultSource": "opening-book",
+          "referenceMove": "F4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D3",
+            "G5"
+          ]
+        },
+        {
+          "ply": 4,
+          "prefixSequence": "C4E3F5E6",
+          "topNames": [
+            "Cat",
+            "Italian",
+            "Sakaguchi",
+            "Berner"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "F6",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4",
+            "D3"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5B3",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "E3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "D2",
+          "resultSource": "search",
+          "referenceMove": "E2",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "E2",
+            "E3",
+            "F5"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3C2",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "D6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D6"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "B4",
+          "resultSource": "search",
+          "referenceMove": "B5",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "B5",
+            "C5",
+            "E6"
+          ]
+        }
+      ]
+    },
+    {
+      "profileKey": "stage56-legacy",
+      "profileLabel": "Stage 56 legacy",
+      "description": "Stage 56 opening-prior integration 기본 임계치입니다.",
+      "profile": {
+        "key": "stage56-legacy",
+        "label": "Stage 56 legacy",
+        "description": "Stage 56 opening-prior integration 기본 임계치입니다.",
+        "directUseMaxPly": 12,
+        "directAlwaysUseMaxPly": 2,
+        "singleMoveMinWeight": 3,
+        "singleMovePriorSupportMinCount": 64,
+        "singleMovePriorSupportMinShare": 0.55,
+        "singleMoveElitePriorSupportMinCount": 5000,
+        "singleMoveElitePriorSupportMinShare": 1,
+        "highConfidenceScoreGap": 28,
+        "mediumConfidenceScoreGap": 18,
+        "mediumBookShare": 0.68,
+        "priorSupportScoreGap": 12,
+        "priorSupportBookShare": 0.58,
+        "priorSupportMinCount": 128,
+        "priorSupportMinShare": 0.52,
+        "selectionPriorScale": 1,
+        "selectionMissingPriorPenaltyScale": 1,
+        "orderingPriorScale": 1,
+        "orderingOffBookPriorScale": 1
+      },
+      "cases": 182,
+      "agreementCount": 106,
+      "agreementRate": 0.5824175824175825,
+      "directCount": 163,
+      "directRate": 0.8956043956043956,
+      "searchCount": 19,
+      "directAgreementCount": 98,
+      "searchAgreementCount": 8,
+      "bookBackedChoiceCount": 174,
+      "bookBackedChoiceRate": 0.9560439560439561,
+      "offBookChoiceCount": 8,
+      "offBookChoiceRate": 0.04395604395604396,
+      "confidenceSkipCount": 19,
+      "openingPriorHitCount": 182,
+      "openingHybridDirectMoves": 163,
+      "averageNodes": 70.57692307692308,
+      "averageElapsedMs": 1.9175824175824177,
+      "averageCompletedDepth": 0.4175824175824176,
+      "byPly": [
+        {
+          "ply": 0,
+          "cases": 1,
+          "agreementCount": 0,
+          "directCount": 1,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 1,
+          "cases": 2,
+          "agreementCount": 2,
+          "directCount": 2,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 1,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 2,
+          "cases": 4,
+          "agreementCount": 2,
+          "directCount": 4,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 3,
+          "cases": 8,
+          "agreementCount": 4,
+          "directCount": 6,
+          "searchCount": 2,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 0.75,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 4,
+          "cases": 8,
+          "agreementCount": 7,
+          "directCount": 5,
+          "searchCount": 3,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.875,
+          "directRate": 0.625,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 5,
+          "cases": 17,
+          "agreementCount": 13,
+          "directCount": 15,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.7647058823529411,
+          "directRate": 0.8823529411764706,
+          "offBookChoiceRate": 0.11764705882352941
+        },
+        {
+          "ply": 6,
+          "cases": 19,
+          "agreementCount": 8,
+          "directCount": 19,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.42105263157894735,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 7,
+          "cases": 21,
+          "agreementCount": 8,
+          "directCount": 21,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.38095238095238093,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 8,
+          "cases": 28,
+          "agreementCount": 14,
+          "directCount": 22,
+          "searchCount": 6,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5,
+          "directRate": 0.7857142857142857,
+          "offBookChoiceRate": 0.07142857142857142
+        },
+        {
+          "ply": 9,
+          "cases": 25,
+          "agreementCount": 19,
+          "directCount": 23,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.76,
+          "directRate": 0.92,
+          "offBookChoiceRate": 0.08
+        },
+        {
+          "ply": 10,
+          "cases": 19,
+          "agreementCount": 11,
+          "directCount": 18,
+          "searchCount": 1,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5789473684210527,
+          "directRate": 0.9473684210526315,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 11,
+          "cases": 15,
+          "agreementCount": 10,
+          "directCount": 15,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.6666666666666666,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 12,
+          "cases": 15,
+          "agreementCount": 8,
+          "directCount": 12,
+          "searchCount": 3,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5333333333333333,
+          "directRate": 0.8,
+          "offBookChoiceRate": 0.13333333333333333
+        }
+      ],
+      "mismatches": [
+        {
+          "ply": 0,
+          "prefixSequence": "",
+          "topNames": [
+            "Perpendicular Opening",
+            "Diagonal Opening",
+            "Parallel Opening",
+            "Heath, Tobidashi \"Jumping Out\"",
+            "Cow"
+          ],
+          "resultMove": "C4",
+          "resultSource": "opening-book",
+          "referenceMove": "D3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C4",
+            "D3",
+            "E6",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "C4E3",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "F6",
+          "resultSource": "opening-book",
+          "referenceMove": "F5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F6",
+            "F4",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "F5D6",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "C3",
+          "resultSource": "opening-book",
+          "referenceMove": "C4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C3",
+            "C5",
+            "C4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4C3F5",
+          "topNames": [
+            "Semi-Wing Variation"
+          ],
+          "resultMove": "C5",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C5"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F5",
+          "topNames": [
+            "No-Cat",
+            "Cat",
+            "Swallow",
+            "Italian",
+            "Sakaguchi"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "B4",
+            "E6"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F6",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "E6",
+            "B4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "F5D6C3",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "D3",
+          "resultSource": "opening-book",
+          "referenceMove": "F4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D3",
+            "G5"
+          ]
+        },
+        {
+          "ply": 4,
+          "prefixSequence": "C4E3F5E6",
+          "topNames": [
+            "Cat",
+            "Italian",
+            "Sakaguchi",
+            "Berner"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "F6",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4",
+            "D3"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5B3",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "E3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "D2",
+          "resultSource": "search",
+          "referenceMove": "E2",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "E2",
+            "E3",
+            "F5"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3C2",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "D6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D6"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "B4",
+          "resultSource": "search",
+          "referenceMove": "B5",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "B5",
+            "C5",
+            "E6"
+          ]
+        }
+      ]
+    },
+    {
+      "profileKey": "stage57-cautious",
+      "profileLabel": "Cautious hybrid",
+      "description": "direct book 사용을 더 보수적으로 제한하고 off-book prior bonus를 강하게 줄인 profile입니다.",
+      "profile": {
+        "key": "stage57-cautious",
+        "label": "Cautious hybrid",
+        "description": "direct book 사용을 더 보수적으로 제한하고 off-book prior bonus를 강하게 줄인 profile입니다.",
+        "directUseMaxPly": 12,
+        "directAlwaysUseMaxPly": 2,
+        "singleMoveMinWeight": 4,
+        "singleMovePriorSupportMinCount": 96,
+        "singleMovePriorSupportMinShare": 0.58,
+        "singleMoveElitePriorSupportMinCount": 5000,
+        "singleMoveElitePriorSupportMinShare": 1,
+        "highConfidenceScoreGap": 32,
+        "mediumConfidenceScoreGap": 22,
+        "mediumBookShare": 0.72,
+        "priorSupportScoreGap": 14,
+        "priorSupportBookShare": 0.6,
+        "priorSupportMinCount": 160,
+        "priorSupportMinShare": 0.55,
+        "selectionPriorScale": 0.8,
+        "selectionMissingPriorPenaltyScale": 1,
+        "orderingPriorScale": 0.7,
+        "orderingOffBookPriorScale": 0.15
+      },
+      "cases": 182,
+      "agreementCount": 106,
+      "agreementRate": 0.5824175824175825,
+      "directCount": 161,
+      "directRate": 0.8846153846153846,
+      "searchCount": 21,
+      "directAgreementCount": 97,
+      "searchAgreementCount": 9,
+      "bookBackedChoiceCount": 172,
+      "bookBackedChoiceRate": 0.945054945054945,
+      "offBookChoiceCount": 10,
+      "offBookChoiceRate": 0.054945054945054944,
+      "confidenceSkipCount": 21,
+      "openingPriorHitCount": 182,
+      "openingHybridDirectMoves": 161,
+      "averageNodes": 77.89010989010988,
+      "averageElapsedMs": 2.0824175824175826,
+      "averageCompletedDepth": 0.46153846153846156,
+      "byPly": [
+        {
+          "ply": 0,
+          "cases": 1,
+          "agreementCount": 0,
+          "directCount": 1,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 1,
+          "cases": 2,
+          "agreementCount": 2,
+          "directCount": 2,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 1,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 2,
+          "cases": 4,
+          "agreementCount": 2,
+          "directCount": 4,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 3,
+          "cases": 8,
+          "agreementCount": 4,
+          "directCount": 6,
+          "searchCount": 2,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.5,
+          "directRate": 0.75,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 4,
+          "cases": 8,
+          "agreementCount": 7,
+          "directCount": 5,
+          "searchCount": 3,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.875,
+          "directRate": 0.625,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 5,
+          "cases": 17,
+          "agreementCount": 13,
+          "directCount": 15,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.7647058823529411,
+          "directRate": 0.8823529411764706,
+          "offBookChoiceRate": 0.11764705882352941
+        },
+        {
+          "ply": 6,
+          "cases": 19,
+          "agreementCount": 8,
+          "directCount": 19,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.42105263157894735,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 7,
+          "cases": 21,
+          "agreementCount": 8,
+          "directCount": 21,
+          "searchCount": 0,
+          "offBookChoiceCount": 0,
+          "agreementRate": 0.38095238095238093,
+          "directRate": 1,
+          "offBookChoiceRate": 0
+        },
+        {
+          "ply": 8,
+          "cases": 28,
+          "agreementCount": 14,
+          "directCount": 22,
+          "searchCount": 6,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5,
+          "directRate": 0.7857142857142857,
+          "offBookChoiceRate": 0.07142857142857142
+        },
+        {
+          "ply": 9,
+          "cases": 25,
+          "agreementCount": 19,
+          "directCount": 23,
+          "searchCount": 2,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.76,
+          "directRate": 0.92,
+          "offBookChoiceRate": 0.08
+        },
+        {
+          "ply": 10,
+          "cases": 19,
+          "agreementCount": 12,
+          "directCount": 17,
+          "searchCount": 2,
+          "offBookChoiceCount": 1,
+          "agreementRate": 0.631578947368421,
+          "directRate": 0.8947368421052632,
+          "offBookChoiceRate": 0.05263157894736842
+        },
+        {
+          "ply": 11,
+          "cases": 15,
+          "agreementCount": 9,
+          "directCount": 14,
+          "searchCount": 1,
+          "offBookChoiceCount": 1,
+          "agreementRate": 0.6,
+          "directRate": 0.9333333333333333,
+          "offBookChoiceRate": 0.06666666666666667
+        },
+        {
+          "ply": 12,
+          "cases": 15,
+          "agreementCount": 8,
+          "directCount": 12,
+          "searchCount": 3,
+          "offBookChoiceCount": 2,
+          "agreementRate": 0.5333333333333333,
+          "directRate": 0.8,
+          "offBookChoiceRate": 0.13333333333333333
+        }
+      ],
+      "mismatches": [
+        {
+          "ply": 0,
+          "prefixSequence": "",
+          "topNames": [
+            "Perpendicular Opening",
+            "Diagonal Opening",
+            "Parallel Opening",
+            "Heath, Tobidashi \"Jumping Out\"",
+            "Cow"
+          ],
+          "resultMove": "C4",
+          "resultSource": "opening-book",
+          "referenceMove": "D3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C4",
+            "D3",
+            "E6",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "C4E3",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "F6",
+          "resultSource": "opening-book",
+          "referenceMove": "F5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F6",
+            "F4",
+            "F5"
+          ]
+        },
+        {
+          "ply": 2,
+          "prefixSequence": "F5D6",
+          "topNames": [
+            "Tiger",
+            "Rose",
+            "Stephenson",
+            "No-Cat",
+            "COMP'OTH"
+          ],
+          "resultMove": "C3",
+          "resultSource": "opening-book",
+          "referenceMove": "C4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C3",
+            "C5",
+            "C4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4C3F5",
+          "topNames": [
+            "Semi-Wing Variation"
+          ],
+          "resultMove": "C5",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "C5"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F5",
+          "topNames": [
+            "No-Cat",
+            "Cat",
+            "Swallow",
+            "Italian",
+            "Sakaguchi"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "B4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "B4",
+            "E6"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "C4E3F6",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "E6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "E6",
+            "B4"
+          ]
+        },
+        {
+          "ply": 3,
+          "prefixSequence": "F5D6C3",
+          "topNames": [
+            "Tiger",
+            "Stephenson",
+            "COMP'OTH",
+            "Rose-BILL",
+            "No-Kung"
+          ],
+          "resultMove": "D3",
+          "resultSource": "opening-book",
+          "referenceMove": "F4",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D3",
+            "G5"
+          ]
+        },
+        {
+          "ply": 4,
+          "prefixSequence": "C4E3F5E6",
+          "topNames": [
+            "Cat",
+            "Italian",
+            "Sakaguchi",
+            "Berner"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "F6",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4",
+            "D3"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5B3",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "F4",
+          "resultSource": "opening-book",
+          "referenceMove": "E3",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "F4"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3C5F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "D2",
+          "resultSource": "search",
+          "referenceMove": "E2",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "E2",
+            "E3",
+            "F5"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3C2",
+          "topNames": [
+            "Pyramid, Checkerboarding Peasant"
+          ],
+          "resultMove": "D6",
+          "resultSource": "opening-book",
+          "referenceMove": "C5",
+          "bookBackedChoice": true,
+          "bookTopMoves": [
+            "D6"
+          ]
+        },
+        {
+          "ply": 5,
+          "prefixSequence": "C4C3D3E3F6",
+          "topNames": [
+            "Maruoka Buffalo",
+            "Tanida Buffalo",
+            "Hokuriku Buffalo"
+          ],
+          "resultMove": "B4",
+          "resultSource": "search",
+          "referenceMove": "B5",
+          "bookBackedChoice": false,
+          "bookTopMoves": [
+            "B5",
+            "C5",
+            "E6"
+          ]
+        }
+      ]
+    }
+  ],
+  "ranking": [
+    {
+      "rank": 1,
+      "profileKey": "stage57-book-led",
+      "agreementRate": 0.5879120879120879,
+      "averageElapsedMs": 1.6923076923076923,
+      "averageNodes": 62.71978021978022
+    },
+    {
+      "rank": 2,
+      "profileKey": "stage57-prior-light",
+      "agreementRate": 0.5824175824175825,
+      "averageElapsedMs": 1.9175824175824177,
+      "averageNodes": 70.32967032967034
+    },
+    {
+      "rank": 3,
+      "profileKey": "stage56-legacy",
+      "agreementRate": 0.5824175824175825,
+      "averageElapsedMs": 1.9175824175824177,
+      "averageNodes": 70.57692307692308
+    },
+    {
+      "rank": 4,
+      "profileKey": "stage57-cautious",
+      "agreementRate": 0.5824175824175825,
+      "averageElapsedMs": 2.0824175824175826,
+      "averageNodes": 77.89010989010988
+    }
+  ],
+  "referenceCases": [
+    {
+      "ply": 0,
+      "prefixSequence": "",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 1,
+      "prefixSequence": "C4",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 1,
+      "prefixSequence": "F5",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 2,
+      "prefixSequence": "C4C3",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 2,
+      "prefixSequence": "C4E3",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 2,
+      "prefixSequence": "F5D6",
+      "referenceMove": "C4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 2,
+      "prefixSequence": "F5F6",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4C3D3",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4C3E6",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4C3F5",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4E3F4",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4E3F5",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "C4E3F6",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "F5D6C3",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 3,
+      "prefixSequence": "F5F6E6",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4C3D3C5",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4C3D3E3",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4E3F4C5",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4E3F5B4",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4E3F5E6",
+      "referenceMove": "F6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "C4E3F6E6",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "F5D6C3D3",
+      "referenceMove": "C4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 4,
+      "prefixSequence": "F5F6E6F4",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3C5B3",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3C5B4",
+      "referenceMove": "D2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3C5B6",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3C5D6",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3C5F6",
+      "referenceMove": "E2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3E3C2",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3E3D2",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3E3F2",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3E3F4",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4C3D3E3F6",
+      "referenceMove": "B5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4E3F4C5D6",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4E3F5B4F3",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4E3F5E6F4",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "C4E3F6E6F5",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "F5D6C3D3C4",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "F5F6E6F4E3",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 5,
+      "prefixSequence": "F5F6E6F4G5",
+      "referenceMove": "E7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5B3F4",
+      "referenceMove": "B5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5B4D2",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5B6C6",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5D6F4",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5F6E2",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3C5F6E3",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3C2D6",
+      "referenceMove": "E2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3D2B4",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3F2F3",
+      "referenceMove": "D2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3F4D6",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3F6B5",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4C3D3E3F6C5",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4E3F4C5D6F3",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4E3F5B4F3F4",
+      "referenceMove": "C3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4E3F5E6F4C5",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "C4E3F6E6F5C5",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "F5D6C3D3C4F4",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "F5F6E6F4E3C5",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 6,
+      "prefixSequence": "F5F6E6F4G5E7",
+      "referenceMove": "F7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3C5B3F4B5",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3C5B4D2C2",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3C5D6F4B4",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3C5D6F4F5",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3C5F6E3C6",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3E3C2D6E2",
+      "referenceMove": "D2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3E3D2B4B3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3E3F4D6D2",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3E3F4D6E6",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4C3D3E3F6C5F3",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F4C5D6F3D3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F4C5D6F3E6",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F5B4F3F4E2",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F5E6F4C5D6",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F6E6F5C5C3",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "C4E3F6E6F5C5F4",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "F5D6C3D3C4F4C5",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "F5D6C3D3C4F4F6",
+      "referenceMove": "G5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "F5F6E6F4E3C5C4",
+      "referenceMove": "E7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "F5F6E6F4E3C5C6",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 7,
+      "prefixSequence": "F5F6E6F4G5E7F7",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5B3F4B5B4",
+      "referenceMove": "A5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5B4D2C2F4",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5D6F4B4B6",
+      "referenceMove": "B5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5D6F4B4C6",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5D6F4B4E3",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5D6F4F5D2",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5D6F4F5E6",
+      "referenceMove": "F6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3C5F6E3C6F5",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3C2D6E2D2",
+      "referenceMove": "E1",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3D2B4B3D6",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F4D6D2C5",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F4D6D2F2",
+      "referenceMove": "E2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F4D6D2F3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F4D6E6B4",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F4D6E6F5",
+      "referenceMove": "F6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4C3D3E3F6C5F3E6",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F4C5D6F3E6C3",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F5B4F3F4E2E6",
+      "referenceMove": "G5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F5E6F4C5D6C6",
+      "referenceMove": "D7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F6E6F5C5C3B4",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F6E6F5C5F4G5",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "C4E3F6E6F5C5F4G6",
+      "referenceMove": "F7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5D6C3D3C4F4C5B3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5D6C3D3C4F4F6F3",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5D6C3D3C4F4F6G5",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5F6E6F4E3C5C4D6",
+      "referenceMove": "B6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5F6E6F4E3C5C6D6",
+      "referenceMove": "G4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 8,
+      "prefixSequence": "F5F6E6F4G5E7F7D6",
+      "referenceMove": "E8",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5B3F4B5B4C6",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5B4D2C2F4D6",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5D6F4B4B6B5",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5D6F4B4C6B5",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5D6F4F5D2G4",
+      "referenceMove": "E7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5D6F4F5E6C6",
+      "referenceMove": "D7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3C5F6E3C6F5F4",
+      "referenceMove": "G5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3C2D6E2D2F3",
+      "referenceMove": "F4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3D2B4B3D6F4",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3F4D6D2F2E2",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3F4D6D2F3E2",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3F4D6E6B4D7",
+      "referenceMove": "G5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3F4D6E6F5F3",
+      "referenceMove": "G4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4C3D3E3F6C5F3E6D6",
+      "referenceMove": "E7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3",
+      "referenceMove": "E2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F5B4F3F4E2E6G5",
+      "referenceMove": "F6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F5E6F4C5D6C6F7",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F6E6F5C5C3B4D6",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F6E6F5C5F4G5G4",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "C4E3F6E6F5C5F4G6F7",
+      "referenceMove": "C3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2",
+      "referenceMove": "F6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "F5D6C3D3C4F4F6F3E6",
+      "referenceMove": "E7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "F5D6C3D3C4F4F6G5E6",
+      "referenceMove": "D7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "F5F6E6F4E3C5C4D6C6",
+      "referenceMove": "B6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 9,
+      "prefixSequence": "F5F6E6F4G5E7F7D6F3",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3C5B3F4B5B4C6D6",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3C5B4D2C2F4D6C6",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3C5D6F4B4B6B5C6",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3C5D6F4B4C6B5B3",
+      "referenceMove": "D2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3E3C2D6E2D2F3F4",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3E3D2B4B3D6F4F3",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3E3F4D6D2F2E2F3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4C3D3E3F4D6D2F3E2C2",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3E2",
+      "referenceMove": "B5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4E3F5B4F3F4E2E6G5F6",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4E3F5E6F4C5D6C6F7G5",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4E3F6E6F5C5C3B4D6C6",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "C4E3F6E6F5C5F4G5G4F3",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2B4",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2E3",
+      "referenceMove": "D2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5D6C3D3C4F4F6F3E6E7",
+      "referenceMove": "F7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5D6C3D3C4F4F6G5E6D7",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5F6E6F4E3C5C4D6C6B3",
+      "referenceMove": "C3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 10,
+      "prefixSequence": "F5F6E6F4G5E7F7D6F3G6",
+      "referenceMove": "D8",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4C3D3C5B4D2C2F4D6C6F5",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4C3D3C5D6F4B4C6B5B3B6",
+      "referenceMove": "E3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4C3D3E3D2B4B3D6F4F3E6",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4C3D3E3F4D6D2F3E2C2F2",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3E2B5",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3E2B6",
+      "referenceMove": "F5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4E3F5B4F3F4E2E6G5F6D6",
+      "referenceMove": "H5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4E3F6E6F5C5C3B4D6C6B5",
+      "referenceMove": "D7",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "C4E3F6E6F5C5F4G5G4F3C6",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2B4E3",
+      "referenceMove": "E6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2E3D2",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5D6C3D3C4F4F6F3E6E7D7",
+      "referenceMove": "C5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5D6C3D3C4F4F6G5E6D7E3",
+      "referenceMove": "G6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5F6E6F4E3C5C4D6C6B3D7",
+      "referenceMove": "D3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 11,
+      "prefixSequence": "F5F6E6F4G5E7F7D6F3G6D8",
+      "referenceMove": "H5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4C3D3C5B4D2C2F4D6C6F5E6",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4C3D3C5D6F4B4C6B5B3B6E3",
+      "referenceMove": "C2",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4C3D3E3D2B4B3D6F4F3E6F5",
+      "referenceMove": "C6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4C3D3E3F4D6D2F3E2C2F2C5",
+      "referenceMove": "B3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3E2B5F5",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4E3F4C5D6F3E6C3D3E2B6F5",
+      "referenceMove": "G5",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4E3F6E6F5C5C3B4D6C6B5A6",
+      "referenceMove": "B6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "C4E3F6E6F5C5F4G5G4F3C6D3",
+      "referenceMove": "D6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2B4E3E2",
+      "referenceMove": "B6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2B4E3E6",
+      "referenceMove": "B6",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5D6C3D3C4F4C5B3C2E3D2C6",
+      "referenceMove": "B4",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5D6C3D3C4F4F6F3E6E7D7G6",
+      "referenceMove": "E8",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5D6C3D3C4F4F6G5E6D7E3C5",
+      "referenceMove": "F3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5F6E6F4E3C5C4D6C6B3D7D3",
+      "referenceMove": "C3",
+      "referenceMode": "depth-limited"
+    },
+    {
+      "ply": 12,
+      "prefixSequence": "F5F6E6F4G5E7F7D6F3G6D8H5",
+      "referenceMove": "H6",
+      "referenceMode": "depth-limited"
+    }
+  ]
+}

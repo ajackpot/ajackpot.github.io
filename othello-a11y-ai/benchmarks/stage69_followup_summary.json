@@ -1,0 +1,576 @@
+{
+  "generatedAt": "2026-04-07T01:43:07.307634Z",
+  "stage": 69,
+  "focusDepthSearch": {
+    "top16-latea095": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 100.619,
+      "timePercent": 100.771,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "top16-latea090": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 100.66,
+      "timePercent": 101.812,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "top16-midc095-latea095": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 100.619,
+      "timePercent": 102.428,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "top16-midc090-latea095": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 100.608,
+      "timePercent": 100.914,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "top16-latea080": {
+      "sameBestMoveCases": 34,
+      "cases": 36,
+      "nodePercent": 101.272,
+      "timePercent": 102.593,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "top16-midc090-latea080": {
+      "sameBestMoveCases": 34,
+      "cases": 36,
+      "nodePercent": 101.252,
+      "timePercent": 101.034,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "latea-control": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 99.454,
+      "timePercent": 100.138,
+      "mismatches": [
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 6,
+          "baselineBestMove": "B1",
+          "candidateBestMove": "A8"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "latea-latea095": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 99.64,
+      "timePercent": 100.038,
+      "mismatches": [
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 6,
+          "baselineBestMove": "B1",
+          "candidateBestMove": "A8"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "latea-latea090": {
+      "sameBestMoveCases": 33,
+      "cases": 36,
+      "nodePercent": 99.923,
+      "timePercent": 100.498,
+      "mismatches": [
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 6,
+          "baselineBestMove": "B1",
+          "candidateBestMove": "A8"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "latea-latea080": {
+      "sameBestMoveCases": 34,
+      "cases": 36,
+      "nodePercent": 100.548,
+      "timePercent": 101.078,
+      "mismatches": [
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    }
+  },
+  "fullDepthSearch": {
+    "top16-midc090-latea080": {
+      "sameBestMoveCases": 70,
+      "cases": 72,
+      "nodePercent": 98.483,
+      "timePercent": 99.132,
+      "mismatches": [
+        {
+          "empties": 24,
+          "seed": 12,
+          "baselineBestMove": "D7",
+          "candidateBestMove": "H1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    },
+    "latea-latea080": {
+      "sameBestMoveCases": 70,
+      "cases": 72,
+      "nodePercent": 100.328,
+      "timePercent": 100.739,
+      "mismatches": [
+        {
+          "empties": 20,
+          "seed": 12,
+          "baselineBestMove": "F5",
+          "candidateBestMove": "D1"
+        },
+        {
+          "empties": 18,
+          "seed": 11,
+          "baselineBestMove": "E1",
+          "candidateBestMove": "H4"
+        }
+      ]
+    }
+  },
+  "exactSearch": {
+    "top16-midc090-latea080": {
+      "sameScoreCases": 40,
+      "sameBestMoveCases": 40,
+      "cases": 40,
+      "timePercent": 98.877
+    },
+    "latea-latea080": {
+      "sameScoreCases": 40,
+      "sameBestMoveCases": 40,
+      "cases": 40,
+      "timePercent": 99.064
+    }
+  },
+  "noisyFreshOpeningMatch": {
+    "variants": {
+      "baseline": {
+        "aggregate": {
+          "games": 24,
+          "wins": 18,
+          "losses": 6,
+          "draws": 0,
+          "points": 18,
+          "discDiff": 247,
+          "totalPlayedPly": 630,
+          "totalOurTimeMs": 46810,
+          "totalTheirTimeMs": 31331,
+          "totalOurNodes": 923550,
+          "totalTheirNodes": 1945781,
+          "exactAdjudications": 24,
+          "exactAdjudicationTimeMs": 15738,
+          "exactAdjudicationNodes": 374230,
+          "scoreRate": 0.75,
+          "averageDiscDiff": 10.291666666666666,
+          "averageOurTimeMsPerGame": 1950.4166666666667,
+          "averageOurNodesPerGame": 38481.25
+        },
+        "bySeed": [
+          {
+            "seed": 61,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 2.6666666666666665,
+            "averageOurTimeMsPerGame": 1772.6666666666667,
+            "averageOurNodesPerGame": 35779.333333333336
+          },
+          {
+            "seed": 71,
+            "games": 6,
+            "scoreRate": 0.6666666666666666,
+            "averageDiscDiff": 8.5,
+            "averageOurTimeMsPerGame": 1941.8333333333333,
+            "averageOurNodesPerGame": 38138.833333333336
+          },
+          {
+            "seed": 81,
+            "games": 6,
+            "scoreRate": 0.8333333333333334,
+            "averageDiscDiff": 10.666666666666666,
+            "averageOurTimeMsPerGame": 2103.5,
+            "averageOurNodesPerGame": 41406.166666666664
+          },
+          {
+            "seed": 91,
+            "games": 6,
+            "scoreRate": 1,
+            "averageDiscDiff": 19.333333333333332,
+            "averageOurTimeMsPerGame": 1983.6666666666667,
+            "averageOurNodesPerGame": 38600.666666666664
+          }
+        ]
+      },
+      "top16-control": {
+        "aggregate": {
+          "games": 24,
+          "wins": 15,
+          "losses": 9,
+          "draws": 0,
+          "points": 15,
+          "discDiff": 268,
+          "totalPlayedPly": 630,
+          "totalOurTimeMs": 49533,
+          "totalTheirTimeMs": 31407,
+          "totalOurNodes": 955948,
+          "totalTheirNodes": 1887722,
+          "exactAdjudications": 24,
+          "exactAdjudicationTimeMs": 18468,
+          "exactAdjudicationNodes": 430434,
+          "scoreRate": 0.625,
+          "averageDiscDiff": 11.166666666666666,
+          "averageOurTimeMsPerGame": 2063.875,
+          "averageOurNodesPerGame": 39831.166666666664
+        },
+        "bySeed": [
+          {
+            "seed": 61,
+            "games": 6,
+            "scoreRate": 0.6666666666666666,
+            "averageDiscDiff": 12.333333333333334,
+            "averageOurTimeMsPerGame": 1821.6666666666667,
+            "averageOurNodesPerGame": 35071.5
+          },
+          {
+            "seed": 71,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 5.666666666666667,
+            "averageOurTimeMsPerGame": 1975.1666666666667,
+            "averageOurNodesPerGame": 38607.666666666664
+          },
+          {
+            "seed": 81,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 10,
+            "averageOurTimeMsPerGame": 2290,
+            "averageOurNodesPerGame": 44291
+          },
+          {
+            "seed": 91,
+            "games": 6,
+            "scoreRate": 0.8333333333333334,
+            "averageDiscDiff": 16.666666666666668,
+            "averageOurTimeMsPerGame": 2168.6666666666665,
+            "averageOurNodesPerGame": 41354.5
+          }
+        ]
+      },
+      "top16-midc090-latea080": {
+        "aggregate": {
+          "games": 24,
+          "wins": 15,
+          "losses": 9,
+          "draws": 0,
+          "points": 15,
+          "discDiff": 282,
+          "totalPlayedPly": 630,
+          "totalOurTimeMs": 51873,
+          "totalTheirTimeMs": 31322,
+          "totalOurNodes": 970196,
+          "totalTheirNodes": 1820855,
+          "exactAdjudications": 24,
+          "exactAdjudicationTimeMs": 20686,
+          "exactAdjudicationNodes": 462954,
+          "scoreRate": 0.625,
+          "averageDiscDiff": 11.75,
+          "averageOurTimeMsPerGame": 2161.375,
+          "averageOurNodesPerGame": 40424.833333333336
+        },
+        "bySeed": [
+          {
+            "seed": 61,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 5.333333333333333,
+            "averageOurTimeMsPerGame": 1869.6666666666667,
+            "averageOurNodesPerGame": 34965.666666666664
+          },
+          {
+            "seed": 71,
+            "games": 6,
+            "scoreRate": 0.6666666666666666,
+            "averageDiscDiff": 14,
+            "averageOurTimeMsPerGame": 2054.6666666666665,
+            "averageOurNodesPerGame": 36870.666666666664
+          },
+          {
+            "seed": 81,
+            "games": 6,
+            "scoreRate": 0.6666666666666666,
+            "averageDiscDiff": 13.666666666666666,
+            "averageOurTimeMsPerGame": 2359.5,
+            "averageOurNodesPerGame": 45137
+          },
+          {
+            "seed": 91,
+            "games": 6,
+            "scoreRate": 0.6666666666666666,
+            "averageDiscDiff": 14,
+            "averageOurTimeMsPerGame": 2361.6666666666665,
+            "averageOurNodesPerGame": 44726
+          }
+        ]
+      },
+      "latea-latea080": {
+        "aggregate": {
+          "games": 24,
+          "wins": 16,
+          "losses": 8,
+          "draws": 0,
+          "points": 16,
+          "discDiff": 283,
+          "totalPlayedPly": 630,
+          "totalOurTimeMs": 50036,
+          "totalTheirTimeMs": 31354,
+          "totalOurNodes": 957687,
+          "totalTheirNodes": 1841999,
+          "exactAdjudications": 24,
+          "exactAdjudicationTimeMs": 18830,
+          "exactAdjudicationNodes": 433752,
+          "scoreRate": 0.6666666666666666,
+          "averageDiscDiff": 11.791666666666666,
+          "averageOurTimeMsPerGame": 2084.8333333333335,
+          "averageOurNodesPerGame": 39903.625
+        },
+        "bySeed": [
+          {
+            "seed": 61,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 9,
+            "averageOurTimeMsPerGame": 1837.3333333333333,
+            "averageOurNodesPerGame": 34927
+          },
+          {
+            "seed": 71,
+            "games": 6,
+            "scoreRate": 0.5,
+            "averageDiscDiff": 6.166666666666667,
+            "averageOurTimeMsPerGame": 2105.3333333333335,
+            "averageOurNodesPerGame": 41090.833333333336
+          },
+          {
+            "seed": 81,
+            "games": 6,
+            "scoreRate": 0.8333333333333334,
+            "averageDiscDiff": 15,
+            "averageOurTimeMsPerGame": 2263.5,
+            "averageOurNodesPerGame": 43224.833333333336
+          },
+          {
+            "seed": 91,
+            "games": 6,
+            "scoreRate": 0.8333333333333334,
+            "averageDiscDiff": 17,
+            "averageOurTimeMsPerGame": 2133.1666666666665,
+            "averageOurNodesPerGame": 40371.833333333336
+          }
+        ]
+      }
+    },
+    "comparisons": {
+      "top16_control_vs_baseline": {
+        "better": 8,
+        "worse": 9,
+        "equal": 7
+      },
+      "top16_micro_vs_baseline": {
+        "better": 10,
+        "worse": 7,
+        "equal": 7
+      },
+      "latea_micro_vs_baseline": {
+        "better": 9,
+        "worse": 7,
+        "equal": 8
+      },
+      "top16_micro_vs_top16_control": {
+        "better": 4,
+        "worse": 6,
+        "equal": 14
+      },
+      "latea_micro_vs_top16_control": {
+        "better": 4,
+        "worse": 5,
+        "equal": 15
+      },
+      "latea_micro_vs_top16_micro": {
+        "better": 5,
+        "worse": 8,
+        "equal": 11
+      }
+    }
+  },
+  "moduleSizes": {
+    "top16-control": 13660,
+    "top16-midc090-latea080": 14699,
+    "latea-latea080": 12642
+  },
+  "decision": {
+    "defaultRuntime": "baseline-active",
+    "promisingDepthPatch": "top16-midc090-latea080",
+    "promisingNoisyMatchPatch": "latea-latea080",
+    "reopenLargeTraining": false,
+    "nextLane": "small-patch-or-cleanup"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "inputFiles": [
+    "/mnt/data/othello_stage26_extract/repeated_200k.jsonl"
+  ],
+  "totalInputBytes": 26538000,
+  "sampleLimit": 200000,
+  "seenSamples": 200000,
+  "sampledBytes": 26538000,
+  "averageBytesPerSample": 132.69,
+  "fitSeconds": 9.328,
+  "fitSamplesPerSecond": 21440.82332761578,
+  "diagnosticsSeconds": 15.908,
+  "diagnosticsSamplesPerSecond": 12572.290671360322,
+  "estimatedTotalSamples": 25514097,
+  "fitOnlySecondsEstimate": 1189.97748408,
+  "fullRunSecondsEstimate": 3219.3687594599996,
+  "optimisticSecondsEstimate": 2736.4634455409996,
+  "conservativeSecondsEstimate": 4024.2109493249995,
+  "skipDiagnostics": false,
+  "createdAt": "2026-03-27T11:01:49.627Z"
+}

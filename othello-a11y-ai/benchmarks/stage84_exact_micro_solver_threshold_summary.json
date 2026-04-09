@@ -1,0 +1,65 @@
+{
+  "benchmark": "Stage 84 exact micro-solver threshold summary",
+  "description": "Summary of local pilot and validation runs for widening the exact-only optimized few-empties bitboard alpha-beta solver beyond the pre-existing 1-4 empties specialization. WLD remained unchanged by design.",
+  "candidate": {
+    "name": "optimizedFewEmptiesExactSolverEmpties",
+    "testedThresholds": [4, 5, 6, 8],
+    "adoptedDefault": 6,
+    "allowedRange": [4, 8]
+  },
+  "notes": [
+    "Threshold 4 reproduces the prior Stage 83 behavior.",
+    "Thresholds above 4 reuse the existing exact-only board-level alpha-beta solver for a slightly wider tail window and add exact fastest-first reply-count ordering inside that solver.",
+    "All listed comparisons preserved exact scores on the sampled positions.",
+    "Some preset-level tests showed move tie-swaps with unchanged exact score; those were treated as acceptable because the exact value was preserved and the default normal preset already allows non-zero search randomness."
+  ],
+  "results": {
+    "custom_direct_exact_root_6_median_of_3": {
+      "threshold4": { "elapsedMs": 17, "nodes": 117, "smallSolverNodes": 924, "sameScoreVs4": 6 },
+      "threshold5": { "elapsedMs": 10, "nodes": 32, "smallSolverNodes": 947, "sameScoreVs4": 6 },
+      "threshold6": { "elapsedMs": 13, "nodes": 32, "smallSolverNodes": 947, "sameScoreVs4": 6 },
+      "threshold8": { "elapsedMs": 12, "nodes": 32, "smallSolverNodes": 947, "sameScoreVs4": 6 }
+    },
+    "custom_direct_exact_root_8_median_of_3": {
+      "threshold4": { "elapsedMs": 46, "nodes": 915, "smallSolverNodes": 6023, "sameScoreVs4": 6 },
+      "threshold5": { "elapsedMs": 44, "nodes": 412, "smallSolverNodes": 7287, "sameScoreVs4": 6 },
+      "threshold6": { "elapsedMs": 44, "nodes": 153, "smallSolverNodes": 7922, "sameScoreVs4": 6 },
+      "threshold8": { "elapsedMs": 54, "nodes": 38, "smallSolverNodes": 9192, "sameScoreVs4": 6 }
+    },
+    "custom_exact_bucket_10_median_of_3": {
+      "threshold4": { "elapsedMs": 581, "nodes": 9317, "smallSolverNodes": 55507, "sameScoreVs4": 8 },
+      "threshold5": { "elapsedMs": 382, "nodes": 4322, "smallSolverNodes": 61254, "sameScoreVs4": 8 },
+      "threshold6": { "elapsedMs": 320, "nodes": 1925, "smallSolverNodes": 61492, "sameScoreVs4": 8 },
+      "threshold8": { "elapsedMs": 350, "nodes": 245, "smallSolverNodes": 72818, "sameScoreVs4": 8 }
+    },
+    "custom_exact_bucket_14_single_run": {
+      "threshold4": { "elapsedMs": 3800, "nodes": 90417, "smallSolverNodes": 397531, "sameScoreVs4": 4 },
+      "threshold6": { "elapsedMs": 3029, "nodes": 24091, "smallSolverNodes": 421125, "sameScoreVs4": 4 },
+      "threshold8": { "elapsedMs": 2647, "nodes": 5501, "smallSolverNodes": 433804, "sameScoreVs4": 4 }
+    },
+    "custom_wld_bucket_12_single_run_control": {
+      "threshold4": { "elapsedMs": 475, "nodes": 13577, "smallSolverNodes": 0, "sameScoreVs4": 4 },
+      "threshold6": { "elapsedMs": 526, "nodes": 13577, "smallSolverNodes": 0, "sameScoreVs4": 4 },
+      "threshold8": { "elapsedMs": 445, "nodes": 13577, "smallSolverNodes": 0, "sameScoreVs4": 4 }
+    },
+    "preset_normal_exact_8_median_of_3": {
+      "threshold4": { "elapsedMs": 40, "nodes": 914, "smallSolverNodes": 6033, "sameScoreVs4": 6 },
+      "threshold6": { "elapsedMs": 34, "nodes": 153, "smallSolverNodes": 7922, "sameScoreVs4": 6 },
+      "threshold8": { "elapsedMs": 39, "nodes": 38, "smallSolverNodes": 9192, "sameScoreVs4": 6 }
+    },
+    "preset_hard_exact_10_median_of_3": {
+      "threshold4": { "elapsedMs": 134, "nodes": 5020, "smallSolverNodes": 33330, "sameScoreVs4": 4 },
+      "threshold6": { "elapsedMs": 128, "nodes": 976, "smallSolverNodes": 41063, "sameScoreVs4": 4 },
+      "threshold8": { "elapsedMs": 142, "nodes": 116, "smallSolverNodes": 48528, "sameScoreVs4": 4 }
+    }
+  },
+  "decision": {
+    "status": "adopted",
+    "defaultThreshold": 6,
+    "reason": [
+      "Threshold 6 consistently improved the common exact-8 and exact-10 ranges and also improved the direct exact-root pilot sections.",
+      "Threshold 8 was promising in one heavier exact-14 spot-check but did not consistently beat threshold 6 on the more typical preset-level and median-of-three validation buckets.",
+      "The implementation stays exact-only, leaves WLD untouched, and keeps the threshold configurable for later follow-up tuning."
+    ]
+  }
+}

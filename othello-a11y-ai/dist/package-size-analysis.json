@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-04-07T03:24:38.270Z",
+  "repoRoot": "/mnt/data/othello-src/othello-a11y-ai",
+  "totalFileCount": 674,
+  "totalBytes": 44095087,
+  "topLevelBreakdown": [
+    {
+      "name": "benchmarks",
+      "size": 32813485
+    },
+    {
+      "name": "tools",
+      "size": 7421419
+    },
+    {
+      "name": "js",
+      "size": 3438850
+    },
+    {
+      "name": "docs",
+      "size": 361094
+    },
+    {
+      "name": "(root)",
+      "size": 29434
+    },
+    {
+      "name": "tests",
+      "size": 18042
+    },
+    {
+      "name": "third_party",
+      "size": 12763
+    }
+  ],
+  "heavyAreaBreakdown": [
+    {
+      "name": "benchmarks",
+      "size": 32813485
+    },
+    {
+      "name": "tools/evaluator-training/out",
+      "size": 6551116
+    },
+    {
+      "name": "runtime-core",
+      "size": 3055655
+    },
+    {
+      "name": "other",
+      "size": 1009718
+    },
+    {
+      "name": "docs/reports",
+      "size": 361094
+    },
+    {
+      "name": "js/test",
+      "size": 285977
+    },
+    {
+      "name": "tests",
+      "size": 18042
+    }
+  ],
+  "largestFiles": [
+    {
+      "relativePath": "js/ai/opening-prior.generated.js",
+      "size": 2705826
+    },
+    {
+      "relativePath": "benchmarks/stage39_candidateD_wider_validation_merged_with_prior_20260329.json",
+      "size": 2005704
+    },
+    {
+      "relativePath": "benchmarks/stage44_candidateH2_current_apples_to_apples_24seed_20260330.json",
+      "size": 1605043
+    },
+    {
+      "relativePath": "benchmarks/stage38_candidateC_wider_validation_merged_with_prior_20260329.json",
+      "size": 1604746
+    },
+    {
+      "relativePath": "benchmarks/stage41_candidateF_current_apples_to_apples_24seed_20260330.json",
+      "size": 1604597
+    },
+    {
+      "relativePath": "benchmarks/stage38_candidateB_adoption_wider_validation_20260329.json",
+      "size": 1204494
+    },
+    {
+      "relativePath": "benchmarks/stage41_candidateF_vs_candidateD_wider_validation_20260330.json",
+      "size": 802618
+    },
+    {
+      "relativePath": "benchmarks/stage44_candidateH2_vs_candidateF_exact_tie_audit_seed1_8_20260330.json",
+      "size": 721273
+    },
+    {
+      "relativePath": "benchmarks/stage38_candidateB_audit_merged_profile_set_20260329.json",
+      "size": 623017
+    },
+    {
+      "relativePath": "benchmarks/stage38_move_ordering_search_cost_rerun_ablation_20260328.json",
+      "size": 622615
+    },
+    {
+      "relativePath": "benchmarks/stage38_candidateB_active_search_cost_audit_20260329.json",
+      "size": 622278
+    },
+    {
+      "relativePath": "benchmarks/stage44_candidateH2_current_apples_to_apples_8seed_20260330.json",
+      "size": 542920
+    },
+    {
+      "relativePath": "benchmarks/stage58_opening_hybrid_reference_suite.json",
+      "size": 497368
+    },
+    {
+      "relativePath": "benchmarks/stage31_vs_trineutron_solver_adjudication_aggregate_seed11_21_31_80ms.json",
+      "size": 439189
+    },
+    {
+      "relativePath": "benchmarks/stage37_vs_trineutron_aggregate_seed11_21_31_2x80ms.json",
+      "size": 437807
+    },
+    {
+      "relativePath": "benchmarks/stage38_candidateC_wider_validation_candidate_only_20260329.json",
+      "size": 402409
+    },
+    {
+      "relativePath": "benchmarks/stage39_candidateD_wider_validation_candidate_only_20260329.json",
+      "size": 402387
+    },
+    {
+      "relativePath": "benchmarks/stage43_candidateH2_vs_candidateF_exact_tie_audit_seed1_4_fullsuite_20260330.json",
+      "size": 363039
+    },
+    {
+      "relativePath": "benchmarks/stage42_candidateF_local_search_depth_15_18_seed1_1_20260330.json",
+      "size": 320356
+    },
+    {
+      "relativePath": "benchmarks/stage23_specialized_few_empties_exact_solver_audit.json",
+      "size": 311626
+    },
+    {
+      "relativePath": "benchmarks/stage41_candidateD_local_search_depth_15_18_broadpilot_seed1_2_20260330.json",
+      "size": 306783
+    },
+    {
+      "relativePath": "benchmarks/stage37_vs_trineutron_aggregate_seed11_21_2x80ms.json",
+      "size": 293000
+    },
+    {
+      "relativePath": "benchmarks/stage30_vs_trineutron_aggregate_seed11_21_80ms.json",
+      "size": 275364
+    },
+    {
+      "relativePath": "benchmarks/stage38_move_ordering_search_cost_rerun_full_vs_legacy_20260328.json",
+      "size": 271626
+    },
+    {
+      "relativePath": "benchmarks/stage22_bucketed_few_empties_exact_solver_audit.json",
+      "size": 227416
+    }
+  ],
+  "profileSummaries": [
+    {
+      "profileName": "runtime",
+      "description": "정적 웹 앱 실행에 필요한 최소 런타임만 포함합니다.",
+      "fileCount": 25,
+      "totalBytes": 3055655,
+      "reductionVsFullBytes": 41039432,
+      "reductionVsFullRatio": 0.930703050886372
+    },
+    {
+      "profileName": "trainer",
+      "description": "웹 앱 + 현재 권장 evaluator/opening-prior 학습 도구만 포함하는 정리된 trainer 패키지입니다. generated output/과거 벤치마크/legacy 실험 도구는 제외합니다.",
+      "fileCount": 104,
+      "totalBytes": 3688201,
+      "reductionVsFullBytes": 40406886,
+      "reductionVsFullRatio": 0.9163580060517853
+    }
+  ]
+}

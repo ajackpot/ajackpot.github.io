@@ -4,6 +4,7 @@ import {
   createStateFromBitboards,
   createStateFromMoveSequence,
   createStateHistoryFromMoveSequence,
+  serializeMoveHistoryCompact,
 } from '../core/game-state.js';
 import { bitFromIndex, FULL_BOARD, popcount } from '../core/bitboard.js';
 import { SearchEngine } from '../ai/search-engine.js';
@@ -11,7 +12,9 @@ import { legalMovesBitboard } from '../core/rules.js';
 import { Evaluator, MoveOrderingEvaluator, describeStableDiscBounds } from '../ai/evaluator.js';
 import { lookupOpeningBook, getOpeningBookSummary } from '../ai/opening-book.js';
 import { resolveEngineOptions } from '../ai/presets.js';
+import { DEFAULT_EVALUATION_PROFILE } from '../ai/evaluation-profiles.js';
 import { formatSearchSummary } from '../ui/formatters.js';
+import { XOT_OPENING_COUNT, XOT_OPENINGS_SMALL, selectRandomXotOpening } from '../data/xot-openings-small.js';
 
 function coordinatesOfLegalMoves(state) {
   return state.getLegalMoves().map((move) => move.coord).sort();
@@ -79,6 +82,16 @@ function withMockedRandom(value, callback) {
   } finally {
     Math.random = originalRandom;
   }
+}
+
+function referencePopcount(bitboard) {
+  let count = 0;
+  let cursor = bitboard;
+  while (cursor !== 0n) {
+    cursor &= cursor - 1n;
+    count += 1;
+  }
+  return count;
 }
 
 function findSearchRandomnessRegressionState() {
@@ -227,6 +240,25 @@ function findExactRootTimeoutRegressionState() {
 }
 
 function runCoreRuleTests() {
+  const representativeBitboards = [
+    0n,
+    FULL_BOARD,
+    0xaaaaaaaa55555555n,
+    bitFromIndex(0) | bitFromIndex(31) | bitFromIndex(32) | bitFromIndex(63),
+    bitFromIndex(7) | bitFromIndex(8) | bitFromIndex(9) | bitFromIndex(54),
+    legalMovesBitboard(GameState.initial().black, GameState.initial().white),
+  ];
+  for (let index = 0; index < 64; index += 1) {
+    representativeBitboards.push(bitFromIndex(index));
+  }
+  for (const bitboard of representativeBitboards) {
+    assert.equal(
+      popcount(bitboard),
+      referencePopcount(bitboard),
+      `popcount should match the reference implementation for ${bitboard.toString(16)}h.`,
+    );
+  }
+
   const initial = GameState.initial();
   const initialMoves = coordinatesOfLegalMoves(initial);
   assert.deepEqual(initialMoves, ['C4', 'D3', 'E6', 'F5']);
@@ -271,6 +303,23 @@ function runCoreRuleTests() {
   const history = createStateHistoryFromMoveSequence('C4 C3');
   assert.equal(history.length, 3, 'Position import should preserve the full state history from the opening state.');
   assert.equal(history.at(-1).moveHistory.length, 2);
+  assert.equal(
+    serializeMoveHistoryCompact(history.at(-1).moveHistory),
+    'c4c3',
+    'Move history export should preserve compact lowercase coordinate notation.',
+  );
+
+  const passHistory = createStateHistoryFromMoveSequence('c4c3c2b2a2a1d3a3b3b4a4a5b1c1e6b5a6a7pass');
+  assert.equal(
+    serializeMoveHistoryCompact(passHistory.at(-1).moveHistory),
+    'c4c3c2b2a2a1d3a3b3b4a4a5b1c1e6b5a6a7',
+    'Move history export should omit explicit pass tokens in the compact coordinate format.',
+  );
+  assert.equal(
+    createStateFromMoveSequence('c4c3c2b2a2a1d3a3b3b4a4a5b1c1e6b5a6a7').hashKey(),
+    passHistory.at(-1).hashKey(),
+    'Compact import should infer omitted forced passes after a copied sequence with a pass.',
+  );
 
   assert.throws(
     () => createStateHistoryFromMoveSequence('pass'),
@@ -326,9 +375,33 @@ function runEvaluatorTests() {
   const riskyFeatures = evaluator.explainFeatures(cornerRisky, 'black');
   assert.ok(Number.isFinite(safeFeatures.edgePattern), 'Edge pattern feature should be computed for analysis output.');
   assert.ok(Number.isFinite(safeFeatures.cornerPattern), 'Corner pattern feature should be computed for analysis output.');
+  assert.ok(Number.isFinite(safeFeatures.cornerOrthAdjacency), 'Orthogonal corner-adjacency feature should be exposed for learning.');
+  assert.ok(Number.isFinite(safeFeatures.cornerDiagonalAdjacency), 'Diagonal corner-adjacency feature should be exposed for learning.');
+  assert.equal(typeof safeFeatures.phaseBucketKey, 'string', 'Feature breakdown should expose the selected phase bucket.');
+  assert.equal(typeof safeFeatures.bucketWeights.mobility, 'number', 'Feature breakdown should expose the applied bucket weights.');
   assert.ok(
     safeFeatures.cornerPattern > riskyFeatures.cornerPattern,
     'Owning a corner should improve the corner-pattern score compared with lingering near an empty corner.',
+  );
+
+  const customProfile = {
+    ...DEFAULT_EVALUATION_PROFILE,
+    name: 'smoke-custom-profile',
+    phaseBuckets: DEFAULT_EVALUATION_PROFILE.phaseBuckets.map((bucket) => ({
+      ...bucket,
+      weights: {
+        ...bucket.weights,
+        mobility: bucket.weights.mobility + 1,
+      },
+    })),
+  };
+  const customProfileEvaluator = new Evaluator({ evaluationProfile: customProfile });
+  const customScore = customProfileEvaluator.evaluate(progressed, 'black');
+  assert.ok(Number.isFinite(customScore), 'Custom evaluation profiles should compile and evaluate normally.');
+  assert.equal(
+    customProfileEvaluator.explainFeatures(progressed, 'black').evaluationProfileName,
+    'smoke-custom-profile',
+    'Custom evaluation profile names should appear in feature diagnostics.',
   );
 
   const cornerAccessState = createStateFromMoveSequence('D3 C3 B3 B2 C4 A3');
@@ -431,9 +504,11 @@ function runEvaluatorTests() {
 
 function runOpeningBookTests() {
   const summary = getOpeningBookSummary();
-  assert.equal(summary.seedLineCount, 99, 'Compact opening book should expose the expected number of seed lines.');
-  assert.ok(summary.positionCount > 300, 'Opening book should expand into a few hundred reachable positions.');
-  assert.ok(summary.maxDepthPly >= 12, 'Opening book should cover a meaningful portion of the opening.');
+  assert.equal(summary.baseSeedLineCount, 99, 'Base opening book should preserve the original Robert Gatliff seed catalog size.');
+  assert.equal(summary.supplementalSeedLineCount, 12, 'Supplemental named continuations should be tracked separately from the base catalog.');
+  assert.equal(summary.seedLineCount, 111, 'Combined opening book should expose the expanded seed line count.');
+  assert.ok(summary.positionCount > 600, 'Expanded opening book should cover several hundred reachable positions.');
+  assert.ok(summary.maxDepthPly >= 20, 'Expanded opening book should now reach deep named continuations.');
 
   const initial = GameState.initial();
   const initialHit = lookupOpeningBook(initial);
@@ -443,6 +518,32 @@ function runOpeningBookTests() {
   const diagonalState = initial.applyMove(initial.getLegalMoves().find((move) => move.coord === 'D3').index).state;
   const diagonalHit = lookupOpeningBook(diagonalState);
   assert.ok(diagonalHit, 'Symmetric early openings should also be found in the opening book.');
+
+  const bondPrefixState = createStateFromMoveSequence('F5 D6 C3 D3 C4 F4 F6 G5 E6 D7 E3 C5 F3 E7');
+  const bondHit = lookupOpeningBook(bondPrefixState);
+  assert.ok(bondHit, 'Supplemental no-kung continuations should be reachable from the opening book.');
+  assert.equal(bondHit.candidates[0].coord, 'B6', 'Bond prefix should point to the named continuation move.');
+  assert.equal(bondHit.candidates[0].topNames[0]?.name, 'Bond', 'Bond continuation should preserve its named label at the candidate level.');
+
+  const toriPrefixState = createStateFromMoveSequence('F5 D6 C3 D3 C4 F4 C5 B3 C2 E3 D2 C6 B4');
+  const toriHit = lookupOpeningBook(toriPrefixState);
+  assert.ok(toriHit, 'Supplemental tiger-heavy continuations should be reachable from the opening book.');
+  assert.deepEqual(
+    toriHit.candidates.map((candidate) => candidate.coord).slice(0, 2),
+    ['A3', 'A4'],
+    'Tori prefix should expose the hook and straight continuations side by side.',
+  );
+  assert.deepEqual(
+    toriHit.candidates.map((candidate) => candidate.topNames[0]?.name).slice(0, 2),
+    ['Tori Hook (酉フック)', 'Tori Straight (酉ストレート)'],
+    'Tori continuations should preserve their distinct named labels.',
+  );
+
+  const supermanPrefixState = createStateFromMoveSequence('F5 F6 E6 F4 E3 C5 C4 D6 C6 B3 D7 D3 F3');
+  const supermanHit = lookupOpeningBook(supermanPrefixState);
+  assert.ok(supermanHit, 'Supplemental cow-family continuations should be reachable from the opening book.');
+  assert.equal(supermanHit.candidates[0].coord, 'D2', 'Superman prefix should point to the named continuation move.');
+  assert.equal(supermanHit.candidates[0].topNames[0]?.name, 'Superman', 'Superman continuation should preserve its named label at the candidate level.');
 }
 
 function runPresetResolutionTests() {
@@ -459,6 +560,9 @@ function runPresetResolutionTests() {
     mobilityScale: 1.4,
     riskPenaltyScale: 1.1,
   }, 'aggressive');
+  const customWithWld = resolveEngineOptions('custom', {
+    wldPreExactEmpties: 2,
+  }, 'balanced');
 
   assert.equal(easy.presetKey, 'easy');
   assert.equal(easy.maxDepth, 3, 'Easy should sit between beginner and normal at depth 3.');
@@ -482,6 +586,34 @@ function runPresetResolutionTests() {
   assert.equal(custom.styleApplied, false);
   assert.equal(custom.mobilityScale, 1.4, 'Custom inputs should bypass style-based scaling.');
   assert.equal(custom.randomness, 5, 'Custom randomness should bypass style-based randomness bonuses.');
+  assert.equal(custom.wldPreExactEmpties, 0, 'Custom preset should keep WLD pre-exact mode disabled unless the user explicitly enables it.');
+  assert.equal(customWithWld.wldPreExactEmpties, 2, 'Custom preset should accept the explicit +2 WLD pre-exact option.');
+
+  const directOverrideEngine = new SearchEngine({
+    maxDepth: 5,
+    timeLimitMs: 1300,
+    exactEndgameEmpties: 11,
+    aspirationWindow: 15,
+    randomness: 0,
+  });
+  assert.equal(directOverrideEngine.options.presetKey, 'normal', 'Bare constructor overrides should still inherit the default normal preset label.');
+  assert.equal(directOverrideEngine.options.maxDepth, 5, 'Bare constructor overrides should honor direct maxDepth input.');
+  assert.equal(directOverrideEngine.options.timeLimitMs, 1300, 'Bare constructor overrides should honor direct timeLimitMs input.');
+  assert.equal(directOverrideEngine.options.exactEndgameEmpties, 11, 'Bare constructor overrides should honor direct exact-endgame input.');
+  assert.equal(directOverrideEngine.options.randomness, 0, 'Bare constructor overrides should honor direct randomness input.');
+
+  const uiSemanticsEngine = new SearchEngine({
+    presetKey: 'normal',
+    styleKey: 'balanced',
+    maxDepth: 1,
+    timeLimitMs: 1300,
+    exactEndgameEmpties: 11,
+    randomness: 0,
+  });
+  assert.equal(uiSemanticsEngine.options.maxDepth, 4, 'Explicit preset-based search should keep ignoring non-custom depth overrides.');
+  assert.equal(uiSemanticsEngine.options.timeLimitMs, 500, 'Explicit preset-based search should keep ignoring non-custom time overrides.');
+  assert.equal(uiSemanticsEngine.options.exactEndgameEmpties, 8, 'Explicit preset-based search should keep ignoring non-custom exact-window overrides.');
+  assert.equal(uiSemanticsEngine.options.randomness, 60, 'Explicit preset-based search should keep ignoring non-custom randomness overrides.');
 }
 
 function runSearchTests() {
@@ -633,19 +765,22 @@ function runSearchTests() {
   );
 
   const trainedThirteenBucket = orderingEngine.moveOrderingEvaluator.selectTrainedBucket(13);
-  assert.deepEqual(
-    trainedThirteenBucket?.weights,
-    {
-      mobility: 2000,
-      corners: 0,
-      cornerAdjacency: 0,
-      edgePattern: 1000,
-      cornerPattern: 0,
-      discDifferential: 0,
-      parity: 0,
-    },
-    'The move-ordering evaluator should expose the exact-teacher 13~14-empty bucket weights.',
+  const activeThirteenBucket = orderingEngine.moveOrderingEvaluator.trainedWeightBuckets.find((bucket) => (
+    13 >= bucket.minEmpties && 13 <= bucket.maxEmpties
+  )) ?? null;
+  assert.equal(
+    trainedThirteenBucket?.key ?? null,
+    activeThirteenBucket?.key ?? null,
+    'The move-ordering evaluator should surface whichever trained child bucket actually covers thirteen empties in the active profile.',
   );
+  if (trainedThirteenBucket) {
+    for (const key of ['mobility', 'corners', 'cornerAdjacency', 'edgePattern', 'cornerPattern', 'discDifferential', 'parity']) {
+      assert.ok(
+        Number.isFinite(trainedThirteenBucket.weights?.[key]),
+        `Active 13-empty trained bucket should expose a finite ${key} weight.`,
+      );
+    }
+  }
 
   const exactLateOrderingProfile = orderingEngine.selectLateOrderingProfile(14);
   assert.ok(
@@ -865,6 +1000,17 @@ function runSearchTests() {
     styleKey: 'aggressive',
   });
   assert.equal(engine.transpositionTable.size, sizeBeforeUpdate, 'Style changes should be ignored while custom difficulty is active.');
+
+  engine.updateOptions({
+    presetKey: 'custom',
+    maxDepth: 5,
+    timeLimitMs: 500,
+    exactEndgameEmpties: engine.options.exactEndgameEmpties,
+    aspirationWindow: engine.options.aspirationWindow,
+    randomness: 0,
+    wldPreExactEmpties: 2,
+  });
+  assert.equal(engine.transpositionTable.size, 0, 'Changing the explicit WLD pre-exact window should clear the transposition table because root search semantics changed.');
 
   const forcedPass = playDeterministicPly(GameState.initial(), 18);
   const passResult = engine.findBestMove(forcedPass, { presetKey: 'custom', timeLimitMs: 500, maxDepth: 5, styleKey: 'balanced' });
@@ -1367,13 +1513,13 @@ function runSearchTests() {
   );
   assert.equal(
     new SearchEngine({ presetKey: 'expert' }).options.wldPreExactEmpties,
-    2,
-    'Expert strength should now default to the full +2 pre-exact WLD window.',
+    0,
+    'Expert strength should now keep WLD pre-exact mode disabled unless it is explicitly enabled.',
   );
   assert.equal(
     new SearchEngine({ presetKey: 'impossible' }).options.wldPreExactEmpties,
-    2,
-    'Impossible strength should now default to the full +2 pre-exact WLD window.',
+    0,
+    'Impossible strength should now keep WLD pre-exact mode disabled unless it is explicitly enabled.',
   );
   assert.equal(
     new SearchEngine({
@@ -1384,20 +1530,21 @@ function runSearchTests() {
       aspirationWindow: 0,
       randomness: 0,
     }).options.wldPreExactEmpties,
-    2,
-    'Strong custom settings should inherit the full +2 pre-exact WLD window by default.',
+    0,
+    'Strong custom settings should keep WLD pre-exact mode disabled by default until the user selects +2.',
   );
   assert.equal(
     new SearchEngine({
       presetKey: 'custom',
-      maxDepth: 6,
-      timeLimitMs: 5000,
+      maxDepth: 8,
+      timeLimitMs: 3900,
       exactEndgameEmpties: 12,
       aspirationWindow: 0,
       randomness: 0,
+      wldPreExactEmpties: 2,
     }).options.wldPreExactEmpties,
-    0,
-    'High time alone should not auto-enable WLD pre-exact mode when the configured search depth is still shallow.',
+    2,
+    'Explicit custom WLD pre-exact input should still enable the +2 window.',
   );
 
   assert.equal(
@@ -1717,12 +1864,36 @@ function runSearchTests() {
   assert.equal(exactFastestWldCandidate.stats.fastestFirstExactSorts, 0, 'The Stage 24 exact fastest-first ordering should stay inactive inside the WLD bucket.');
 }
 
+function runSequenceNotationAndXotTests() {
+  const stateWithForcedPass = createStateFromMoveSequence('d3e3f2c5e6g1c3f3b5c6d6c2f4d7g3c4b1h2e8a6b6c7f6f5b3d2f1a2e1a5g4g2h3g6h7h4g5g7b8d8e7f8b7c8b4d1g8a8h8e2h5f7c1a1a4a3b2a7h6passh1');
+  assert.equal(
+    serializeMoveHistoryCompact(stateWithForcedPass.moveHistory),
+    'd3e3f2c5e6g1c3f3b5c6d6c2f4d7g3c4b1h2e8a6b6c7f6f5b3d2f1a2e1a5g4g2h3g6h7h4g5g7b8d8e7f8b7c8b4d1g8a8h8e2h5f7c1a1a4a3b2a7h6h1',
+    'Compact move serialization should omit forced pass tokens.',
+  );
+  assert.equal(
+    createStateFromMoveSequence('d3e3f2c5e6g1c3f3b5c6d6c2f4d7g3c4b1h2e8a6b6c7f6f5b3d2f1a2e1a5g4g2h3g6h7h4g5g7b8d8e7f8b7c8b4d1g8a8h8e2h5f7c1a1a4a3b2a7h6h1').hashKey(),
+    stateWithForcedPass.hashKey(),
+    'Sequence import should infer omitted forced passes so copied notation round-trips correctly.',
+  );
+
+  assert.equal(XOT_OPENING_COUNT, 3623, 'The bundled XOT opening subset should contain 3623 lines.');
+  assert.equal(XOT_OPENINGS_SMALL[0], 'f5d6c4d3c2b3b4b5', 'The first bundled XOT opening should match the supplied dataset.');
+  assert.equal(selectRandomXotOpening(0).sequence, XOT_OPENINGS_SMALL[0], 'A zero random value should select the first XOT opening.');
+  assert.equal(
+    selectRandomXotOpening(0.999999999).sequence,
+    XOT_OPENINGS_SMALL[XOT_OPENINGS_SMALL.length - 1],
+    'A high random value should select the final XOT opening.',
+  );
+}
+
 function run() {
   runCoreRuleTests();
   runEvaluatorTests();
   runOpeningBookTests();
   runPresetResolutionTests();
   runSearchTests();
+  runSequenceNotationAndXotTests();
   console.log('core-smoke: all assertions passed');
 }
 

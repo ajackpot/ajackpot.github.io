@@ -1,0 +1,47 @@
+{
+  "stage": 35,
+  "title": "MPC calibration harness and planning summary",
+  "decision": {
+    "primary_next_pipeline": "mpc-calibration",
+    "reason": "Current engine already stores evaluator residual stats, but still lacks shallow/deep search regression and sigma estimates required before any ProbCut or Multi-ProbCut runtime experiment.",
+    "deferred_candidates": [
+      "learned pattern residual tables",
+      "WTHOR expert move prior / opening data pipeline"
+    ]
+  },
+  "implemented": {
+    "tools": [
+      "tools/evaluator-training/calibrate-mpc-profile.mjs",
+      "tools/evaluator-training/calibrate-mpc-profile.bat"
+    ],
+    "tests": [
+      "js/test/stage35_mpc_calibration_smoke.mjs"
+    ]
+  },
+  "smoke": {
+    "profilePath": "benchmarks/stage35_mpc_calibration_smoke.json",
+    "acceptedSamples": 8,
+    "usableCalibrationCount": 0,
+    "bucketCount": 2,
+    "shallowSearchCost": {
+      "searches": 8,
+      "nodes": 467,
+      "elapsedMs": 87,
+      "averageNodesPerSearch": 58.375,
+      "averageElapsedMsPerSearch": 10.875
+    },
+    "deepSearchCost": {
+      "searches": 8,
+      "nodes": 1737,
+      "elapsedMs": 155,
+      "averageNodesPerSearch": 217.125,
+      "averageElapsedMsPerSearch": 19.375
+    }
+  },
+  "verification": {
+    "coreSmoke": "passed",
+    "perftDepth8": "passed",
+    "trineutronAdapterSmoke": "passed",
+    "mpcCalibrationSmoke": "passed"
+  }
+}

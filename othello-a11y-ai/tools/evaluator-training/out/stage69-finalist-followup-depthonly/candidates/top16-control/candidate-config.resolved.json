@@ -1,0 +1,60 @@
+{
+  "key": "top16-control",
+  "name": "diagonal-lite-top16 control",
+  "description": null,
+  "sourceCandidateKey": null,
+  "sourceProfileKind": "auto",
+  "sourceTupleProfileJson": "/mnt/data/stage69_work/bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json",
+  "keepBuckets": [],
+  "dropBuckets": [],
+  "keepTopTuples": null,
+  "tupleScore": "sum-abs",
+  "keepTuples": [],
+  "dropTuples": [],
+  "globalScale": 1,
+  "bucketScaleEntries": [],
+  "tupleScaleEntries": [],
+  "calibration": {
+    "enabled": false,
+    "scope": "holdout-selected",
+    "shrink": 1,
+    "maxBiasStones": 1.5,
+    "limit": null
+  },
+  "exportModule": true,
+  "benchmarks": {
+    "profile": {
+      "enabled": false,
+      "limit": 50000,
+      "benchmarkLoops": 200
+    },
+    "depth": {
+      "enabled": true,
+      "empties": [
+        24,
+        20,
+        18
+      ],
+      "seedStart": 1,
+      "seedCount": 12,
+      "repetitions": 1,
+      "timeLimitMs": 2000,
+      "maxDepth": 6,
+      "exactEndgameEmpties": 10
+    },
+    "exact": {
+      "enabled": false,
+      "empties": [
+        10,
+        12,
+        14
+      ],
+      "seedStart": 1,
+      "seedCount": 12,
+      "repetitions": 3,
+      "timeLimitMs": 60000,
+      "maxDepth": 12
+    }
+  },
+  "sourceTupleProfilePath": "../../bundle67/stage67_run/candidates/diagonal-lite-top16/tuple.json"
+}

@@ -1,0 +1,253 @@
+{
+  "generatedAt": "2026-03-27T12:10:05.688Z",
+  "candidateProfileName": "trained-phase-linear-v1",
+  "exactAlignment": [
+    {
+      "empties": 14,
+      "seed": 1,
+      "exactScore": -60000,
+      "baselineScore": -70898,
+      "candidateScore": -30419,
+      "baselineAbsError": 10898,
+      "candidateAbsError": 29581
+    },
+    {
+      "empties": 14,
+      "seed": 2,
+      "exactScore": 180000,
+      "baselineScore": 27909,
+      "candidateScore": 44818,
+      "baselineAbsError": 152091,
+      "candidateAbsError": 135182
+    },
+    {
+      "empties": 14,
+      "seed": 3,
+      "exactScore": 120000,
+      "baselineScore": 72804,
+      "candidateScore": 56844,
+      "baselineAbsError": 47196,
+      "candidateAbsError": 63156
+    },
+    {
+      "empties": 14,
+      "seed": 4,
+      "exactScore": -60000,
+      "baselineScore": -83328,
+      "candidateScore": -34607,
+      "baselineAbsError": 23328,
+      "candidateAbsError": 25393
+    },
+    {
+      "empties": 14,
+      "seed": 5,
+      "exactScore": -200000,
+      "baselineScore": -146755,
+      "candidateScore": -76309,
+      "baselineAbsError": 53245,
+      "candidateAbsError": 123691
+    },
+    {
+      "empties": 14,
+      "seed": 6,
+      "exactScore": 360000,
+      "baselineScore": 123370,
+      "candidateScore": 80913,
+      "baselineAbsError": 236630,
+      "candidateAbsError": 279087
+    },
+    {
+      "empties": 12,
+      "seed": 1,
+      "exactScore": -40000,
+      "baselineScore": -8670,
+      "candidateScore": -30406,
+      "baselineAbsError": 31330,
+      "candidateAbsError": 9594
+    },
+    {
+      "empties": 12,
+      "seed": 2,
+      "exactScore": 180000,
+      "baselineScore": -91574,
+      "candidateScore": 9971,
+      "baselineAbsError": 271574,
+      "candidateAbsError": 170029
+    },
+    {
+      "empties": 12,
+      "seed": 3,
+      "exactScore": 100000,
+      "baselineScore": 128705,
+      "candidateScore": 24665,
+      "baselineAbsError": 28705,
+      "candidateAbsError": 75335
+    },
+    {
+      "empties": 12,
+      "seed": 4,
+      "exactScore": -20000,
+      "baselineScore": -87983,
+      "candidateScore": -24577,
+      "baselineAbsError": 67983,
+      "candidateAbsError": 4577
+    },
+    {
+      "empties": 12,
+      "seed": 5,
+      "exactScore": -400000,
+      "baselineScore": -200461,
+      "candidateScore": -85033,
+      "baselineAbsError": 199539,
+      "candidateAbsError": 314967
+    },
+    {
+      "empties": 12,
+      "seed": 6,
+      "exactScore": 480000,
+      "baselineScore": 92714,
+      "candidateScore": 86386,
+      "baselineAbsError": 387286,
+      "candidateAbsError": 393614
+    },
+    {
+      "empties": 10,
+      "seed": 1,
+      "exactScore": -60000,
+      "baselineScore": 31535,
+      "candidateScore": -14708,
+      "baselineAbsError": 91535,
+      "candidateAbsError": 45292
+    },
+    {
+      "empties": 10,
+      "seed": 2,
+      "exactScore": 180000,
+      "baselineScore": 41842,
+      "candidateScore": 36283,
+      "baselineAbsError": 138158,
+      "candidateAbsError": 143717
+    },
+    {
+      "empties": 10,
+      "seed": 3,
+      "exactScore": 220000,
+      "baselineScore": 171702,
+      "candidateScore": 65395,
+      "baselineAbsError": 48298,
+      "candidateAbsError": 154605
+    },
+    {
+      "empties": 10,
+      "seed": 4,
+      "exactScore": 0,
+      "baselineScore": -47808,
+      "candidateScore": -23268,
+      "baselineAbsError": 47808,
+      "candidateAbsError": 23268
+    },
+    {
+      "empties": 10,
+      "seed": 5,
+      "exactScore": -260000,
+      "baselineScore": -156796,
+      "candidateScore": -74107,
+      "baselineAbsError": 103204,
+      "candidateAbsError": 185893
+    },
+    {
+      "empties": 10,
+      "seed": 6,
+      "exactScore": 400000,
+      "baselineScore": 92842,
+      "candidateScore": 81552,
+      "baselineAbsError": 307158,
+      "candidateAbsError": 318448
+    }
+  ],
+  "exactAlignmentSummary": {
+    "cases": 18,
+    "baselineMae": 124775.88888888889,
+    "candidateMae": 138634.94444444444,
+    "candidateToBaselineRatio": 1.1110715834522873
+  },
+  "depthSearchMoveAgreementAt14Empties": [
+    {
+      "empties": 14,
+      "seed": 1,
+      "exactBestMove": "D8",
+      "exactScore": -60000,
+      "baselineBestMove": "B2",
+      "candidateBestMove": "G7",
+      "baselineBestMoveMatches": false,
+      "candidateBestMoveMatches": false,
+      "baselineScore": -103076,
+      "candidateScore": -2103
+    },
+    {
+      "empties": 14,
+      "seed": 2,
+      "exactBestMove": "H7",
+      "exactScore": 180000,
+      "baselineBestMove": "H7",
+      "candidateBestMove": "H7",
+      "baselineBestMoveMatches": true,
+      "candidateBestMoveMatches": true,
+      "baselineScore": 85699,
+      "candidateScore": 31952
+    },
+    {
+      "empties": 14,
+      "seed": 3,
+      "exactBestMove": "C7",
+      "exactScore": 120000,
+      "baselineBestMove": "C7",
+      "candidateBestMove": "E1",
+      "baselineBestMoveMatches": true,
+      "candidateBestMoveMatches": false,
+      "baselineScore": 81876,
+      "candidateScore": 56615
+    },
+    {
+      "empties": 14,
+      "seed": 4,
+      "exactBestMove": "A3",
+      "exactScore": -60000,
+      "baselineBestMove": "A3",
+      "candidateBestMove": "A3",
+      "baselineBestMoveMatches": true,
+      "candidateBestMoveMatches": true,
+      "baselineScore": 7258,
+      "candidateScore": -7751
+    },
+    {
+      "empties": 14,
+      "seed": 5,
+      "exactBestMove": "G1",
+      "exactScore": -200000,
+      "baselineBestMove": "A8",
+      "candidateBestMove": "A8",
+      "baselineBestMoveMatches": false,
+      "candidateBestMoveMatches": false,
+      "baselineScore": -130932,
+      "candidateScore": -76075
+    },
+    {
+      "empties": 14,
+      "seed": 6,
+      "exactBestMove": "A8",
+      "exactScore": 360000,
+      "baselineBestMove": "F8",
+      "candidateBestMove": "F8",
+      "baselineBestMoveMatches": false,
+      "candidateBestMoveMatches": false,
+      "baselineScore": 134073,
+      "candidateScore": 101090
+    }
+  ],
+  "depthSearchMoveAgreementSummaryAt14Empties": {
+    "cases": 6,
+    "baselineBestMoveMatches": 3,
+    "candidateBestMoveMatches": 2
+  }
+}

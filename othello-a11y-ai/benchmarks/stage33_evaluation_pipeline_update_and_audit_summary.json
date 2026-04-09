@@ -1,0 +1,164 @@
+{
+  "generatedAt": "2026-03-27T18:43:17Z",
+  "stage": 33,
+  "changes": {
+    "trainPhaseSupportsGlobalFeatureExclusions": true,
+    "trainPhaseSupportsBucketFeatureExclusions": true,
+    "parityAliasCanonicalization": {
+      "enabledByDefault": true,
+      "foldedBuckets": [
+        "opening-a",
+        "opening-b",
+        "midgame-a",
+        "midgame-b",
+        "midgame-c"
+      ],
+      "keepParityAliasesFlag": "--keep-parity-aliases",
+      "note": "Buckets entirely above 18 empties fold parityGlobal/parityRegion into parity without changing runtime scores."
+    },
+    "includesEvaluationAuditScript": true,
+    "evaluationAuditModes": [
+      "corpus",
+      "random-exact"
+    ],
+    "trainPhaseBatchForwardsAdditionalFlags": true
+  },
+  "validation": {
+    "coreSmoke": "passed",
+    "perftDepth8": "passed",
+    "trainExclusionSmoke": "passed",
+    "auditCorpusSmoke": {
+      "acceptedSamples": 100,
+      "candidateMae": 49587.8,
+      "baselineMae": 0
+    },
+    "auditRandomExactCurrentProfile": {
+      "acceptedSamples": 32,
+      "candidateMaeInDiscs": 9.54858125,
+      "baselineMaeInDiscs": 10.447315625
+    },
+    "parityFoldRegression": {
+      "sampleStateMismatches": 0,
+      "note": "Sampled random states matched exactly before/after parity alias folding."
+    }
+  },
+  "currentUploadedProfileLateExactAudit": {
+    "candidateMaeInDiscs": 9.54858125,
+    "baselineMaeInDiscs": 10.447315625,
+    "candidateMeanResidualInDiscs": -5.778175,
+    "baselineMeanResidualInDiscs": -7.077228125,
+    "topHelpfulFeatures": [
+      {
+        "key": "frontier",
+        "deltaMae": 6965.0625
+      },
+      {
+        "key": "mobility",
+        "deltaMae": 6288.6875
+      },
+      {
+        "key": "cornerPattern",
+        "deltaMae": 3334.4375
+      },
+      {
+        "key": "stableDiscDifferential",
+        "deltaMae": 2713.15625
+      },
+      {
+        "key": "discDifferential",
+        "deltaMae": 2414.125
+      }
+    ],
+    "potentialOverstatements": [
+      {
+        "key": "potentialMobility",
+        "deltaMae": -2389.5625
+      },
+      {
+        "key": "bias",
+        "deltaMae": -1926.375
+      },
+      {
+        "key": "discDifferentialRaw",
+        "deltaMae": -1174.53125
+      },
+      {
+        "key": "edgePattern",
+        "deltaMae": -672.3125
+      },
+      {
+        "key": "cornerAdjacency",
+        "deltaMae": -234.9375
+      }
+    ],
+    "topTrainedResidualCorrelations": [
+      {
+        "key": "frontier",
+        "count": 32,
+        "correlation": -0.4962608028835632,
+        "meanAbsFeature": 15.868664102364617
+      },
+      {
+        "key": "discDifferentialRaw",
+        "count": 32,
+        "correlation": 0.4298561585285459,
+        "meanAbsFeature": 9.0625
+      },
+      {
+        "key": "discDifferential",
+        "count": 32,
+        "correlation": 0.4212762743635477,
+        "meanAbsFeature": 17.02715794820145
+      },
+      {
+        "key": "mobility",
+        "count": 32,
+        "correlation": -0.4082319345253994,
+        "meanAbsFeature": 13.966095367266027
+      },
+      {
+        "key": "cornerAccess",
+        "count": 32,
+        "correlation": -0.34081485520511295,
+        "meanAbsFeature": 52.08333333333333
+      }
+    ],
+    "topOmittedResidualCorrelations": [
+      {
+        "key": "opponentMoveCount",
+        "count": 32,
+        "correlation": 0.40225370227790697,
+        "meanAbsFeature": 6.40625
+      },
+      {
+        "key": "opponentStableDiscs",
+        "count": 32,
+        "correlation": 0.32145505005292385,
+        "meanAbsFeature": 4.96875
+      },
+      {
+        "key": "cornerMoveCount",
+        "count": 32,
+        "correlation": -0.2933544006165808,
+        "meanAbsFeature": 1.125
+      },
+      {
+        "key": "parityEvenRegions",
+        "count": 32,
+        "correlation": 0.18005615416098608,
+        "meanAbsFeature": 1.71875
+      },
+      {
+        "key": "stableDiscs",
+        "count": 32,
+        "correlation": -0.15926928765029516,
+        "meanAbsFeature": 4.25
+      }
+    ]
+  },
+  "artifacts": {
+    "randomExactAudit": "benchmarks/stage33_current_profile_random_exact_audit.json",
+    "corpusAuditSmoke": "benchmarks/stage33_corpus_audit_smoke.json",
+    "trainExclusionSmokeProfile": "tools/evaluator-training/out/stage33_train_exclusion_smoke.json"
+  }
+}
