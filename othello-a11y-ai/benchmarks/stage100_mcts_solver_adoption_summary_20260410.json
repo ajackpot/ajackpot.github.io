@@ -1,0 +1,232 @@
+{
+  "type": "stage100-mcts-solver-adoption-summary",
+  "generatedAt": "2026-04-10T14:36:51.249Z",
+  "decision": {
+    "adopt": true,
+    "defaultMctsSolverEnabled": true,
+    "defaultMctsSolverWldEmpties": 2,
+    "rationale": [
+      "Late exact/WLD subtree proving now participates in MCTS node expansion, rollout cutoff replacement, and solved-value backpropagation.",
+      "On the stage100 late-position suite, solver-on reached 100% WLD agreement at both 40ms and 120ms, while solver-off stayed at 93.75% under the deterministic benchmark configuration.",
+      "At 9 empties, solver-on preserved exact-best accuracy while collapsing average iterations from roughly 59/189 down to 3.5 and proving every sampled position.",
+      "At 10~12 empties, solver-on keeps a WLD-first character: it often proves the root quickly, but it can stop on the first proven win or loss branch and therefore does not always match the exact best-margin move.",
+      "This trade-off is acceptable for the current runtime because the exact-margin boundary is still governed by exactEndgameEmpties; outside that boundary the new lane is adopted as a certainty/WLD optimization rather than an exact-score optimizer."
+    ],
+    "followUps": [
+      "Add an optional exact-margin continuation policy after a root WLD proof so proven winning/losing children can still compete on exact score.",
+      "Use the new solved-subtree lane as the attachment point for future PN/PPN experiments instead of exposing a whole-game proof-number mode immediately."
+    ]
+  },
+  "timeBuckets": [
+    {
+      "timeMs": 40,
+      "source": "benchmarks/stage100_mcts_solver_late_accuracy_40ms_20260410.json",
+      "topline": {
+        "positions": 16,
+        "solverOff": {
+          "exactBestHits": 12,
+          "exactBestHitRate": 0.75,
+          "wldAgreements": 15,
+          "wldAgreementRate": 0.9375,
+          "provenCount": 0,
+          "provenRate": 0
+        },
+        "solverOn": {
+          "exactBestHits": 11,
+          "exactBestHitRate": 0.6875,
+          "wldAgreements": 16,
+          "wldAgreementRate": 1,
+          "provenCount": 15,
+          "provenRate": 0.9375
+        }
+      },
+      "aggregates": [
+        {
+          "empties": 9,
+          "solverOff": {
+            "exactBestHitRate": 1,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 0,
+            "averageIterations": 59
+          },
+          "solverOn": {
+            "exactBestHitRate": 1,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 0,
+            "averageIterations": 3.5,
+            "averageSolverExactHits": 3.5,
+            "averageSolverWldHits": 0,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 10,
+          "solverOff": {
+            "exactBestHitRate": 0.5,
+            "wldAgreementRate": 0.75,
+            "provenRate": 0,
+            "averageScoreLoss": 35000,
+            "averageIterations": 60.5
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.25,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 25000,
+            "averageIterations": 2.25,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 2.25,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 11,
+          "solverOff": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 5000,
+            "averageIterations": 60.25
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 5000,
+            "averageIterations": 1.25,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 1.25,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 12,
+          "solverOff": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 15000,
+            "averageIterations": 52
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 0.75,
+            "averageScoreLoss": 5000,
+            "averageIterations": 11,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 9,
+            "averageSolverRootProofs": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "timeMs": 120,
+      "source": "benchmarks/stage100_mcts_solver_late_accuracy_20260410.json",
+      "topline": {
+        "positions": 16,
+        "solverOff": {
+          "exactBestHits": 13,
+          "exactBestHitRate": 0.8125,
+          "wldAgreements": 15,
+          "wldAgreementRate": 0.9375,
+          "provenCount": 0,
+          "provenRate": 0
+        },
+        "solverOn": {
+          "exactBestHits": 11,
+          "exactBestHitRate": 0.6875,
+          "wldAgreements": 16,
+          "wldAgreementRate": 1,
+          "provenCount": 16,
+          "provenRate": 1
+        }
+      },
+      "aggregates": [
+        {
+          "empties": 9,
+          "solverOff": {
+            "exactBestHitRate": 1,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 0,
+            "averageIterations": 189.25
+          },
+          "solverOn": {
+            "exactBestHitRate": 1,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 0,
+            "averageIterations": 3.5,
+            "averageSolverExactHits": 3.5,
+            "averageSolverWldHits": 0,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 10,
+          "solverOff": {
+            "exactBestHitRate": 1,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 0,
+            "averageIterations": 190.25
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.25,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 25000,
+            "averageIterations": 2.25,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 2.25,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 11,
+          "solverOff": {
+            "exactBestHitRate": 0.5,
+            "wldAgreementRate": 0.75,
+            "provenRate": 0,
+            "averageScoreLoss": 40000,
+            "averageIterations": 166.5
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 5000,
+            "averageIterations": 1.25,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 1.25,
+            "averageSolverRootProofs": 1
+          }
+        },
+        {
+          "empties": 12,
+          "solverOff": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 0,
+            "averageScoreLoss": 5000,
+            "averageIterations": 144.25
+          },
+          "solverOn": {
+            "exactBestHitRate": 0.75,
+            "wldAgreementRate": 1,
+            "provenRate": 1,
+            "averageScoreLoss": 5000,
+            "averageIterations": 13,
+            "averageSolverExactHits": 0,
+            "averageSolverWldHits": 9.75,
+            "averageSolverRootProofs": 1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,587 @@
+{
+  "benchmark": "stage125_compact_tuple_family_bounded_pilot",
+  "generatedAt": "2026-04-12T06:06:16.369Z",
+  "runtimeBaselineStage": 123,
+  "corpus": {
+    "outputPath": "benchmarks/stage125/stage125_compact_tuple_family_pilot_corpus_20260412.jsonl",
+    "rows": 236,
+    "exactTeacherCases": 128,
+    "averageTeacherElapsedMs": 115.13135593220339,
+    "averageTeacherNodes": 1216.635593220339,
+    "byBucket": {
+      "endgame": 80,
+      "late-a": 84,
+      "late-b": 72
+    },
+    "byEmpties": {
+      "2": 16,
+      "3": 16,
+      "4": 16,
+      "5": 16,
+      "6": 16,
+      "7": 12,
+      "8": 12,
+      "9": 12,
+      "10": 12,
+      "11": 12,
+      "12": 12,
+      "13": 12,
+      "14": 12,
+      "15": 12,
+      "16": 12,
+      "17": 12,
+      "18": 12,
+      "19": 12
+    }
+  },
+  "artifacts": {
+    "familyPilotSummaryJson": "benchmarks/stage125/stage125_compact_tuple_family_pilot_summary_20260412.json",
+    "activeTrineutronJson": "benchmarks/stage125/stage125_active_vs_trineutron_seed125_games2_20260412.json",
+    "diagonalTrineutronJson": "benchmarks/stage125/stage125_diagonal_pilot_vs_trineutron_seed125_games2_20260412.json",
+    "baselineGeneratedModule": "js/ai/learned-eval-profile.generated.js"
+  },
+  "pilotConfig": {
+    "layouts": [
+      "diagonal-adjacent-pairs-full-v1",
+      "orthogonal-adjacent-pairs-full-v1",
+      "orthogonal-adjacent-pairs-outer2-v1"
+    ],
+    "phaseBuckets": [
+      "late-a",
+      "late-b",
+      "endgame"
+    ],
+    "holdoutMod": 5,
+    "tupleSampleStride": 1,
+    "tupleEpochs": 2,
+    "tupleMinVisits": 4,
+    "tupleLearningRate": 0.05,
+    "tupleL2": 0.0005,
+    "tupleGradientClip": 90000,
+    "depthBenchmark": {
+      "empties": [
+        18,
+        16,
+        14,
+        12
+      ],
+      "seedStart": 101,
+      "seedCount": 8,
+      "timeLimitMs": 1500,
+      "maxDepth": 6,
+      "exactEndgameEmpties": 10
+    },
+    "exactBenchmark": {
+      "empties": [
+        10,
+        8,
+        6
+      ],
+      "seedStart": 201,
+      "seedCount": 6,
+      "maxDepth": 12
+    },
+    "trineutronSanityCheck": {
+      "openings": 2,
+      "openingSeedStart": 125,
+      "ourTimeMs": 100,
+      "theirTimeMs": 100,
+      "theirNoiseScale": 4,
+      "note": "Active and diagonal pilot were run as separate single-variant jobs with the same settings to avoid the multi-variant runner instability observed for this custom generated module."
+    }
+  },
+  "baselineGeneratedModuleBytes": 15085,
+  "candidates": [
+    {
+      "layoutName": "diagonal-adjacent-pairs-full-v1",
+      "tupleCount": 98,
+      "totalTableSize": 882,
+      "generatedModuleBytes": 30802,
+      "generatedModuleByteDeltaVsBaseline": 15717,
+      "rawHoldoutSelectedMaeInStones": 25.792506944444444,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.7497638888888905,
+      "verifiedHoldoutSelectedMaeInStones": 25.759909722222226,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.03259722222221899,
+      "depthBenchmark": {
+        "overall": {
+          "cases": 32,
+          "identicalBestMoveCases": 27,
+          "baselineNodes": 86930,
+          "candidateNodes": 83948,
+          "baselineElapsedMs": 8056,
+          "candidateElapsedMs": 8638,
+          "baselineTtHits": 9200,
+          "candidateTtHits": 6615,
+          "nodeDeltaPercent": -3.4303462556079607,
+          "elapsedDeltaPercent": 7.224428997020854,
+          "ttHitDeltaPercent": -28.097826086956523
+        },
+        "byEmpties": [
+          {
+            "empties": 18,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 0.9028632494380366,
+            "candidateElapsedRatio": 0.9803063457330415
+          },
+          {
+            "empties": 16,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 0.9359618178045238,
+            "candidateElapsedRatio": 1.0703125
+          },
+          {
+            "empties": 14,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0025579081995168,
+            "candidateElapsedRatio": 1.1398143091206991
+          },
+          {
+            "empties": 12,
+            "cases": 8,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 0.75,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0783574415575512,
+            "candidateElapsedRatio": 1.18490245971162
+          }
+        ]
+      },
+      "exactBenchmark": {
+        "overall": {
+          "cases": 18,
+          "exactCases": 18,
+          "identicalScoreCases": 18,
+          "identicalBestMoveCases": 18,
+          "baselineNodes": 1569,
+          "candidateNodes": 1569,
+          "baselineElapsedMs": 582,
+          "candidateElapsedMs": 442,
+          "baselineTtHits": 328,
+          "candidateTtHits": 328,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.7594501718213058,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -24.054982817869416
+        },
+        "byEmpties": [
+          {
+            "empties": 10,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 0.7169042769857433
+          },
+          {
+            "empties": 8,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 0.9605263157894737
+          },
+          {
+            "empties": 6,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 1.1333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "layoutName": "orthogonal-adjacent-pairs-full-v1",
+      "tupleCount": 112,
+      "totalTableSize": 1008,
+      "generatedModuleBytes": 34347,
+      "generatedModuleByteDeltaVsBaseline": 19262,
+      "rawHoldoutSelectedMaeInStones": 25.786805555555556,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.7554652777777762,
+      "verifiedHoldoutSelectedMaeInStones": 25.751916666666666,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.0348888888888905,
+      "depthBenchmark": {
+        "overall": {
+          "cases": 32,
+          "identicalBestMoveCases": 26,
+          "baselineNodes": 86930,
+          "candidateNodes": 85556,
+          "baselineElapsedMs": 8198,
+          "candidateElapsedMs": 8971,
+          "baselineTtHits": 9200,
+          "candidateTtHits": 6708,
+          "nodeDeltaPercent": -1.5805820775336477,
+          "elapsedDeltaPercent": 9.429129055867284,
+          "ttHitDeltaPercent": -27.08695652173913
+        },
+        "byEmpties": [
+          {
+            "empties": 18,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 0.8845856211077128,
+            "candidateElapsedRatio": 0.9635453895639743
+          },
+          {
+            "empties": 16,
+            "cases": 8,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 0.75,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 0.9908694749948121,
+            "candidateElapsedRatio": 1.1174934725848564
+          },
+          {
+            "empties": 14,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0390317843778125,
+            "candidateElapsedRatio": 1.1989247311827957
+          },
+          {
+            "empties": 12,
+            "cases": 8,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 0.75,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0791115376705285,
+            "candidateElapsedRatio": 1.1892109500805152
+          }
+        ]
+      },
+      "exactBenchmark": {
+        "overall": {
+          "cases": 18,
+          "exactCases": 18,
+          "identicalScoreCases": 18,
+          "identicalBestMoveCases": 18,
+          "baselineNodes": 1569,
+          "candidateNodes": 1569,
+          "baselineElapsedMs": 555,
+          "candidateElapsedMs": 438,
+          "baselineTtHits": 328,
+          "candidateTtHits": 328,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.7891891891891892,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -21.08108108108108
+        },
+        "byEmpties": [
+          {
+            "empties": 10,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 0.7352941176470589
+          },
+          {
+            "empties": 8,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 1.109375
+          },
+          {
+            "empties": 6,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 1.1333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+      "tupleCount": 56,
+      "totalTableSize": 504,
+      "generatedModuleBytes": 23641,
+      "generatedModuleByteDeltaVsBaseline": 8556,
+      "rawHoldoutSelectedMaeInStones": 25.741555555555557,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.8007152777777762,
+      "verifiedHoldoutSelectedMaeInStones": 25.69576388888889,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.04579166666666667,
+      "depthBenchmark": {
+        "overall": {
+          "cases": 32,
+          "identicalBestMoveCases": 24,
+          "baselineNodes": 86930,
+          "candidateNodes": 88026,
+          "baselineElapsedMs": 8459,
+          "candidateElapsedMs": 8905,
+          "baselineTtHits": 9200,
+          "candidateTtHits": 6884,
+          "nodeDeltaPercent": 1.2607845392844816,
+          "elapsedDeltaPercent": 5.2724908381605395,
+          "ttHitDeltaPercent": -25.17391304347826
+        },
+        "byEmpties": [
+          {
+            "empties": 18,
+            "cases": 8,
+            "identicalBestMoveCases": 5,
+            "identicalBestMoveRate": 0.625,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 0.9526108265467812,
+            "candidateElapsedRatio": 0.964565587734242
+          },
+          {
+            "empties": 16,
+            "cases": 8,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 0.75,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0293836895621498,
+            "candidateElapsedRatio": 1.08786969567081
+          },
+          {
+            "empties": 14,
+            "cases": 8,
+            "identicalBestMoveCases": 7,
+            "identicalBestMoveRate": 0.875,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0299369996684193,
+            "candidateElapsedRatio": 1.109717868338558
+          },
+          {
+            "empties": 12,
+            "cases": 8,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 0.75,
+            "identicalScoreCases": null,
+            "identicalScoreRate": null,
+            "candidateNodeRatio": 1.0714334681565778,
+            "candidateElapsedRatio": 1.105716523101018
+          }
+        ]
+      },
+      "exactBenchmark": {
+        "overall": {
+          "cases": 18,
+          "exactCases": 18,
+          "identicalScoreCases": 18,
+          "identicalBestMoveCases": 18,
+          "baselineNodes": 1569,
+          "candidateNodes": 1569,
+          "baselineElapsedMs": 552,
+          "candidateElapsedMs": 470,
+          "baselineTtHits": 328,
+          "candidateTtHits": 328,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.8514492753623188,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -14.855072463768115
+        },
+        "byEmpties": [
+          {
+            "empties": 10,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 0.8038379530916845
+          },
+          {
+            "empties": 8,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 1.21875
+          },
+          {
+            "empties": 6,
+            "cases": 6,
+            "identicalBestMoveCases": 6,
+            "identicalBestMoveRate": 1,
+            "identicalScoreCases": 6,
+            "identicalScoreRate": 1,
+            "candidateNodeRatio": 1,
+            "candidateElapsedRatio": 0.7894736842105263
+          }
+        ]
+      }
+    }
+  ],
+  "bestVerifiedHoldoutCandidate": {
+    "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+    "verifiedHoldoutSelectedMaeInStones": 25.69576388888889,
+    "verifiedHoldoutSelectedMaeDeltaInStones": -0.04579166666666667
+  },
+  "bestDepthCandidate": {
+    "layoutName": "diagonal-adjacent-pairs-full-v1",
+    "identicalBestMoveCases": 27,
+    "cases": 32,
+    "nodeDeltaPercent": -3.4303462556079607,
+    "elapsedDeltaPercent": 7.224428997020854
+  },
+  "trineutronSanityCheck": {
+    "active": {
+      "variantKey": "active",
+      "variantLabel": "active-generated+ordering (trained-phase-linear-v1 / stage44-candidateH2-edgePattern125-cornerPattern125-11-12 / top24-retrain-retrained-calibrated-lateb-endgame / trained-mpc-overlap-8bucket-high-tight)",
+      "aggregate": {
+        "games": 4,
+        "wins": 1,
+        "losses": 2,
+        "draws": 1,
+        "points": 1.5,
+        "discDiff": -20,
+        "totalPlayedPly": 104,
+        "totalOurTimeMs": 10409,
+        "totalTheirTimeMs": 5352,
+        "totalOurNodes": 94520,
+        "totalTheirNodes": 195099,
+        "exactAdjudications": 4,
+        "exactAdjudicationTimeMs": 3358,
+        "exactAdjudicationNodes": 20662,
+        "scoreRate": 0.375,
+        "averageDiscDiff": -5,
+        "averagePlayedPly": 26,
+        "averageOurTimeMsPerGame": 2602.25,
+        "averageTheirTimeMsPerGame": 1338,
+        "averageOurNodesPerGame": 23630,
+        "averageTheirNodesPerGame": 48774.75,
+        "averageExactAdjudicationTimeMs": 839.5,
+        "averageExactAdjudicationNodes": 5165.5
+      }
+    },
+    "diagonalPilot": {
+      "variantKey": "custom",
+      "variantLabel": "diagonal-full-pilot",
+      "aggregate": {
+        "games": 4,
+        "wins": 1,
+        "losses": 2,
+        "draws": 1,
+        "points": 1.5,
+        "discDiff": -46,
+        "totalPlayedPly": 104,
+        "totalOurTimeMs": 11662,
+        "totalTheirTimeMs": 5364,
+        "totalOurNodes": 97041,
+        "totalTheirNodes": 194218,
+        "exactAdjudications": 4,
+        "exactAdjudicationTimeMs": 4629,
+        "exactAdjudicationNodes": 25952,
+        "scoreRate": 0.375,
+        "averageDiscDiff": -11.5,
+        "averagePlayedPly": 26,
+        "averageOurTimeMsPerGame": 2915.5,
+        "averageTheirTimeMsPerGame": 1341,
+        "averageOurNodesPerGame": 24260.25,
+        "averageTheirNodesPerGame": 48554.5,
+        "averageExactAdjudicationTimeMs": 1157.25,
+        "averageExactAdjudicationNodes": 6488
+      }
+    },
+    "slotComparison": {
+      "comparedSlots": 4,
+      "better": 2,
+      "worse": 1,
+      "equal": 1,
+      "comparisons": [
+        {
+          "openingSeed": 125,
+          "color": "black",
+          "activeOutcome": "loss",
+          "candidateOutcome": "loss",
+          "activeDiscDiff": -12,
+          "candidateDiscDiff": -50,
+          "pointDelta": 0,
+          "discDelta": -38,
+          "verdict": "worse"
+        },
+        {
+          "openingSeed": 125,
+          "color": "white",
+          "activeOutcome": "draw",
+          "candidateOutcome": "draw",
+          "activeDiscDiff": 0,
+          "candidateDiscDiff": 0,
+          "pointDelta": 0,
+          "discDelta": 0,
+          "verdict": "equal"
+        },
+        {
+          "openingSeed": 126,
+          "color": "black",
+          "activeOutcome": "loss",
+          "candidateOutcome": "loss",
+          "activeDiscDiff": -14,
+          "candidateDiscDiff": -8,
+          "pointDelta": 0,
+          "discDelta": 6,
+          "verdict": "better"
+        },
+        {
+          "openingSeed": 126,
+          "color": "white",
+          "activeOutcome": "win",
+          "candidateOutcome": "win",
+          "activeDiscDiff": 6,
+          "candidateDiscDiff": 12,
+          "pointDelta": 0,
+          "discDelta": 6,
+          "verdict": "better"
+        }
+      ]
+    }
+  },
+  "decision": {
+    "verdict": "keep-active-baseline-no-stage125-adoption",
+    "adoptedLayout": null,
+    "reasons": [
+      "The bounded pilot produced small synthetic-holdout gains for all three compact pair families, but the verified post-calibration improvement stayed tiny and did not clearly separate a new family from the existing outer2 control.",
+      "On the current late search replay, the main diagonal pilot had the best same-best depth fidelity among the new families, but still changed best moves in 5 of 32 cases and regressed elapsed time despite a modest node reduction.",
+      "The outer2 control won the synthetic holdout but lost more search-fidelity cases against the current active runtime and even increased nodes on the bounded depth suite.",
+      "All candidates stayed exact-safe on the 18-case exact suite, so the lane remains structurally viable, but exact safety alone is not enough to justify adoption.",
+      "The small Trineutron sanity check tied the active baseline on score rate over 4 games, yet the diagonal pilot was worse on average disc margin and consumed more time/nodes per game, so there is no external signal strong enough to escalate the lane right now."
+    ],
+    "nextAction": "Archive the bounded pilot as a reproducible reference, keep the active runtime unchanged, and only reopen this tuple-family lane when a richer external corpus or a larger offline training budget is available.",
+    "survivingHiddenSubcandidate": "If the lane is ever reopened, start from diagonal-adjacent-pairs-full-v1 again but with a richer corpus and immediately follow with move-ordering compatibility replay before any runtime adoption decision."
+  }
+}

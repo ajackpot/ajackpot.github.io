@@ -1,0 +1,513 @@
+{
+  "type": "mcts-score-bounds-fixed-iteration-sanity",
+  "generatedAt": "2026-04-11T03:29:23.881Z",
+  "options": {
+    "emptyCount": 12,
+    "seeds": [
+      15,
+      71,
+      89,
+      167
+    ],
+    "iterationsList": [
+      16,
+      24,
+      32
+    ],
+    "referenceExactEmpties": 20,
+    "referenceTimeMs": 12000,
+    "exactEndgameEmpties": 8,
+    "mctsSolverWldEmpties": 2,
+    "mctsExactContinuationExtraEmpties": 3,
+    "mctsProofPriorityScale": 0.15,
+    "mctsProofPriorityMaxEmpties": 12,
+    "mctsProofPriorityContinuationHandoffEnabled": true,
+    "mctsProofMetricMode": "legacy-root"
+  },
+  "scenarios": [
+    {
+      "seed": 15,
+      "emptyCount": 12,
+      "legalMoveCount": 5,
+      "reference": {
+        "bestMoveCoord": "A8",
+        "score": 0,
+        "exactScore": 0,
+        "outcome": "draw"
+      },
+      "iterations": {
+        "16": {
+          "off": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 13,
+            "mctsScoreBoundDominatedChildrenSkipped": 1
+          }
+        },
+        "24": {
+          "off": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": true,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": "draw",
+            "mctsRootSolvedExact": true,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 22,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": true,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": "draw",
+            "mctsRootSolvedExact": true,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 0,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 22,
+            "mctsScoreBoundUpdates": 20,
+            "mctsScoreBoundDominatedChildrenSkipped": 14
+          }
+        },
+        "32": {
+          "off": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": true,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": "draw",
+            "mctsRootSolvedExact": true,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 22,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A8",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": true,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": "draw",
+            "mctsRootSolvedExact": true,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 0,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 22,
+            "mctsScoreBoundUpdates": 20,
+            "mctsScoreBoundDominatedChildrenSkipped": 14
+          }
+        }
+      }
+    },
+    {
+      "seed": 71,
+      "emptyCount": 12,
+      "legalMoveCount": 3,
+      "reference": {
+        "bestMoveCoord": "G4",
+        "score": 60000,
+        "exactScore": 60000,
+        "outcome": "win"
+      },
+      "iterations": {
+        "16": {
+          "off": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 10000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 10000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 14,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        },
+        "24": {
+          "off": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 10000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 10000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 14,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        },
+        "32": {
+          "off": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "G4",
+            "chosenExactScore": 60000,
+            "chosenExactOutcome": "win",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "win",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 10000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 10000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 13,
+            "mctsScoreBoundUpdates": 14,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        }
+      }
+    },
+    {
+      "seed": 89,
+      "emptyCount": 12,
+      "legalMoveCount": 8,
+      "reference": {
+        "bestMoveCoord": "H1",
+        "score": -40000,
+        "exactScore": -40000,
+        "outcome": "loss"
+      },
+      "iterations": {
+        "16": {
+          "off": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": -10000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": -10000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 17,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        },
+        "24": {
+          "off": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": -10000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": -10000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 17,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        },
+        "32": {
+          "off": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "A1",
+            "chosenExactScore": -160000,
+            "chosenExactOutcome": "loss",
+            "exactBestHit": false,
+            "isExactResult": false,
+            "isWldResult": true,
+            "mctsRootSolvedOutcome": "loss",
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": -10000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": -10000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 17,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        }
+      }
+    },
+    {
+      "seed": 167,
+      "emptyCount": 12,
+      "legalMoveCount": 8,
+      "reference": {
+        "bestMoveCoord": "C3",
+        "score": 0,
+        "exactScore": 0,
+        "outcome": "draw"
+      },
+      "iterations": {
+        "16": {
+          "off": {
+            "bestMoveCoord": "C3",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "C3",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 16,
+            "mctsScoreBoundUpdates": 13,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          }
+        },
+        "24": {
+          "off": {
+            "bestMoveCoord": "H1",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 24,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "H1",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 24,
+            "mctsScoreBoundUpdates": 23,
+            "mctsScoreBoundDominatedChildrenSkipped": 3
+          }
+        },
+        "32": {
+          "off": {
+            "bestMoveCoord": "H1",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": -640000,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": -640000,
+            "bestMoveScoreUpperBound": 640000,
+            "mctsIterations": 32,
+            "mctsScoreBoundUpdates": 0,
+            "mctsScoreBoundDominatedChildrenSkipped": 0
+          },
+          "on": {
+            "bestMoveCoord": "H1",
+            "chosenExactScore": 0,
+            "chosenExactOutcome": "draw",
+            "exactBestHit": true,
+            "isExactResult": false,
+            "isWldResult": false,
+            "mctsRootSolvedOutcome": null,
+            "mctsRootSolvedExact": false,
+            "rootScoreLowerBound": 0,
+            "rootScoreUpperBound": 640000,
+            "bestMoveScoreLowerBound": 0,
+            "bestMoveScoreUpperBound": 0,
+            "mctsIterations": 32,
+            "mctsScoreBoundUpdates": 29,
+            "mctsScoreBoundDominatedChildrenSkipped": 33
+          }
+        }
+      }
+    }
+  ]
+}

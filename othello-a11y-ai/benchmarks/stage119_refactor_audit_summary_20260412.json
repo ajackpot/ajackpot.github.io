@@ -1,0 +1,132 @@
+{
+  "type": "stage119-refactor-audit-summary",
+  "generatedAt": "2026-04-11T22:30:00+09:00",
+  "decision": {
+    "acceptedEngineRefactors": [],
+    "rejectedEngineRefactors": [
+      {
+        "name": "proof-priority finite-metric consolidation",
+        "reason": "fixed-iteration late-lane throughput regressed while scenario outputs stayed identical"
+      }
+    ],
+    "defaultStrengthChanges": []
+  },
+  "comparisons": [
+    {
+      "baselineFile": "benchmarks/stage119_root_gate_refactor_fixediter_main24_stage117baseline_control.json",
+      "currentFile": "benchmarks/stage119_root_gate_refactor_fixediter_main24_v2.json",
+      "variants": {
+        "base": {
+          "baselineAverageElapsedMs": 182.29166666666666,
+          "currentAverageElapsedMs": 193.89583333333334,
+          "averageElapsedDeltaMs": 11.604166666666686,
+          "exactBestHits": [
+            41,
+            41
+          ],
+          "provenCount": [
+            40,
+            40
+          ],
+          "exactResultCount": [
+            22,
+            22
+          ]
+        },
+        "target": {
+          "baselineAverageElapsedMs": 178.22916666666666,
+          "currentAverageElapsedMs": 188.4375,
+          "averageElapsedDeltaMs": 10.208333333333343,
+          "exactBestHits": [
+            41,
+            41
+          ],
+          "provenCount": [
+            43,
+            43
+          ],
+          "exactResultCount": [
+            24,
+            24
+          ]
+        },
+        "runtime-gate": {
+          "baselineAverageElapsedMs": 178.97916666666666,
+          "currentAverageElapsedMs": 184.3125,
+          "averageElapsedDeltaMs": 5.333333333333343,
+          "exactBestHits": [
+            41,
+            41
+          ],
+          "provenCount": [
+            43,
+            43
+          ],
+          "exactResultCount": [
+            24,
+            24
+          ]
+        }
+      },
+      "scenarioSignatureDiffCount": 0
+    },
+    {
+      "baselineFile": "benchmarks/stage119_root_gate_refactor_fixediter_holdout24a_stage117baseline_control.json",
+      "currentFile": "benchmarks/stage119_root_gate_refactor_fixediter_holdout24a_v2.json",
+      "variants": {
+        "base": {
+          "baselineAverageElapsedMs": 186.6875,
+          "currentAverageElapsedMs": 191.375,
+          "averageElapsedDeltaMs": 4.6875,
+          "exactBestHits": [
+            37,
+            37
+          ],
+          "provenCount": [
+            41,
+            41
+          ],
+          "exactResultCount": [
+            24,
+            24
+          ]
+        },
+        "target": {
+          "baselineAverageElapsedMs": 183.75,
+          "currentAverageElapsedMs": 185.91666666666666,
+          "averageElapsedDeltaMs": 2.166666666666657,
+          "exactBestHits": [
+            37,
+            37
+          ],
+          "provenCount": [
+            42,
+            42
+          ],
+          "exactResultCount": [
+            24,
+            24
+          ]
+        },
+        "runtime-gate": {
+          "baselineAverageElapsedMs": 182.91666666666666,
+          "currentAverageElapsedMs": 187.70833333333334,
+          "averageElapsedDeltaMs": 4.791666666666686,
+          "exactBestHits": [
+            37,
+            37
+          ],
+          "provenCount": [
+            42,
+            42
+          ],
+          "exactResultCount": [
+            24,
+            24
+          ]
+        }
+      },
+      "scenarioSignatureDiffCount": 0
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "stage": 126,
+  "label": "Stage 126",
+  "date": "2026-04-12",
+  "runtimeChanged": false,
+  "runtimeBaseline": "Stage 123 adopted runtime semantics retained",
+  "goal": "Prepare a user-executable richer-corpus weight-learning bundle and trainer package for the only still-meaningful offline tuple lane",
+  "recommendedLane": {
+    "primary": "compact systematic short n-tuple richer-corpus family retraining",
+    "followup": "compact patch/prune/attenuation replay against the current active runtime",
+    "candidateFamilies": [
+      "diagonal-adjacent-pairs-full-v1",
+      "orthogonal-adjacent-pairs-full-v1",
+      "orthogonal-adjacent-pairs-outer2-v1"
+    ]
+  },
+  "excludedFromDefaultBundle": [
+    "independent move-ordering retuning",
+    "broad MPC re-open",
+    "broad hand-crafted evaluator expansion",
+    "5-6 empties micro-specialization expansion",
+    "broad special-ending expansion"
+  ],
+  "entrypoints": {
+    "bundleScript": "tools/evaluator-training/run-stage126-weight-learning-bundle.mjs",
+    "bundleBatch": "tools/evaluator-training/run-stage126-weight-learning-bundle.bat",
+    "suiteConfig": "tools/evaluator-training/examples/stage126-compact-tuple-richer-corpus.train-plus-bench.example.json",
+    "suiteTrainOnlyConfig": "tools/evaluator-training/examples/stage126-compact-tuple-richer-corpus.fullbudget-train-only.example.json",
+    "patchConfig": "tools/evaluator-training/examples/stage126-compact-tuple-patch-followup.example.json",
+    "smokeTest": "js/test/stage126_weight_learning_bundle_smoke.mjs"
+  },
+  "validation": {
+    "required": [
+      "node js/test/stage126_weight_learning_bundle_smoke.mjs",
+      "node js/test/core-smoke.mjs",
+      "node js/test/stage36_package_profile_smoke.mjs",
+      "node tools/docs/generate-report-inventory.mjs",
+      "node tools/docs/generate-report-inventory.mjs --check",
+      "node tools/docs/check-doc-sync.mjs",
+      "node js/test/stage109_report_inventory_smoke.mjs",
+      "node js/test/stage120_documentation_sync_smoke.mjs",
+      "node tools/package/analyze-package-size.mjs",
+      "node tools/package/build-release-packages.mjs --profiles trainer"
+    ]
+  },
+  "status": "validated",
+  "packageArtifacts": {
+    "trainerZip": "dist/othello-web-app-ai-trainer.zip",
+    "trainerProfile": {
+      "files": 159,
+      "sourceBytes": 4510000,
+      "zipBytes": 1320000
+    },
+    "runtimeProfile": {
+      "files": 29,
+      "sourceBytes": 3260000
+    }
+  }
+}

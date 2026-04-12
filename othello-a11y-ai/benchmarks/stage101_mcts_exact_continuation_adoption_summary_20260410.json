@@ -1,0 +1,164 @@
+{
+  "type": "stage101-mcts-exact-continuation-adoption-summary",
+  "generatedAt": "2026-04-10T15:30:13Z",
+  "decision": {
+    "adopt": true,
+    "defaultMctsExactContinuationEnabled": true,
+    "defaultMctsExactContinuationExtraEmpties": 2,
+    "rationale": [
+      "The continuation lane does not change the Stage 100 proof logic itself; it only spends the remaining deadline on a single exact root search after a non-exact MCTS root proof has already been obtained.",
+      "At 120ms on the deterministic 9~10 empties suite, continuation-on kept WLD agreement at 100% and raised exact-result rate from 25% to 62.5%, but exact-best hit rate stayed flat at 75% because three 10-empties positions still timed out before the exact continuation could finish.",
+      "At 280ms, which matches the current easy-preset user-facing MCTS budget, continuation-on reached 100% exact-best hit rate and 100% exact-result rate on the same deterministic suite, while continuation-off stayed at 75% exact-best and 25% exact-result.",
+      "The 280ms run solved all four sampled 10-empties roots exactly and improved the average exact score loss in that bucket from 15000 to 0 without regressing WLD agreement.",
+      "Given the current UI exposure of MCTS on easy and above, adopting the continuation lane as an enabled-by-default late exactifier is justified even though the benefit is smaller at lower custom time budgets."
+    ],
+    "followUps": [
+      "Prototype a PN/PPN proof-priority policy inside the existing late solved-subtree lane rather than exposing a whole-game proof-number mode immediately.",
+      "Consider surfacing proved/exact root metadata in the UI once the late-lane diagnostics are stable."
+    ]
+  },
+  "timeBuckets": [
+    {
+      "timeMs": 120,
+      "source": "benchmarks/stage101_mcts_exact_continuation_120ms_20260410.json",
+      "topline": {
+        "positions": 8,
+        "continuationOff": {
+          "exactBestHits": 6,
+          "exactBestHitRate": 0.75,
+          "exactResultCount": 2,
+          "exactResultRate": 0.25,
+          "wldAgreements": 8,
+          "wldAgreementRate": 1,
+          "provenCount": 8,
+          "provenRate": 1
+        },
+        "continuationOn": {
+          "exactBestHits": 6,
+          "exactBestHitRate": 0.75,
+          "exactResultCount": 5,
+          "exactResultRate": 0.625,
+          "wldAgreements": 8,
+          "wldAgreementRate": 1,
+          "provenCount": 8,
+          "provenRate": 1,
+          "continuationAppliedCount": 3,
+          "continuationAppliedRate": 0.375,
+          "bestMoveChangeCount": 1,
+          "bestMoveChangeRate": 0.125
+        }
+      },
+      "aggregates": [
+        {
+          "empties": 9,
+          "continuationOff": {
+            "exactBestHitRate": 1,
+            "exactResultRate": 0.5,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 0,
+            "averageElapsedMs": 78.25
+          },
+          "continuationOn": {
+            "exactBestHitRate": 1,
+            "exactResultRate": 1,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 0,
+            "averageElapsedMs": 78,
+            "continuationAppliedRate": 0.5,
+            "bestMoveChangeRate": 0.25
+          }
+        },
+        {
+          "empties": 10,
+          "continuationOff": {
+            "exactBestHitRate": 0.5,
+            "exactResultRate": 0,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 15000,
+            "averageElapsedMs": 73
+          },
+          "continuationOn": {
+            "exactBestHitRate": 0.5,
+            "exactResultRate": 0.25,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 15000,
+            "averageElapsedMs": 131,
+            "continuationAppliedRate": 0.25,
+            "bestMoveChangeRate": 0
+          }
+        }
+      ]
+    },
+    {
+      "timeMs": 280,
+      "source": "benchmarks/stage101_mcts_exact_continuation_280ms_20260410.json",
+      "topline": {
+        "positions": 8,
+        "continuationOff": {
+          "exactBestHits": 6,
+          "exactBestHitRate": 0.75,
+          "exactResultCount": 2,
+          "exactResultRate": 0.25,
+          "wldAgreements": 8,
+          "wldAgreementRate": 1,
+          "provenCount": 8,
+          "provenRate": 1
+        },
+        "continuationOn": {
+          "exactBestHits": 8,
+          "exactBestHitRate": 1,
+          "exactResultCount": 8,
+          "exactResultRate": 1,
+          "wldAgreements": 8,
+          "wldAgreementRate": 1,
+          "provenCount": 8,
+          "provenRate": 1,
+          "continuationAppliedCount": 6,
+          "continuationAppliedRate": 0.75,
+          "bestMoveChangeCount": 4,
+          "bestMoveChangeRate": 0.5
+        }
+      },
+      "aggregates": [
+        {
+          "empties": 9,
+          "continuationOff": {
+            "exactBestHitRate": 1,
+            "exactResultRate": 0.5,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 0,
+            "averageElapsedMs": 129
+          },
+          "continuationOn": {
+            "exactBestHitRate": 1,
+            "exactResultRate": 1,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 0,
+            "averageElapsedMs": 95.5,
+            "continuationAppliedRate": 0.5,
+            "bestMoveChangeRate": 0.25
+          }
+        },
+        {
+          "empties": 10,
+          "continuationOff": {
+            "exactBestHitRate": 0.5,
+            "exactResultRate": 0,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 15000,
+            "averageElapsedMs": 46.5
+          },
+          "continuationOn": {
+            "exactBestHitRate": 1,
+            "exactResultRate": 1,
+            "wldAgreementRate": 1,
+            "averageScoreLoss": 0,
+            "averageElapsedMs": 94.5,
+            "continuationAppliedRate": 1,
+            "bestMoveChangeRate": 0.75
+          }
+        }
+      ]
+    }
+  ]
+}

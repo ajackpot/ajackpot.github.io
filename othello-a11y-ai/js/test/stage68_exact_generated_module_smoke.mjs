@@ -3,8 +3,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const repoRoot = path.resolve(import.meta.dirname, '..', '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'stage68-exact-module-'));
 const outputJson = path.join(tempDir, 'exact.json');
 const baselineModule = path.resolve(repoRoot, 'js/ai/learned-eval-profile.generated.js');

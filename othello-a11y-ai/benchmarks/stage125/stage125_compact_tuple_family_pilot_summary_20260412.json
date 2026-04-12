@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-04-12T05:55:27.355Z",
+  "inputPaths": [
+    "/mnt/data/stage125_work/othello-web-app-ai/benchmarks/stage125/stage125_compact_tuple_family_pilot_corpus_20260412.jsonl"
+  ],
+  "outputDir": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot",
+  "moduleFormat": "compact",
+  "evaluationProfilePath": null,
+  "usedActiveEvaluationProfile": true,
+  "phaseBucketKeys": [
+    "late-a",
+    "late-b",
+    "endgame"
+  ],
+  "layoutNames": [
+    "diagonal-adjacent-pairs-full-v1",
+    "orthogonal-adjacent-pairs-full-v1",
+    "orthogonal-adjacent-pairs-outer2-v1"
+  ],
+  "candidates": [
+    {
+      "layoutName": "diagonal-adjacent-pairs-full-v1",
+      "tupleCount": 98,
+      "totalTableSize": 882,
+      "tupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/diagonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.json",
+      "calibratedTupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/diagonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.calibrated.json",
+      "generatedModulePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/diagonal-adjacent-pairs-full-v1/learned-eval-profile.generated.js",
+      "generatedModuleBytes": 30802,
+      "rawHoldoutSelectedMaeInStones": 25.792506944444444,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.7497638888888905,
+      "rawHoldoutSelectedRmseInStones": 38.96395059179584,
+      "calibrationScope": "holdout-selected",
+      "calibrationBiasDeltas": null,
+      "verifiedHoldoutSelectedMaeInStones": 25.759909722222226,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.03259722222221899,
+      "verifiedHoldoutSelectedRmseInStones": 38.5665048959142
+    },
+    {
+      "layoutName": "orthogonal-adjacent-pairs-full-v1",
+      "tupleCount": 112,
+      "totalTableSize": 1008,
+      "tupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.json",
+      "calibratedTupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.calibrated.json",
+      "generatedModulePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-full-v1/learned-eval-profile.generated.js",
+      "generatedModuleBytes": 34347,
+      "rawHoldoutSelectedMaeInStones": 25.786805555555556,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.7554652777777762,
+      "rawHoldoutSelectedRmseInStones": 38.93500752322174,
+      "calibrationScope": "holdout-selected",
+      "calibrationBiasDeltas": null,
+      "verifiedHoldoutSelectedMaeInStones": 25.751916666666666,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.0348888888888905,
+      "verifiedHoldoutSelectedRmseInStones": 38.5362926667836
+    },
+    {
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+      "tupleCount": 56,
+      "totalTableSize": 504,
+      "tupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-outer2-v1/trained-tuple-residual-profile.json",
+      "calibratedTupleProfilePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-outer2-v1/trained-tuple-residual-profile.calibrated.json",
+      "generatedModulePath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-outer2-v1/learned-eval-profile.generated.js",
+      "generatedModuleBytes": 23641,
+      "rawHoldoutSelectedMaeInStones": 25.741555555555557,
+      "rawHoldoutSelectedMaeDeltaInStones": -0.8007152777777762,
+      "rawHoldoutSelectedRmseInStones": 38.841098400453404,
+      "calibrationScope": "holdout-selected",
+      "calibrationBiasDeltas": null,
+      "verifiedHoldoutSelectedMaeInStones": 25.69576388888889,
+      "verifiedHoldoutSelectedMaeDeltaInStones": -0.04579166666666667,
+      "verifiedHoldoutSelectedRmseInStones": 38.43844169517937
+    }
+  ]
+}

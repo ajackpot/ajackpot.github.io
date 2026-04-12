@@ -1,0 +1,254 @@
+{
+  "type": "mcts-throughput-compare",
+  "generatedAt": "2026-04-09T21:29:18.153Z",
+  "options": {
+    "candidateRoot": ".",
+    "baselineRoot": "../../work_stage93_baseline/stage83",
+    "algorithms": [
+      "mcts-guided",
+      "mcts-hybrid"
+    ],
+    "timeMsList": [
+      160,
+      280,
+      500
+    ],
+    "positionSeedList": [
+      17,
+      31,
+      41,
+      53,
+      71,
+      89
+    ],
+    "openingPlies": 12,
+    "randomMode": "constant-zero",
+    "maxDepth": 4,
+    "exactEndgameEmpties": 8,
+    "maxTableEntries": 90000,
+    "presetKey": "custom",
+    "styleKey": "balanced"
+  },
+  "runs": [
+    {
+      "label": "baseline",
+      "repoRoot": "../../work_stage93_baseline/stage83",
+      "openingPlies": 12,
+      "positionSeedList": [
+        17,
+        31,
+        41,
+        53,
+        71,
+        89
+      ],
+      "randomMode": "constant-zero",
+      "results": [
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 160,
+          "averageIterations": 56.666666666666664,
+          "averageElapsedMs": 160.33333333333334,
+          "averageTreeNodes": 58.666666666666664,
+          "averageRollouts": 56.666666666666664,
+          "averageGuidedPolicySelections": 972.5,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 280,
+          "averageIterations": 114,
+          "averageElapsedMs": 280,
+          "averageTreeNodes": 115.83333333333333,
+          "averageRollouts": 114,
+          "averageGuidedPolicySelections": 1946.1666666666667,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 500,
+          "averageIterations": 218.5,
+          "averageElapsedMs": 500,
+          "averageTreeNodes": 220.33333333333334,
+          "averageRollouts": 218.5,
+          "averageGuidedPolicySelections": 3719.8333333333335,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 160,
+          "averageIterations": 38,
+          "averageElapsedMs": 160,
+          "averageTreeNodes": 39.666666666666664,
+          "averageRollouts": 38,
+          "averageGuidedPolicySelections": 654.5,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 38.666666666666664
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 280,
+          "averageIterations": 64.33333333333333,
+          "averageElapsedMs": 280,
+          "averageTreeNodes": 65.83333333333333,
+          "averageRollouts": 64.33333333333333,
+          "averageGuidedPolicySelections": 1096.6666666666667,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 64.83333333333333
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 500,
+          "averageIterations": 125.33333333333333,
+          "averageElapsedMs": 500,
+          "averageTreeNodes": 127,
+          "averageRollouts": 125.33333333333333,
+          "averageGuidedPolicySelections": 2139,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 126
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "repoRoot": ".",
+      "openingPlies": 12,
+      "positionSeedList": [
+        17,
+        31,
+        41,
+        53,
+        71,
+        89
+      ],
+      "randomMode": "constant-zero",
+      "results": [
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 160,
+          "averageIterations": 62.333333333333336,
+          "averageElapsedMs": 160,
+          "averageTreeNodes": 64.33333333333333,
+          "averageRollouts": 62.333333333333336,
+          "averageGuidedPolicySelections": 1066.3333333333333,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 280,
+          "averageIterations": 116.16666666666667,
+          "averageElapsedMs": 280,
+          "averageTreeNodes": 118.16666666666667,
+          "averageRollouts": 116.16666666666667,
+          "averageGuidedPolicySelections": 1983.6666666666667,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 500,
+          "averageIterations": 229,
+          "averageElapsedMs": 500,
+          "averageTreeNodes": 231,
+          "averageRollouts": 229,
+          "averageGuidedPolicySelections": 3900.6666666666665,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 0
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 160,
+          "averageIterations": 38.666666666666664,
+          "averageElapsedMs": 160,
+          "averageTreeNodes": 40.5,
+          "averageRollouts": 38.666666666666664,
+          "averageGuidedPolicySelections": 668.8333333333334,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 39.5
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 280,
+          "averageIterations": 68.5,
+          "averageElapsedMs": 280,
+          "averageTreeNodes": 70,
+          "averageRollouts": 68.5,
+          "averageGuidedPolicySelections": 1167.8333333333333,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 69
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 500,
+          "averageIterations": 125,
+          "averageElapsedMs": 500,
+          "averageTreeNodes": 126.33333333333333,
+          "averageRollouts": 125,
+          "averageGuidedPolicySelections": 2127.1666666666665,
+          "averageGuidedPriorUses": 0,
+          "averageHybridPriorUses": 125.33333333333333
+        }
+      ]
+    }
+  ],
+  "diffAgainstBaseline": [
+    {
+      "algorithm": "mcts-guided",
+      "timeLimitMs": 160,
+      "baselineFound": true,
+      "iterationGain": 5.666666666666671,
+      "iterationGainRate": 0.10000000000000009,
+      "treeNodeGain": 5.666666666666664,
+      "treeNodeGainRate": 0.09659090909090906
+    },
+    {
+      "algorithm": "mcts-guided",
+      "timeLimitMs": 280,
+      "baselineFound": true,
+      "iterationGain": 2.1666666666666714,
+      "iterationGainRate": 0.019005847953216415,
+      "treeNodeGain": 2.333333333333343,
+      "treeNodeGainRate": 0.020143884892086412
+    },
+    {
+      "algorithm": "mcts-guided",
+      "timeLimitMs": 500,
+      "baselineFound": true,
+      "iterationGain": 10.5,
+      "iterationGainRate": 0.04805491990846682,
+      "treeNodeGain": 10.666666666666657,
+      "treeNodeGainRate": 0.048411497730710996
+    },
+    {
+      "algorithm": "mcts-hybrid",
+      "timeLimitMs": 160,
+      "baselineFound": true,
+      "iterationGain": 0.6666666666666643,
+      "iterationGainRate": 0.017543859649122744,
+      "treeNodeGain": 0.8333333333333357,
+      "treeNodeGainRate": 0.0210084033613446
+    },
+    {
+      "algorithm": "mcts-hybrid",
+      "timeLimitMs": 280,
+      "baselineFound": true,
+      "iterationGain": 4.166666666666671,
+      "iterationGainRate": 0.06476683937823842,
+      "treeNodeGain": 4.166666666666671,
+      "treeNodeGainRate": 0.0632911392405064
+    },
+    {
+      "algorithm": "mcts-hybrid",
+      "timeLimitMs": 500,
+      "baselineFound": true,
+      "iterationGain": -0.3333333333333286,
+      "iterationGainRate": -0.0026595744680850686,
+      "treeNodeGain": -0.6666666666666714,
+      "treeNodeGainRate": -0.005249343832021035
+    }
+  ]
+}

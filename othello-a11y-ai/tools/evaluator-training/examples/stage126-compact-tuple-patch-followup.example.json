@@ -1,0 +1,86 @@
+{
+  "name": "stage126-compact-tuple-patch-followup",
+  "outputDir": "tools/evaluator-training/out/stage126-weight-learning/tuple-patch-followup",
+  "moduleFormat": "compact",
+  "targetScale": 3000,
+  "progressEvery": 250000,
+  "sharedProfiles": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "mpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": "active",
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active"
+  },
+  "defaults": {
+    "sourceProfileKind": "auto",
+    "tupleScore": "sum-abs",
+    "globalScale": 1,
+    "calibration": {
+      "enabled": true,
+      "scope": "holdout-selected",
+      "shrink": 1.0,
+      "maxBiasStones": 1.5,
+      "limit": null
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "profile": {
+        "enabled": true,
+        "limit": 50000,
+        "benchmarkLoops": 200
+      },
+      "depth": {
+        "enabled": true,
+        "empties": [18, 16, 14, 12],
+        "seedStart": 1,
+        "seedCount": 8,
+        "repetitions": 1,
+        "timeLimitMs": 1500,
+        "maxDepth": 6,
+        "exactEndgameEmpties": 10
+      },
+      "exact": {
+        "enabled": true,
+        "empties": [10, 8, 6],
+        "seedStart": 1,
+        "seedCount": 6,
+        "repetitions": 1,
+        "timeLimitMs": 60000,
+        "maxDepth": 12
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "diagonal-top24-latea-endgame",
+      "name": "diagonal richer-corpus top24 late-a+endgame",
+      "sourceCandidateKey": "diagonal-main",
+      "keepBuckets": ["late-a", "endgame"],
+      "keepTopTuples": 24
+    },
+    {
+      "key": "diagonal-top24-lateb-endgame",
+      "name": "diagonal richer-corpus top24 late-b+endgame",
+      "sourceCandidateKey": "diagonal-main",
+      "keepBuckets": ["late-b", "endgame"],
+      "keepTopTuples": 24
+    },
+    {
+      "key": "orthogonal-top24-lateb-endgame",
+      "name": "orthogonal richer-corpus top24 late-b+endgame",
+      "sourceCandidateKey": "orthogonal-control",
+      "keepBuckets": ["late-b", "endgame"],
+      "keepTopTuples": 24
+    },
+    {
+      "key": "outer2-top24-lateb-endgame",
+      "name": "outer2 richer-corpus top24 late-b+endgame control",
+      "sourceCandidateKey": "outer2-control",
+      "keepBuckets": ["late-b", "endgame"],
+      "keepTopTuples": 24
+    }
+  ]
+}

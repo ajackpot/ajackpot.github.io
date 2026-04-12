@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-04-12T04:50:23.561Z",
+  "moduleFormat": "compact",
+  "phaseBucketKeys": [
+    "midgame-c",
+    "late-a",
+    "late-b",
+    "endgame"
+  ],
+  "baselineModuleBytes": 9288,
+  "activeEvaluationProfileName": "trained-phase-linear-v1",
+  "activeMoveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+  "activeTupleResidualProfileName": "top24-retrain-retrained-calibrated-lateb-endgame",
+  "activeMpcProfileName": "trained-mpc-overlap-8bucket-high-tight",
+  "candidates": [
+    {
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+      "tupleCount": 56,
+      "maxTupleLength": 2,
+      "totalTableSize": 504,
+      "phaseBucketCount": 4,
+      "moduleBytes": 19496,
+      "incrementalBytes": 10208
+    },
+    {
+      "layoutName": "orthogonal-adjacent-pairs-full-v1",
+      "tupleCount": 112,
+      "maxTupleLength": 2,
+      "totalTableSize": 1008,
+      "phaseBucketCount": 4,
+      "moduleBytes": 29110,
+      "incrementalBytes": 19822
+    },
+    {
+      "layoutName": "diagonal-adjacent-pairs-full-v1",
+      "tupleCount": 98,
+      "maxTupleLength": 2,
+      "totalTableSize": 882,
+      "phaseBucketCount": 4,
+      "moduleBytes": 26709,
+      "incrementalBytes": 17421
+    },
+    {
+      "layoutName": "straight-adjacent-pairs-full-v1",
+      "tupleCount": 210,
+      "maxTupleLength": 2,
+      "totalTableSize": 1890,
+      "phaseBucketCount": 4,
+      "moduleBytes": 45956,
+      "incrementalBytes": 36668
+    }
+  ]
+}

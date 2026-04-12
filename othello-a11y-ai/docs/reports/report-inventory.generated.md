@@ -3,21 +3,21 @@
 이 문서는 `node tools/docs/generate-report-inventory.mjs`로 생성됩니다.
 수동으로 문서 목록을 유지하지 않고, 현재 저장소 상태를 기준으로 구현/검토/기능/체크리스트 문서를 한 번에 정리합니다.
 
-- 생성 시각: `2026-04-09T19:35:00+09:00`
-- 현재 저장소 Stage: **Stage 87** (tag: `stage87`)
-- 총 분류 문서 수: **70**
+- 생성 시각: `2026-04-12T16:40:00+09:00`
+- 현재 저장소 Stage: **Stage 126** (tag: `stage126`)
+- 총 분류 문서 수: **102**
 
 ## 빠른 진입점
 - [AI 구현 체크리스트](checklists/ai-implementation-checklist.md)
-- [최신 구현 보고서 (Stage 87)](implementation/impl-stage-87-runtime-documentation-closeout.md)
+- [최신 구현 보고서 (Stage 126)](implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md)
 - [생성된 리포트 인벤토리 JSON](report-inventory.generated.json)
 
 ## 요약
 | 구분 | 설명 | 문서 수 | 최신 Stage |
 | --- | --- | ---: | --- |
 | 체크리스트 | 현재 구현 상태를 빠르게 확인하는 운영 문서 | 1 | — |
-| 구현 | 실제 코드 변경이 반영된 구현 보고서 | 46 | Stage 87 |
-| 검토 | 실험, 검토, 채택/비채택 판단 문서 | 22 | Stage 25 |
+| 구현 | 실제 코드 변경이 반영된 구현 보고서 | 76 | Stage 126 |
+| 검토 | 실험, 검토, 채택/비채택 판단 문서 | 24 | Stage 124 |
 | 기능 | 특정 기능 단위의 보충 설계/통합 문서 | 1 | — |
 
 ## 체크리스트
@@ -28,6 +28,36 @@
 ## 구현
 | Stage | 파일 | 제목 |
 | --- | --- | --- |
+| Stage 126 | [impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md](implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md) | Stage 126 - user-executable weight learning bundle and trainer refresh |
+| Stage 125 | [impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md](implementation/impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md) | Stage 125 - compact tuple family bounded pilot and no adoption |
+| Stage 123 | [impl-stage-123-opening-default-revalidation-and-final-runtime-closeout.md](implementation/impl-stage-123-opening-default-revalidation-and-final-runtime-closeout.md) | Stage 123 - opening default revalidation and final runtime closeout |
+| Stage 122 | [impl-stage-122-allocation-light-search-move-path.md](implementation/impl-stage-122-allocation-light-search-move-path.md) | Stage 122 - allocation-light search move path |
+| Stage 121 | [impl-stage-121-active-mpc-default-parity-hardening.md](implementation/impl-stage-121-active-mpc-default-parity-hardening.md) | Stage 121 - active MPC default parity hardening |
+| Stage 120 | [impl-stage-120-documentation-baseline-and-version-sync.md](implementation/impl-stage-120-documentation-baseline-and-version-sync.md) | Stage 120 - 문서 기준선 정리와 버전 동기화 |
+| Stage 119 | [impl-stage-119-refactor-audit-and-documentation-closeout.md](implementation/impl-stage-119-refactor-audit-and-documentation-closeout.md) | Stage 119 - 리팩토링 감사와 문서화 마감 정리 |
+| Stage 118 | [impl-stage-118-mcts-root-maturity-gate-causality-closeout.md](implementation/impl-stage-118-mcts-root-maturity-gate-causality-closeout.md) | Stage 118 - MCTS root-maturity gate causality closeout |
+| Stage 117 | [impl-stage-117-mcts-root-maturity-gate-trigger-refinement-screening.md](implementation/impl-stage-117-mcts-root-maturity-gate-trigger-refinement-screening.md) | Stage 117 - MCTS root-maturity gate trigger refinement screening |
+| Stage 116 | [impl-stage-116-mcts-root-maturity-gate-runtime-prototype.md](implementation/impl-stage-116-mcts-root-maturity-gate-runtime-prototype.md) | Stage 116 - MCTS root-maturity gate runtime prototype |
+| Stage 115 | [impl-stage-115-mcts-root-maturity-gate-screening.md](implementation/impl-stage-115-mcts-root-maturity-gate-screening.md) | Stage 115 - MCTS root-maturity / proof-maturity gate fixed-iteration screening |
+| Stage 114 | [impl-stage-114-mcts-late-bias-package-fixed-iteration-control.md](implementation/impl-stage-114-mcts-late-bias-package-fixed-iteration-control.md) | Stage 114 - MCTS late-bias package fixed-iteration control |
+| Stage 113 | [impl-stage-113-mcts-time-budget-conditioned-late-bias-package.md](implementation/impl-stage-113-mcts-time-budget-conditioned-late-bias-package.md) | Stage 113 - MCTS time-budget-conditioned late-bias package screening |
+| Stage 112 | [impl-stage-112-mcts-proof-metric-bias-combo-screening.md](implementation/impl-stage-112-mcts-proof-metric-bias-combo-screening.md) | Stage 112 — MCTS proof metric × bias combo screening |
+| Stage 111 | [impl-stage-111-mcts-proof-priority-bias-formula-screening.md](implementation/impl-stage-111-mcts-proof-priority-bias-formula-screening.md) | Stage 111 — MCTS proof-priority bias formula screening |
+| Stage 109 | [impl-stage-109-repository-wide-refactor-audit-and-documentation-closeout.md](implementation/impl-stage-109-repository-wide-refactor-audit-and-documentation-closeout.md) | Stage 109 - 저장소 전반 리팩토링 감사와 문서화 마감 정리 |
+| Stage 108 | [impl-stage-108-score-bounded-draw-blocker-priority.md](implementation/impl-stage-108-score-bounded-draw-blocker-priority.md) | Stage 108 - score-bounded draw-blocker priority와 마지막 채택 판정 |
+| Stage 107 | [impl-stage-107-true-score-bounded-late-lane-correction.md](implementation/impl-stage-107-true-score-bounded-late-lane-correction.md) | Stage 107 - true score-bounded late lane correction과 채택 판정 |
+| Stage 106 | [impl-stage-106-mcts-score-bounded-late-lane.md](implementation/impl-stage-106-mcts-score-bounded-late-lane.md) | Stage 106 - draw-aware / score-bounded late lane prototype와 채택 판정 |
+| Stage 105 | [impl-stage-105-generalized-proof-metric-benchmarking.md](implementation/impl-stage-105-generalized-proof-metric-benchmarking.md) | Stage 105 - draw-aware / per-player generalized proof metric prototype와 채택 판정 |
+| Stage 104 | [impl-stage-104-mcts-proof-priority-continuation-bridge.md](implementation/impl-stage-104-mcts-proof-priority-continuation-bridge.md) | Stage 104 — MCTS proof-priority ↔ exact continuation bridge readjustment |
+| Stage 103 | [impl-stage-103-mcts-proof-priority-frontier-bias.md](implementation/impl-stage-103-mcts-proof-priority-frontier-bias.md) | Stage 103 — MCTS proof-priority frontier bias |
+| Stage 102 | [impl-stage-102-sensei-proof-telemetry-survey-and-mcts-ui-annotation.md](implementation/impl-stage-102-sensei-proof-telemetry-survey-and-mcts-ui-annotation.md) | Stage 102 - Othello Sensei 조사와 MCTS proof telemetry / UI annotation |
+| Stage 101 | [impl-stage-101-mcts-root-exact-continuation.md](implementation/impl-stage-101-mcts-root-exact-continuation.md) | Stage 101 - MCTS root exact continuation after proof |
+| Stage 100 | [impl-stage-100-mcts-solver-late-solved-value-propagation.md](implementation/impl-stage-100-mcts-solver-late-solved-value-propagation.md) | Stage 100 - MCTS-Solver / late solved-value propagation |
+| Stage 98 | [impl-stage-98-special-ending-wrapup-and-regression-suite.md](implementation/impl-stage-98-special-ending-wrapup-and-regression-suite.md) | Stage 98 - 특수 종국 안전망 정리, 공용 휴리스틱 리팩토링, 회귀셋 통합 |
+| Stage 93 | [impl-stage-93-mcts-ui-refactor-and-throughput.md](implementation/impl-stage-93-mcts-ui-refactor-and-throughput.md) | Stage 93 - MCTS 모드 가용성 정리, 핫패스 리팩토링, 처리량 점검 |
+| Stage 92 | [impl-stage-92-mcts-preset-benchmark-refresh.md](implementation/impl-stage-92-mcts-preset-benchmark-refresh.md) | Stage 92 - MCTS preset-time benchmark refresh and multi-seed pair sampling |
+| Stage 91 | [impl-stage-91-mcts-hybrid-priors.md](implementation/impl-stage-91-mcts-hybrid-priors.md) | Stage 91 - MCTS Hybrid informed-prior lane |
+| Stage 90 | [impl-stage-90-mcts-search-algorithm-pair-benchmarking.md](implementation/impl-stage-90-mcts-search-algorithm-pair-benchmarking.md) | Stage 90 - MCTS Lite vs Guided pair benchmarking |
 | Stage 87 | [impl-stage-87-runtime-documentation-closeout.md](implementation/impl-stage-87-runtime-documentation-closeout.md) | 구현 보고서 Stage 87 — 런타임 문서 정리 마감 |
 | Stage 86 | [impl-stage-86-runtime-stability-hotpath-audit.md](implementation/impl-stage-86-runtime-stability-hotpath-audit.md) | 구현 보고서 Stage 86 — 런타임 stability hotpath audit / refactor |
 | Stage 85 | [impl-stage-85-report-hub-and-ai-checklist-closeout.md](implementation/impl-stage-85-report-hub-and-ai-checklist-closeout.md) | 구현 보고서 Stage 85 — 리포트 허브/AI 체크리스트 마감 리팩토링 |
@@ -78,6 +108,8 @@
 ## 검토
 | Stage | 파일 | 제목 |
 | --- | --- | --- |
+| Stage 124 | [review-stage-124-compact-ntuple-go-no-go-and-nonreopen-proof.md](review/review-stage-124-compact-ntuple-go-no-go-and-nonreopen-proof.md) | 검토 보고서 Stage 124 — compact systematic short n-tuple additive lane 착수 여부와 비재개 lane 근거 정리 |
+| Stage 120 | [review-stage-120-ai-core-full-survey-and-step3-candidates.md](review/review-stage-120-ai-core-full-survey-and-step3-candidates.md) | 검토 보고서 Stage 120 — AI core 전수조사와 Step 3 테스트 후보 분류 |
 | Stage 25 | [review-stage-25-dormant-runtime-logic-classification.md](review/review-stage-25-dormant-runtime-logic-classification.md) | 검토 보고서 Stage 25 — dormant 런타임 로직 분류와 처리 기준 |
 | Stage 24 | [review-stage-24-exact-fastest-first-and-cut-aware-audit.md](review/review-stage-24-exact-fastest-first-and-cut-aware-audit.md) | Stage 24 Review - Exact fastest-first and cut-aware ordering audit |
 | Stage 23 | [review-stage-23-specialized-few-empties-exact-solver.md](review/review-stage-23-specialized-few-empties-exact-solver.md) | Stage 23 Review - Specialized exact few-empties solver audit |

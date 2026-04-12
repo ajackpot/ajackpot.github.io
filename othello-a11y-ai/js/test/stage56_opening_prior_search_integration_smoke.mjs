@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { GameState } from '../core/game-state.js';
+import { GameState, createStateHistoryFromMoveSequence } from '../core/game-state.js';
 import { SearchEngine } from '../ai/search-engine.js';
 import { lookupOpeningPrior } from '../ai/opening-prior.js';
 import { resolveEngineOptions } from '../ai/presets.js';
@@ -183,6 +183,49 @@ assert.equal(
   searchOnlyRandomOpening.bestMoveCoord,
   deterministicOpening.bestMoveCoord,
   'searchRandomness should not affect direct opening-book selection when openingRandomness is zero',
+);
+
+const afterF5State = createStateHistoryFromMoveSequence('f5').at(-1);
+const impossibleOpeningEngine = new SearchEngine({ presetKey: 'impossible' });
+const afterF5LowRoll = withMockedRandom(0, () => impossibleOpeningEngine.findBestMove(afterF5State, {
+  presetKey: 'impossible',
+  styleKey: 'balanced',
+}));
+const afterF5HighRoll = withMockedRandom(0.999999, () => impossibleOpeningEngine.findBestMove(afterF5State, {
+  presetKey: 'impossible',
+  styleKey: 'balanced',
+}));
+assert.equal(afterF5LowRoll.source, 'opening-book');
+assert.equal(afterF5HighRoll.source, 'opening-book');
+assert.equal(afterF5LowRoll.bestMoveCoord, 'D6');
+assert.equal(afterF5HighRoll.bestMoveCoord, 'F6');
+
+const afterF5SearchOnlyRandom = withMockedRandom(0.999999, () => impossibleOpeningEngine.findBestMove(afterF5State, {
+  presetKey: 'impossible',
+  openingRandomness: 0,
+  searchRandomness: 400,
+  styleKey: 'balanced',
+}));
+assert.equal(
+  afterF5SearchOnlyRandom.bestMoveCoord,
+  afterF5HighRoll.bestMoveCoord,
+  'built-in zero opening randomness floor should stay tied to the opening setting and ignore searchRandomness overrides',
+);
+
+const lopsidedOpeningState = createStateHistoryFromMoveSequence('c4c3d3c5b6').at(-1);
+const lopsidedOpeningLowRoll = withMockedRandom(0, () => impossibleOpeningEngine.findBestMove(lopsidedOpeningState, {
+  presetKey: 'impossible',
+  styleKey: 'balanced',
+}));
+const lopsidedOpeningHighRoll = withMockedRandom(0.999999, () => impossibleOpeningEngine.findBestMove(lopsidedOpeningState, {
+  presetKey: 'impossible',
+  styleKey: 'balanced',
+}));
+assert.equal(lopsidedOpeningLowRoll.bestMoveCoord, 'E3');
+assert.equal(
+  lopsidedOpeningHighRoll.bestMoveCoord,
+  lopsidedOpeningLowRoll.bestMoveCoord,
+  'zero-opening tie band should stay disabled when the book shares are not actually close',
 );
 
 const searchRegressionState = findSearchRandomnessRegressionState();

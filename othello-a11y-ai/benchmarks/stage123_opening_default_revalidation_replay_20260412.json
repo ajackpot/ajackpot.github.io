@@ -1,0 +1,2055 @@
+{
+  "generatedAt": "2026-04-12T03:56:48.622Z",
+  "sourceReferenceJson": "benchmarks/stage58_opening_hybrid_reference_suite.json",
+  "corpus": {
+    "stateCount": 182,
+    "minPly": 0,
+    "maxPly": 12
+  },
+  "benchmarkConfig": {
+    "candidate": {
+      "maxDepth": 4,
+      "timeLimitMs": 450,
+      "exactEndgameEmpties": 10,
+      "repetitions": 1
+    },
+    "profileKeys": [
+      "stage59-prior-veto",
+      "stage59-cap9-prior-veto"
+    ]
+  },
+  "unresolvedRequestedProfileKeys": [],
+  "sourceReferenceScenarios": [
+    {
+      "key": "stage57-baseline",
+      "label": "Stage 57 baseline reference",
+      "description": "Stage 57 benchmark 재현용 reference입니다. search-only이지만 prior ordering은 약하게 유지합니다.",
+      "maxDepth": 6,
+      "timeLimitMs": 900,
+      "exactEndgameEmpties": 8,
+      "openingTuningKey": "search-reference"
+    },
+    {
+      "key": "stage58-strong-assisted",
+      "label": "Stage 58 strong assisted reference",
+      "description": "direct opening-book을 끄고 depth/time budget을 늘린 stronger reference입니다. prior ordering은 극히 약하게만 남겨 깊이를 더 확보합니다.",
+      "maxDepth": 8,
+      "timeLimitMs": 1600,
+      "exactEndgameEmpties": 10,
+      "openingTuningKey": "search-reference-strong"
+    },
+    {
+      "key": "stage58-strong-pure",
+      "label": "Stage 58 strong pure-search reference",
+      "description": "direct opening-book과 opening prior ordering을 모두 끈 pure-search reference입니다.",
+      "maxDepth": 7,
+      "timeLimitMs": 2200,
+      "exactEndgameEmpties": 10,
+      "openingTuningKey": "search-reference-pure"
+    }
+  ],
+  "sourceReferenceConsistency": {
+    "scenarioCount": 3,
+    "unanimousCaseCount": 112,
+    "unanimousRate": 0.6153846153846154,
+    "byPair": [
+      {
+        "leftReferenceScenarioKey": "stage57-baseline",
+        "rightReferenceScenarioKey": "stage58-strong-assisted",
+        "cases": 182,
+        "agreementCount": 129,
+        "agreementRate": 0.7087912087912088,
+        "disagreements": [
+          {
+            "ply": 2,
+            "prefixSequence": "C4E3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "F5",
+            "rightMove": "F6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 2,
+            "prefixSequence": "F5D6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "C4",
+            "rightMove": "C3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "C4C3E6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "C5",
+            "rightMove": "B4",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "C4E3F6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "C5",
+            "rightMove": "E6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "F5D6C3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "F4",
+            "rightMove": "D3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "F5F6E6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "F4",
+            "rightMove": "D6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "C4C3D3C5",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "D6",
+            "rightMove": "B4",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "C4C3D3E3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "F4",
+            "rightMove": "D2",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5B3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "E3",
+            "rightMove": "F3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5B4",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "D2",
+            "rightMove": "B3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5D6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "F4",
+            "rightMove": "E3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3E3C2",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-assisted",
+            "leftMove": "C5",
+            "rightMove": "C6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 8
+          }
+        ]
+      },
+      {
+        "leftReferenceScenarioKey": "stage57-baseline",
+        "rightReferenceScenarioKey": "stage58-strong-pure",
+        "cases": 182,
+        "agreementCount": 118,
+        "agreementRate": 0.6483516483516484,
+        "disagreements": [
+          {
+            "ply": 2,
+            "prefixSequence": "C4E3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F5",
+            "rightMove": "F6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 2,
+            "prefixSequence": "F5D6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "C4",
+            "rightMove": "C3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "C4C3D3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E3",
+            "rightMove": "C5",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "C4E3F6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "C5",
+            "rightMove": "E6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "F5D6C3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F4",
+            "rightMove": "D3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "F5F6E6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F4",
+            "rightMove": "D6",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "C4C3D3C5",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "D6",
+            "rightMove": "B4",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "C4C3D3E3",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F4",
+            "rightMove": "D2",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "F5F6E6F4",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E3",
+            "rightMove": "G5",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5B4",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "D2",
+            "rightMove": "F3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5D6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F4",
+            "rightMove": "E3",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5F6",
+            "leftReferenceScenarioKey": "stage57-baseline",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E2",
+            "rightMove": "D2",
+            "leftCompletedDepth": 6,
+            "rightCompletedDepth": 7
+          }
+        ]
+      },
+      {
+        "leftReferenceScenarioKey": "stage58-strong-assisted",
+        "rightReferenceScenarioKey": "stage58-strong-pure",
+        "cases": 182,
+        "agreementCount": 151,
+        "agreementRate": 0.8296703296703297,
+        "disagreements": [
+          {
+            "ply": 3,
+            "prefixSequence": "C4C3D3",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E3",
+            "rightMove": "C5",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 3,
+            "prefixSequence": "C4C3E6",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "B4",
+            "rightMove": "C5",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 4,
+            "prefixSequence": "F5F6E6F4",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E3",
+            "rightMove": "G5",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5B3",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "F3",
+            "rightMove": "E3",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5B4",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "B3",
+            "rightMove": "F3",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3C5F6",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E2",
+            "rightMove": "D2",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3E3C2",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "C6",
+            "rightMove": "C5",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3E3D2",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "C2",
+            "rightMove": "C6",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3E3F4",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "D6",
+            "rightMove": "C5",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4C3D3E3F6",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "B5",
+            "rightMove": "B4",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 5,
+            "prefixSequence": "C4E3F5B4F3",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "E6",
+            "rightMove": "D6",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          },
+          {
+            "ply": 6,
+            "prefixSequence": "C4C3D3C5B4D2",
+            "leftReferenceScenarioKey": "stage58-strong-assisted",
+            "rightReferenceScenarioKey": "stage58-strong-pure",
+            "leftMove": "D6",
+            "rightMove": "C2",
+            "leftCompletedDepth": 8,
+            "rightCompletedDepth": 7
+          }
+        ]
+      }
+    ]
+  },
+  "profiles": [
+    {
+      "profileKey": "stage59-prior-veto",
+      "referenceScenarios": [
+        {
+          "referenceScenarioKey": "stage57-baseline",
+          "referenceScenarioLabel": "Stage 57 baseline reference",
+          "cases": 182,
+          "agreementCount": 115,
+          "agreementRate": 0.6318681318681318,
+          "directCount": 156,
+          "directRate": 0.8571428571428571,
+          "searchCount": 26,
+          "searchRate": 0.14285714285714285,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 167,
+          "bookBackedChoiceRate": 0.9175824175824175,
+          "offBookChoiceCount": 15,
+          "offBookChoiceRate": 0.08241758241758242,
+          "averageNodes": 95.3021978021978,
+          "averageElapsedMs": 5.043956043956044,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 768,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 2,
+              "prefixSequence": "C4E3",
+              "topNames": [
+                "Tiger",
+                "Rose",
+                "Stephenson",
+                "No-Cat",
+                "COMP'OTH"
+              ],
+              "resultMove": "F6",
+              "resultSource": "opening-book",
+              "referenceMove": "F5",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F6",
+                "F4",
+                "F5"
+              ]
+            },
+            {
+              "ply": 2,
+              "prefixSequence": "F5D6",
+              "topNames": [
+                "Tiger",
+                "Rose",
+                "Stephenson",
+                "No-Cat",
+                "COMP'OTH"
+              ],
+              "resultMove": "C3",
+              "resultSource": "opening-book",
+              "referenceMove": "C4",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C3",
+                "C5",
+                "C4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 901,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 240,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F6",
+              "topNames": [
+                "Tiger",
+                "Stephenson",
+                "COMP'OTH",
+                "Rose-BILL",
+                "No-Kung"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "C5",
+              "referenceScore": -1205,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5D6C3",
+              "topNames": [
+                "Tiger",
+                "Stephenson",
+                "COMP'OTH",
+                "Rose-BILL",
+                "No-Kung"
+              ],
+              "resultMove": "D3",
+              "resultSource": "opening-book",
+              "referenceMove": "F4",
+              "referenceScore": -1205,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D3",
+                "G5"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": 494,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "E2",
+              "referenceScore": -208,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3C2",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C5",
+              "referenceScore": 494,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "C5",
+              "resultSource": "search",
+              "referenceMove": "B5",
+              "referenceScore": -208,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5",
+                "B4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 6,
+              "prefixSequence": "C4C3D3C5B4D2",
+              "topNames": [
+                "Heath-Bat",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C2",
+              "referenceScore": 1589,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "C2",
+                "E2"
+              ]
+            }
+          ]
+        },
+        {
+          "referenceScenarioKey": "stage58-strong-assisted",
+          "referenceScenarioLabel": "Stage 58 strong assisted reference",
+          "cases": 182,
+          "agreementCount": 106,
+          "agreementRate": 0.5824175824175825,
+          "directCount": 156,
+          "directRate": 0.8571428571428571,
+          "searchCount": 26,
+          "searchRate": 0.14285714285714285,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 167,
+          "bookBackedChoiceRate": 0.9175824175824175,
+          "offBookChoiceCount": 15,
+          "offBookChoiceRate": 0.08241758241758242,
+          "averageNodes": 95.3021978021978,
+          "averageElapsedMs": 5.043956043956044,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3E6",
+              "topNames": [
+                "Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 1113,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 277,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": -503,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5F6E6",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D6",
+              "referenceScore": -1314,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3C5",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "D6",
+              "resultSource": "search",
+              "referenceMove": "B4",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "E6",
+                "C6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3E3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "F5",
+                "F3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "F3",
+              "referenceScore": -354,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B4",
+              "topNames": [
+                "Heath-Bat",
+                "Heath-Chimney, \"Mass-Turning\"",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D2",
+              "resultSource": "opening-book",
+              "referenceMove": "B3",
+              "referenceScore": -1230,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D2",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5D6",
+              "topNames": [
+                "Rose-v-Toth",
+                "Tanida",
+                "Cow Bat, Bat, Cambridge",
+                "Chimney",
+                "Sailboat"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": -1204,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "E2",
+              "referenceScore": 302,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3C2",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C6",
+              "referenceScore": -354,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6"
+              ]
+            }
+          ]
+        },
+        {
+          "referenceScenarioKey": "stage58-strong-pure",
+          "referenceScenarioLabel": "Stage 58 strong pure-search reference",
+          "cases": 182,
+          "agreementCount": 104,
+          "agreementRate": 0.5714285714285714,
+          "directCount": 156,
+          "directRate": 0.8571428571428571,
+          "searchCount": 26,
+          "searchRate": 0.14285714285714285,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 167,
+          "bookBackedChoiceRate": 0.9175824175824175,
+          "offBookChoiceCount": 15,
+          "offBookChoiceRate": 0.08241758241758242,
+          "averageNodes": 95.3021978021978,
+          "averageElapsedMs": 5.043956043956044,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 177,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3D3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "C5",
+              "referenceScore": -1178,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 175,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": -665,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5F6E6",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D6",
+              "referenceScore": -1178,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3C5",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "D6",
+              "resultSource": "search",
+              "referenceMove": "B4",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "E6",
+                "C6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3E3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "F5",
+                "F3"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "F5F6E6F4",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "G5",
+              "referenceScore": 805,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D3",
+                "F3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": 307,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B4",
+              "topNames": [
+                "Heath-Bat",
+                "Heath-Chimney, \"Mass-Turning\"",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D2",
+              "resultSource": "opening-book",
+              "referenceMove": "F3",
+              "referenceScore": -889,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D2",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5D6",
+              "topNames": [
+                "Rose-v-Toth",
+                "Tanida",
+                "Cow Bat, Bat, Cambridge",
+                "Chimney",
+                "Sailboat"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": -1204,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": -373,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            }
+          ]
+        }
+      ],
+      "averageAgreementRate": 0.5952380952380952,
+      "worstAgreementRate": 0.5714285714285714,
+      "agreementSpread": 0.023809523809523836,
+      "averageNodes": 95.3021978021978,
+      "averageElapsedMs": 5.043956043956044,
+      "averageDirectRate": 0.8571428571428571,
+      "averageContradictionVetoRate": 0.04945054945054945
+    },
+    {
+      "profileKey": "stage59-cap9-prior-veto",
+      "referenceScenarios": [
+        {
+          "referenceScenarioKey": "stage57-baseline",
+          "referenceScenarioLabel": "Stage 57 baseline reference",
+          "cases": 182,
+          "agreementCount": 117,
+          "agreementRate": 0.6428571428571429,
+          "directCount": 110,
+          "directRate": 0.6043956043956044,
+          "searchCount": 72,
+          "searchRate": 0.3956043956043956,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 148,
+          "bookBackedChoiceRate": 0.8131868131868132,
+          "offBookChoiceCount": 34,
+          "offBookChoiceRate": 0.18681318681318682,
+          "averageNodes": 282.25274725274727,
+          "averageElapsedMs": 12.835164835164836,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 768,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 2,
+              "prefixSequence": "C4E3",
+              "topNames": [
+                "Tiger",
+                "Rose",
+                "Stephenson",
+                "No-Cat",
+                "COMP'OTH"
+              ],
+              "resultMove": "F6",
+              "resultSource": "opening-book",
+              "referenceMove": "F5",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F6",
+                "F4",
+                "F5"
+              ]
+            },
+            {
+              "ply": 2,
+              "prefixSequence": "F5D6",
+              "topNames": [
+                "Tiger",
+                "Rose",
+                "Stephenson",
+                "No-Cat",
+                "COMP'OTH"
+              ],
+              "resultMove": "C3",
+              "resultSource": "opening-book",
+              "referenceMove": "C4",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C3",
+                "C5",
+                "C4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 901,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 240,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F6",
+              "topNames": [
+                "Tiger",
+                "Stephenson",
+                "COMP'OTH",
+                "Rose-BILL",
+                "No-Kung"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "C5",
+              "referenceScore": -1205,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5D6C3",
+              "topNames": [
+                "Tiger",
+                "Stephenson",
+                "COMP'OTH",
+                "Rose-BILL",
+                "No-Kung"
+              ],
+              "resultMove": "D3",
+              "resultSource": "opening-book",
+              "referenceMove": "F4",
+              "referenceScore": -1205,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D3",
+                "G5"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": 494,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "E2",
+              "referenceScore": -208,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3C2",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C5",
+              "referenceScore": 494,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "C5",
+              "resultSource": "search",
+              "referenceMove": "B5",
+              "referenceScore": -208,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5",
+                "B4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 6,
+              "prefixSequence": "C4C3D3C5B4D2",
+              "topNames": [
+                "Heath-Bat",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C2",
+              "referenceScore": 1589,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "C2",
+                "E2"
+              ]
+            }
+          ]
+        },
+        {
+          "referenceScenarioKey": "stage58-strong-assisted",
+          "referenceScenarioLabel": "Stage 58 strong assisted reference",
+          "cases": 182,
+          "agreementCount": 108,
+          "agreementRate": 0.5934065934065934,
+          "directCount": 110,
+          "directRate": 0.6043956043956044,
+          "searchCount": 72,
+          "searchRate": 0.3956043956043956,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 148,
+          "bookBackedChoiceRate": 0.8131868131868132,
+          "offBookChoiceCount": 34,
+          "offBookChoiceRate": 0.18681318681318682,
+          "averageNodes": 282.25274725274727,
+          "averageElapsedMs": 12.835164835164836,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 1262,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3E6",
+              "topNames": [
+                "Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 1113,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 277,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": -503,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5F6E6",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D6",
+              "referenceScore": -1314,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3C5",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "D6",
+              "resultSource": "search",
+              "referenceMove": "B4",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "E6",
+                "C6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3E3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "F5",
+                "F3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "F3",
+              "referenceScore": -354,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B4",
+              "topNames": [
+                "Heath-Bat",
+                "Heath-Chimney, \"Mass-Turning\"",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D2",
+              "resultSource": "opening-book",
+              "referenceMove": "B3",
+              "referenceScore": -1230,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D2",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5D6",
+              "topNames": [
+                "Rose-v-Toth",
+                "Tanida",
+                "Cow Bat, Bat, Cambridge",
+                "Chimney",
+                "Sailboat"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": -1204,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "E2",
+              "referenceScore": 302,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3E3C2",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "D6",
+              "resultSource": "opening-book",
+              "referenceMove": "C6",
+              "referenceScore": -354,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6"
+              ]
+            }
+          ]
+        },
+        {
+          "referenceScenarioKey": "stage58-strong-pure",
+          "referenceScenarioLabel": "Stage 58 strong pure-search reference",
+          "cases": 182,
+          "agreementCount": 108,
+          "agreementRate": 0.5934065934065934,
+          "directCount": 110,
+          "directRate": 0.6043956043956044,
+          "searchCount": 72,
+          "searchRate": 0.3956043956043956,
+          "contradictionVetoCount": 9,
+          "contradictionVetoRate": 0.04945054945054945,
+          "bookBackedChoiceCount": 148,
+          "bookBackedChoiceRate": 0.8131868131868132,
+          "offBookChoiceCount": 34,
+          "offBookChoiceRate": 0.18681318681318682,
+          "averageNodes": 282.25274725274727,
+          "averageElapsedMs": 12.835164835164836,
+          "mismatches": [
+            {
+              "ply": 0,
+              "prefixSequence": "",
+              "topNames": [
+                "Perpendicular Opening",
+                "Diagonal Opening",
+                "Parallel Opening",
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow"
+              ],
+              "resultMove": "C4",
+              "resultSource": "opening-book",
+              "referenceMove": "D3",
+              "referenceScore": 177,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C4",
+                "D3",
+                "E6"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3D3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "C5",
+              "referenceScore": -1178,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4C3F5",
+              "topNames": [
+                "Semi-Wing Variation"
+              ],
+              "resultMove": "C5",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": 175,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "C5"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "C4E3F5",
+              "topNames": [
+                "No-Cat",
+                "Cat",
+                "Swallow",
+                "Italian",
+                "Sakaguchi"
+              ],
+              "resultMove": "E6",
+              "resultSource": "opening-book",
+              "referenceMove": "B4",
+              "referenceScore": -665,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E6",
+                "B4"
+              ]
+            },
+            {
+              "ply": 3,
+              "prefixSequence": "F5F6E6",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D6",
+              "referenceScore": -1178,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "D6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3C5",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "D6",
+              "resultSource": "search",
+              "referenceMove": "B4",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D6",
+                "E6",
+                "C6"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "C4C3D3E3",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "F4",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": 1440,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "F5",
+                "F3"
+              ]
+            },
+            {
+              "ply": 4,
+              "prefixSequence": "F5F6E6F4",
+              "topNames": [
+                "Heath, Tobidashi \"Jumping Out\"",
+                "Cow",
+                "Snake, Peasant",
+                "Buffalo, Kenichi Variation",
+                "Rose-v-Toth"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "G5",
+              "referenceScore": 805,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D3",
+                "F3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B3",
+              "topNames": [
+                "Pyramid, Checkerboarding Peasant"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": 307,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5B4",
+              "topNames": [
+                "Heath-Bat",
+                "Heath-Chimney, \"Mass-Turning\"",
+                "Iwasaki variation",
+                "Mimura variation II",
+                "Jelly"
+              ],
+              "resultMove": "D2",
+              "resultSource": "opening-book",
+              "referenceMove": "F3",
+              "referenceScore": -889,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "D2",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5D6",
+              "topNames": [
+                "Rose-v-Toth",
+                "Tanida",
+                "Cow Bat, Bat, Cambridge",
+                "Chimney",
+                "Sailboat"
+              ],
+              "resultMove": "F4",
+              "resultSource": "opening-book",
+              "referenceMove": "E3",
+              "referenceScore": -1204,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "F4",
+                "E3"
+              ]
+            },
+            {
+              "ply": 5,
+              "prefixSequence": "C4C3D3C5F6",
+              "topNames": [
+                "Maruoka Buffalo",
+                "Tanida Buffalo",
+                "Hokuriku Buffalo"
+              ],
+              "resultMove": "E3",
+              "resultSource": "search",
+              "referenceMove": "D2",
+              "referenceScore": -373,
+              "bookBackedChoice": true,
+              "contradictionVeto": null,
+              "bookTopMoves": [
+                "E3",
+                "D2",
+                "F4"
+              ]
+            }
+          ]
+        }
+      ],
+      "averageAgreementRate": 0.6098901098901099,
+      "worstAgreementRate": 0.5934065934065934,
+      "agreementSpread": 0.016483516483516536,
+      "averageNodes": 282.25274725274727,
+      "averageElapsedMs": 12.835164835164838,
+      "averageDirectRate": 0.6043956043956044,
+      "averageContradictionVetoRate": 0.04945054945054945
+    }
+  ],
+  "ranking": [
+    {
+      "rank": 1,
+      "profileKey": "stage59-cap9-prior-veto",
+      "worstAgreementRate": 0.5934065934065934,
+      "averageAgreementRate": 0.6098901098901099,
+      "agreementSpread": 0.016483516483516536,
+      "averageNodes": 282.25274725274727,
+      "averageElapsedMs": 12.835164835164838,
+      "averageDirectRate": 0.6043956043956044,
+      "averageContradictionVetoRate": 0.04945054945054945
+    },
+    {
+      "rank": 2,
+      "profileKey": "stage59-prior-veto",
+      "worstAgreementRate": 0.5714285714285714,
+      "averageAgreementRate": 0.5952380952380952,
+      "agreementSpread": 0.023809523809523836,
+      "averageNodes": 95.3021978021978,
+      "averageElapsedMs": 5.043956043956044,
+      "averageDirectRate": 0.8571428571428571,
+      "averageContradictionVetoRate": 0.04945054945054945
+    }
+  ]
+}

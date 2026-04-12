@@ -3,10 +3,17 @@
 이 문서는 **현재 기본 런타임에 실제로 남아 있는 구현**을 빠르게 확인하기 위한 체크리스트입니다.
 역사 문서와 분리해서 읽는 것이 핵심이며, 상세 구조 설명은 `../../runtime-ai-reference.md`를 먼저 보는 편이 더 빠릅니다.
 
+## 문서 기준선
+- 저장소 stage/tag/updatedAt/summary의 단일 기준은 루트 `stage-info.json`입니다.
+- **현재 코드 기준 안내**는 루트 `README.md`, `../../runtime-ai-reference.md`, 이 체크리스트를 함께 봅니다.
+- Stage별 채택/비채택 근거는 `../implementation/*`, `../review/*`에 남기고, 최신 구현 보고서 진입점은 `../report-inventory.generated.md`를 우선 기준으로 봅니다.
+- `package.json`은 Node ESM / 도구 실행용 최소 메타데이터 파일이며, 저장소 Stage 버전 기준으로 사용하지 않습니다.
+
 ## 관련 문서
 - [현재 AI 런타임 레퍼런스](../../runtime-ai-reference.md)
 - [구현/검토 보고서 허브](../README.md)
 - [생성된 리포트 인벤토리](../report-inventory.generated.md)
+- [현재 저장소 Stage 메타데이터](../../../stage-info.json)
 
 ## 상태 라벨
 - **활성**: 현재 기본 런타임에서 실제 사용됨
@@ -18,17 +25,20 @@
 
 | 항목 | 현재 상태 | 근거 파일 |
 | --- | --- | --- |
-| 저장소 현재 Stage | **Stage 87** | `stage-info.json` |
+| 저장소 현재 Stage | **Stage 126** | `stage-info.json` |
 | 기본 난이도 | `normal` | `js/ai/search-engine.js`, `js/ai/presets.js` |
 | 기본 스타일 | `balanced` | `js/ai/presets.js` |
-| 기본 오프닝 hybrid 프로필 | `stage59-cap9-prior-veto` | `js/ai/opening-tuning.js` |
-| active evaluation profile | `trained-phase-linear-v1` | `js/ai/evaluation-profiles.js` |
-| active move-ordering profile | `stage44-candidateH2-edgePattern125-cornerPattern125-11-12` | `js/ai/evaluation-profiles.js` |
-| active tuple residual profile | `top24-retrain-retrained-calibrated-lateb-endgame` | `js/ai/evaluation-profiles.js` |
-| active MPC profile | UI/worker 경로에서는 `trained-mpc-overlap-8bucket-high-tight`를 자동 주입 | `js/ui/engine-client.js`, `js/ai/worker.js` |
+| 기본 AI 모드(search algorithm) | `classic` | `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
+| 기본 오프닝 hybrid 프로필 | `stage59-cap9-prior-veto` | `js/ai/opening-tuning.js`, Stage 123 replay revalidation 유지 |
+| active evaluation profile | `trained-phase-linear-v1` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active move-ordering profile | `stage44-candidateH2-edgePattern125-cornerPattern125-11-12` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active tuple residual profile | `top24-retrain-retrained-calibrated-lateb-endgame` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active MPC profile | `trained-mpc-overlap-8bucket-high-tight` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
 | exact micro-solver threshold | `optimizedFewEmptiesExactSolverEmpties = 6` | `js/ai/search-engine.js`, Stage 84 보고서 |
 | specialized few-empties exact solver | 활성 | `js/ai/search-engine.js` |
 | root WLD pre-exact | 기본 꺼짐 (`0`), 사용자 지정에서만 `+2` 선택 가능 | `js/ai/presets.js`, `js/ai/search-engine.js` |
+| special-ending safety net | root scout / internal immediate wipeout guard / MCTS root threat penalty 활성 | `js/ai/search-engine.js`, `js/ai/mcts.js`, `js/ai/special-endings.js` |
+| 실행 경로 | worker 우선, 실패 시 main-thread fallback | `js/ui/engine-client.js`, `js/ai/worker.js` |
 
 ## 난이도/스타일 프리셋 스냅샷
 
@@ -69,8 +79,16 @@
 | 활성 | killer/history ordering | 일반 탐색 move ordering 기본 신호 | Stage 03, `js/ai/search-engine.js` |
 | 활성 | late move reductions (LMR) | 조건부 축소 + 재탐색 | `js/ai/search-engine.js` |
 | 활성 | enhanced transposition cutoff (ETC) | exact/WLD 모두 child TT 재사용을 포함한 cutoff 경로 유지 | Stage 17/20/80/81, `js/ai/search-engine.js` |
+| 활성 | allocation-light search move path | classic search 내부 노드는 prepared move record + fixed ordering metadata shape + inline flip-count 누적 경로를 기본 사용, `allocationLightSearchMoves: false`로 baseline 재현 가능 | Stage 122, `js/core/rules.js`, `js/ai/search-engine.js` |
 | 활성 | pass/terminal TT 저장 | 패스/종료 노드도 재사용 | Stage 06 보강, `js/ai/search-engine.js` |
-| 활성 | MPC runtime lane | UI/worker 기본 경로에서 active MPC profile 자동 연결 | Stage 72~74, `js/ui/engine-client.js`, `js/ai/worker.js` |
+| 활성 | MPC runtime lane | worker / UI fallback / direct `SearchEngine` 기본 경로에서 active MPC profile 상속, explicit `mpcProfile: null` preserve | Stage 72~74, 121, `js/ai/search-engine.js`, `js/ui/engine-client.js`, `js/ai/worker.js` |
+| 활성 | preset-aware AI 모드 선택기 | `beginner`: `classic / mcts-lite / mcts-guided`, `easy` 이상: `classic / mcts-guided / mcts-hybrid` | Stage 88~93, `js/ai/search-algorithms.js`, `js/ui/settings-panel-view.js`, `js/ai/search-engine.js` |
+| 선택형 | MCTS lite / guided / hybrid lane | 기본값은 `classic`, 프리셋 허용 범위 안에서만 선택 가능 | Stage 88~93, `js/ai/mcts.js`, `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
+| 선택형 | MCTS late solved-subtree lane | `mctsSolverEnabled = true`, `mctsSolverWldEmpties = 2` | Stage 100, `js/ai/search-engine.js`, `js/ai/mcts.js` |
+| 선택형 | MCTS root exact continuation | base `+3` + adaptive post-proof continuation(`loss-only`, 추가 `+1`) 유지 | Stage 101/104/110, `js/ai/search-engine.js`, `js/ai/mcts.js`, `js/ui/formatters.js` |
+| 선택형 | MCTS proof telemetry / UI summary | 상태 패널의 `말기 proof` 문장 유지 | Stage 102, `js/ai/search-engine.js`, `js/ui/formatters.js`, `js/ui/app-controller.js` |
+| 선택형 | MCTS late proof-priority bias | `mcts-hybrid` late lane에서 rank bias 사용, late-bias package / root-maturity gate는 experimental 표면만 유지 | Stage 103/111~118, `js/ai/search-engine.js`, `js/ai/mcts.js`, `js/ui/formatters.js` |
+| 선택형 | MCTS score-bound late lane | experimental opt-in, lane 내부 draw-blocker `x0.35`, 전역 기본값은 꺼짐 | Stage 106~108, `js/ai/search-engine.js`, `js/ai/mcts.js`, `js/ui/formatters.js` |
 
 ### 2. 말기 exact / WLD 경로
 
@@ -114,8 +132,9 @@
 | 활성 | 소형 opening book | 111개 seed line 기반 소형 책 유지 | Stage 54, `js/ai/opening-book*.js` |
 | 활성 | compact opening prior | 런타임 압축 prior 모듈 연결 | Stage 55, `js/ai/opening-prior*.js` |
 | 활성 | opening hybrid tuning | confidence gate / direct use / ordering bias 조합 | Stage 56~59, `js/ai/opening-tuning.js` |
-| 활성 | prior contradiction veto | 기본 hybrid key `stage59-cap9-prior-veto`에 포함 | Stage 59, `js/ai/opening-tuning.js` |
+| 활성 | prior contradiction veto | 기본 hybrid key `stage59-cap9-prior-veto`에 포함, Stage 123 replay revalidation에서도 기본값 유지 확인 | Stage 59, 123, `js/ai/opening-tuning.js` |
 | 활성 | opening randomness / search randomness 분리 | 초반과 중후반 무작위성 제어를 분리 | Stage 59, `js/ai/presets.js` |
+| 활성 | zero-randomness opening tie-band | preset 엔진에서 `openingRandomness=0`이어도 거의 동점인 오프닝 분기만 제한적으로 허용 | Stage 98, `js/ai/search-engine.js` |
 
 ### 6. 사용자 노출 설정 / 안전 장치
 
@@ -125,18 +144,22 @@
 | 활성 | custom 전용 엔진 수치 적용 | custom이 아닐 때는 프리셋 우선 | `js/ai/presets.js`, `js/main.js` |
 | 활성 | WLD pre-exact 변경 시 TT 무효화 | 의미가 바뀌는 옵션 변경에 대해 TT 즉시 비움 | Stage 83, `js/main.js`, `js/ai/search-engine.js` |
 | 활성 | UI-only 설정 변경 시 AI 재시작 방지 | theme/accessibility 변경이 search runtime을 불필요하게 건드리지 않음 | Stage 83, `js/main.js` |
+| 활성 | 설정 요약 수동 재낭독 | 설정 변경 시 자동 낭독 제거, 사용자 요청 시에만 현재 설정을 읽음 | Stage 98, `js/ui/settings-panel-view.js`, `js/ui/app-controller.js` |
 
 ## 도구 / 검증 / 배포 체크리스트
 
 | 상태 | 항목 | 현재 상태 | 주요 파일 |
 | --- | --- | --- | --- |
-| 도구 | evaluator 학습 파이프라인 | ridge regression, generated module export, holdout 검증 | `tools/evaluator-training/*` |
+| 도구 | evaluator 학습 파이프라인 | ridge regression, generated module export, holdout 검증, Stage 126 user-executable richer-corpus bundle wrapper/config 유지 | `tools/evaluator-training/*`, `tools/evaluator-training/run-stage126-weight-learning-bundle.mjs`, `tools/evaluator-training/examples/stage126-compact-tuple-richer-corpus.train-plus-bench.example.json` |
 | 도구 | move-ordering 튜닝/재생성 | local search, benchmark replay, profile merge 도구 유지 | `tools/evaluator-training/*`, `benchmarks/*` |
-| 도구 | opening hybrid benchmark/replay | reference suite 비교와 replay 도구 유지 | `tools/evaluator-training/benchmark-opening-hybrid-tuning.mjs`, `replay-opening-hybrid-reference-suite.mjs` |
+| 도구 | opening hybrid benchmark/replay | reference suite 비교와 replay 도구 유지, Stage 123 default revalidation orchestrator 추가 | `tools/evaluator-training/benchmark-opening-hybrid-tuning.mjs`, `tools/evaluator-training/replay-opening-hybrid-reference-suite.mjs`, `tools/benchmark/run-stage123-opening-default-revalidation-benchmark.mjs`, `benchmarks/stage123_opening_default_revalidation_benchmark_20260412.json` |
+| 도구 | compact tuple family pilot / size estimate | Stage 125 bounded pilot까지 완료. default adoption은 no-adoption이지만, Stage 126에서 richer external corpus 재시도용 bundle과 patch follow-up config를 추가해 user-executable learning lane으로만 유지 | `tools/evaluator-training/estimate-tuple-layout-candidate-sizes.mjs`, `tools/evaluator-training/run-tuple-layout-family-pilot.mjs`, `tools/evaluator-training/run-multi-candidate-training-suite.mjs`, `tools/evaluator-training/run-tuple-patch-suite.mjs`, `tools/evaluator-training/run-stage126-weight-learning-bundle.mjs`, `tools/evaluator-training/examples/stage126-compact-tuple-richer-corpus.train-plus-bench.example.json`, `tools/evaluator-training/examples/stage126-compact-tuple-patch-followup.example.json`, `tools/benchmark/run-stage125-compact-tuple-family-pilot.mjs`, `benchmarks/stage124/stage124_tuple_layout_candidate_size_summary.json`, `benchmarks/stage125/stage125_compact_tuple_family_pilot_decision_summary_20260412.json` |
 | 도구 | engine match harness | Trineutron 비교/대전 도구 유지 | `tools/engine-match/*`, `third_party/trineutron-othello/*` |
 | 도구 | package slimming | runtime/trainer 패키지 생성과 용량 분석 유지 | `tools/package/*` |
 | 도구 | report inventory generator | 보고서 인덱스를 수동 관리 대신 생성물로 유지 | `tools/docs/generate-report-inventory.mjs` |
-| 도구 | 코어 회귀 | core smoke / perft / stage83 custom WLD smoke / stage86 stability smoke 유지 | `js/test/core-smoke.mjs`, `js/test/perft.mjs`, `js/test/stage83_custom_wld_toggle_smoke.mjs`, `js/test/stage86_stability_hotpath_smoke.mjs` |
+| 도구 | 문서 동기화 점검 | `stage-info.json`, README, runtime reference, checklist, generated inventory의 Stage 표기를 검사 | `tools/docs/check-doc-sync.mjs` |
+| 도구 | 코어 회귀 | core smoke / perft / stage83 custom WLD smoke / stage86 stability smoke / stage122 allocation-light move path smoke / stage123 opening default revalidation smoke / stage125 compact tuple bounded pilot smoke / stage126 weight-learning bundle smoke 유지 | `js/test/core-smoke.mjs`, `js/test/perft.mjs`, `js/test/stage83_custom_wld_toggle_smoke.mjs`, `js/test/stage86_stability_hotpath_smoke.mjs`, `js/test/stage122_allocation_light_search_moves_smoke.mjs`, `js/test/stage123_opening_default_revalidation_smoke.mjs`, `js/test/stage125_compact_tuple_family_pilot_smoke.mjs`, `js/test/stage126_weight_learning_bundle_smoke.mjs` |
+| 도구 | special-ending 회귀셋 | stage94~98 스모크와 공통 픽스처를 통해 classic/MCTS trap 회귀 유지 | `js/test/stage94_special_ending_scout_smoke.mjs`, `js/test/stage95_immediate_wipeout_guard_smoke.mjs`, `js/test/stage96_mcts_immediate_wipeout_bias_smoke.mjs`, `js/test/stage97_mcts_root_threat_penalty_smoke.mjs`, `js/test/stage98_special_ending_regression_suite.mjs`, `js/test/special-ending-regression-helpers.mjs` |
 | 도구 | 브라우저 UI 스모크 | 번들/원본 모듈 로드 스모크 유지 | `tests/ui_smoke.py`, `tests/virtual_host_smoke.py` |
 
 ## 현재 기본 런타임에 남기지 않은 것
@@ -146,10 +169,16 @@
 | 역사 | `stabilityCutoff*` 런타임 pruning 토글 | 보고서에는 남기되 기본 런타임에서는 제거 |
 | 역사 | `exactFastestCutFirstOrdering` 별도 토글 | 채택된 exact fastest-first 경로만 남기고 별도 토글 제거 |
 | 역사 | 강한 프리셋 자동 WLD `+2` | Stage 83에서 default/custom 정책 정리 후 custom 선택형만 유지 |
-| 범위 밖 | MCTS 및 방향이 다른 방법론 | 별도 옵션으로 추후 검토 예정, 이 체크리스트 범위에서는 제외 |
+| 범위 밖 | proof-number search / PN·PPN full mode, transposition-aware MCTS graph, RAVE/AMAF 등 더 무거운 실험 lane | 보고서/검토 문서에서는 추적하되 현재 기본 런타임에는 남기지 않음 |
+| 역사 | 추가 MCTS late-lane retuning | Stage 118/119 closeout 이후 새 구조적 아이디어 전까지 비재개 권고 |
+| 역사 | 독립 move-ordering 재튜닝 | Stage 45 freeze 이후 새 evaluator family 채택이 있기 전까지 비재개 권고 |
+| 역사 | broad hand-crafted evaluator 확장 | Stage 13 이후 data-driven lane 우선, 현재는 cleanup 외 broad 확장 비재개 권고 |
+| 역사 | 5–6 empties micro-specialization 추가 확대 | Stage 84 threshold `6` 유지, 새 profiling hotspot이 생기기 전까지 비재개 권고 |
+| 역사 | broad special-ending 확장 | Stage 98 regression maintenance 단계로 정리, 새 trap corpus가 나오기 전까지 비재개 권고 |
+| 역사 | compact systematic short n-tuple family default adoption | Stage 125 bounded pilot을 실제로 돌렸지만 no-adoption으로 종료. Stage 126에서는 richer external corpus / larger offline budget이 있을 때만 다시 돌릴 수 있도록 user-executable bundle을 추가했고, 기본 런타임은 그대로 유지 |
 
 ## 이 문서를 읽는 순서
 1. **현재 무엇이 실제 살아 있는지**만 보려면 이 문서를 먼저 확인합니다.
 2. 구조와 역할까지 알고 싶으면 `../../runtime-ai-reference.md`를 엽니다.
-3. 문서 전체 목록이 필요하면 `../report-inventory.generated.md`를 엽니다.
+3. 문서 전체 목록과 최신 구현 보고서 진입점이 필요하면 `../report-inventory.generated.md`를 엽니다.
 4. 특정 채택/비채택 근거가 궁금하면 해당 Stage 구현/검토 보고서로 내려갑니다.

@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-04-12T05:55:25.665Z",
+  "tupleJsonPath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.json",
+  "outputJsonPath": "/mnt/data/stage125_work/othello-web-app-ai/tools/evaluator-training/out/stage125-family-pilot/orthogonal-adjacent-pairs-full-v1/trained-tuple-residual-profile.calibrated.json",
+  "mode": "corpus",
+  "scope": "holdout-selected",
+  "shrink": 1,
+  "targetScale": 3000,
+  "maxBiasStones": 1.5,
+  "sourceTupleProfileName": "trained-tuple-residual-stage124",
+  "outputTupleProfileName": "trained-tuple-residual-stage124-calibrated",
+  "bucketBiasAdjustments": [
+    {
+      "key": "late-a",
+      "minEmpties": 13,
+      "maxEmpties": 19,
+      "previousBias": 3474.962127,
+      "deltaBias": 4500,
+      "nextBias": 7974.962127
+    },
+    {
+      "key": "late-b",
+      "minEmpties": 7,
+      "maxEmpties": 12,
+      "previousBias": 11009.524663,
+      "deltaBias": 4500,
+      "nextBias": 15509.524663
+    },
+    {
+      "key": "endgame",
+      "minEmpties": 0,
+      "maxEmpties": 6,
+      "previousBias": 612.686722,
+      "deltaBias": 4500,
+      "nextBias": 5112.686722
+    }
+  ],
+  "verification": {
+    "holdoutMaeDeltaInStones": -0.0348888888888905,
+    "holdoutMeanResidualBeforeInStones": -11.046319444444446,
+    "holdoutMeanResidualAfterInStones": -9.546319444444444,
+    "selectedMaeDeltaInStones": -0.04431073446327355
+  }
+}

@@ -1,0 +1,1050 @@
+{
+  "type": "stage118-root-gate-causality-adoption-summary",
+  "generatedAt": "2026-04-11T22:20:00+09:00",
+  "fixedIteration": {
+    "label": "combined",
+    "scenarios": 96,
+    "gateActivatedCount": 50,
+    "gateNotActivatedCount": 46,
+    "baseVsTargetDiffCount": 5,
+    "baseVsRuntimeDiffCount": 5,
+    "runtimeVsTargetDiffCount": 0,
+    "activatedChangedScenarioCount": 5,
+    "activationExplainsTargetShiftCount": 5,
+    "activationWithoutOutputChangeCount": 45,
+    "activationButRuntimeStillBaseCount": 0,
+    "activationButRuntimeDivergedFromBothCount": 0,
+    "targetShiftWithoutActivationCount": 0,
+    "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+    "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 0,
+    "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 0,
+    "changedScenarioDetails": [
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 8,
+        "emptyCount": 12,
+        "seed": 47,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 9,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 18,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 4286,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 167,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 40,
+        "emptyCount": 12,
+        "seed": 419,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json",
+        "scenarioIndex": 32,
+        "emptyCount": 12,
+        "seed": 269,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H3",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      }
+    ],
+    "gateActivatedRate": 0.5208,
+    "baseVsTargetDiffRate": 0.0521,
+    "activationExplainsTargetShiftRateAmongChanged": 1,
+    "activationExplainsTargetShiftRateAmongAll": 0.0521
+  },
+  "timeBudgetRunA": {
+    "label": "combined",
+    "scenarios": 96,
+    "gateActivatedCount": 50,
+    "gateNotActivatedCount": 46,
+    "baseVsTargetDiffCount": 4,
+    "baseVsRuntimeDiffCount": 4,
+    "runtimeVsTargetDiffCount": 2,
+    "activatedChangedScenarioCount": 3,
+    "activationExplainsTargetShiftCount": 3,
+    "activationWithoutOutputChangeCount": 46,
+    "activationButRuntimeStillBaseCount": 0,
+    "activationButRuntimeDivergedFromBothCount": 0,
+    "targetShiftWithoutActivationCount": 1,
+    "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+    "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 1,
+    "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 0,
+    "changedScenarioDetails": [
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 0,
+        "emptyCount": 12,
+        "seed": 15,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 19,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 21,
+        "emptyCount": 12,
+        "seed": 149,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 26,
+        "emptyCount": 12,
+        "seed": 223,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 6,
+        "gateActivated": false,
+        "gateActivationReason": null,
+        "gateActivationIteration": 0,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "A6",
+          "score": -20000,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "loss"
+        },
+        "target": {
+          "bestMoveCoord": "B8",
+          "score": -10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "loss"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": -20000,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "loss"
+        }
+      }
+    ],
+    "gateActivatedRate": 0.5208,
+    "baseVsTargetDiffRate": 0.0417,
+    "activationExplainsTargetShiftRateAmongChanged": 0.75,
+    "activationExplainsTargetShiftRateAmongAll": 0.0313
+  },
+  "timeBudgetRunB": {
+    "label": "combined",
+    "scenarios": 96,
+    "gateActivatedCount": 50,
+    "gateNotActivatedCount": 46,
+    "baseVsTargetDiffCount": 7,
+    "baseVsRuntimeDiffCount": 5,
+    "runtimeVsTargetDiffCount": 7,
+    "activatedChangedScenarioCount": 6,
+    "activationExplainsTargetShiftCount": 1,
+    "activationWithoutOutputChangeCount": 47,
+    "activationButRuntimeStillBaseCount": 3,
+    "activationButRuntimeDivergedFromBothCount": 2,
+    "targetShiftWithoutActivationCount": 1,
+    "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+    "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 0,
+    "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 1,
+    "changedScenarioDetails": [
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10_dup.json",
+        "scenarioIndex": 19,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 4286,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10_dup.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 167,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "H1",
+          "score": 4000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "C3",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 4000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 20,
+        "emptyCount": 12,
+        "seed": 131,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 9,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "B3",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 22,
+        "emptyCount": 12,
+        "seed": 157,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 10,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "C1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "C1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 157,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 10,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G5",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 24,
+        "emptyCount": 12,
+        "seed": 173,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 7,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 28,
+        "emptyCount": 12,
+        "seed": 211,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 6,
+        "gateActivated": false,
+        "gateActivationReason": null,
+        "gateActivationIteration": 0,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H2",
+          "score": 6667,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H2",
+          "score": 6000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H2",
+          "score": 5714,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      }
+    ],
+    "gateActivatedRate": 0.5208,
+    "baseVsTargetDiffRate": 0.0729,
+    "activationExplainsTargetShiftRateAmongChanged": 0.1429,
+    "activationExplainsTargetShiftRateAmongAll": 0.0104
+  },
+  "timeBudgetCombinedAcrossDuplicateRuns": {
+    "label": "combined",
+    "scenarios": 192,
+    "gateActivatedCount": 100,
+    "gateNotActivatedCount": 92,
+    "baseVsTargetDiffCount": 11,
+    "baseVsRuntimeDiffCount": 9,
+    "runtimeVsTargetDiffCount": 9,
+    "activatedChangedScenarioCount": 9,
+    "activationExplainsTargetShiftCount": 4,
+    "activationWithoutOutputChangeCount": 93,
+    "activationButRuntimeStillBaseCount": 3,
+    "activationButRuntimeDivergedFromBothCount": 2,
+    "targetShiftWithoutActivationCount": 2,
+    "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+    "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 1,
+    "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 1,
+    "changedScenarioDetails": [
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 0,
+        "emptyCount": 12,
+        "seed": 15,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 19,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 21,
+        "emptyCount": 12,
+        "seed": 149,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "F1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+        "scenarioIndex": 26,
+        "emptyCount": 12,
+        "seed": 223,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 6,
+        "gateActivated": false,
+        "gateActivationReason": null,
+        "gateActivationIteration": 0,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "A6",
+          "score": -20000,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "loss"
+        },
+        "target": {
+          "bestMoveCoord": "B8",
+          "score": -10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "loss"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": -20000,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "loss"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10_dup.json",
+        "scenarioIndex": 19,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 4286,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10_dup.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 167,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "H1",
+          "score": 4000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "C3",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 4000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 20,
+        "emptyCount": 12,
+        "seed": 131,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 9,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "B3",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 22,
+        "emptyCount": 12,
+        "seed": 157,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 10,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "C1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "C1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 157,
+        "timeLimitMs": 280,
+        "fixedIterations": null,
+        "legalMoveCount": 10,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "G5",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 24,
+        "emptyCount": 12,
+        "seed": 173,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 7,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": true,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+        "scenarioIndex": 28,
+        "emptyCount": 12,
+        "seed": 211,
+        "timeLimitMs": 200,
+        "fixedIterations": null,
+        "legalMoveCount": 6,
+        "gateActivated": false,
+        "gateActivationReason": null,
+        "gateActivationIteration": 0,
+        "runtimeMatchesTarget": false,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H2",
+          "score": 6667,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H2",
+          "score": 6000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H2",
+          "score": 5714,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      }
+    ],
+    "gateActivatedRate": 0.5208,
+    "baseVsTargetDiffRate": 0.0573,
+    "activationExplainsTargetShiftRateAmongChanged": 0.3636,
+    "activationExplainsTargetShiftRateAmongAll": 0.0208
+  },
+  "decision": {
+    "defaultAdoption": false,
+    "reason": "fixed-iteration causal support is perfect, but duplicate time-budget reruns remain unstable and only explain a minority of changed scenarios when pooled",
+    "remainingPnPpnCandidates": []
+  }
+}

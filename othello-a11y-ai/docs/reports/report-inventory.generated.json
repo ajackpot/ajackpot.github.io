@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-04-09T19:35:00+09:00",
+  "generatedAt": "2026-04-12T16:40:00+09:00",
   "stageInfo": {
-    "stage": 87,
-    "tag": "stage87",
-    "label": "Stage 87",
-    "updatedAt": "2026-04-09T19:35:00+09:00",
-    "summary": "Root/runtime documentation now separates current AI architecture from stage history, and the missing Stage 86 runtime audit artifacts were backfilled into the repo"
+    "stage": 126,
+    "tag": "stage126",
+    "label": "Stage 126",
+    "updatedAt": "2026-04-12T16:40:00+09:00",
+    "summary": "Prepared a user-executable richer-corpus weight-learning bundle and trainer package for the only still-meaningful offline tuple lane, while keeping the active Stage 123 runtime semantics unchanged"
   },
-  "totalDocumentCount": 70,
+  "totalDocumentCount": 102,
   "quickLinks": [
     {
       "label": "AI 구현 체크리스트",
       "relativePath": "checklists/ai-implementation-checklist.md"
     },
     {
-      "label": "최신 구현 보고서 (Stage 87)",
-      "relativePath": "implementation/impl-stage-87-runtime-documentation-closeout.md"
+      "label": "최신 구현 보고서 (Stage 126)",
+      "relativePath": "implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md"
     },
     {
       "label": "생성된 리포트 인벤토리 JSON",
@@ -42,9 +42,189 @@
       "key": "implementation",
       "label": "구현",
       "description": "실제 코드 변경이 반영된 구현 보고서",
-      "count": 46,
-      "latestStage": 87,
+      "count": 76,
+      "latestStage": 126,
       "entries": [
+        {
+          "fileName": "impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md",
+          "title": "Stage 126 - user-executable weight learning bundle and trainer refresh",
+          "relativePath": "implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md",
+          "stageNumber": 126
+        },
+        {
+          "fileName": "impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md",
+          "title": "Stage 125 - compact tuple family bounded pilot and no adoption",
+          "relativePath": "implementation/impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md",
+          "stageNumber": 125
+        },
+        {
+          "fileName": "impl-stage-123-opening-default-revalidation-and-final-runtime-closeout.md",
+          "title": "Stage 123 - opening default revalidation and final runtime closeout",
+          "relativePath": "implementation/impl-stage-123-opening-default-revalidation-and-final-runtime-closeout.md",
+          "stageNumber": 123
+        },
+        {
+          "fileName": "impl-stage-122-allocation-light-search-move-path.md",
+          "title": "Stage 122 - allocation-light search move path",
+          "relativePath": "implementation/impl-stage-122-allocation-light-search-move-path.md",
+          "stageNumber": 122
+        },
+        {
+          "fileName": "impl-stage-121-active-mpc-default-parity-hardening.md",
+          "title": "Stage 121 - active MPC default parity hardening",
+          "relativePath": "implementation/impl-stage-121-active-mpc-default-parity-hardening.md",
+          "stageNumber": 121
+        },
+        {
+          "fileName": "impl-stage-120-documentation-baseline-and-version-sync.md",
+          "title": "Stage 120 - 문서 기준선 정리와 버전 동기화",
+          "relativePath": "implementation/impl-stage-120-documentation-baseline-and-version-sync.md",
+          "stageNumber": 120
+        },
+        {
+          "fileName": "impl-stage-119-refactor-audit-and-documentation-closeout.md",
+          "title": "Stage 119 - 리팩토링 감사와 문서화 마감 정리",
+          "relativePath": "implementation/impl-stage-119-refactor-audit-and-documentation-closeout.md",
+          "stageNumber": 119
+        },
+        {
+          "fileName": "impl-stage-118-mcts-root-maturity-gate-causality-closeout.md",
+          "title": "Stage 118 - MCTS root-maturity gate causality closeout",
+          "relativePath": "implementation/impl-stage-118-mcts-root-maturity-gate-causality-closeout.md",
+          "stageNumber": 118
+        },
+        {
+          "fileName": "impl-stage-117-mcts-root-maturity-gate-trigger-refinement-screening.md",
+          "title": "Stage 117 - MCTS root-maturity gate trigger refinement screening",
+          "relativePath": "implementation/impl-stage-117-mcts-root-maturity-gate-trigger-refinement-screening.md",
+          "stageNumber": 117
+        },
+        {
+          "fileName": "impl-stage-116-mcts-root-maturity-gate-runtime-prototype.md",
+          "title": "Stage 116 - MCTS root-maturity gate runtime prototype",
+          "relativePath": "implementation/impl-stage-116-mcts-root-maturity-gate-runtime-prototype.md",
+          "stageNumber": 116
+        },
+        {
+          "fileName": "impl-stage-115-mcts-root-maturity-gate-screening.md",
+          "title": "Stage 115 - MCTS root-maturity / proof-maturity gate fixed-iteration screening",
+          "relativePath": "implementation/impl-stage-115-mcts-root-maturity-gate-screening.md",
+          "stageNumber": 115
+        },
+        {
+          "fileName": "impl-stage-114-mcts-late-bias-package-fixed-iteration-control.md",
+          "title": "Stage 114 - MCTS late-bias package fixed-iteration control",
+          "relativePath": "implementation/impl-stage-114-mcts-late-bias-package-fixed-iteration-control.md",
+          "stageNumber": 114
+        },
+        {
+          "fileName": "impl-stage-113-mcts-time-budget-conditioned-late-bias-package.md",
+          "title": "Stage 113 - MCTS time-budget-conditioned late-bias package screening",
+          "relativePath": "implementation/impl-stage-113-mcts-time-budget-conditioned-late-bias-package.md",
+          "stageNumber": 113
+        },
+        {
+          "fileName": "impl-stage-112-mcts-proof-metric-bias-combo-screening.md",
+          "title": "Stage 112 — MCTS proof metric × bias combo screening",
+          "relativePath": "implementation/impl-stage-112-mcts-proof-metric-bias-combo-screening.md",
+          "stageNumber": 112
+        },
+        {
+          "fileName": "impl-stage-111-mcts-proof-priority-bias-formula-screening.md",
+          "title": "Stage 111 — MCTS proof-priority bias formula screening",
+          "relativePath": "implementation/impl-stage-111-mcts-proof-priority-bias-formula-screening.md",
+          "stageNumber": 111
+        },
+        {
+          "fileName": "impl-stage-109-repository-wide-refactor-audit-and-documentation-closeout.md",
+          "title": "Stage 109 - 저장소 전반 리팩토링 감사와 문서화 마감 정리",
+          "relativePath": "implementation/impl-stage-109-repository-wide-refactor-audit-and-documentation-closeout.md",
+          "stageNumber": 109
+        },
+        {
+          "fileName": "impl-stage-108-score-bounded-draw-blocker-priority.md",
+          "title": "Stage 108 - score-bounded draw-blocker priority와 마지막 채택 판정",
+          "relativePath": "implementation/impl-stage-108-score-bounded-draw-blocker-priority.md",
+          "stageNumber": 108
+        },
+        {
+          "fileName": "impl-stage-107-true-score-bounded-late-lane-correction.md",
+          "title": "Stage 107 - true score-bounded late lane correction과 채택 판정",
+          "relativePath": "implementation/impl-stage-107-true-score-bounded-late-lane-correction.md",
+          "stageNumber": 107
+        },
+        {
+          "fileName": "impl-stage-106-mcts-score-bounded-late-lane.md",
+          "title": "Stage 106 - draw-aware / score-bounded late lane prototype와 채택 판정",
+          "relativePath": "implementation/impl-stage-106-mcts-score-bounded-late-lane.md",
+          "stageNumber": 106
+        },
+        {
+          "fileName": "impl-stage-105-generalized-proof-metric-benchmarking.md",
+          "title": "Stage 105 - draw-aware / per-player generalized proof metric prototype와 채택 판정",
+          "relativePath": "implementation/impl-stage-105-generalized-proof-metric-benchmarking.md",
+          "stageNumber": 105
+        },
+        {
+          "fileName": "impl-stage-104-mcts-proof-priority-continuation-bridge.md",
+          "title": "Stage 104 — MCTS proof-priority ↔ exact continuation bridge readjustment",
+          "relativePath": "implementation/impl-stage-104-mcts-proof-priority-continuation-bridge.md",
+          "stageNumber": 104
+        },
+        {
+          "fileName": "impl-stage-103-mcts-proof-priority-frontier-bias.md",
+          "title": "Stage 103 — MCTS proof-priority frontier bias",
+          "relativePath": "implementation/impl-stage-103-mcts-proof-priority-frontier-bias.md",
+          "stageNumber": 103
+        },
+        {
+          "fileName": "impl-stage-102-sensei-proof-telemetry-survey-and-mcts-ui-annotation.md",
+          "title": "Stage 102 - Othello Sensei 조사와 MCTS proof telemetry / UI annotation",
+          "relativePath": "implementation/impl-stage-102-sensei-proof-telemetry-survey-and-mcts-ui-annotation.md",
+          "stageNumber": 102
+        },
+        {
+          "fileName": "impl-stage-101-mcts-root-exact-continuation.md",
+          "title": "Stage 101 - MCTS root exact continuation after proof",
+          "relativePath": "implementation/impl-stage-101-mcts-root-exact-continuation.md",
+          "stageNumber": 101
+        },
+        {
+          "fileName": "impl-stage-100-mcts-solver-late-solved-value-propagation.md",
+          "title": "Stage 100 - MCTS-Solver / late solved-value propagation",
+          "relativePath": "implementation/impl-stage-100-mcts-solver-late-solved-value-propagation.md",
+          "stageNumber": 100
+        },
+        {
+          "fileName": "impl-stage-98-special-ending-wrapup-and-regression-suite.md",
+          "title": "Stage 98 - 특수 종국 안전망 정리, 공용 휴리스틱 리팩토링, 회귀셋 통합",
+          "relativePath": "implementation/impl-stage-98-special-ending-wrapup-and-regression-suite.md",
+          "stageNumber": 98
+        },
+        {
+          "fileName": "impl-stage-93-mcts-ui-refactor-and-throughput.md",
+          "title": "Stage 93 - MCTS 모드 가용성 정리, 핫패스 리팩토링, 처리량 점검",
+          "relativePath": "implementation/impl-stage-93-mcts-ui-refactor-and-throughput.md",
+          "stageNumber": 93
+        },
+        {
+          "fileName": "impl-stage-92-mcts-preset-benchmark-refresh.md",
+          "title": "Stage 92 - MCTS preset-time benchmark refresh and multi-seed pair sampling",
+          "relativePath": "implementation/impl-stage-92-mcts-preset-benchmark-refresh.md",
+          "stageNumber": 92
+        },
+        {
+          "fileName": "impl-stage-91-mcts-hybrid-priors.md",
+          "title": "Stage 91 - MCTS Hybrid informed-prior lane",
+          "relativePath": "implementation/impl-stage-91-mcts-hybrid-priors.md",
+          "stageNumber": 91
+        },
+        {
+          "fileName": "impl-stage-90-mcts-search-algorithm-pair-benchmarking.md",
+          "title": "Stage 90 - MCTS Lite vs Guided pair benchmarking",
+          "relativePath": "implementation/impl-stage-90-mcts-search-algorithm-pair-benchmarking.md",
+          "stageNumber": 90
+        },
         {
           "fileName": "impl-stage-87-runtime-documentation-closeout.md",
           "title": "구현 보고서 Stage 87 — 런타임 문서 정리 마감",
@@ -327,9 +507,21 @@
       "key": "review",
       "label": "검토",
       "description": "실험, 검토, 채택/비채택 판단 문서",
-      "count": 22,
-      "latestStage": 25,
+      "count": 24,
+      "latestStage": 124,
       "entries": [
+        {
+          "fileName": "review-stage-124-compact-ntuple-go-no-go-and-nonreopen-proof.md",
+          "title": "검토 보고서 Stage 124 — compact systematic short n-tuple additive lane 착수 여부와 비재개 lane 근거 정리",
+          "relativePath": "review/review-stage-124-compact-ntuple-go-no-go-and-nonreopen-proof.md",
+          "stageNumber": 124
+        },
+        {
+          "fileName": "review-stage-120-ai-core-full-survey-and-step3-candidates.md",
+          "title": "검토 보고서 Stage 120 — AI core 전수조사와 Step 3 테스트 후보 분류",
+          "relativePath": "review/review-stage-120-ai-core-full-survey-and-step3-candidates.md",
+          "stageNumber": 120
+        },
         {
           "fileName": "review-stage-25-dormant-runtime-logic-classification.md",
           "title": "검토 보고서 Stage 25 — dormant 런타임 로직 분류와 처리 기준",

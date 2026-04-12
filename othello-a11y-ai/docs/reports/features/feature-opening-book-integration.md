@@ -5,7 +5,7 @@
 - base seed line 99개에 selected named continuation 12개를 낮은 가중치로 추가해 총 111개로 확장했고, 런타임 전개 후 실제 조회 가능한 포지션 엔트리는 643개입니다.
 - 오프닝북은 초기 12플라이까지 직접 수를 제안하고, 최대 18플라이까지는 탐색 루트 수 정렬 참고 정보로도 활용할 수 있게 설계했습니다.
 - compact WTHOR opening prior를 별도 runtime 모듈로 연결해 direct opening 선택의 confidence gate와 root move ordering bias를 함께 제공합니다.
-- Stage 59에서는 prior contradiction veto와 direct-use cap 9를 결합한 `stage59-cap9-prior-veto`를 기본 hybrid profile로 채택했습니다.
+- Stage 59에서는 prior contradiction veto와 direct-use cap 9를 결합한 `stage59-cap9-prior-veto`를 기본 hybrid profile로 채택했고, Stage 123 replay revalidation에서도 이 기본값을 유지했습니다.
 - 초기 위치에서는 엔진이 탐색 없이 즉시 북 수를 반환하지만, 애매한 분기나 prior가 강하게 반대하는 분기에서는 search로 복귀할 수 있습니다.
 
 ## 데이터 선정 방식
@@ -85,3 +85,4 @@ python3 tests/virtual_host_smoke.py
 - 다만 reference끼리도 완전 합의하지 않았습니다. baseline vs strong-assisted는 70.9%, baseline vs pure-search는 64.8%, strong-assisted vs pure-search는 83.0% agreement를 보였습니다.
 - Stage 59에서는 replay benchmark(`benchmarks/stage59_opening_wrapup_candidates.json`)로 남은 후보를 재평가해, `prior contradiction veto`와 `direct cap 9`를 함께 적용한 `stage59-cap9-prior-veto`를 최종 기본값으로 채택했습니다.
 - 이 profile은 multi-reference 기준 worst agreement 60.4%, average agreement 62.1%로 가장 높았고, contradiction veto는 전체 corpus의 약 4.9% case에서만 발동했습니다. 반면 `stage59-prior-veto`는 direct rate 85.7%를 유지하는 저비용 대안으로 남겼고, cap만 줄인 `stage59-cap9`는 채택하지 않았습니다.
+- Stage 123 replay revalidation(`benchmarks/stage123_opening_default_revalidation_benchmark_20260412.json`)에서도 결론은 바뀌지 않았습니다. Stage 59-compatible replay에서는 `stage59-cap9-prior-veto`가 worst/average agreement `59.3% / 61.0%`로 `stage59-prior-veto`(`57.1% / 59.5%`)를 앞섰고, current normal-runtime-like replay(`d6 / 1500ms`)에서는 격차가 `62.6% / 64.5%` 대 `59.9% / 60.3%`로 더 벌어졌습니다.

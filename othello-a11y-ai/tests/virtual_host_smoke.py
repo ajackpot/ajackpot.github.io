@@ -101,6 +101,9 @@ async def main() -> None:
         assert await page.evaluate("document.querySelector('#settings-collapsible-content').hidden") is False
         assert await page.locator('section[aria-labelledby="engine-settings-title"]').count() == 1
         assert await page.locator('section[aria-labelledby="accessibility-settings-title"]').count() == 1
+        assert await page.locator('#read-settings-button').is_visible() is True
+        assert await page.locator('#engine-summary-output').get_attribute('role') is None
+        assert await page.locator('#engine-summary-output').get_attribute('aria-live') is None
         assert await page.locator('section[aria-labelledby="accessibility-settings-title"] input[name="enableBoardShortcuts"]').count() == 1
         assert await page.locator('section[aria-labelledby="engine-settings-title"] input[name="enableBoardShortcuts"]').count() == 0
         assert await page.is_checked('input[name="enableBoardShortcuts"]') is True
@@ -133,10 +136,17 @@ async def main() -> None:
         preset_values = await page.evaluate("Array.from(document.querySelectorAll('#preset-select option')).map((option) => option.value)")
         assert preset_values == ['beginner', 'easy', 'normal', 'hard', 'expert', 'impossible', 'custom']
 
+        live_before_settings_change = (await page.locator('#live-region').text_content()) or ''
         await page.select_option('#preset-select', 'easy')
         await page.wait_for_timeout(50)
         summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
         assert '쉬움' in summary_text and '깊이 3' in summary_text and '6칸 이하' in summary_text
+        live_after_settings_change = (await page.locator('#live-region').text_content()) or ''
+        assert live_after_settings_change == live_before_settings_change
+        await page.locator('#read-settings-button').click()
+        await page.wait_for_timeout(50)
+        live_text = (await page.locator('#live-region').text_content()) or ''
+        assert '현재 설정.' in live_text and '쉬움' in live_text
 
         await page.select_option('#preset-select', 'impossible')
         await page.wait_for_timeout(50)

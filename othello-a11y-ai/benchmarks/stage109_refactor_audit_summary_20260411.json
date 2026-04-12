@@ -1,0 +1,265 @@
+{
+  "type": "mcts-refactor-audit-summary",
+  "generatedAt": "2026-04-11T07:26:27Z",
+  "repoRoot": ".",
+  "stage": 109,
+  "appliedRefactors": [
+    {
+      "key": "shared-mcts-node-factory",
+      "area": "js/ai/mcts.js",
+      "summary": "Merged root/child node initialization into createMctsNode() so later field additions stay in one place."
+    },
+    {
+      "key": "principal-variation-normalization",
+      "area": "js/ai/mcts.js",
+      "summary": "Replaced per-update filter/slice + JSON.stringify comparisons with normalizePrincipalVariation() and direct sequence equality checks."
+    },
+    {
+      "key": "single-pass-solved-child-propagation",
+      "area": "js/ai/mcts.js",
+      "summary": "Rewrote refreshSolvedStateFromChildren() to avoid filter() allocation and repeated solved-child scans while keeping exact/WLD propagation rules intact."
+    },
+    {
+      "key": "selection-ranking-allocation-trim",
+      "area": "js/ai/mcts.js",
+      "summary": "Traversal-time proof/draw-priority ranking now skips byMoveIndex maps, caches local scale lookups, and drops a redundant includes() invariant check from the selection hot path."
+    },
+    {
+      "key": "result-metadata-lookup-dedup",
+      "area": "js/ai/mcts.js",
+      "summary": "Root analyzed-move export reuses ranking metadata lookups instead of reading the same maps multiple times per child."
+    },
+    {
+      "key": "documentation-closeout",
+      "area": "docs/runtime-ai-reference.md, docs/reports/*, stage-info.json",
+      "summary": "Updated stage metadata/runtime notes and added final report-inventory smoke for the next conversation handoff."
+    }
+  ],
+  "benchmarks": {
+    "scoreBoundDrawPriority120msProbe": {
+      "workload": {
+        "tool": "tools/engine-match/benchmark-mcts-score-bound-draw-priority.mjs",
+        "emptiesList": [
+          12
+        ],
+        "seedList": [
+          15,
+          17,
+          31,
+          41,
+          47,
+          53
+        ],
+        "timeLimitMs": 120,
+        "drawPriorityScales": [
+          0.35
+        ]
+      },
+      "baseline": {
+        "key": "scale-00",
+        "label": "draw-priority x0.35",
+        "drawPriorityScale": 0.35,
+        "total": 6,
+        "exactBestHits": 5,
+        "exactBestHitRate": 0.8333333333333334,
+        "wldAgreementHits": 6,
+        "wldAgreementRate": 1,
+        "provenHits": 3,
+        "provenRate": 0.5,
+        "exactResultHits": 0,
+        "exactResultRate": 0,
+        "averageScoreLoss": 3333.3333333333335,
+        "averageElapsedMs": 113.33333333333333,
+        "averageIterations": 10.666666666666666,
+        "averageTreeNodes": 11.833333333333334,
+        "averageSolverStateProbes": 9.833333333333334,
+        "averageSolverRootProofs": 0.5,
+        "averageProofPrioritySelectionNodes": 3.8333333333333335,
+        "averageProofPriorityRankedChildren": 26.166666666666668,
+        "averageScoreBoundUpdates": 5.333333333333333,
+        "averageScoreBoundExactSolves": 0,
+        "averageScoreBoundOutcomeSolves": 0,
+        "averageScoreBoundDominatedChildrenSkipped": 0,
+        "averageScoreBoundTraversalFilteredNodes": 0,
+        "averageScoreBoundDominatedTraversalSelections": 0,
+        "averageScoreBoundDrawPrioritySelectionNodes": 0,
+        "averageScoreBoundDrawPriorityRankedChildren": 0,
+        "averageScoreBoundDrawPriorityBlockerChildren": 0,
+        "averageRootScoreBoundWidth": 955000
+      },
+      "candidate": {
+        "key": "scale-00",
+        "label": "draw-priority x0.35",
+        "drawPriorityScale": 0.35,
+        "total": 6,
+        "exactBestHits": 5,
+        "exactBestHitRate": 0.8333333333333334,
+        "wldAgreementHits": 6,
+        "wldAgreementRate": 1,
+        "provenHits": 3,
+        "provenRate": 0.5,
+        "exactResultHits": 0,
+        "exactResultRate": 0,
+        "averageScoreLoss": 3333.3333333333335,
+        "averageElapsedMs": 111.83333333333333,
+        "averageIterations": 10.5,
+        "averageTreeNodes": 11.5,
+        "averageSolverStateProbes": 10,
+        "averageSolverRootProofs": 0.5,
+        "averageProofPrioritySelectionNodes": 3.6666666666666665,
+        "averageProofPriorityRankedChildren": 23,
+        "averageScoreBoundUpdates": 4.833333333333333,
+        "averageScoreBoundExactSolves": 0,
+        "averageScoreBoundOutcomeSolves": 0,
+        "averageScoreBoundDominatedChildrenSkipped": 0,
+        "averageScoreBoundTraversalFilteredNodes": 0,
+        "averageScoreBoundDominatedTraversalSelections": 0,
+        "averageScoreBoundDrawPrioritySelectionNodes": 0,
+        "averageScoreBoundDrawPriorityRankedChildren": 0,
+        "averageScoreBoundDrawPriorityBlockerChildren": 0,
+        "averageRootScoreBoundWidth": 955000
+      },
+      "delta": {
+        "averageElapsedMs": -1.5,
+        "averageIterations": -0.16666666666666607,
+        "averageTreeNodes": -0.3333333333333339,
+        "exactBestHitRate": 0.0,
+        "provenRate": 0.0
+      },
+      "note": "Time-budget iteration counts moved within normal deadline noise; solved quality stayed unchanged while average elapsed fell slightly."
+    },
+    "scoreBoundDrawPriorityFixedProbeWallTime": {
+      "workload": {
+        "tool": "tools/engine-match/benchmark-mcts-score-bound-draw-priority-fixed-iterations.mjs",
+        "iterationsList": [
+          24,
+          32
+        ],
+        "emptiesList": [
+          12
+        ],
+        "seedList": [
+          15,
+          17,
+          31,
+          41,
+          47,
+          53
+        ],
+        "drawPriorityScales": [
+          0.35
+        ]
+      },
+      "baselineSeconds": 4.08,
+      "candidateSeconds": 4.05,
+      "deltaSeconds": -0.03000000000000025,
+      "deltaRate": -0.007352941176470649
+    },
+    "globalThroughputCompare": {
+      "tool": "tools/engine-match/benchmark-mcts-throughput-compare.mjs",
+      "options": {
+        "candidateRoot": ".",
+        "baselineRoot": "../../work109_baseline",
+        "algorithms": [
+          "mcts-guided",
+          "mcts-hybrid"
+        ],
+        "timeMsList": [
+          160,
+          280
+        ],
+        "positionSeedList": [
+          17,
+          31,
+          41,
+          53
+        ],
+        "openingPlies": 12,
+        "randomMode": "constant-zero",
+        "maxDepth": 4,
+        "exactEndgameEmpties": 8,
+        "maxTableEntries": 90000,
+        "presetKey": "custom",
+        "styleKey": "balanced"
+      },
+      "diffAgainstBaseline": [
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 160,
+          "baselineFound": true,
+          "iterationGain": 4.75,
+          "iterationGainRate": 0.14393939393939395,
+          "treeNodeGain": 4.75,
+          "treeNodeGainRate": 0.1357142857142857
+        },
+        {
+          "algorithm": "mcts-guided",
+          "timeLimitMs": 280,
+          "baselineFound": true,
+          "iterationGain": 0.25,
+          "iterationGainRate": 0.003424657534246575,
+          "treeNodeGain": 0.25,
+          "treeNodeGainRate": 0.0033333333333333335
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 160,
+          "baselineFound": true,
+          "iterationGain": 0.25,
+          "iterationGainRate": 0.010638297872340425,
+          "treeNodeGain": 0,
+          "treeNodeGainRate": 0
+        },
+        {
+          "algorithm": "mcts-hybrid",
+          "timeLimitMs": 280,
+          "baselineFound": true,
+          "iterationGain": -0.5,
+          "iterationGainRate": -0.011627906976744186,
+          "treeNodeGain": -0.25,
+          "treeNodeGainRate": -0.00558659217877095
+        }
+      ]
+    }
+  },
+  "regressionChecks": {
+    "runtimeSmokes": [
+      "core-smoke",
+      "stage100_mcts_solver_runtime_smoke",
+      "stage101_mcts_exact_continuation_runtime_smoke",
+      "stage102_mcts_proof_telemetry_runtime_smoke",
+      "stage103_mcts_proof_priority_runtime_smoke",
+      "stage104_mcts_continuation_bridge_runtime_smoke",
+      "stage105_mcts_generalized_proof_metric_runtime_smoke",
+      "stage106_mcts_score_bounds_runtime_smoke",
+      "stage107_mcts_true_score_bounds_runtime_smoke",
+      "stage108_mcts_score_bound_draw_priority_runtime_smoke",
+      "stage109_mcts_refactor_runtime_smoke"
+    ],
+    "benchmarkSmokes": [
+      "stage103_mcts_proof_priority_benchmark_smoke",
+      "stage104_mcts_continuation_bridge_benchmark_smoke",
+      "stage105_mcts_generalized_proof_metric_benchmark_smoke",
+      "stage106_mcts_score_bounds_benchmark_smoke",
+      "stage107_mcts_true_score_bounds_benchmark_smoke",
+      "stage108_mcts_score_bound_draw_priority_benchmark_smoke"
+    ],
+    "docChecks": [
+      "stage109_report_inventory_smoke"
+    ]
+  },
+  "nonAdoptedCandidates": [
+    {
+      "key": "per-player-proof-array-or-typed-array-rewrite",
+      "reason": "Would touch many serialization/telemetry call sites for unclear win in the current late-lane width; not justified in a cleanup pass."
+    },
+    {
+      "key": "score-bounds-global-default-promotion",
+      "reason": "Stage 106-108 validation still does not show a robust exact-best default-strength win; left as experimental opt-in."
+    },
+    {
+      "key": "large search-engine telemetry API reshuffle",
+      "reason": "Mostly cosmetic before the next PN/PPN work; postponed to avoid churn in a stable handoff stage."
+    }
+  ]
+}

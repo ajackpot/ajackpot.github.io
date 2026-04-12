@@ -1,0 +1,583 @@
+{
+  "type": "mcts-root-maturity-gate-causality-analysis",
+  "generatedAt": "2026-04-11T22:11:31.850Z",
+  "repoRoot": ".",
+  "options": {
+    "inputJsonList": [
+      "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+      "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json"
+    ]
+  },
+  "perFile": [
+    {
+      "file": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+      "type": "mcts-root-maturity-gate-runtime-fixed-iterations-benchmark",
+      "generatedAt": "2026-04-11T22:09:37.026Z",
+      "options": {
+        "mode": "fixed-iterations",
+        "algorithm": "mcts-hybrid",
+        "fixedIterationTimeLimitMs": 10000,
+        "timeMsList": [
+          200,
+          280
+        ],
+        "emptiesList": [
+          12
+        ],
+        "seedList": [
+          15,
+          17,
+          31,
+          41,
+          47,
+          53,
+          71,
+          89,
+          107,
+          123,
+          149,
+          167,
+          191,
+          223,
+          257,
+          281,
+          307,
+          331,
+          359,
+          383,
+          419,
+          443,
+          467,
+          491
+        ],
+        "iterationsList": [
+          24,
+          32
+        ],
+        "exactEndgameEmpties": 8,
+        "mctsSolverWldEmpties": 2,
+        "mctsExactContinuationExtraEmpties": 3,
+        "mctsExactContinuationAdaptiveEnabled": true,
+        "mctsExactContinuationAdaptiveExtraEmpties": 1,
+        "mctsExactContinuationAdaptiveOutcomeMode": "loss-only",
+        "mctsExactContinuationAdaptiveMaxLegalMoves": 0,
+        "mctsProofPriorityScale": 0.15,
+        "mctsProofPriorityMaxEmpties": 12,
+        "mctsProofPriorityContinuationHandoffEnabled": true,
+        "baseProofMetricMode": "legacy-root",
+        "baseProofPriorityBiasMode": "rank",
+        "targetProofMetricMode": "per-player",
+        "targetProofPriorityBiasMode": "pnmax",
+        "rootMaturityGateMode": "best-metric-threshold",
+        "rootMaturityGateMinVisits": 10,
+        "rootMaturityGateBestFiniteMetricThreshold": 3,
+        "rootMaturityGateRequireNoSolvedChild": true,
+        "rootMaturityGateMinDistinctFiniteMetricCount": 0,
+        "maxDepth": 4,
+        "maxTableEntries": 90000,
+        "mctsMaxNodes": 50000,
+        "timeBudgetMctsMaxIterations": 200000,
+        "presetKey": "custom",
+        "styleKey": "balanced",
+        "referenceExactEmpties": 20,
+        "referenceTimeMs": 6000
+      },
+      "summary": {
+        "label": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarios": 48,
+        "gateActivatedCount": 26,
+        "gateNotActivatedCount": 22,
+        "baseVsTargetDiffCount": 4,
+        "baseVsRuntimeDiffCount": 4,
+        "runtimeVsTargetDiffCount": 0,
+        "activatedChangedScenarioCount": 4,
+        "activationExplainsTargetShiftCount": 4,
+        "activationWithoutOutputChangeCount": 22,
+        "activationButRuntimeStillBaseCount": 0,
+        "activationButRuntimeDivergedFromBothCount": 0,
+        "targetShiftWithoutActivationCount": 0,
+        "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+        "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 0,
+        "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 0,
+        "changedScenarioDetails": [
+          {
+            "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+            "scenarioIndex": 8,
+            "emptyCount": 12,
+            "seed": 47,
+            "timeLimitMs": null,
+            "fixedIterations": null,
+            "legalMoveCount": 9,
+            "gateActivated": true,
+            "gateActivationReason": "best-metric-lte-3",
+            "gateActivationIteration": 10,
+            "runtimeMatchesTarget": true,
+            "runtimeMatchesBase": false,
+            "base": {
+              "bestMoveCoord": "H8",
+              "score": 0,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "target": {
+              "bestMoveCoord": "H8",
+              "score": 0,
+              "proven": true,
+              "isExactResult": true,
+              "rootSolvedOutcome": "draw"
+            },
+            "runtimeGate": {
+              "bestMoveCoord": "H8",
+              "score": 0,
+              "proven": true,
+              "isExactResult": true,
+              "rootSolvedOutcome": "draw"
+            }
+          },
+          {
+            "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+            "scenarioIndex": 18,
+            "emptyCount": 12,
+            "seed": 123,
+            "timeLimitMs": null,
+            "fixedIterations": null,
+            "legalMoveCount": 5,
+            "gateActivated": true,
+            "gateActivationReason": "best-metric-lte-3",
+            "gateActivationIteration": 10,
+            "runtimeMatchesTarget": true,
+            "runtimeMatchesBase": false,
+            "base": {
+              "bestMoveCoord": "A8",
+              "score": 4286,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "target": {
+              "bestMoveCoord": "A8",
+              "score": 0,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "runtimeGate": {
+              "bestMoveCoord": "A8",
+              "score": 0,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            }
+          },
+          {
+            "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+            "scenarioIndex": 23,
+            "emptyCount": 12,
+            "seed": 167,
+            "timeLimitMs": null,
+            "fixedIterations": null,
+            "legalMoveCount": 8,
+            "gateActivated": true,
+            "gateActivationReason": "best-metric-lte-3",
+            "gateActivationIteration": 10,
+            "runtimeMatchesTarget": true,
+            "runtimeMatchesBase": false,
+            "base": {
+              "bestMoveCoord": "H1",
+              "score": 0,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "target": {
+              "bestMoveCoord": "H1",
+              "score": 0,
+              "proven": true,
+              "isExactResult": true,
+              "rootSolvedOutcome": "draw"
+            },
+            "runtimeGate": {
+              "bestMoveCoord": "H1",
+              "score": 0,
+              "proven": true,
+              "isExactResult": true,
+              "rootSolvedOutcome": "draw"
+            }
+          },
+          {
+            "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+            "scenarioIndex": 40,
+            "emptyCount": 12,
+            "seed": 419,
+            "timeLimitMs": null,
+            "fixedIterations": null,
+            "legalMoveCount": 8,
+            "gateActivated": true,
+            "gateActivationReason": "best-metric-lte-3",
+            "gateActivationIteration": 10,
+            "runtimeMatchesTarget": true,
+            "runtimeMatchesBase": false,
+            "base": {
+              "bestMoveCoord": "A8",
+              "score": 10000,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "target": {
+              "bestMoveCoord": "A8",
+              "score": 10000,
+              "proven": true,
+              "isExactResult": false,
+              "rootSolvedOutcome": "win"
+            },
+            "runtimeGate": {
+              "bestMoveCoord": "A8",
+              "score": 10000,
+              "proven": true,
+              "isExactResult": false,
+              "rootSolvedOutcome": "win"
+            }
+          }
+        ],
+        "gateActivatedRate": 0.5417,
+        "baseVsTargetDiffRate": 0.0833,
+        "activationExplainsTargetShiftRateAmongChanged": 1,
+        "activationExplainsTargetShiftRateAmongAll": 0.0833
+      }
+    },
+    {
+      "file": "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json",
+      "type": "mcts-root-maturity-gate-runtime-fixed-iterations-benchmark",
+      "generatedAt": "2026-04-11T22:10:14.305Z",
+      "options": {
+        "mode": "fixed-iterations",
+        "algorithm": "mcts-hybrid",
+        "fixedIterationTimeLimitMs": 10000,
+        "timeMsList": [
+          200,
+          280
+        ],
+        "emptiesList": [
+          12
+        ],
+        "seedList": [
+          11,
+          19,
+          29,
+          37,
+          43,
+          59,
+          67,
+          73,
+          97,
+          113,
+          131,
+          157,
+          173,
+          199,
+          211,
+          239,
+          269,
+          293,
+          317,
+          347,
+          373,
+          401,
+          431,
+          479
+        ],
+        "iterationsList": [
+          24,
+          32
+        ],
+        "exactEndgameEmpties": 8,
+        "mctsSolverWldEmpties": 2,
+        "mctsExactContinuationExtraEmpties": 3,
+        "mctsExactContinuationAdaptiveEnabled": true,
+        "mctsExactContinuationAdaptiveExtraEmpties": 1,
+        "mctsExactContinuationAdaptiveOutcomeMode": "loss-only",
+        "mctsExactContinuationAdaptiveMaxLegalMoves": 0,
+        "mctsProofPriorityScale": 0.15,
+        "mctsProofPriorityMaxEmpties": 12,
+        "mctsProofPriorityContinuationHandoffEnabled": true,
+        "baseProofMetricMode": "legacy-root",
+        "baseProofPriorityBiasMode": "rank",
+        "targetProofMetricMode": "per-player",
+        "targetProofPriorityBiasMode": "pnmax",
+        "rootMaturityGateMode": "best-metric-threshold",
+        "rootMaturityGateMinVisits": 10,
+        "rootMaturityGateBestFiniteMetricThreshold": 3,
+        "rootMaturityGateRequireNoSolvedChild": true,
+        "rootMaturityGateMinDistinctFiniteMetricCount": 0,
+        "maxDepth": 4,
+        "maxTableEntries": 90000,
+        "mctsMaxNodes": 50000,
+        "timeBudgetMctsMaxIterations": 200000,
+        "presetKey": "custom",
+        "styleKey": "balanced",
+        "referenceExactEmpties": 20,
+        "referenceTimeMs": 6000
+      },
+      "summary": {
+        "label": "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json",
+        "scenarios": 48,
+        "gateActivatedCount": 24,
+        "gateNotActivatedCount": 24,
+        "baseVsTargetDiffCount": 1,
+        "baseVsRuntimeDiffCount": 1,
+        "runtimeVsTargetDiffCount": 0,
+        "activatedChangedScenarioCount": 1,
+        "activationExplainsTargetShiftCount": 1,
+        "activationWithoutOutputChangeCount": 23,
+        "activationButRuntimeStillBaseCount": 0,
+        "activationButRuntimeDivergedFromBothCount": 0,
+        "targetShiftWithoutActivationCount": 0,
+        "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+        "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 0,
+        "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 0,
+        "changedScenarioDetails": [
+          {
+            "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json",
+            "scenarioIndex": 32,
+            "emptyCount": 12,
+            "seed": 269,
+            "timeLimitMs": null,
+            "fixedIterations": null,
+            "legalMoveCount": 8,
+            "gateActivated": true,
+            "gateActivationReason": "best-metric-lte-3",
+            "gateActivationIteration": 10,
+            "runtimeMatchesTarget": true,
+            "runtimeMatchesBase": false,
+            "base": {
+              "bestMoveCoord": "H3",
+              "score": 10000,
+              "proven": false,
+              "isExactResult": false,
+              "rootSolvedOutcome": null
+            },
+            "target": {
+              "bestMoveCoord": "A6",
+              "score": 10000,
+              "proven": true,
+              "isExactResult": false,
+              "rootSolvedOutcome": "win"
+            },
+            "runtimeGate": {
+              "bestMoveCoord": "A6",
+              "score": 10000,
+              "proven": true,
+              "isExactResult": false,
+              "rootSolvedOutcome": "win"
+            }
+          }
+        ],
+        "gateActivatedRate": 0.5,
+        "baseVsTargetDiffRate": 0.0208,
+        "activationExplainsTargetShiftRateAmongChanged": 1,
+        "activationExplainsTargetShiftRateAmongAll": 0.0208
+      }
+    }
+  ],
+  "combined": {
+    "label": "combined",
+    "scenarios": 96,
+    "gateActivatedCount": 50,
+    "gateNotActivatedCount": 46,
+    "baseVsTargetDiffCount": 5,
+    "baseVsRuntimeDiffCount": 5,
+    "runtimeVsTargetDiffCount": 0,
+    "activatedChangedScenarioCount": 5,
+    "activationExplainsTargetShiftCount": 5,
+    "activationWithoutOutputChangeCount": 45,
+    "activationButRuntimeStillBaseCount": 0,
+    "activationButRuntimeDivergedFromBothCount": 0,
+    "targetShiftWithoutActivationCount": 0,
+    "targetShiftWithoutActivationButRuntimeMatchedTargetCount": 0,
+    "targetShiftWithoutActivationAndRuntimeStayedBaseCount": 0,
+    "targetShiftWithoutActivationAndRuntimeDivergedFromBothCount": 0,
+    "changedScenarioDetails": [
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 8,
+        "emptyCount": 12,
+        "seed": 47,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 9,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H8",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 18,
+        "emptyCount": 12,
+        "seed": 123,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 5,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 4286,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 23,
+        "emptyCount": 12,
+        "seed": 167,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "H1",
+          "score": 0,
+          "proven": true,
+          "isExactResult": true,
+          "rootSolvedOutcome": "draw"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+        "scenarioIndex": 40,
+        "emptyCount": 12,
+        "seed": 419,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A8",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      },
+      {
+        "sourceLabel": "benchmarks/stage118_root_gate_causality_fixediter_holdout24a_v10.json",
+        "scenarioIndex": 32,
+        "emptyCount": 12,
+        "seed": 269,
+        "timeLimitMs": null,
+        "fixedIterations": null,
+        "legalMoveCount": 8,
+        "gateActivated": true,
+        "gateActivationReason": "best-metric-lte-3",
+        "gateActivationIteration": 10,
+        "runtimeMatchesTarget": true,
+        "runtimeMatchesBase": false,
+        "base": {
+          "bestMoveCoord": "H3",
+          "score": 10000,
+          "proven": false,
+          "isExactResult": false,
+          "rootSolvedOutcome": null
+        },
+        "target": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        },
+        "runtimeGate": {
+          "bestMoveCoord": "A6",
+          "score": 10000,
+          "proven": true,
+          "isExactResult": false,
+          "rootSolvedOutcome": "win"
+        }
+      }
+    ],
+    "gateActivatedRate": 0.5208,
+    "baseVsTargetDiffRate": 0.0521,
+    "activationExplainsTargetShiftRateAmongChanged": 1,
+    "activationExplainsTargetShiftRateAmongAll": 0.0521
+  }
+}

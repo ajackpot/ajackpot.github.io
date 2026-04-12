@@ -1,0 +1,88 @@
+{
+  "name": "stage126-compact-tuple-richer-corpus-train-plus-bench",
+  "outputDir": "tools/evaluator-training/out/stage126-weight-learning/tuple-family-suite",
+  "moduleFormat": "compact",
+  "targetScale": 3000,
+  "holdoutMod": 10,
+  "holdoutResidue": 0,
+  "progressEvery": 500000,
+  "phaseTraining": {
+    "enabled": true,
+    "lambda": 5000,
+    "limit": null,
+    "skipDiagnostics": false
+  },
+  "sharedProfiles": {
+    "evaluationProfileJson": null,
+    "moveOrderingProfileJson": "active",
+    "mpcProfileJson": "active"
+  },
+  "benchmarkBaseline": {
+    "evaluationProfileJson": null,
+    "moveOrderingProfileJson": "active",
+    "tupleProfileJson": "active"
+  },
+  "defaults": {
+    "phaseBuckets": ["late-a", "late-b", "endgame"],
+    "tupleLimit": null,
+    "sampleStride": 2,
+    "sampleResidue": 0,
+    "epochs": 2,
+    "learningRate": 0.05,
+    "l2": 0.0005,
+    "gradientClip": 90000,
+    "minVisits": 16,
+    "skipDiagnostics": false,
+    "calibration": {
+      "enabled": true,
+      "scope": "holdout-selected",
+      "shrink": 1.0,
+      "maxBiasStones": 1.5,
+      "limit": null
+    },
+    "exportModule": true,
+    "benchmarks": {
+      "profile": {
+        "enabled": true,
+        "limit": 50000,
+        "benchmarkLoops": 200
+      },
+      "depth": {
+        "enabled": true,
+        "empties": [18, 16, 14, 12],
+        "seedStart": 1,
+        "seedCount": 8,
+        "repetitions": 1,
+        "timeLimitMs": 1500,
+        "maxDepth": 6,
+        "exactEndgameEmpties": 10
+      },
+      "exact": {
+        "enabled": true,
+        "empties": [10, 8, 6],
+        "seedStart": 1,
+        "seedCount": 6,
+        "repetitions": 1,
+        "timeLimitMs": 60000,
+        "maxDepth": 12
+      }
+    }
+  },
+  "candidates": [
+    {
+      "key": "diagonal-main",
+      "name": "diagonal-adjacent-pairs-full-v1",
+      "layoutName": "diagonal-adjacent-pairs-full-v1"
+    },
+    {
+      "key": "orthogonal-control",
+      "name": "orthogonal-adjacent-pairs-full-v1",
+      "layoutName": "orthogonal-adjacent-pairs-full-v1"
+    },
+    {
+      "key": "outer2-control",
+      "name": "orthogonal-adjacent-pairs-outer2-v1",
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1"
+    }
+  ]
+}

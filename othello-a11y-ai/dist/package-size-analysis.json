@@ -1,66 +1,70 @@
 {
-  "generatedAt": "2026-04-07T03:24:38.270Z",
-  "repoRoot": "/mnt/data/othello-src/othello-a11y-ai",
-  "totalFileCount": 674,
-  "totalBytes": 44095087,
+  "generatedAt": "2026-04-12T07:25:29.558Z",
+  "repoRoot": "/mnt/data/stage126_work/othello-web-app-ai",
+  "totalFileCount": 1028,
+  "totalBytes": 75684752,
   "topLevelBreakdown": [
     {
       "name": "benchmarks",
-      "size": 32813485
+      "size": 61834467
     },
     {
       "name": "tools",
-      "size": 7421419
+      "size": 8829175
     },
     {
       "name": "js",
-      "size": 3438850
+      "size": 4042567
     },
     {
       "name": "docs",
-      "size": 361094
+      "size": 905180
     },
     {
       "name": "(root)",
-      "size": 29434
+      "size": 30875
     },
     {
       "name": "tests",
-      "size": 18042
+      "size": 29193
     },
     {
       "name": "third_party",
       "size": 12763
+    },
+    {
+      "name": ".pytest_cache",
+      "size": 532
     }
   ],
   "heavyAreaBreakdown": [
     {
       "name": "benchmarks",
-      "size": 32813485
+      "size": 61834467
     },
     {
       "name": "tools/evaluator-training/out",
-      "size": 6551116
+      "size": 7306347
     },
     {
       "name": "runtime-core",
-      "size": 3055655
+      "size": 3420023
     },
     {
       "name": "other",
-      "size": 1009718
+      "size": 1774545
     },
     {
       "name": "docs/reports",
-      "size": 361094
+      "size": 794215
     },
     {
       "name": "js/test",
-      "size": 285977
+      "size": 525962
     },
     {
       "name": "tests",
-      "size": 18042
+      "size": 29193
     }
   ],
   "largestFiles": [
@@ -89,6 +93,14 @@
       "size": 1204494
     },
     {
+      "relativePath": "benchmarks/stage115_mcts_root_maturity_gate_fixed_iterations_12empties_24seeds_20260411_v1.json",
+      "size": 1023970
+    },
+    {
+      "relativePath": "benchmarks/stage115_mcts_root_maturity_gate_fixed_iterations_12empties_holdout24_20260411_v1.json",
+      "size": 1020841
+    },
+    {
       "relativePath": "benchmarks/stage41_candidateF_vs_candidateD_wider_validation_20260330.json",
       "size": 802618
     },
@@ -109,78 +121,70 @@
       "size": 622278
     },
     {
-      "relativePath": "benchmarks/stage44_candidateH2_current_apples_to_apples_8seed_20260330.json",
-      "size": 542920
+      "relativePath": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10_dup.json",
+      "size": 565866
     },
     {
-      "relativePath": "benchmarks/stage58_opening_hybrid_reference_suite.json",
-      "size": 497368
+      "relativePath": "benchmarks/stage118_root_gate_causality_timebudget_main24_v10.json",
+      "size": 565754
     },
     {
-      "relativePath": "benchmarks/stage31_vs_trineutron_solver_adjudication_aggregate_seed11_21_31_80ms.json",
-      "size": 439189
+      "relativePath": "benchmarks/stage119_root_gate_refactor_fixediter_main24_stage117baseline_control.json",
+      "size": 565717
     },
     {
-      "relativePath": "benchmarks/stage37_vs_trineutron_aggregate_seed11_21_31_2x80ms.json",
-      "size": 437807
+      "relativePath": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10_dup.json",
+      "size": 565712
     },
     {
-      "relativePath": "benchmarks/stage38_candidateC_wider_validation_candidate_only_20260329.json",
-      "size": 402409
+      "relativePath": "benchmarks/stage118_root_gate_causality_fixediter_main24_v10.json",
+      "size": 565670
     },
     {
-      "relativePath": "benchmarks/stage39_candidateD_wider_validation_candidate_only_20260329.json",
-      "size": 402387
+      "relativePath": "benchmarks/stage119_root_gate_refactor_fixediter_main24_v10.json",
+      "size": 565666
     },
     {
-      "relativePath": "benchmarks/stage43_candidateH2_vs_candidateF_exact_tie_audit_seed1_4_fullsuite_20260330.json",
-      "size": 363039
+      "relativePath": "benchmarks/stage119_root_gate_refactor_fixediter_main24_v2.json",
+      "size": 565639
     },
     {
-      "relativePath": "benchmarks/stage42_candidateF_local_search_depth_15_18_seed1_1_20260330.json",
-      "size": 320356
+      "relativePath": "benchmarks/stage117_root_gate_refinement_fixediter_main24_v10.json",
+      "size": 565580
     },
     {
-      "relativePath": "benchmarks/stage23_specialized_few_empties_exact_solver_audit.json",
-      "size": 311626
+      "relativePath": "benchmarks/stage117_root_gate_refinement_timebudget_main24_v10d4.json",
+      "size": 565534
     },
     {
-      "relativePath": "benchmarks/stage41_candidateD_local_search_depth_15_18_broadpilot_seed1_2_20260330.json",
-      "size": 306783
+      "relativePath": "benchmarks/stage118_root_gate_causality_timebudget_holdout24a_v10.json",
+      "size": 565510
     },
     {
-      "relativePath": "benchmarks/stage37_vs_trineutron_aggregate_seed11_21_2x80ms.json",
-      "size": 293000
+      "relativePath": "benchmarks/stage117_root_gate_refinement_timebudget_main24_v8.json",
+      "size": 565503
     },
     {
-      "relativePath": "benchmarks/stage30_vs_trineutron_aggregate_seed11_21_80ms.json",
-      "size": 275364
-    },
-    {
-      "relativePath": "benchmarks/stage38_move_ordering_search_cost_rerun_full_vs_legacy_20260328.json",
-      "size": 271626
-    },
-    {
-      "relativePath": "benchmarks/stage22_bucketed_few_empties_exact_solver_audit.json",
-      "size": 227416
+      "relativePath": "benchmarks/stage117_root_gate_refinement_timebudget_main24_v10.json",
+      "size": 565489
     }
   ],
   "profileSummaries": [
     {
       "profileName": "runtime",
       "description": "정적 웹 앱 실행에 필요한 최소 런타임만 포함합니다.",
-      "fileCount": 25,
-      "totalBytes": 3055655,
-      "reductionVsFullBytes": 41039432,
-      "reductionVsFullRatio": 0.930703050886372
+      "fileCount": 29,
+      "totalBytes": 3420023,
+      "reductionVsFullBytes": 72264729,
+      "reductionVsFullRatio": 0.954812258617165
     },
     {
       "profileName": "trainer",
       "description": "웹 앱 + 현재 권장 evaluator/opening-prior 학습 도구만 포함하는 정리된 trainer 패키지입니다. generated output/과거 벤치마크/legacy 실험 도구는 제외합니다.",
-      "fileCount": 104,
-      "totalBytes": 3688201,
-      "reductionVsFullBytes": 40406886,
-      "reductionVsFullRatio": 0.9163580060517853
+      "fileCount": 159,
+      "totalBytes": 4731335,
+      "reductionVsFullBytes": 70953417,
+      "reductionVsFullRatio": 0.9374862852163406
     }
   ]
 }

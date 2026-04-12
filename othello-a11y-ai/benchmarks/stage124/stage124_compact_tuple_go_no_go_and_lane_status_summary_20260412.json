@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-04-12T13:00:00+09:00",
+  "stage": 124,
+  "tag": "stage124",
+  "label": "Stage 124",
+  "scope": "Decide whether to open a compact systematic short n-tuple additive pilot and document why several previously excluded optimization lanes remain non-reopen recommendations under the current browser-target runtime.",
+  "currentRuntime": {
+    "activeEvaluationProfileName": "trained-phase-linear-v1",
+    "activeMoveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "activeTupleResidualProfile": {
+      "name": "top24-retrain-retrained-calibrated-lateb-endgame",
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1-patched-patched",
+      "tupleCount": 24,
+      "maxTupleLength": 2,
+      "totalTableSize": 216,
+      "trainedBucketKeys": [
+        "late-b",
+        "endgame"
+      ]
+    },
+    "activeMpcProfileName": "trained-mpc-overlap-8bucket-high-tight",
+    "runtimePackageBytes": 3418193,
+    "runtimePackageProfileBytes": 3418193
+  },
+  "compactSystematicShortNTupleAdditiveLane": {
+    "decision": "recommended-scoped-pilot",
+    "why": [
+      "Stage 52 explicitly said the evaluator lane should reopen only when the layout family changes, not for another retraining pass of the same family.",
+      "Stage 69 follow-up kept the active baseline because same-family micro-patches improved local fidelity but did not beat the baseline on the fresh noisy match set.",
+      "The current runtime already has built-in compact systematic adjacent-pair layout families and end-to-end training/export/benchmark tooling, so a bounded pilot is operationally cheap compared with adding a new search subsystem.",
+      "The active tuple residual is still small (24 size-2 tuples, 216 table cells, late-b/endgame only), leaving room for a compact additive follow-up without replacing the existing evaluator lane."
+    ],
+    "recommendedScope": {
+      "mainPilot": "diagonal-adjacent-pairs-full-v1 as a genuinely new short systematic family",
+      "controlPilot": "orthogonal-adjacent-pairs-outer2-v1 or orthogonal-adjacent-pairs-full-v1 as a same-direction control",
+      "avoidFirst": "straight-adjacent-pairs-full-v1 due to its much larger compact module cost",
+      "initialBucketPolicy": [
+        "late-a",
+        "late-b",
+        "endgame"
+      ],
+      "acceptanceCriteria": [
+        "exact/depth parity remains safe on the formal validation set",
+        "holdout search fidelity improves over the active baseline",
+        "fresh noisy match benchmarks do not fall behind baseline",
+        "module size and startup cost stay within a browser-friendly budget"
+      ]
+    },
+    "sizeEstimate": {
+      "generatedAt": "2026-04-12T04:50:23.561Z",
+      "moduleFormat": "compact",
+      "phaseBucketKeys": [
+        "midgame-c",
+        "late-a",
+        "late-b",
+        "endgame"
+      ],
+      "baselineModuleBytes": 9288,
+      "activeEvaluationProfileName": "trained-phase-linear-v1",
+      "activeMoveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+      "activeTupleResidualProfileName": "top24-retrain-retrained-calibrated-lateb-endgame",
+      "activeMpcProfileName": "trained-mpc-overlap-8bucket-high-tight",
+      "candidates": [
+        {
+          "layoutName": "orthogonal-adjacent-pairs-outer2-v1",
+          "tupleCount": 56,
+          "maxTupleLength": 2,
+          "totalTableSize": 504,
+          "phaseBucketCount": 4,
+          "moduleBytes": 19496,
+          "incrementalBytes": 10208
+        },
+        {
+          "layoutName": "orthogonal-adjacent-pairs-full-v1",
+          "tupleCount": 112,
+          "maxTupleLength": 2,
+          "totalTableSize": 1008,
+          "phaseBucketCount": 4,
+          "moduleBytes": 29110,
+          "incrementalBytes": 19822
+        },
+        {
+          "layoutName": "diagonal-adjacent-pairs-full-v1",
+          "tupleCount": 98,
+          "maxTupleLength": 2,
+          "totalTableSize": 882,
+          "phaseBucketCount": 4,
+          "moduleBytes": 26709,
+          "incrementalBytes": 17421
+        },
+        {
+          "layoutName": "straight-adjacent-pairs-full-v1",
+          "tupleCount": 210,
+          "maxTupleLength": 2,
+          "totalTableSize": 1890,
+          "phaseBucketCount": 4,
+          "moduleBytes": 45956,
+          "incrementalBytes": 36668
+        }
+      ]
+    },
+    "evidence": [
+      "benchmarks/stage52/stage52_tuple_lane_closeout_summary.md",
+      "benchmarks/stage69_followup_decision.md",
+      "tools/evaluator-training/TOOL_INDEX.md",
+      "tools/evaluator-training/README.md",
+      "js/ai/evaluation-profiles.js",
+      "benchmarks/stage124/stage124_tuple_layout_candidate_size_summary.json",
+      "dist/package-size-analysis.json"
+    ]
+  },
+  "nonReopenLanes": {
+    "extraMctsLateLaneRetuning": {
+      "decision": "non-reopen-recommended",
+      "reason": "Stage 118 closed the remaining PN/PPN retuning candidates and Stage 119 showed the last meaningful hot-path refactor attempt was slower.",
+      "hiddenSubcandidateCheck": "Only reopen for a genuinely new architectural idea or a new failing late-lane benchmark corpus; do not reopen for more threshold/bias/gate retuning."
+    },
+    "moveOrderingRetuning": {
+      "decision": "non-reopen-recommended",
+      "reason": "Stage 45 explicitly froze move-ordering at candidateH2 and switched priority to MPC/runtime plumbing after gains plateaued.",
+      "hiddenSubcandidateCheck": "Re-run compatibility replay only after a new evaluator/tuple family actually changes the search landscape."
+    },
+    "traditionalHandcraftedEvaluatorExpansion": {
+      "decision": "non-reopen-recommended",
+      "reason": "Stage 13 found only small remaining issues and directed the repo toward data-driven tuning rather than adding more hand-written heuristics.",
+      "hiddenSubcandidateCheck": "Only tiny cleanup or dead-calculation removal is still plausible; no broad new manual feature family looks essential."
+    },
+    "fiveToSixEmptiesMicroSpecialization": {
+      "decision": "non-reopen-recommended",
+      "reason": "Stages 23, 24, and 84 already specialized the exact tail and settled on threshold 6; threshold 8 did not generalize as a default and current profiling no longer points here as the primary bottleneck.",
+      "hiddenSubcandidateCheck": "Reopen only if future profiling after other hot-path changes shows the 5–6 empties family becoming the dominant hotspot again."
+    },
+    "specialEndingExpansion": {
+      "decision": "non-reopen-recommended",
+      "reason": "Stage 98 productized the shared special-ending safety net and regression suite for both classic and MCTS lanes.",
+      "hiddenSubcandidateCheck": "Treat new trap sequences as regression additions first; do not widen the lane without a new recurring failure class."
+    }
+  },
+  "hiddenMustHaveAudit": {
+    "jsAiAndCoreTodoHitCount": 0,
+    "jsAiAndCoreTodoHits": [],
+    "conclusion": "No open TODO/FIXME/HACK backlog was found in js/ai or js/core, so the remaining must-have candidate is not hidden in source comments."
+  },
+  "recommendedNextStep": {
+    "summary": "Proceed only with a bounded compact systematic short n-tuple additive pilot built on a new layout family, then rerun move-ordering compatibility and noisy match checks before any runtime adoption decision.",
+    "notRecommendedNow": [
+      "extra MCTS late-lane retuning",
+      "additional move-ordering retuning before evaluator changes",
+      "broad handcrafted evaluator expansion",
+      "new 5–6 empties micro-specialization before profiling shifts",
+      "broad special-ending expansion without a new trap corpus"
+    ]
+  }
+}
