@@ -13,11 +13,12 @@ import {
 const beginnerKeys = listSearchAlgorithmEntries('beginner').map((entry) => entry.key);
 const normalKeys = listSearchAlgorithmEntries('normal').map((entry) => entry.key);
 
-assert.deepEqual(beginnerKeys, ['classic', 'mcts-lite', 'mcts-guided']);
-assert.deepEqual(normalKeys, ['classic', 'mcts-guided', 'mcts-hybrid']);
+assert.deepEqual(beginnerKeys, ['classic-mtdf-2ply', 'classic', 'mcts-lite', 'mcts-guided']);
+assert.deepEqual(normalKeys, ['classic-mtdf-2ply', 'classic', 'mcts-guided', 'mcts-hybrid']);
 assert.equal(normalizeSearchAlgorithmForPreset('mcts-hybrid', 'beginner'), 'mcts-lite');
 assert.equal(normalizeSearchAlgorithmForPreset('mcts-lite', 'normal'), 'mcts-guided');
 assert.equal(normalizeSearchAlgorithmForPreset('classic', 'beginner'), 'classic');
+assert.equal(normalizeSearchAlgorithmForPreset('classic-mtdf', 'normal'), 'classic-mtdf-2ply');
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'stage93-mcts-throughput-'));

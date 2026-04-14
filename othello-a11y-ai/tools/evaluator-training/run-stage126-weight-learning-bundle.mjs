@@ -24,7 +24,7 @@ const DEFAULT_PATCH_CONFIG = path.join(
   'stage126-compact-tuple-patch-followup.example.json',
 );
 const DEFAULT_ETA_SAMPLE_LIMIT = 200000;
-const DEFAULT_PHASE = 'suite';
+const DEFAULT_PHASE = 'all';
 const VALID_PHASES = new Set(['eta', 'suite', 'patch', 'all']);
 
 function toPortablePath(targetPath) {
@@ -122,7 +122,7 @@ function renderUsage() {
 
 설명:
 - Stage 124/125 결론을 따라, 실제 재시도 가치가 남은 offline learning lane을 richer-corpus compact tuple family + patch follow-up으로 묶은 stage-specific wrapper입니다.
-- 기본 phase는 suite 입니다. 일반적으로 ETA -> suite -> patch 순서로 실행합니다.
+- 기본 phase는 all 입니다. 별도 지정이 없으면 ETA -> suite -> patch를 한 번에 실행합니다.
 - phase=all 은 ETA + suite + patch를 순차 실행합니다.
 - phase=patch 는 기본적으로 <output-root>/tuple-family-suite 를 source로 사용하며, 이미 학습이 끝난 suite 산출물을 대상으로 compact patch 후보를 만듭니다.
 - plan-only 는 어떤 command가 호출될지만 manifest/summary에 남기고 실제 실행하지 않습니다.
@@ -135,7 +135,7 @@ function renderUsage() {
   node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
     --input D:/othello-data/Egaroucid_Train_Data \
     --output-root tools/evaluator-training/out/stage126-weight-learning \
-    --phase suite --resume
+    --resume
 
   node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
     --input D:/othello-data/Egaroucid_Train_Data \

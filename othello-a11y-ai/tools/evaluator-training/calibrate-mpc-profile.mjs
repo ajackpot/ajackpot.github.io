@@ -6,6 +6,8 @@ import { SearchEngine } from '../../js/ai/search-engine.js';
 import {
   ACTIVE_EVALUATION_PROFILE,
   ACTIVE_MOVE_ORDERING_PROFILE,
+  ACTIVE_TUPLE_RESIDUAL_PROFILE,
+  ACTIVE_MPC_PROFILE,
 } from '../../js/ai/evaluation-profiles.js';
 import {
   collectInputFileEntries,
@@ -44,6 +46,8 @@ function printUsage() {
     --input <file-or-dir> [--input <file-or-dir> ...] \
     [--evaluation-profile-json tools/evaluator-training/out/trained-evaluation-profile.json] \
     [--move-ordering-profile-json tools/evaluator-training/out/trained-move-ordering-profile.json] \
+    [--tuple-profile-json tools/evaluator-training/out/trained-tuple-residual-profile.calibrated.json|off] \
+    [--mpc-profile-json tools/evaluator-training/out/trained-mpc-profile.json|off] \
     [--calibration-buckets 18-21:4>8,22-25:4>8,26-29:6>10,30-33:6>10] \
     [--sample-stride 200] [--sample-residue 0] [--max-samples-per-bucket 400] \
     [--holdout-mod 10] [--holdout-residue 0] [--target-holdout-coverage 0.99] \
@@ -68,6 +72,23 @@ function toFiniteInteger(value, fallback) {
 function toFiniteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function isExplicitNullLike(value) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  return ['off', 'none', 'null', 'disabled'].includes(String(value).trim().toLowerCase());
+}
+
+function loadJsonFileOrExplicitNull(value, fallback) {
+  if (value === undefined) {
+    return fallback;
+  }
+  if (isExplicitNullLike(value)) {
+    return null;
+  }
+  return loadJsonFileIfPresent(value);
 }
 
 function parseCalibrationSpecs(value) {
@@ -128,15 +149,25 @@ function parseZValues(value) {
   return values.length > 0 ? Object.freeze(values) : DEFAULT_Z_VALUES;
 }
 
-function findCalibrationIndices(specs, empties) {
-  const matches = [];
-  for (let index = 0; index < specs.length; index += 1) {
-    const spec = specs[index];
-    if (empties >= spec.minEmpties && empties <= spec.maxEmpties) {
-      matches.push(index);
+function buildCalibrationIndexLookupTable(specs) {
+  return Array.from({ length: 61 }, (_, empties) => {
+    const matches = [];
+    for (let index = 0; index < specs.length; index += 1) {
+      const spec = specs[index];
+      if (empties >= spec.minEmpties && empties <= spec.maxEmpties) {
+        matches.push(index);
+      }
     }
+    return Object.freeze(matches);
+  });
+}
+
+function lookupCalibrationIndices(calibrationIndexLookupTable, empties) {
+  if (!Number.isFinite(empties)) {
+    return [];
   }
-  return matches;
+  const normalized = Math.max(0, Math.min(60, Math.round(empties)));
+  return calibrationIndexLookupTable[normalized] ?? [];
 }
 
 function shouldUseHoldout(sampleIndex, holdoutMod, holdoutResidue) {
@@ -149,6 +180,8 @@ function createSearchOptions({
   aspirationWindow,
   evaluationProfile,
   moveOrderingProfile,
+  tupleResidualProfile,
+  mpcProfile,
   maxTableEntries,
 }) {
   return {
@@ -162,6 +195,8 @@ function createSearchOptions({
     maxTableEntries,
     evaluationProfile,
     moveOrderingProfile,
+    tupleResidualProfile,
+    mpcProfile,
     optimizedFewEmptiesExactSolver: true,
     specializedFewEmptiesExactSolver: true,
     exactFastestFirstOrdering: true,
@@ -171,15 +206,39 @@ function createSearchOptions({
   };
 }
 
-function runSearchScore(state, options) {
-  const engine = new SearchEngine(options);
-  const result = engine.findBestMove(state, options);
-  return {
-    score: Number.isFinite(result?.score) ? result.score : null,
-    didPass: Boolean(result?.didPass),
-    searchCompletion: result?.searchCompletion ?? null,
-    nodes: engine.stats?.nodes ?? 0,
-    elapsedMs: engine.stats?.elapsedMs ?? 0,
+function resetReusableSearchEngine(engine) {
+  engine.transpositionTable.clear();
+  engine.killerMoves = [];
+  engine.historyHeuristic = Array.from({ length: 2 }, () => Array(64).fill(0));
+  engine.mpcSuppressionDepth = 0;
+}
+
+function createSearchRunner() {
+  const enginesByKey = new Map();
+
+  return (state, options) => {
+    const cacheKey = [
+      options.maxDepth,
+      options.timeLimitMs,
+      options.exactEndgameEmpties,
+      options.aspirationWindow,
+      options.maxTableEntries,
+    ].join('|');
+    let engine = enginesByKey.get(cacheKey);
+    if (!engine) {
+      engine = new SearchEngine(options);
+      enginesByKey.set(cacheKey, engine);
+    } else {
+      resetReusableSearchEngine(engine);
+    }
+    const result = engine.findBestMove(state);
+    return {
+      score: Number.isFinite(result?.score) ? result.score : null,
+      didPass: Boolean(result?.didPass),
+      searchCompletion: result?.searchCompletion ?? null,
+      nodes: engine.stats?.nodes ?? 0,
+      elapsedMs: engine.stats?.elapsedMs ?? 0,
+    };
   };
 }
 
@@ -340,6 +399,8 @@ const description = typeof args.description === 'string'
   : 'shallow/deep search 상관 기반 MPC/ProbCut 보정 프로필입니다.';
 const evaluationProfile = loadJsonFileIfPresent(args['evaluation-profile-json']) ?? ACTIVE_EVALUATION_PROFILE;
 const moveOrderingProfile = loadJsonFileIfPresent(args['move-ordering-profile-json']) ?? ACTIVE_MOVE_ORDERING_PROFILE ?? null;
+const tupleResidualProfile = loadJsonFileOrExplicitNull(args['tuple-profile-json'], ACTIVE_TUPLE_RESIDUAL_PROFILE ?? null);
+const mpcProfile = loadJsonFileOrExplicitNull(args['mpc-profile-json'], ACTIVE_MPC_PROFILE ?? null);
 
 const inputFiles = await collectInputFileEntries(requestedInputs);
 if (inputFiles.length === 0) {
@@ -347,6 +408,8 @@ if (inputFiles.length === 0) {
 }
 
 const estimatedTotalSamples = detectKnownDatasetSampleCount(inputFiles);
+const calibrationIndexLookupTable = buildCalibrationIndexLookupTable(calibrationSpecs);
+const runSearchScore = createSearchRunner();
 const bucketData = calibrationSpecs.map(() => ({
   sampleIndex: 0,
   acceptedSamples: 0,
@@ -367,6 +430,7 @@ const globalSearchCost = {
 const startedAt = Date.now();
 let visitedSamples = 0;
 let matchedSamples = 0;
+let acceptedSamplesTotal = 0;
 let lastProgressAt = startedAt;
 
 console.log(`MPC calibration start`);
@@ -378,6 +442,7 @@ console.log(`  holdout split    : mod ${holdoutMod}, residue ${holdoutResidue}`)
 console.log(`  time/search      : ${formatInteger(timeLimitMs)} ms`);
 console.log(`  z values         : ${zValues.join(', ')}`);
 console.log(`  estimated samples: ${estimatedTotalSamples === null ? 'n/a' : formatInteger(estimatedTotalSamples)}`);
+console.log(`  tuple/mpc stack  : tuple=${tupleResidualProfile?.name ?? 'null'} | mpc=${mpcProfile?.name ?? 'null'}`);
 
 try {
   await streamTrainingSamples(inputFiles, {}, async ({ state, sampleIndex, totalBytesProcessed, totalBytes }) => {
@@ -387,7 +452,7 @@ try {
     }
 
     const empties = state.getEmptyCount();
-    const matchingBucketIndices = findCalibrationIndices(calibrationSpecs, empties);
+    const matchingBucketIndices = lookupCalibrationIndices(calibrationIndexLookupTable, empties);
     if (matchingBucketIndices.length === 0) {
       return;
     }
@@ -412,6 +477,8 @@ try {
         aspirationWindow,
         evaluationProfile,
         moveOrderingProfile,
+        tupleResidualProfile,
+        mpcProfile,
         maxTableEntries,
       });
       const result = runSearchScore(state, options);
@@ -446,6 +513,7 @@ try {
       };
       bucket.sampleIndex += 1;
       bucket.acceptedSamples += 1;
+      acceptedSamplesTotal += 1;
       updateSearchCostAccumulator(bucket.searchCost.shallow, shallowResult);
       updateSearchCostAccumulator(bucket.searchCost.deep, deepResult);
       updateSearchCostAccumulator(globalSearchCost.shallow, shallowResult);
@@ -459,16 +527,18 @@ try {
     }
 
     const now = Date.now();
-    const acceptedTotal = bucketData.reduce((sum, entry) => sum + entry.acceptedSamples, 0);
-    if (progressEvery > 0 && targetBucketIndices.some((bucketIndex) => (bucketData[bucketIndex].acceptedSamples % progressEvery) === 0) && (now - lastProgressAt) >= 1000) {
+    if (progressEvery > 0
+      && targetBucketIndices.some((bucketIndex) => bucketData[bucketIndex].acceptedSamples > 0
+        && (bucketData[bucketIndex].acceptedSamples % progressEvery) === 0)
+      && (now - lastProgressAt) >= 1000) {
       const elapsedSeconds = (now - startedAt) / 1000;
-      const rate = acceptedTotal / Math.max(1e-9, elapsedSeconds);
+      const rate = acceptedSamplesTotal / Math.max(1e-9, elapsedSeconds);
       const targetTotal = maxSamplesPerBucket * calibrationSpecs.length;
-      const remaining = Math.max(0, targetTotal - acceptedTotal);
+      const remaining = Math.max(0, targetTotal - acceptedSamplesTotal);
       const etaSeconds = rate > 0 ? remaining / rate : null;
-      const progressRatio = targetTotal > 0 ? acceptedTotal / targetTotal : 0;
+      const progressRatio = targetTotal > 0 ? acceptedSamplesTotal / targetTotal : 0;
       const byteProgress = totalBytes > 0 ? totalBytesProcessed / totalBytes : null;
-      console.log(`Progress ${formatInteger(acceptedTotal)}/${formatInteger(targetTotal)} accepted (${percentage(progressRatio)}) | rate ${formatRate(rate, 1)} | ETA ${formatDurationSeconds(etaSeconds)} | data ${percentage(byteProgress)} | current bucket ${progressLabel}`);
+      console.log(`Progress ${formatInteger(acceptedSamplesTotal)}/${formatInteger(targetTotal)} accepted (${percentage(progressRatio)}) | rate ${formatRate(rate, 1)} | ETA ${formatDurationSeconds(etaSeconds)} | data ${percentage(byteProgress)} | current bucket ${progressLabel}`);
       lastProgressAt = now;
     }
 
@@ -547,7 +617,7 @@ const output = {
   diagnostics: {
     visitedSamples,
     matchedSamples,
-    acceptedSamples: bucketData.reduce((sum, entry) => sum + entry.acceptedSamples, 0),
+    acceptedSamples: acceptedSamplesTotal,
     usableCalibrationCount: usableCount,
     shallowSearchCost: summarizeSearchCost(globalSearchCost.shallow),
     deepSearchCost: summarizeSearchCost(globalSearchCost.deep),

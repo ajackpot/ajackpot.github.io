@@ -11,6 +11,7 @@ import {
   DEFAULT_EVALUATION_PROFILE,
 } from '../../js/ai/evaluation-profiles.js';
 import { SearchEngine } from '../../js/ai/search-engine.js';
+import { describeSearchAlgorithm, normalizeSearchAlgorithm } from '../../js/ai/search-algorithms.js';
 import { GameState } from '../../js/core/game-state.js';
 import { PLAYER_COLORS } from '../../js/core/rules.js';
 import { createSeededRandom } from '../../js/test/benchmark-helpers.mjs';
@@ -25,6 +26,7 @@ function printUsage() {
     [--games 4] [--opening-plies 20] [--seed 1] \
     [--our-time-ms 100] [--their-time-ms 100] \
     [--our-max-depth 6] [--their-max-depth 18] \
+    [--search-algorithm classic] [--aspiration-window 40] [--max-table-entries 180000] \
     [--exact-endgame-empties 10] \
     [--solver-adjudication-empties 14] [--solver-adjudication-time-ms 60000] \
     [--their-noise-scale 4] \
@@ -71,14 +73,17 @@ function createOurEngineOptions({
   maxDepth,
   exactEndgameEmpties,
   maxTableEntries = 180000,
+  searchAlgorithm = 'classic',
+  aspirationWindow = 40,
 }) {
   return {
     presetKey: 'custom',
     styleKey: 'balanced',
+    searchAlgorithm,
     maxDepth,
     timeLimitMs,
     exactEndgameEmpties,
-    aspirationWindow: 40,
+    aspirationWindow,
     randomness: 0,
     maxTableEntries,
     evaluationProfile,
@@ -287,7 +292,9 @@ function createVariantDefinitions(config, { customVariant = null } = {}) {
         timeLimitMs: overrides.timeLimitMs ?? config.ourTimeMs,
         maxDepth: overrides.maxDepth ?? config.ourMaxDepth,
         exactEndgameEmpties: overrides.exactEndgameEmpties ?? config.exactEndgameEmpties,
-        maxTableEntries: overrides.maxTableEntries ?? 180000,
+        maxTableEntries: overrides.maxTableEntries ?? config.maxTableEntries,
+        searchAlgorithm: overrides.searchAlgorithm ?? config.searchAlgorithm,
+        aspirationWindow: overrides.aspirationWindow ?? config.aspirationWindow,
       }));
     },
   };
@@ -304,7 +311,9 @@ function createVariantDefinitions(config, { customVariant = null } = {}) {
         timeLimitMs: overrides.timeLimitMs ?? config.ourTimeMs,
         maxDepth: overrides.maxDepth ?? config.ourMaxDepth,
         exactEndgameEmpties: overrides.exactEndgameEmpties ?? config.exactEndgameEmpties,
-        maxTableEntries: overrides.maxTableEntries ?? 180000,
+        maxTableEntries: overrides.maxTableEntries ?? config.maxTableEntries,
+        searchAlgorithm: overrides.searchAlgorithm ?? config.searchAlgorithm,
+        aspirationWindow: overrides.aspirationWindow ?? config.aspirationWindow,
       }));
     },
   };
@@ -321,7 +330,9 @@ function createVariantDefinitions(config, { customVariant = null } = {}) {
         timeLimitMs: overrides.timeLimitMs ?? config.ourTimeMs,
         maxDepth: overrides.maxDepth ?? config.ourMaxDepth,
         exactEndgameEmpties: overrides.exactEndgameEmpties ?? config.exactEndgameEmpties,
-        maxTableEntries: overrides.maxTableEntries ?? 180000,
+        maxTableEntries: overrides.maxTableEntries ?? config.maxTableEntries,
+        searchAlgorithm: overrides.searchAlgorithm ?? config.searchAlgorithm,
+        aspirationWindow: overrides.aspirationWindow ?? config.aspirationWindow,
       }));
     },
   };
@@ -346,7 +357,9 @@ function createVariantDefinitions(config, { customVariant = null } = {}) {
           timeLimitMs: overrides.timeLimitMs ?? config.ourTimeMs,
           maxDepth: overrides.maxDepth ?? config.ourMaxDepth,
           exactEndgameEmpties: overrides.exactEndgameEmpties ?? config.exactEndgameEmpties,
-          maxTableEntries: overrides.maxTableEntries ?? 180000,
+          maxTableEntries: overrides.maxTableEntries ?? config.maxTableEntries,
+          searchAlgorithm: overrides.searchAlgorithm ?? config.searchAlgorithm,
+          aspirationWindow: overrides.aspirationWindow ?? config.aspirationWindow,
         }));
       },
     };
@@ -613,6 +626,9 @@ const ourTimeMs = Math.max(10, toFiniteInteger(args['our-time-ms'], 100));
 const theirTimeMs = Math.max(10, toFiniteInteger(args['their-time-ms'], 100));
 const ourMaxDepth = Math.max(1, toFiniteInteger(args['our-max-depth'], 6));
 const theirMaxDepth = Math.max(1, toFiniteInteger(args['their-max-depth'], 18));
+const searchAlgorithm = normalizeSearchAlgorithm(args['search-algorithm'] ?? 'classic');
+const aspirationWindow = Math.max(0, toFiniteInteger(args['aspiration-window'], 40));
+const maxTableEntries = Math.max(1000, toFiniteInteger(args['max-table-entries'], 180000));
 const exactEndgameEmpties = Math.max(0, toFiniteInteger(args['exact-endgame-empties'], 10));
 const solverAdjudicationEmpties = Math.max(0, toFiniteInteger(args['solver-adjudication-empties'], 14));
 const solverAdjudicationTimeMs = Math.max(1000, toFiniteInteger(args['solver-adjudication-time-ms'], 60000));
@@ -629,6 +645,9 @@ const config = {
   theirTimeMs,
   ourMaxDepth,
   theirMaxDepth,
+  searchAlgorithm,
+  aspirationWindow,
+  maxTableEntries,
   exactEndgameEmpties,
   solverAdjudicationEmpties,
   solverAdjudicationTimeMs,
@@ -650,6 +669,8 @@ while (openings.length < games) {
 
 console.log(`Opening plies       : ${openingPlies}`);
 console.log(`Opening seed range  : ${seed}..${openingSeedCursor - 1}`);
+const searchAlgorithmLabel = describeSearchAlgorithm(searchAlgorithm)?.label ?? searchAlgorithm;
+console.log(`Our search          : ${searchAlgorithm} (${searchAlgorithmLabel}), aspiration=${aspirationWindow}, table=${maxTableEntries}`);
 console.log(`Our engine time     : ${ourTimeMs}ms, depth=${ourMaxDepth}, exactEndgameEmpties=${exactEndgameEmpties}`);
 console.log(`Solver adjudication : empties<=${solverAdjudicationEmpties ? solverAdjudicationEmpties : 'disabled'}, time=${solverAdjudicationTimeMs}ms, depth=${solverAdjudicationMaxDepth}`);
 console.log(`Trineutron time     : ${theirTimeMs}ms, depth=${theirMaxDepth}, noiseScale=${theirNoiseScale}`);
@@ -776,6 +797,9 @@ const output = {
     games,
     openingPlies,
     seed,
+    searchAlgorithm,
+    aspirationWindow,
+    maxTableEntries,
     ourTimeMs,
     ourMaxDepth,
     exactEndgameEmpties,

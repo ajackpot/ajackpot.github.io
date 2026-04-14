@@ -529,11 +529,40 @@ export function createMoveOrderingFeatureScratch() {
   return createEmptyMoveOrderingFeatureRecord();
 }
 
-export function fillRegressionVectorFromState(state, scratch) {
+export function createMoveOrderingRegressionVectorScratch() {
+  return Array(MOVE_ORDERING_FEATURE_KEYS.length).fill(0);
+}
+
+export function regressionFeatureKeysForEvaluationFeatureList(featureKeys = EVALUATION_FEATURE_KEYS) {
+  return ['bias', ...featureKeys];
+}
+
+export function normalizeEvaluationSampleAssignmentMode(value, fallback = 'hard') {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return fallback;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (['hard', 'bucket', 'discrete'].includes(normalized)) {
+    return 'hard';
+  }
+  if (['linear', 'linear-adjacent', 'linear-adjacent-midpoint', 'smoothed', 'overlap'].includes(normalized)) {
+    return 'linear-adjacent';
+  }
+  return fallback;
+}
+
+export function createRegressionVectorScratch(featureKeys = EVALUATION_FEATURE_KEYS) {
+  return Array(featureKeys.length + 1).fill(0);
+}
+
+export function fillRegressionVectorFromState(state, scratch, featureKeys = EVALUATION_FEATURE_KEYS, vectorScratch = null) {
   const record = populateEvaluationFeatureRecord(scratch, state, state.currentPlayer, { includeDiagnostics: false });
-  const vector = [1];
-  for (const key of EVALUATION_FEATURE_KEYS) {
-    vector.push(record[key]);
+  const vector = Array.isArray(vectorScratch) && vectorScratch.length >= (featureKeys.length + 1)
+    ? vectorScratch
+    : Array(featureKeys.length + 1).fill(0);
+  vector[0] = 1;
+  for (let index = 0; index < featureKeys.length; index += 1) {
+    vector[index + 1] = record[featureKeys[index]];
   }
   return {
     record,
@@ -541,21 +570,88 @@ export function fillRegressionVectorFromState(state, scratch) {
   };
 }
 
-export function fillMoveOrderingRegressionVectorFromState(state, perspectiveColor, scratch, context = {}) {
+export function fillMoveOrderingRegressionVectorFromState(state, perspectiveColor, scratch, context = {}, vectorScratch = null) {
   const record = populateMoveOrderingFeatureRecord(scratch, state, perspectiveColor, context);
-  const vector = [];
-  for (const key of MOVE_ORDERING_FEATURE_KEYS) {
-    vector.push(record[key]);
+  const vector = Array.isArray(vectorScratch) && vectorScratch.length >= MOVE_ORDERING_FEATURE_KEYS.length
+    ? vectorScratch
+    : Array(MOVE_ORDERING_FEATURE_KEYS.length).fill(0);
+  for (let index = 0; index < MOVE_ORDERING_FEATURE_KEYS.length; index += 1) {
+    vector[index] = record[MOVE_ORDERING_FEATURE_KEYS[index]];
   }
   return {
     record,
     vector,
   };
+}
+
+function clampEmptiesToIndex(empties) {
+  const value = Number(empties ?? 0);
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(60, Math.trunc(value)));
 }
 
 export function bucketIndexForEmpties(compiledProfile, empties) {
-  const bucket = compiledProfile.bucketsByEmptyCount[Math.max(0, Math.min(60, empties))];
+  const emptiesIndex = clampEmptiesToIndex(empties);
+  const precomputed = compiledProfile?.bucketIndexByEmptyCount?.[emptiesIndex];
+  if (Number.isInteger(precomputed)) {
+    return precomputed;
+  }
+  const bucket = compiledProfile.bucketsByEmptyCount[emptiesIndex];
   return compiledProfile.phaseBuckets.findIndex((candidate) => candidate.key === bucket.key);
+}
+
+export function bucketAssignmentsForEmpties(compiledProfile, empties, mode = 'hard') {
+  const normalizedMode = normalizeEvaluationSampleAssignmentMode(mode);
+  const emptiesIndex = clampEmptiesToIndex(empties);
+  if (normalizedMode === 'hard' || !Array.isArray(compiledProfile?.phaseBuckets) || compiledProfile.phaseBuckets.length <= 1) {
+    const precomputedHard = compiledProfile?.hardBucketAssignmentsByEmptyCount?.[emptiesIndex];
+    if (precomputedHard) {
+      return precomputedHard;
+    }
+    return [{ bucketIndex: bucketIndexForEmpties(compiledProfile, emptiesIndex), weight: 1 }];
+  }
+
+  const precomputedLinear = compiledProfile?.linearAdjacentBucketAssignmentsByEmptyCount?.[emptiesIndex];
+  if (precomputedLinear) {
+    return precomputedLinear;
+  }
+
+  const hardIndex = bucketIndexForEmpties(compiledProfile, emptiesIndex);
+  const bucketsByCenter = compiledProfile.phaseBuckets
+    .map((bucket, index) => ({
+      index,
+      center: (Number(bucket.minEmpties ?? 0) + Number(bucket.maxEmpties ?? 0)) / 2,
+    }))
+    .sort((left, right) => left.center - right.center);
+  const value = emptiesIndex;
+
+  if (value <= bucketsByCenter[0].center) {
+    return [{ bucketIndex: bucketsByCenter[0].index, weight: 1 }];
+  }
+  if (value >= bucketsByCenter[bucketsByCenter.length - 1].center) {
+    return [{ bucketIndex: bucketsByCenter[bucketsByCenter.length - 1].index, weight: 1 }];
+  }
+
+  let rightPosition = 1;
+  while (rightPosition < bucketsByCenter.length && value > bucketsByCenter[rightPosition].center) {
+    rightPosition += 1;
+  }
+
+  const left = bucketsByCenter[rightPosition - 1];
+  const right = bucketsByCenter[rightPosition];
+  const span = right.center - left.center;
+  const rightWeight = span <= 1e-9 ? 0 : Math.max(0, Math.min(1, (value - left.center) / span));
+  const leftWeight = Math.max(0, Math.min(1, 1 - rightWeight));
+  const assignments = [];
+  if (leftWeight > 1e-9) {
+    assignments.push({ bucketIndex: left.index, weight: leftWeight });
+  }
+  if (rightWeight > 1e-9) {
+    assignments.push({ bucketIndex: right.index, weight: rightWeight });
+  }
+  return assignments.length > 0 ? assignments : [{ bucketIndex: hardIndex, weight: 1 }];
 }
 
 export function zeroMatrix(size) {
@@ -643,17 +739,17 @@ export function solveLinearSystem(matrix, vector) {
   return augmented.map((row) => row[size]);
 }
 
-export function weightsObjectFromSolution(solution) {
+export function weightsObjectFromSolution(solution, featureKeys = EVALUATION_FEATURE_KEYS) {
   const weights = { bias: solution[0] };
-  for (let index = 0; index < EVALUATION_FEATURE_KEYS.length; index += 1) {
-    weights[EVALUATION_FEATURE_KEYS[index]] = solution[index + 1];
+  for (let index = 0; index < featureKeys.length; index += 1) {
+    weights[featureKeys[index]] = solution[index + 1];
   }
   return weights;
 }
 
-export function solutionFromWeights(weights) {
+export function solutionFromWeights(weights, featureKeys = EVALUATION_FEATURE_KEYS) {
   const vector = [weights.bias ?? 0];
-  for (const key of EVALUATION_FEATURE_KEYS) {
+  for (const key of featureKeys) {
     vector.push(weights[key] ?? 0);
   }
   return vector;
@@ -700,13 +796,16 @@ export function buildProfileFromBucketWeights(baseProfile, bucketWeightVectors, 
     stage: metadata.stage ?? buildProfileStageMetadata({ kind: 'evaluation-profile' }),
     source: metadata.source ?? null,
     diagnostics: metadata.diagnostics ?? null,
+    featureKeys: resolvedBaseProfile.featureKeys,
+    ...(resolvedBaseProfile.interpolation ? { interpolation: resolvedBaseProfile.interpolation } : {}),
     phaseBuckets: resolvedBaseProfile.phaseBuckets.map((bucket, index) => ({
       key: bucket.key,
+      ...(typeof bucket?.label === 'string' ? { label: bucket.label } : {}),
       minEmpties: bucket.minEmpties,
       maxEmpties: bucket.maxEmpties,
       weights: roundWeights(canonicalizeEvaluationWeightsForBucket(
         bucket,
-        weightsObjectFromSolution(bucketWeightVectors[index]),
+        weightsObjectFromSolution(bucketWeightVectors[index], resolvedBaseProfile.featureKeys),
       )),
     })),
   };
@@ -774,9 +873,11 @@ export function sanitizeEvaluationProfileForModule(profile) {
     ...(Object.hasOwn(source, 'stage') ? { stage: source.stage } : {}),
     ...(Object.hasOwn(source, 'source') ? { source: source.source } : {}),
     ...(Object.hasOwn(source, 'diagnostics') ? { diagnostics: source.diagnostics } : {}),
-    featureKeys: EVALUATION_FEATURE_KEYS,
+    featureKeys: Object.freeze([...resolved.featureKeys]),
+    ...(resolved.interpolation ? { interpolation: resolved.interpolation } : {}),
     phaseBuckets: Object.freeze(resolved.phaseBuckets.map((bucket) => Object.freeze({
       ...(typeof bucket?.key === 'string' ? { key: bucket.key } : {}),
+      ...(typeof bucket?.label === 'string' ? { label: bucket.label } : {}),
       minEmpties: bucket.minEmpties,
       maxEmpties: bucket.maxEmpties,
       weights: Object.freeze({ ...bucket.weights }),
@@ -950,8 +1051,11 @@ function compactEvaluationProfileForModule(profile) {
     format: 'compact-v1',
     name: resolved.name,
     ...(Object.hasOwn(resolved, 'stage') ? { stage: resolved.stage } : {}),
+    featureKeys: Object.freeze([...resolved.featureKeys]),
+    ...(Object.hasOwn(resolved, 'interpolation') ? { interpolation: resolved.interpolation } : {}),
     phaseBuckets: Object.freeze(resolved.phaseBuckets.map((bucket) => Object.freeze({
       ...(typeof bucket?.key === 'string' ? { key: bucket.key } : {}),
+      ...(typeof bucket?.label === 'string' ? { label: bucket.label } : {}),
       minEmpties: bucket.minEmpties,
       maxEmpties: bucket.maxEmpties,
       weights: Object.freeze({ ...bucket.weights }),

@@ -35,6 +35,7 @@ import { legalMovesBitboard, PLAYER_COLORS } from '../core/rules.js';
 import {
   compileEvaluationProfile,
   compileTupleResidualProfile,
+  EVALUATION_FEATURE_KEYS,
   moveOrderingFallbackWeightsForEmpties,
   resolveMoveOrderingBuckets,
 } from './evaluation-profiles.js';
@@ -55,6 +56,49 @@ const DEFAULT_EVALUATION_OPTIONS = Object.freeze({
   parityScale: 1,
   discScale: 1,
 });
+
+const EVALUATION_FEATURE_SCALE_OPTION_BY_KEY = Object.freeze({
+  mobility: 'mobilityScale',
+  potentialMobility: 'potentialMobilityScale',
+  corners: 'cornerScale',
+  cornerAccess: 'cornerScale',
+  cornerMoveBalance: 'cornerScale',
+  cornerMoveCount: 'cornerScale',
+  opponentCornerMoveCount: 'cornerScale',
+  cornerAdjacency: 'cornerAdjacencyScale',
+  cornerOrthAdjacency: 'cornerAdjacencyScale',
+  cornerDiagonalAdjacency: 'cornerAdjacencyScale',
+  frontier: 'frontierScale',
+  positional: 'positionalScale',
+  edgePattern: 'edgePatternScale',
+  cornerPattern: 'cornerPatternScale',
+  stability: 'stabilityScale',
+  stableDiscDifferential: 'stabilityScale',
+  stableDiscs: 'stabilityScale',
+  opponentStableDiscs: 'stabilityScale',
+  discDifferential: 'discScale',
+  discDifferentialRaw: 'discScale',
+  parity: 'parityScale',
+  parityGlobal: 'parityScale',
+  parityRegion: 'parityScale',
+  parityRegionCount: 'parityScale',
+  parityOddRegions: 'parityScale',
+  parityEvenRegions: 'parityScale',
+  myMoveCount: 'mobilityScale',
+  opponentMoveCount: 'mobilityScale',
+});
+
+function sameFeatureKeySequence(left, right) {
+  if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
+    return false;
+  }
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] !== right[index]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 const CORNER_ADJACENCY_GROUPS = Object.freeze([
   { corner: 0, adjacent: [1, 8, 9], orthogonal: [1, 8], diagonal: [9] },
@@ -1002,6 +1046,15 @@ export class Evaluator {
     };
     this.evaluationProfile = compileEvaluationProfile(options.evaluationProfile);
     this.phaseBucketsByEmptyCount = this.evaluationProfile.bucketsByEmptyCount;
+    this.phaseWeightsByEmptyCount = this.evaluationProfile.weightsByEmptyCount
+      ?? this.phaseBucketsByEmptyCount.map((bucket) => bucket.weights);
+    this.evaluationFeatureKeys = Object.freeze([
+      ...(this.evaluationProfile.featureKeys ?? EVALUATION_FEATURE_KEYS),
+    ]);
+    this.evaluationFeatureRuntimeScales = Object.freeze(this.evaluationFeatureKeys.map(
+      (key) => this.options[EVALUATION_FEATURE_SCALE_OPTION_BY_KEY[key] ?? 'mobilityScale'] ?? 1,
+    ));
+    this.useDefaultFastPath = sameFeatureKeySequence(this.evaluationFeatureKeys, EVALUATION_FEATURE_KEYS);
     this.tupleResidualProfile = compileTupleResidualProfile(options.tupleResidualProfile);
     this.tupleResidualBucketsByEmptyCount = this.tupleResidualProfile?.bucketsByEmptyCount ?? null;
     this.scratchFeatureRecord = createEmptyEvaluationFeatureRecord();
@@ -1013,32 +1066,49 @@ export class Evaluator {
       ?? this.phaseBucketsByEmptyCount[this.phaseBucketsByEmptyCount.length - 1];
   }
 
+  selectPhaseWeights(empties) {
+    const clampedEmpties = clampTrackedEmpties(empties);
+    return this.phaseWeightsByEmptyCount[clampedEmpties]
+      ?? this.phaseWeightsByEmptyCount[this.phaseWeightsByEmptyCount.length - 1]
+      ?? this.selectPhaseBucket(clampedEmpties).weights;
+  }
+
   evaluate(state, color = state.currentPlayer) {
     const features = populateEvaluationFeatureRecord(this.scratchFeatureRecord, state, color);
-    const weights = this.selectPhaseBucket(features.empties).weights;
-    const bias = color === state.currentPlayer ? weights.bias : -weights.bias;
-    const weighted = (
-      bias
-      + (features.mobility * weights.mobility * this.options.mobilityScale)
-      + (features.potentialMobility * weights.potentialMobility * this.options.potentialMobilityScale)
-      + (features.corners * weights.corners * this.options.cornerScale)
-      + (features.cornerAccess * weights.cornerAccess * this.options.cornerScale)
-      + (features.cornerMoveBalance * weights.cornerMoveBalance * this.options.cornerScale)
-      + (features.cornerAdjacency * weights.cornerAdjacency * this.options.cornerAdjacencyScale)
-      + (features.cornerOrthAdjacency * weights.cornerOrthAdjacency * this.options.cornerAdjacencyScale)
-      + (features.cornerDiagonalAdjacency * weights.cornerDiagonalAdjacency * this.options.cornerAdjacencyScale)
-      + (features.frontier * weights.frontier * this.options.frontierScale)
-      + (features.positional * weights.positional * this.options.positionalScale)
-      + (features.edgePattern * weights.edgePattern * this.options.edgePatternScale)
-      + (features.cornerPattern * weights.cornerPattern * this.options.cornerPatternScale)
-      + (features.stability * weights.stability * this.options.stabilityScale)
-      + (features.stableDiscDifferential * weights.stableDiscDifferential * this.options.stabilityScale)
-      + (features.discDifferential * weights.discDifferential * this.options.discScale)
-      + (features.discDifferentialRaw * weights.discDifferentialRaw * this.options.discScale)
-      + (features.parity * weights.parity * this.options.parityScale)
-      + (features.parityGlobal * weights.parityGlobal * this.options.parityScale)
-      + (features.parityRegion * weights.parityRegion * this.options.parityScale)
-    );
+    const weights = this.selectPhaseWeights(features.empties);
+    const weighted = this.useDefaultFastPath
+      ? (
+        (color === state.currentPlayer ? weights.bias : -weights.bias)
+        + (features.mobility * weights.mobility * this.options.mobilityScale)
+        + (features.potentialMobility * weights.potentialMobility * this.options.potentialMobilityScale)
+        + (features.corners * weights.corners * this.options.cornerScale)
+        + (features.cornerAccess * weights.cornerAccess * this.options.cornerScale)
+        + (features.cornerMoveBalance * weights.cornerMoveBalance * this.options.cornerScale)
+        + (features.cornerAdjacency * weights.cornerAdjacency * this.options.cornerAdjacencyScale)
+        + (features.cornerOrthAdjacency * weights.cornerOrthAdjacency * this.options.cornerAdjacencyScale)
+        + (features.cornerDiagonalAdjacency * weights.cornerDiagonalAdjacency * this.options.cornerAdjacencyScale)
+        + (features.frontier * weights.frontier * this.options.frontierScale)
+        + (features.positional * weights.positional * this.options.positionalScale)
+        + (features.edgePattern * weights.edgePattern * this.options.edgePatternScale)
+        + (features.cornerPattern * weights.cornerPattern * this.options.cornerPatternScale)
+        + (features.stability * weights.stability * this.options.stabilityScale)
+        + (features.stableDiscDifferential * weights.stableDiscDifferential * this.options.stabilityScale)
+        + (features.discDifferential * weights.discDifferential * this.options.discScale)
+        + (features.discDifferentialRaw * weights.discDifferentialRaw * this.options.discScale)
+        + (features.parity * weights.parity * this.options.parityScale)
+        + (features.parityGlobal * weights.parityGlobal * this.options.parityScale)
+        + (features.parityRegion * weights.parityRegion * this.options.parityScale)
+      )
+      : (() => {
+        let total = color === state.currentPlayer ? weights.bias : -weights.bias;
+        for (let index = 0; index < this.evaluationFeatureKeys.length; index += 1) {
+          const featureKey = this.evaluationFeatureKeys[index];
+          total += (features[featureKey] ?? 0)
+            * (weights[featureKey] ?? 0)
+            * this.evaluationFeatureRuntimeScales[index];
+        }
+        return total;
+      })();
 
     let tupleResidualContribution = 0;
     if (this.tupleResidualBucketsByEmptyCount) {
@@ -1073,6 +1143,7 @@ export class Evaluator {
       { includeDiagnostics: true },
     );
     const bucket = this.selectPhaseBucket(featureRecord.empties);
+    const effectiveWeights = this.selectPhaseWeights(featureRecord.empties);
     const tupleBucket = this.tupleResidualBucketsByEmptyCount?.[clampTrackedEmpties(featureRecord.empties)] ?? null;
     const sideToMoveBoards = perspectiveBoardsForColor(state, state.currentPlayer);
     const tupleDetails = tupleBucket
@@ -1098,7 +1169,10 @@ export class Evaluator {
       ...featureRecord,
       phaseBucketKey: bucket.key,
       evaluationProfileName: this.evaluationProfile.name,
+      evaluationFeatureKeys: this.evaluationFeatureKeys,
+      phaseInterpolation: this.evaluationProfile.interpolation ?? null,
       bucketWeights: bucket.weights,
+      effectiveWeights,
       tupleResidualProfileName: this.tupleResidualProfile?.name ?? null,
       tupleResidualBucketKey: tupleBucket?.key ?? null,
       tupleResidualContribution,

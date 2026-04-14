@@ -46,7 +46,7 @@ Stage 125 bounded pilot은 실제로 다음을 돌렸습니다.
 이 wrapper는 Stage 126 결론을 코드 레벨에서 고정합니다.
 
 - `--phase eta`: corpus 기준 wall-time 추정
-- `--phase suite`: richer-corpus tuple family 학습 + benchmark
+- 기본값(`--phase all`): ETA → richer-corpus tuple family 학습 → patch follow-up
 - `--phase patch`: compact patch/prune/attenuation follow-up
 - `--phase all`: ETA → suite → patch 순차 실행
 - `--resume`, `--continue-on-error`, `--plan-only` 지원
@@ -125,7 +125,6 @@ node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
 node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
   --input D:/othello-data/Egaroucid_Train_Data \
   --output-root tools/evaluator-training/out/stage126-weight-learning \
-  --phase suite \
   --resume
 ```
 

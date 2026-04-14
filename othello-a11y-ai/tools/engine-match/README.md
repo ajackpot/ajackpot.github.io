@@ -11,10 +11,27 @@
 - **색상 공정성**: 같은 시작 국면에서 **흑/백을 바꿔 두 번** 대국
 - **opening book 편향 완화**: 기본값으로 `opening-plies=20`을 사용하여, 우리 엔진의 opening book 직접 사용 구간(12수)과 advisory 구간(18수)을 지난 뒤 중반부터 비교
 - **종반 노이즈 제거**: 기본값으로 `empties <= 14`가 되면 trineutron을 더 두지 않고, **우리 exact solver를 한 번만 호출**해 승패를 판정
-- **학습 전/후 비교**: 기본값으로 현재 generated profile+learned move-ordering(`active`), learned evaluator만 적용한 비교군(`phase-only`), 학습 전 seed evaluator(`legacy`)를 함께 돌려 비교
+- **학습 전/후 비교**: 기본값으로 현재 설치 generated module(`active`, 현재는 balanced13 support-stack), learned evaluator만 적용한 비교군(`phase-only`), 학습 전 seed evaluator(`legacy`)를 함께 돌려 비교
 
 ## 포함된 것
 
+- `benchmark-search-algorithm-pair.mjs`
+  - 내부 알고리즘 두 개를 같은 opening pair에서 흑/백 교차 대국시키는 generic self-play 벤치입니다.
+  - `--progress-every-pairs` 로 장시간 실행의 진행률을 주기적으로 출력할 수 있습니다.
+- `benchmark-classic-throughput-compare.mjs`
+  - classic / classic-mtdf / classic-mtdf-2ply 같은 classic driver 변형의 처리량과 완료 깊이를 같은 opening position 묶음에서 비교합니다.
+- `benchmark-profile-variant-pair.mjs`
+  - 같은 search algorithm 아래에서 evaluation profile finalist 두 개를 같은 opening pair로 흑/백 교차 self-play시켜 실제 점수율을 비교합니다.
+- `benchmark-profile-variant-throughput-compare.mjs`
+  - active / finalist generated module을 같은 root position 묶음에서 비교해 profile variant별 처리량, 완료 깊이, move agreement를 계산합니다.
+- `run-stage132-classic-mtdf-suite.mjs` / `run-stage132-classic-mtdf-suite.bat`
+  - classic MTD(f) 후보 lane의 초기 throughput + paired self-play screening 배치입니다.
+- `run-stage133-classic-mtdf-adoption-suite.mjs` / `run-stage133-classic-mtdf-adoption-suite.bat`
+  - 실제 classic preset(입문/쉬움/보통/어려움)에 맞춘 preset-aligned adoption suite입니다.
+  - 기존 JSON output을 재사용해 resume하고, `stage133_classic_mtdf_adoption_summary.json`에 최종 채택 판정을 남깁니다.
+- `run-stage135-evaluation-profile-adoption-suite.mjs` / `run-stage135-evaluation-profile-adoption-suite.bat`
+  - active / balanced12 / balanced13 evaluation profile finalists를 classic, MCTS, MTD(f) 재시험까지 묶어 최종 round-robin 채택 판정을 내립니다. 현재 설치본이 balanced13으로 교체된 뒤에는 historical fixture와 finalist generated module을 함께 써서 회고 비교를 계속할 수 있습니다.
+  - 기존 JSON output을 재사용해 resume하고, `stage135_evaluation_profile_adoption_summary.json`과 notes markdown을 남깁니다.
 - `opponents/trineutron-engine.mjs`
   - upstream `trineutron/othello` 브라우저 엔진을 Node에서 호출할 수 있도록 옮긴 어댑터입니다.
   - 원본 UI는 사람이 항상 흑, AI가 항상 백인 구조인데, 어댑터에서는 **흑/백 어느 쪽도 플레이 가능**하게 만들었습니다.
@@ -136,3 +153,10 @@ node tools/engine-match/benchmark-vs-trineutron.mjs \
   --games 2 --opening-plies 20 --seed 11 \
   --our-time-ms 100 --their-time-ms 100 --their-noise-scale 0
 ```
+
+```bash
+node tools/engine-match/run-stage135-evaluation-profile-adoption-suite.mjs
+```
+
+이 배치는 active, `balanced12-alllate-smoothed-stability-090`, `balanced13-alllate-smoothed-stability-090` finalist를 같은 opening 묶음에서 classic/MCTS self-play와 classic throughput까지 한 번에 비교합니다.
+

@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-04-13T11:05:03.465Z",
+  "sourceProfileName": "eval-expansion-balanced13-alllate-smoothed",
+  "baselineProfileName": "trained-phase-linear-v1",
+  "outputJsonPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced13-alllate-smoothed-stability-090\\trained-evaluation-profile.patched.json",
+  "beforeFeatureKeys": [
+    "mobility",
+    "potentialMobility",
+    "corners",
+    "cornerAccess",
+    "cornerMoveBalance",
+    "cornerAdjacency",
+    "cornerOrthAdjacency",
+    "cornerDiagonalAdjacency",
+    "frontier",
+    "positional",
+    "edgePattern",
+    "cornerPattern",
+    "stability",
+    "stableDiscDifferential",
+    "discDifferential",
+    "discDifferentialRaw",
+    "parity",
+    "parityGlobal",
+    "parityRegion",
+    "parityRegionCount",
+    "parityOddRegions",
+    "parityEvenRegions",
+    "myMoveCount",
+    "opponentMoveCount",
+    "cornerMoveCount",
+    "opponentCornerMoveCount",
+    "stableDiscs",
+    "opponentStableDiscs"
+  ],
+  "afterFeatureKeys": [
+    "mobility",
+    "potentialMobility",
+    "corners",
+    "cornerAccess",
+    "cornerMoveBalance",
+    "cornerAdjacency",
+    "cornerOrthAdjacency",
+    "cornerDiagonalAdjacency",
+    "frontier",
+    "positional",
+    "edgePattern",
+    "cornerPattern",
+    "stability",
+    "stableDiscDifferential",
+    "discDifferential",
+    "discDifferentialRaw",
+    "parity",
+    "parityGlobal",
+    "parityRegion",
+    "parityRegionCount",
+    "parityOddRegions",
+    "parityEvenRegions",
+    "myMoveCount",
+    "opponentMoveCount",
+    "cornerMoveCount",
+    "opponentCornerMoveCount",
+    "stableDiscs",
+    "opponentStableDiscs"
+  ],
+  "patch": {
+    "globalScale": 1,
+    "bucketScaleEntries": [],
+    "featureScaleEntries": [
+      {
+        "token": "stableDiscs",
+        "scale": 0.9
+      },
+      {
+        "token": "opponentStableDiscs",
+        "scale": 0.9
+      }
+    ],
+    "bucketFeatureScaleEntries": [],
+    "baselineBlendEntries": [],
+    "dropFeatures": [],
+    "setInterpolation": {
+      "enabled": true,
+      "mode": "linear-adjacent-midpoint"
+    }
+  },
+  "bucketCount": 13,
+  "bucketKeys": [
+    "phase-01",
+    "phase-02",
+    "phase-03",
+    "phase-04",
+    "phase-05",
+    "phase-06",
+    "phase-07",
+    "phase-08",
+    "phase-09",
+    "phase-10",
+    "phase-11",
+    "late-b",
+    "endgame"
+  ]
+}

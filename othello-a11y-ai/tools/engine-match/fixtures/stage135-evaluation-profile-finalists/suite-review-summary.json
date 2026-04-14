@@ -1,0 +1,449 @@
+{
+  "generatedAt": "2026-04-13T11:09:19.053Z",
+  "candidateCount": 18,
+  "successfulCandidateCount": 18,
+  "rankingByProfileBenchmark": [
+    {
+      "key": "balanced12-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2563190666666646,
+      "depthNodeDeltaPercent": -4.0059073287797675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2534685466666655,
+      "depthNodeDeltaPercent": -2.8705925789182207,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24449594666666563,
+      "depthNodeDeltaPercent": -4.085023339223081,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24271501333333312,
+      "depthNodeDeltaPercent": -3.6802130857881274,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24235574666666615,
+      "depthNodeDeltaPercent": -2.729502360294312,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24054094666666614,
+      "depthNodeDeltaPercent": -2.8007067696932935,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24047897333333346,
+      "depthNodeDeltaPercent": -3.986128326168939,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.23776305333333347,
+      "depthNodeDeltaPercent": -3.884596112766687,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22757049333333157,
+      "depthNodeDeltaPercent": -2.2152482924127748,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22614859999999837,
+      "depthNodeDeltaPercent": -2.7031303568132072,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21989355999999916,
+      "depthNodeDeltaPercent": -1.590231809910599,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21790391999999947,
+      "depthNodeDeltaPercent": -1.9647142593422822,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20769698666666514,
+      "depthNodeDeltaPercent": -1.8368100424589255,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20703195999999835,
+      "depthNodeDeltaPercent": -0.15823202088662675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.1929658399999994,
+      "depthNodeDeltaPercent": 3.718452490835729,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11879362666666715,
+      "depthNodeDeltaPercent": 3.6406550805664706,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11610730666666669,
+      "depthNodeDeltaPercent": 3.7342756929243914,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.10428063999999893,
+      "depthNodeDeltaPercent": 4.40016878082228,
+      "exactNodeDeltaPercent": 0
+    }
+  ],
+  "rankingByDepthNodes": [
+    {
+      "key": "balanced12-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24449594666666563,
+      "depthNodeDeltaPercent": -4.085023339223081,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2563190666666646,
+      "depthNodeDeltaPercent": -4.0059073287797675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24047897333333346,
+      "depthNodeDeltaPercent": -3.986128326168939,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.23776305333333347,
+      "depthNodeDeltaPercent": -3.884596112766687,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24271501333333312,
+      "depthNodeDeltaPercent": -3.6802130857881274,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2534685466666655,
+      "depthNodeDeltaPercent": -2.8705925789182207,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24054094666666614,
+      "depthNodeDeltaPercent": -2.8007067696932935,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24235574666666615,
+      "depthNodeDeltaPercent": -2.729502360294312,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22614859999999837,
+      "depthNodeDeltaPercent": -2.7031303568132072,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22757049333333157,
+      "depthNodeDeltaPercent": -2.2152482924127748,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21790391999999947,
+      "depthNodeDeltaPercent": -1.9647142593422822,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20769698666666514,
+      "depthNodeDeltaPercent": -1.8368100424589255,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21989355999999916,
+      "depthNodeDeltaPercent": -1.590231809910599,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20703195999999835,
+      "depthNodeDeltaPercent": -0.15823202088662675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11879362666666715,
+      "depthNodeDeltaPercent": 3.6406550805664706,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.1929658399999994,
+      "depthNodeDeltaPercent": 3.718452490835729,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11610730666666669,
+      "depthNodeDeltaPercent": 3.7342756929243914,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.10428063999999893,
+      "depthNodeDeltaPercent": 4.40016878082228,
+      "exactNodeDeltaPercent": 0
+    }
+  ],
+  "rankingByExactNodes": [
+    {
+      "key": "balanced12-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11610730666666669,
+      "depthNodeDeltaPercent": 3.7342756929243914,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20769698666666514,
+      "depthNodeDeltaPercent": -1.8368100424589255,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21790391999999947,
+      "depthNodeDeltaPercent": -1.9647142593422822,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24449594666666563,
+      "depthNodeDeltaPercent": -4.085023339223081,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24047897333333346,
+      "depthNodeDeltaPercent": -3.986128326168939,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced12-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced12-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2563190666666646,
+      "depthNodeDeltaPercent": -4.0059073287797675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.10428063999999893,
+      "depthNodeDeltaPercent": 4.40016878082228,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.1929658399999994,
+      "depthNodeDeltaPercent": 3.718452490835729,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24054094666666614,
+      "depthNodeDeltaPercent": -2.8007067696932935,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22757049333333157,
+      "depthNodeDeltaPercent": -2.2152482924127748,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.22614859999999837,
+      "depthNodeDeltaPercent": -2.7031303568132072,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-hard-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-hard",
+      "profileDeltaMaeInStones": -0.24235574666666615,
+      "depthNodeDeltaPercent": -2.729502360294312,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-075",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.11879362666666715,
+      "depthNodeDeltaPercent": 3.6406550805664706,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-extras-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.20703195999999835,
+      "depthNodeDeltaPercent": -0.15823202088662675,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-interp-off",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.21989355999999916,
+      "depthNodeDeltaPercent": -1.590231809910599,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-lateblend-010",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.24271501333333312,
+      "depthNodeDeltaPercent": -3.6802130857881274,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-parity-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.23776305333333347,
+      "depthNodeDeltaPercent": -3.884596112766687,
+      "exactNodeDeltaPercent": 0
+    },
+    {
+      "key": "balanced13-alllate-smoothed-stability-090",
+      "status": "success",
+      "sourceCandidateKey": "balanced13-alllate-smoothed",
+      "profileDeltaMaeInStones": -0.2534685466666655,
+      "depthNodeDeltaPercent": -2.8705925789182207,
+      "exactNodeDeltaPercent": 0
+    }
+  ],
+  "recommendedFinalists": [
+    "balanced12-alllate-smoothed-stability-090",
+    "balanced13-alllate-smoothed-stability-090",
+    "balanced12-alllate-smoothed-lateblend-010",
+    "balanced13-alllate-smoothed-lateblend-010"
+  ]
+}

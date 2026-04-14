@@ -57,8 +57,7 @@ function printUsage() {
     [--limit 2000000] [--progress-every 250000] [--skip-diagnostics] \
     [--seed-profile path/to/tuple-profile.json] \
     [--output-json ${outputJsonPath}] \
-    [--output-module ${outputModulePath}] [--module-format compact|expanded]
-
+    [--output-module ${outputModulePath}|off] [--module-format compact|expanded]\n
 설명:
 - 현재 phase-linear evaluator를 base로 두고, 선택한 empties bucket에 한해서 tuple residual table을 추가 학습합니다.
 - target은 raw teacher score가 아니라 (teacher - current base evaluator) residual을 간접적으로 맞춥니다.
@@ -73,6 +72,32 @@ function printUsage() {
 function toFiniteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function isExplicitNullLike(value) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  return ['off', 'none', 'null', 'disabled'].includes(String(value).trim().toLowerCase());
+}
+
+function buildBucketIndexLookupTable(bucketSpecs) {
+  const table = Array.from({ length: 61 }, () => -1);
+  for (let index = 0; index < bucketSpecs.length; index += 1) {
+    const bucket = bucketSpecs[index];
+    for (let empties = Math.max(0, bucket.minEmpties); empties <= Math.min(60, bucket.maxEmpties); empties += 1) {
+      table[empties] = index;
+    }
+  }
+  return table;
+}
+
+function pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties) {
+  if (!Number.isFinite(empties)) {
+    return -1;
+  }
+  const normalized = Math.max(0, Math.min(60, Math.round(empties)));
+  return bucketIndexLookupTable[normalized] ?? -1;
 }
 
 function unwrapTupleLayoutInput(value) {
@@ -168,16 +193,6 @@ function createProgressLogger({
   };
 }
 
-function pickBucketIndexForEmpties(bucketSpecs, empties) {
-  for (let index = 0; index < bucketSpecs.length; index += 1) {
-    const bucket = bucketSpecs[index];
-    if (empties >= bucket.minEmpties && empties <= bucket.maxEmpties) {
-      return index;
-    }
-  }
-  return -1;
-}
-
 function compatibleTupleLayouts(left, right) {
   if (!left || !right) {
     return false;
@@ -213,6 +228,16 @@ function findMatchingSeedBucket(seedProfile, bucketSpec) {
   }) ?? null;
 }
 
+function prepareTupleLayoutForTraining(layout) {
+  return Object.freeze({
+    ...layout,
+    tuples: Object.freeze(layout.tuples.map((tuple) => Object.freeze({
+      ...tuple,
+      squareBits: Object.freeze(tuple.squares.map((square) => INDEX_BITS[square])),
+    }))),
+  });
+}
+
 function createBucketTrainingState(bucketSpec, layout, seedBucket = null) {
   const tupleWeights = layout.tuples.map((tuple, tupleIndex) => {
     const seedWeights = Array.isArray(seedBucket?.tupleWeights?.[tupleIndex]) ? seedBucket.tupleWeights[tupleIndex] : [];
@@ -237,11 +262,10 @@ function perspectiveBoardsForState(state) {
     : { player: state.white, opponent: state.black };
 }
 
-function tupleIndexForPerspectiveBoards(player, opponent, squares) {
+function tupleIndexForPerspectiveBoardsBits(player, opponent, squareBits) {
   let index = 0;
-  for (const square of squares) {
+  for (const bit of squareBits) {
     index *= 3;
-    const bit = INDEX_BITS[square];
     if ((player & bit) !== 0n) {
       index += 1;
     } else if ((opponent & bit) !== 0n) {
@@ -251,11 +275,11 @@ function tupleIndexForPerspectiveBoards(player, opponent, squares) {
   return index;
 }
 
-function collectTupleContribution(layout, tupleWeights, player, opponent, scratchActiveIndices) {
+function collectTupleContribution(trainingLayout, tupleWeights, player, opponent, scratchActiveIndices) {
   let total = 0;
-  for (let tupleIndex = 0; tupleIndex < layout.tuples.length; tupleIndex += 1) {
-    const tuple = layout.tuples[tupleIndex];
-    const patternIndex = tupleIndexForPerspectiveBoards(player, opponent, tuple.squares);
+  for (let tupleIndex = 0; tupleIndex < trainingLayout.tuples.length; tupleIndex += 1) {
+    const tuple = trainingLayout.tuples[tupleIndex];
+    const patternIndex = tupleIndexForPerspectiveBoardsBits(player, opponent, tuple.squareBits);
     scratchActiveIndices[tupleIndex] = patternIndex;
     total += tupleWeights[tupleIndex][patternIndex];
   }
@@ -376,7 +400,9 @@ const limit = args.limit !== undefined ? Math.max(1, Math.trunc(toFiniteNumber(a
 const progressEvery = Math.max(0, Math.trunc(toFiniteNumber(args['progress-every'], 250000)));
 const skipDiagnostics = Boolean(args['skip-diagnostics']);
 const outputJsonPath = args['output-json'] ? resolveCliPath(args['output-json']) : resolveTrainingOutputPath('trained-tuple-residual-profile.json');
-const outputModulePath = args['output-module'] ? resolveCliPath(args['output-module']) : resolveTrainingOutputPath('learned-eval-profile.generated.js');
+const outputModulePath = isExplicitNullLike(args['output-module'])
+  ? null
+  : (args['output-module'] ? resolveCliPath(args['output-module']) : resolveTrainingOutputPath('learned-eval-profile.generated.js'));
 const moduleFormat = typeof args['module-format'] === 'string' ? args['module-format'] : 'compact';
 const profileName = typeof args.name === 'string' ? args.name : defaultTupleResidualProfileName();
 const description = typeof args.description === 'string'
@@ -394,15 +420,17 @@ const explicitLayoutInput = args['layout-json']
   : (args['layout-name'] ?? null);
 const layoutInput = explicitLayoutInput ?? seedProfile?.layout ?? DEFAULT_TUPLE_RESIDUAL_LAYOUT_NAME;
 const layout = resolveTupleResidualLayout(layoutInput);
+const trainingLayout = prepareTupleLayoutForTraining(layout);
 const bucketSpecs = parsePhaseBuckets(args['phase-buckets']);
+const bucketIndexLookupTable = buildBucketIndexLookupTable(bucketSpecs);
 
 if (seedProfile && !compatibleTupleLayouts(seedProfile.layout, layout)) {
   throw new Error(`seed profile layout(${seedProfile.layout.name})이 현재 layout(${layout.name})과 호환되지 않습니다.`);
 }
 
 const seedBuckets = bucketSpecs.map((bucketSpec) => findMatchingSeedBucket(seedProfile, bucketSpec));
-const bucketStates = bucketSpecs.map((bucketSpec, bucketIndex) => createBucketTrainingState(bucketSpec, layout, seedBuckets[bucketIndex]));
-const scratchActiveIndices = new Int32Array(layout.tuples.length);
+const bucketStates = bucketSpecs.map((bucketSpec, bucketIndex) => createBucketTrainingState(bucketSpec, trainingLayout, seedBuckets[bucketIndex]));
+const scratchActiveIndices = new Int32Array(trainingLayout.tuples.length);
 const baseEvaluator = new Evaluator({
   evaluationProfile: baseEvaluationProfile,
   tupleResidualProfile: null,
@@ -468,7 +496,7 @@ for (let epochIndex = 0; epochIndex < epochs; epochIndex += 1) {
     trainingScanSummary.scannedSamples += 1;
 
     const empties = state.getEmptyCount();
-    const bucketIndex = pickBucketIndexForEmpties(bucketSpecs, empties);
+    const bucketIndex = pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties);
     if (bucketIndex < 0) {
       epochStats.outsideBucketSamples += 1;
       trainingScanSummary.outsideBucketSamples += 1;
@@ -501,7 +529,7 @@ for (let epochIndex = 0; epochIndex < epochs; epochIndex += 1) {
     const bucketState = bucketStates[bucketIndex];
     const { player, opponent } = perspectiveBoardsForState(state);
     const basePrediction = baseEvaluator.evaluate(state, state.currentPlayer);
-    const tupleContribution = collectTupleContribution(layout, bucketState.tupleWeights, player, opponent, scratchActiveIndices);
+    const tupleContribution = collectTupleContribution(trainingLayout, bucketState.tupleWeights, player, opponent, scratchActiveIndices);
     const prediction = basePrediction + bucketState.bias + tupleContribution;
     const residual = target - prediction;
     const clippedResidual = gradientClip > 0
@@ -638,7 +666,7 @@ if (!skipDiagnostics) {
     const baseResidual = basePrediction - target;
     const candidateResidual = candidatePrediction - target;
     const empties = state.getEmptyCount();
-    const bucketIndex = pickBucketIndexForEmpties(bucketSpecs, empties);
+    const bucketIndex = pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties);
 
     updateMetricAccumulator(allSamplesBase, baseResidual);
     updateMetricAccumulator(allSamplesCandidate, candidateResidual);

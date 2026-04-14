@@ -1,0 +1,62 @@
+{
+  "key": "balanced12-alllate-smoothed-stability-090",
+  "name": "balanced12-alllate-smoothed stability extras 0.90x",
+  "description": "Patched evaluation profile balanced12-alllate-smoothed-stability-090",
+  "sourceCandidateKey": "balanced12-alllate-smoothed",
+  "sourceProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-suite\\candidates\\balanced12-alllate-smoothed\\trained-evaluation-profile.json",
+  "sourceProfileName": "eval-expansion-balanced12-alllate-smoothed",
+  "patch": {
+    "globalScale": 1,
+    "bucketScaleEntries": [],
+    "featureScaleEntries": [
+      "stableDiscs=0.9",
+      "opponentStableDiscs=0.9"
+    ],
+    "bucketFeatureScaleEntries": [],
+    "baselineBlendEntries": [],
+    "dropFeatures": [],
+    "setInterpolation": null
+  },
+  "exportModule": true,
+  "benchmarks": {
+    "profile": {
+      "enabled": true,
+      "limit": 25000,
+      "benchmarkLoops": 100
+    },
+    "depth": {
+      "enabled": true,
+      "empties": [
+        18,
+        20,
+        24
+      ],
+      "seedStart": 1,
+      "seedCount": 6,
+      "repetitions": 1,
+      "timeLimitMs": 1500,
+      "maxDepth": 6,
+      "exactEndgameEmpties": 10
+    },
+    "exact": {
+      "enabled": true,
+      "empties": [
+        10,
+        12
+      ],
+      "seedStart": 1,
+      "seedCount": 8,
+      "repetitions": 2,
+      "timeLimitMs": 30000,
+      "maxDepth": 12
+    }
+  },
+  "outputs": {
+    "patchedProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\trained-evaluation-profile.patched.json",
+    "patchSummaryPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\patch-summary.json",
+    "generatedModulePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\learned-eval-profile.generated.js",
+    "profileBenchmarkPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\benchmarks\\profile.benchmark.json",
+    "depthBenchmarkPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\benchmarks\\depth-search.benchmark.json",
+    "exactBenchmarkPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage130-evaluation-expansion\\evaluation-profile-patch\\candidates\\balanced12-alllate-smoothed-stability-090\\benchmarks\\exact-search.benchmark.json"
+  }
+}

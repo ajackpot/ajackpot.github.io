@@ -1,3 +1,5 @@
+import { DEFAULT_SEARCH_ALGORITHM, normalizeSearchAlgorithm } from './search-algorithms.js';
+
 const SCALE_FIELD_KEYS = Object.freeze([
   'mobilityScale',
   'potentialMobilityScale',
@@ -20,6 +22,7 @@ const BASE_ENGINE_DEFAULTS = Object.freeze({
   wldPreExactEmpties: 0,
   aspirationWindow: 50,
   openingRandomness: 0,
+  openingTieBreakRandomization: false,
   searchRandomness: 0,
   maxTableEntries: 200000,
   mobilityScale: 1,
@@ -149,7 +152,7 @@ export const ENGINE_PRESETS = Object.freeze({
     maxDepth: 3,
     timeLimitMs: 280,
     exactEndgameEmpties: 6,
-    aspirationWindow: 70,
+    aspirationWindow: 0,
     openingRandomness: 32,
     searchRandomness: 140,
     maxTableEntries: 65000,
@@ -160,7 +163,7 @@ export const ENGINE_PRESETS = Object.freeze({
     maxDepth: 4,
     timeLimitMs: 500,
     exactEndgameEmpties: 8,
-    aspirationWindow: 60,
+    aspirationWindow: 0,
     openingRandomness: 16,
     searchRandomness: 60,
     maxTableEntries: 90000,
@@ -171,8 +174,9 @@ export const ENGINE_PRESETS = Object.freeze({
     maxDepth: 6,
     timeLimitMs: 1400,
     exactEndgameEmpties: 10,
-    aspirationWindow: 55,
+    aspirationWindow: 0,
     openingRandomness: 0,
+    openingTieBreakRandomization: true,
     searchRandomness: 0,
     maxTableEntries: 180000,
   },
@@ -184,6 +188,7 @@ export const ENGINE_PRESETS = Object.freeze({
     exactEndgameEmpties: 12,
     aspirationWindow: 45,
     openingRandomness: 0,
+    openingTieBreakRandomization: true,
     searchRandomness: 0,
     maxTableEntries: 260000,
   },
@@ -195,6 +200,7 @@ export const ENGINE_PRESETS = Object.freeze({
     exactEndgameEmpties: 16,
     aspirationWindow: 35,
     openingRandomness: 0,
+    openingTieBreakRandomization: true,
     searchRandomness: 0,
     maxTableEntries: 420000,
   },
@@ -207,6 +213,7 @@ export const ENGINE_PRESETS = Object.freeze({
     wldPreExactEmpties: 0,
     aspirationWindow: 50,
     openingRandomness: 0,
+    openingTieBreakRandomization: false,
     searchRandomness: 0,
     maxTableEntries: 200000,
     mobilityScale: 1,
@@ -224,7 +231,9 @@ export const ENGINE_PRESETS = Object.freeze({
   },
 });
 
-export const CUSTOM_ENGINE_FIELDS = Object.freeze([
+export const CUSTOM_STYLE_KEY = 'custom';
+
+const LEGACY_CUSTOM_DIFFICULTY_FIELDS = Object.freeze([
   {
     key: 'maxDepth',
     label: '최대 탐색 깊이',
@@ -276,6 +285,16 @@ export const CUSTOM_ENGINE_FIELDS = Object.freeze([
     step: 1,
   },
   {
+    key: 'openingTieBreakRandomization',
+    label: '최선 오프닝 복수 후보 시 무작위 선택',
+    type: 'select',
+    options: [
+      { value: false, label: '끔' },
+      { value: true, label: '켬' },
+    ],
+    helpText: '오프닝 수 무작위성 범위가 0이어도, 오프닝북 최상위 후보가 사실상 동률일 때는 어려움~전문가 난이도처럼 무작위로 하나를 고릅니다.',
+  },
+  {
     key: 'searchRandomness',
     label: '중반 이후 근접 수 무작위성 범위',
     type: 'number',
@@ -291,6 +310,13 @@ export const CUSTOM_ENGINE_FIELDS = Object.freeze([
     max: 600000,
     step: 1000,
   },
+]);
+
+const LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY = Object.freeze(Object.fromEntries(
+  LEGACY_CUSTOM_DIFFICULTY_FIELDS.map((field) => [field.key, field]),
+));
+
+export const CUSTOM_STYLE_FIELDS = Object.freeze([
   {
     key: 'mobilityScale',
     label: '기동성 가중치 배율',
@@ -389,8 +415,121 @@ export const CUSTOM_ENGINE_FIELDS = Object.freeze([
   },
 ]);
 
+export const CUSTOM_DIFFICULTY_COMMON_FIELDS = Object.freeze([
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.timeLimitMs,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.exactEndgameEmpties,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.wldPreExactEmpties,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.openingRandomness,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.openingTieBreakRandomization,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.searchRandomness,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.maxTableEntries,
+]);
+
+export const CUSTOM_DIFFICULTY_CLASSIC_ONLY_FIELDS = Object.freeze([
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.maxDepth,
+  LEGACY_CUSTOM_DIFFICULTY_FIELD_BY_KEY.aspirationWindow,
+]);
+
+export const CUSTOM_DIFFICULTY_MCTS_FIELDS = Object.freeze([
+  {
+    key: 'mctsExploration',
+    label: 'MCTS 탐험 계수',
+    type: 'number',
+    min: 0.1,
+    max: 4,
+    step: 0.05,
+  },
+  {
+    key: 'mctsMaxIterations',
+    label: 'MCTS 최대 반복 수',
+    type: 'number',
+    min: 100,
+    max: 2000000,
+    step: 100,
+  },
+  {
+    key: 'mctsMaxNodes',
+    label: 'MCTS 최대 트리 노드 수',
+    type: 'number',
+    min: 64,
+    max: 500000,
+    step: 64,
+  },
+]);
+
+export const CUSTOM_DIFFICULTY_MCTS_GUIDED_HYBRID_FIELDS = Object.freeze([
+  {
+    key: 'mctsProofPriorityEnabled',
+    label: 'MCTS proof-priority',
+    type: 'select',
+    options: [
+      { value: false, label: '끔' },
+      { value: true, label: '켬' },
+    ],
+  },
+  {
+    key: 'mctsProofPriorityScale',
+    label: 'MCTS proof-priority 배율',
+    type: 'number',
+    min: 0,
+    max: 5,
+    step: 0.05,
+  },
+  {
+    key: 'mctsProofPriorityMaxEmpties',
+    label: 'MCTS proof-priority 최대 빈칸 수',
+    type: 'number',
+    min: 0,
+    max: 32,
+    step: 1,
+  },
+]);
+
+export const CUSTOM_DIFFICULTY_MCTS_HYBRID_ONLY_FIELDS = Object.freeze([
+  {
+    key: 'mctsHybridMinimaxDepth',
+    label: 'Hybrid prior minimax 깊이',
+    type: 'number',
+    min: 0,
+    max: 4,
+    step: 1,
+  },
+  {
+    key: 'mctsHybridMinimaxTopK',
+    label: 'Hybrid prior 후보 수',
+    type: 'number',
+    min: 1,
+    max: 8,
+    step: 1,
+  },
+]);
+
+export const CUSTOM_DIFFICULTY_FIELDS = Object.freeze([
+  ...CUSTOM_DIFFICULTY_COMMON_FIELDS,
+  ...CUSTOM_DIFFICULTY_CLASSIC_ONLY_FIELDS,
+  ...CUSTOM_DIFFICULTY_MCTS_FIELDS,
+  ...CUSTOM_DIFFICULTY_MCTS_GUIDED_HYBRID_FIELDS,
+  ...CUSTOM_DIFFICULTY_MCTS_HYBRID_ONLY_FIELDS,
+]);
+
+export const CUSTOM_STYLE_OPTION = Object.freeze({
+  key: CUSTOM_STYLE_KEY,
+  label: '사용자 지정',
+  description: '기동성부터 위험 칸 패널티까지의 평가 배율을 직접 조절합니다.',
+});
+
+export const CUSTOM_ENGINE_FIELDS = Object.freeze([
+  ...LEGACY_CUSTOM_DIFFICULTY_FIELDS,
+  ...CUSTOM_STYLE_FIELDS,
+]);
+
+const ALL_CUSTOM_ENGINE_FIELDS = Object.freeze([
+  ...CUSTOM_DIFFICULTY_FIELDS,
+  ...CUSTOM_STYLE_FIELDS,
+]);
+
 const CUSTOM_ENGINE_FIELD_BY_KEY = Object.freeze(Object.fromEntries(
-  CUSTOM_ENGINE_FIELDS.map((field) => [field.key, field]),
+  ALL_CUSTOM_ENGINE_FIELDS.map((field) => [field.key, field]),
 ));
 
 function sanitizeSelectValue(field, value, fallback) {
@@ -499,6 +638,163 @@ function finalizeRandomnessAliases(resolved) {
   };
 }
 
+function buildCustomDifficultyBaseDefaults(baseInputs = {}) {
+  const defaults = {};
+  for (const field of LEGACY_CUSTOM_DIFFICULTY_FIELDS) {
+    defaults[field.key] = sanitizeValue(
+      field,
+      baseInputs?.[field.key],
+      ENGINE_PRESETS.custom[field.key],
+    );
+  }
+  return defaults;
+}
+
+function buildDefaultMctsDetailValues(baseInputs = {}) {
+  const maxTableEntries = sanitizeValue(
+    CUSTOM_ENGINE_FIELD_BY_KEY.maxTableEntries,
+    baseInputs?.maxTableEntries,
+    ENGINE_PRESETS.custom.maxTableEntries,
+  );
+  const exactEndgameEmpties = sanitizeValue(
+    CUSTOM_ENGINE_FIELD_BY_KEY.exactEndgameEmpties,
+    baseInputs?.exactEndgameEmpties,
+    ENGINE_PRESETS.custom.exactEndgameEmpties,
+  );
+
+  return {
+    mctsExploration: 1.35,
+    mctsMaxIterations: 200000,
+    mctsMaxNodes: Math.max(2048, Math.min(160000, Math.round(maxTableEntries * 0.75))),
+    mctsProofPriorityEnabled: false,
+    mctsProofPriorityScale: 0,
+    mctsProofPriorityMaxEmpties: Math.min(32, Math.max(0, exactEndgameEmpties + 4)),
+    mctsHybridMinimaxDepth: 2,
+    mctsHybridMinimaxTopK: 4,
+  };
+}
+
+export function createDefaultCustomDifficultyInputs() {
+  return buildCustomDifficultyBaseDefaults(ENGINE_PRESETS.custom);
+}
+
+export function createDefaultCustomStyleInputs() {
+  const defaults = {};
+  for (const field of CUSTOM_STYLE_FIELDS) {
+    defaults[field.key] = sanitizeValue(
+      field,
+      ENGINE_PRESETS.custom[field.key],
+      1,
+    );
+  }
+  return defaults;
+}
+
+export function mergeCustomInputGroups(customDifficultyInputs = {}, customStyleInputs = {}) {
+  return {
+    ...((customDifficultyInputs && typeof customDifficultyInputs === 'object') ? customDifficultyInputs : {}),
+    ...((customStyleInputs && typeof customStyleInputs === 'object') ? customStyleInputs : {}),
+  };
+}
+
+export function splitCustomInputGroups(rawInputs = {}) {
+  const customDifficultyInputs = {};
+  const customStyleInputs = {};
+  if (!rawInputs || typeof rawInputs !== 'object') {
+    return { customDifficultyInputs, customStyleInputs };
+  }
+
+  for (const [key, value] of Object.entries(rawInputs)) {
+    if (SCALE_FIELD_KEYS.includes(key)) {
+      customStyleInputs[key] = value;
+    } else {
+      customDifficultyInputs[key] = value;
+    }
+  }
+
+  return {
+    customDifficultyInputs,
+    customStyleInputs,
+  };
+}
+
+export function listCustomDifficultyFieldsForSearchAlgorithm(searchAlgorithm = DEFAULT_SEARCH_ALGORITHM) {
+  const normalizedAlgorithm = normalizeSearchAlgorithm(searchAlgorithm);
+
+  if (normalizedAlgorithm === 'classic' || normalizedAlgorithm === 'classic-mtdf' || normalizedAlgorithm === 'classic-mtdf-2ply') {
+    return [
+      ...CUSTOM_DIFFICULTY_COMMON_FIELDS,
+      ...CUSTOM_DIFFICULTY_CLASSIC_ONLY_FIELDS,
+    ];
+  }
+
+  if (normalizedAlgorithm === 'mcts-lite') {
+    return [
+      ...CUSTOM_DIFFICULTY_COMMON_FIELDS,
+      ...CUSTOM_DIFFICULTY_MCTS_FIELDS,
+    ];
+  }
+
+  if (normalizedAlgorithm === 'mcts-guided') {
+    return [
+      ...CUSTOM_DIFFICULTY_COMMON_FIELDS,
+      ...CUSTOM_DIFFICULTY_MCTS_FIELDS,
+      ...CUSTOM_DIFFICULTY_MCTS_GUIDED_HYBRID_FIELDS,
+    ];
+  }
+
+  return [
+    ...CUSTOM_DIFFICULTY_COMMON_FIELDS,
+    ...CUSTOM_DIFFICULTY_MCTS_FIELDS,
+    ...CUSTOM_DIFFICULTY_MCTS_GUIDED_HYBRID_FIELDS,
+    ...CUSTOM_DIFFICULTY_MCTS_HYBRID_ONLY_FIELDS,
+  ];
+}
+
+export function getCustomDifficultyDefaultsForSearchAlgorithm(searchAlgorithm = DEFAULT_SEARCH_ALGORITHM, baseInputs = {}) {
+  const baseDefaults = buildCustomDifficultyBaseDefaults(baseInputs);
+  const mctsDefaults = buildDefaultMctsDetailValues(baseDefaults);
+  const normalizedAlgorithm = normalizeSearchAlgorithm(searchAlgorithm);
+
+  if (normalizedAlgorithm === 'mcts-hybrid') {
+    return {
+      ...baseDefaults,
+      ...mctsDefaults,
+      mctsProofPriorityEnabled: true,
+      mctsProofPriorityScale: 0.15,
+    };
+  }
+
+  if (normalizedAlgorithm === 'mcts-guided' || normalizedAlgorithm === 'mcts-lite') {
+    return {
+      ...baseDefaults,
+      ...mctsDefaults,
+    };
+  }
+
+  return baseDefaults;
+}
+
+export function doesSearchAlgorithmUseStyleEvaluator(searchAlgorithm = DEFAULT_SEARCH_ALGORITHM) {
+  return normalizeSearchAlgorithm(searchAlgorithm) !== 'mcts-lite';
+}
+
+function applyCustomDifficultyFieldsForSearchAlgorithm(resolved, customDifficultyInputs = {}, searchAlgorithm = DEFAULT_SEARCH_ALGORITHM, { allowCustomInputs = false } = {}) {
+  const defaults = getCustomDifficultyDefaultsForSearchAlgorithm(searchAlgorithm, resolved);
+  const relevantFields = listCustomDifficultyFieldsForSearchAlgorithm(searchAlgorithm);
+  const nextResolved = { ...resolved };
+
+  for (const field of relevantFields) {
+    const fallback = defaults[field.key];
+    const rawValue = allowCustomInputs ? customDifficultyInputs?.[field.key] : undefined;
+    nextResolved[field.key] = sanitizeValue(field, rawValue, fallback);
+  }
+
+  return allowCustomInputs
+    ? applyLegacyRandomnessInput(nextResolved, customDifficultyInputs)
+    : nextResolved;
+}
+
 function clampScale(value) {
   return Number(Math.min(4.5, Math.max(0.1, value)).toFixed(2));
 }
@@ -530,6 +826,26 @@ function applyStyle(baseOptions, styleKey) {
   return finalizeRandomnessAliases(styled);
 }
 
+function applyCustomStyle(baseOptions, customStyleInputs = {}) {
+  const styled = {
+    ...baseOptions,
+    styleApplied: true,
+    styleKey: CUSTOM_STYLE_KEY,
+    styleLabel: CUSTOM_STYLE_OPTION.label,
+    styleDescription: CUSTOM_STYLE_OPTION.description,
+  };
+
+  for (const field of CUSTOM_STYLE_FIELDS) {
+    styled[field.key] = sanitizeValue(
+      field,
+      customStyleInputs?.[field.key],
+      baseOptions[field.key] ?? ENGINE_PRESETS.custom[field.key] ?? 1,
+    );
+  }
+
+  return finalizeRandomnessAliases(styled);
+}
+
 function disableStyle(baseOptions) {
   return finalizeRandomnessAliases({
     ...baseOptions,
@@ -538,6 +854,50 @@ function disableStyle(baseOptions) {
     styleLabel: '적용 안 함',
     styleDescription: '난이도가 “사용자 지정”이면 입력한 수치가 그대로 적용되어 스타일 프리셋은 적용되지 않습니다.',
   });
+}
+
+export function resolveEngineOptionsWithCustomizations({
+  presetKey,
+  customDifficultyInputs = {},
+  styleKey = DEFAULT_STYLE_KEY,
+  customStyleInputs = {},
+  searchAlgorithm = DEFAULT_SEARCH_ALGORITHM,
+  allowStyleWithCustomDifficulty = true,
+} = {}) {
+  const resolvedPresetKey = ENGINE_PRESETS[presetKey] ? presetKey : 'normal';
+  const preset = ENGINE_PRESETS[resolvedPresetKey];
+  let resolved = {
+    ...BASE_ENGINE_DEFAULTS,
+    presetKey: resolvedPresetKey,
+    ...preset,
+  };
+
+  const useCustomDifficultyInputs = resolvedPresetKey === 'custom';
+  if (useCustomDifficultyInputs) {
+    resolved = applyCustomDifficultyFieldsForSearchAlgorithm(
+      resolved,
+      customDifficultyInputs,
+      searchAlgorithm,
+      { allowCustomInputs: true },
+    );
+  } else {
+    resolved = applyCustomDifficultyFieldsForSearchAlgorithm(
+      resolved,
+      {},
+      searchAlgorithm,
+      { allowCustomInputs: false },
+    );
+  }
+
+  if (useCustomDifficultyInputs && !allowStyleWithCustomDifficulty) {
+    return disableStyle(resolved);
+  }
+
+  if (styleKey === CUSTOM_STYLE_KEY) {
+    return applyCustomStyle(resolved, customStyleInputs);
+  }
+
+  return applyStyle(resolved, styleKey);
 }
 
 export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DEFAULT_STYLE_KEY) {
@@ -550,10 +910,12 @@ export function resolveEngineOptions(presetKey, customInputs = {}, styleKey = DE
   };
 
   if (resolvedPresetKey === 'custom') {
+    const { customDifficultyInputs, customStyleInputs } = splitCustomInputGroups(customInputs);
+    const mergedCustomInputs = mergeCustomInputGroups(customDifficultyInputs, customStyleInputs);
     for (const field of CUSTOM_ENGINE_FIELDS) {
-      resolved[field.key] = sanitizeValue(field, customInputs[field.key], resolved[field.key]);
+      resolved[field.key] = sanitizeValue(field, mergedCustomInputs[field.key], resolved[field.key]);
     }
-    return disableStyle(applyLegacyRandomnessInput(resolved, customInputs));
+    return disableStyle(applyLegacyRandomnessInput(resolved, mergedCustomInputs));
   }
 
   return applyStyle(resolved, styleKey);

@@ -80,6 +80,8 @@ function printUsage() {
     --input <file-or-dir> [--input <file-or-dir> ...] \
     [--teacher-evaluation-profile ${evaluationProfilePath}] \
     [--teacher-move-ordering-profile ${moveOrderingProfilePath}] \
+    [--teacher-tuple-profile-json path/to/tuple-profile.json|off] \
+    [--teacher-mpc-profile-json path/to/mpc-profile.json|off] \
     [--child-buckets 10-10,11-12,13-14,15-16,17-18] \
     [--exact-root-max-empties 14] [--exact-root-time-limit-ms 60000] \
     [--teacher-depth 6] [--teacher-time-limit-ms 4000] [--teacher-exact-endgame-empties 14] \
@@ -89,7 +91,9 @@ function printUsage() {
     [--seed-profile path/to/move-ordering-profile.json] \
     [--output-json ${moveOrderingProfilePath}] \
     [--output-module ${outputModulePath}] \
-    [--evaluation-profile-json ${evaluationProfilePath}]
+    [--evaluation-profile-json ${evaluationProfilePath}] \
+    [--tuple-profile-json path/to/tuple-profile.json|off] \
+    [--mpc-json path/to/mpc-profile.json|off]
 
 입력은 기존 phase-linear 학습과 동일하게 Egaroucid txt / JSONL / NDJSON을 지원합니다.
 기본값은 root별 평균 점수를 제거한 root-mean target과 uniform root weighting을 사용합니다.
@@ -105,6 +109,42 @@ function toFiniteInteger(value, fallback) {
 function toFiniteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function isExplicitNullLike(value) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  return ['off', 'none', 'null', 'disabled'].includes(String(value).trim().toLowerCase());
+}
+
+function loadJsonFileOrExplicitNull(value, fallback) {
+  if (value === undefined) {
+    return fallback;
+  }
+  if (isExplicitNullLike(value)) {
+    return null;
+  }
+  return loadJsonFileIfPresent(value);
+}
+
+function buildBucketIndexLookupTable(bucketSpecs) {
+  const table = Array.from({ length: 61 }, () => -1);
+  for (let bucketIndex = 0; bucketIndex < bucketSpecs.length; bucketIndex += 1) {
+    const bucket = bucketSpecs[bucketIndex];
+    for (let empties = Math.max(0, bucket.minEmpties); empties <= Math.min(60, bucket.maxEmpties); empties += 1) {
+      table[empties] = bucketIndex;
+    }
+  }
+  return table;
+}
+
+function pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties) {
+  if (!Number.isFinite(empties)) {
+    return -1;
+  }
+  const normalized = Math.max(0, Math.min(60, Math.round(empties)));
+  return bucketIndexLookupTable[normalized] ?? -1;
 }
 
 function parseBucketSpecs(value) {
@@ -160,6 +200,36 @@ function parseExcludedFeatureKeys(value) {
   return [...new Set(requested.filter((key) => MOVE_ORDERING_REGRESSION_FEATURE_KEYS.includes(key)))];
 }
 
+function resetReusableSearchEngine(engine) {
+  engine.transpositionTable.clear();
+  engine.killerMoves = [];
+  engine.historyHeuristic = Array.from({ length: 2 }, () => Array(64).fill(0));
+  engine.mpcSuppressionDepth = 0;
+}
+
+function createTeacherSearchRunner() {
+  const enginesByKey = new Map();
+
+  return (state, options) => {
+    const cacheKey = [
+      options.maxDepth,
+      options.timeLimitMs,
+      options.exactEndgameEmpties,
+      options.aspirationWindow,
+      options.maxTableEntries ?? 'default',
+    ].join('|');
+    let engine = enginesByKey.get(cacheKey);
+    if (!engine) {
+      engine = new SearchEngine(options);
+      enginesByKey.set(cacheKey, engine);
+    } else {
+      resetReusableSearchEngine(engine);
+    }
+    const result = engine.findBestMove(state);
+    return result;
+  };
+}
+
 function findBucketIndex(bucketSpecs, empties) {
   return bucketSpecs.findIndex((bucket) => empties >= bucket.minEmpties && empties <= bucket.maxEmpties);
 }
@@ -190,6 +260,8 @@ function createTeacherSearchOptions({
   teacherExactEndgameEmpties,
   evaluationProfile,
   moveOrderingProfile,
+  tupleResidualProfile,
+  mpcProfile,
 }) {
   const exactRoot = rootEmpties <= exactRootMaxEmpties;
   const maxDepth = exactRoot
@@ -205,6 +277,8 @@ function createTeacherSearchOptions({
     randomness: 0,
     evaluationProfile,
     moveOrderingProfile,
+    tupleResidualProfile,
+    mpcProfile,
     optimizedFewEmptiesExactSolver: true,
     specializedFewEmptiesExactSolver: true,
     exactFastestFirstOrdering: true,
@@ -468,6 +542,8 @@ const outputModulePath = args['output-module'] ? resolveCliPath(args['output-mod
 const teacherEvaluationProfileInput = loadJsonFileIfPresent(args['teacher-evaluation-profile']);
 const moduleEvaluationProfileInput = loadJsonFileIfPresent(args['evaluation-profile-json']);
 const teacherMoveOrderingProfileInput = loadJsonFileIfPresent(args['teacher-move-ordering-profile']);
+const teacherTupleResidualProfileInput = loadJsonFileOrExplicitNull(args['teacher-tuple-profile-json'], ACTIVE_TUPLE_RESIDUAL_PROFILE ?? null);
+const teacherMpcProfileInput = loadJsonFileOrExplicitNull(args['teacher-mpc-profile-json'], ACTIVE_MPC_PROFILE ?? null);
 const seedProfileInput = loadJsonFileIfPresent(args['seed-profile']);
 const profileName = typeof args.name === 'string' ? args.name : defaultMoveOrderingProfileName();
 const description = typeof args.description === 'string'
@@ -476,9 +552,11 @@ const description = typeof args.description === 'string'
 const estimatedTotalSamples = detectKnownDatasetSampleCount(inputFiles) ?? null;
 const teacherEvaluationProfile = teacherEvaluationProfileInput ?? ACTIVE_EVALUATION_PROFILE;
 const teacherMoveOrderingProfile = teacherMoveOrderingProfileInput ?? ACTIVE_MOVE_ORDERING_PROFILE ?? null;
+const teacherTupleResidualProfile = teacherTupleResidualProfileInput;
+const teacherMpcProfile = teacherMpcProfileInput;
 const moduleEvaluationProfile = moduleEvaluationProfileInput ?? teacherEvaluationProfile ?? ACTIVE_EVALUATION_PROFILE;
-const moduleTupleResidualProfile = ACTIVE_TUPLE_RESIDUAL_PROFILE ?? null;
-const moduleMpcProfile = ACTIVE_MPC_PROFILE ?? null;
+const moduleTupleResidualProfile = loadJsonFileOrExplicitNull(args['tuple-profile-json'], teacherTupleResidualProfile);
+const moduleMpcProfile = loadJsonFileOrExplicitNull(args['mpc-json'], teacherMpcProfile);
 
 const seedBuckets = resolveMoveOrderingBuckets(seedProfileInput ?? null);
 const dimension = MOVE_ORDERING_REGRESSION_FEATURE_KEYS.length;
@@ -496,6 +574,9 @@ const priorSolutions = childBucketSpecs.map((bucketSpec) => {
   }
   return solution;
 });
+
+const childBucketIndexLookupTable = buildBucketIndexLookupTable(childBucketSpecs);
+const runTeacherSearch = createTeacherSearchRunner();
 
 const bucketStats = childBucketSpecs.map(() => ({
   xtx: zeroMatrix(dimension),
@@ -533,6 +614,7 @@ console.log(`child buckets: ${childBucketSpecs.map((bucket) => `${bucket.minEmpt
 console.log(`root empties filter: ${rootMinEmpties}..${rootMaxEmpties}`);
 console.log(`teacher: exact<=${exactRootMaxEmpties} empties, otherwise depth=${teacherDepth}, time=${teacherTimeLimitMs}ms`);
 console.log(`teacher evaluator: ${teacherEvaluationProfile?.name ?? 'default-eval'} | teacher move-ordering: ${teacherMoveOrderingProfile?.name ?? 'default late ordering'}`);
+console.log(`teacher tuple residual: ${teacherTupleResidualProfile?.name ?? 'null'} | teacher mpc: ${teacherMpcProfile?.name ?? 'null'}`);
 console.log(`sampling: stride=${sampleStride}, maxRootsPerBucket=${maxRootsPerBucket}, holdoutMod=${holdoutMod}, lambda=${regularization}`);
 console.log(`targets : mode=${targetMode}, rootWeighting=${rootWeighting}, exactRootWeightScale=${exactRootWeightScale}`);
 if (excludedFeatureKeys.length > 0) {
@@ -562,7 +644,7 @@ try {
     }
 
     const childEmpties = rootEmpties - 1;
-    const bucketIndex = findBucketIndex(childBucketSpecs, childEmpties);
+    const bucketIndex = pickBucketIndexFromLookupTable(childBucketIndexLookupTable, childEmpties);
     if (bucketIndex < 0) {
       skipped.rootRange += 1;
       return;
@@ -593,9 +675,10 @@ try {
       teacherExactEndgameEmpties,
       evaluationProfile: teacherEvaluationProfile,
       moveOrderingProfile: teacherMoveOrderingProfile,
+      tupleResidualProfile: teacherTupleResidualProfile,
+      mpcProfile: teacherMpcProfile,
     });
-    const teacherEngine = new SearchEngine(teacherOptions);
-    const teacherResult = teacherEngine.findBestMove(state);
+    const teacherResult = runTeacherSearch(state, teacherOptions);
 
     if (teacherResult.searchCompletion !== 'complete') {
       skipped.timeout += 1;
@@ -681,6 +764,7 @@ try {
 
     const holdoutRootRecord = holdout ? {
       key: childBucketSpecs[bucketIndex].key,
+      bucketIndex,
       rootEmpties,
       childEmpties,
       teacherMode: exactTeacher ? 'exact' : 'depth',
@@ -774,7 +858,9 @@ const residualCorrelationAccumulators = childBucketSpecs.map(() => createResidua
 const overallResidualCorrelationAccumulator = createResidualCorrelationAccumulators(OMITTED_AUDIT_FEATURE_KEYS);
 
 for (const rootRecord of holdoutRoots) {
-  const bucketIndex = findBucketIndex(childBucketSpecs, rootRecord.childEmpties);
+  const bucketIndex = Number.isInteger(rootRecord.bucketIndex)
+    ? rootRecord.bucketIndex
+    : pickBucketIndexFromLookupTable(childBucketIndexLookupTable, rootRecord.childEmpties);
   if (bucketIndex < 0) {
     continue;
   }

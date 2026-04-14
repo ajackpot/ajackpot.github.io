@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import {
-  REGRESSION_FEATURE_KEYS,
   addOuterProductInPlace,
   addScaledVectorInPlace,
   bucketIndexForEmpties,
@@ -12,12 +11,14 @@ import {
   collectInputFileEntries,
   createEvaluatorForProfile,
   createFeatureScratch,
+  createRegressionVectorScratch,
   detectKnownDatasetSampleCount,
   displayTrainingOutputPath,
   displayTrainingToolPath,
   ensureArray,
   estimateSampleCountFromBytes,
   fillRegressionVectorFromState,
+  regressionFeatureKeysForEvaluationFeatureList,
   formatDurationSeconds,
   formatInteger,
   loadJsonFileIfPresent,
@@ -85,8 +86,9 @@ const forcedTotalSamples = args['total-samples'] !== undefined
 
 const seedProfileInput = loadJsonFileIfPresent(args['seed-profile']);
 const seedProfile = resolveSeedProfile(seedProfileInput);
-const dimension = REGRESSION_FEATURE_KEYS.length;
-const priorSolutions = seedProfile.phaseBuckets.map((bucket) => solutionFromWeights(bucket.weights));
+const regressionFeatureKeys = regressionFeatureKeysForEvaluationFeatureList(seedProfile.featureKeys);
+const dimension = regressionFeatureKeys.length;
+const priorSolutions = seedProfile.phaseBuckets.map((bucket) => solutionFromWeights(bucket.weights, seedProfile.featureKeys));
 const bucketTrainStats = seedProfile.phaseBuckets.map(() => ({
   xtx: zeroMatrix(dimension),
   xty: zeroVector(dimension),
@@ -94,6 +96,7 @@ const bucketTrainStats = seedProfile.phaseBuckets.map(() => ({
   holdoutCount: 0,
 }));
 const scratches = seedProfile.phaseBuckets.map(() => createFeatureScratch());
+const vectorScratch = createRegressionVectorScratch(seedProfile.featureKeys);
 
 console.log(`Benchmarking training throughput on ${inputFiles.length} file(s).`);
 console.log(`sampleLimit=${formatInteger(sampleLimit)} targetScale=${targetScale} holdoutMod=${holdoutMod} lambda=${regularization}`);
@@ -103,7 +106,7 @@ const fitStartMs = Date.now();
 const seenSamples = await streamTrainingSamples(inputFiles, { targetScale, limit: sampleLimit }, ({ state, target, sampleIndex, totalBytesProcessed }) => {
   sampledBytes = totalBytesProcessed;
   const scratch = scratches[0];
-  const { record, vector } = fillRegressionVectorFromState(state, scratch);
+  const { record, vector } = fillRegressionVectorFromState(state, scratch, seedProfile.featureKeys, vectorScratch);
   const bucketIndex = bucketIndexForEmpties(seedProfile, record.empties);
   const bucketStats = bucketTrainStats[bucketIndex];
 
@@ -145,8 +148,7 @@ if (!skipDiagnostics) {
   let checksum = 0;
   await streamTrainingSamples(inputFiles, { targetScale, limit: sampleLimit }, ({ state }) => {
     const scratch = scratches[0];
-    const { record } = fillRegressionVectorFromState(state, scratch);
-    bucketIndexForEmpties(seedProfile, record.empties);
+    bucketIndexForEmpties(seedProfile, state.getEmptyCount());
     checksum += evaluator.evaluate(state, state.currentPlayer);
   });
   diagnosticsSeconds = secondsFromMs(diagnosticsStartMs);

@@ -6,7 +6,7 @@ set "INPUT=%~1"
 if "%INPUT%"=="" (
   echo Usage: tools\evaluator-training\run-stage126-weight-learning-bundle.bat ^<input-file-or-dir^> [output-root] [additional-flags...]
   echo Example: tools\evaluator-training\run-stage126-weight-learning-bundle.bat D:\othello-data\Egaroucid_Train_Data
-  echo Example: tools\evaluator-training\run-stage126-weight-learning-bundle.bat D:\othello-data\Egaroucid_Train_Data tools\evaluator-training\out\stage126-weight-learning --phase suite --resume
+  echo Example: tools\evaluator-training\run-stage126-weight-learning-bundle.bat D:\othello-data\Egaroucid_Train_Data tools\evaluator-training\out\stage126-weight-learning --resume
   echo Example: tools\evaluator-training\run-stage126-weight-learning-bundle.bat D:\othello-data\Egaroucid_Train_Data tools\evaluator-training\out\stage126-weight-learning --phase all --resume
   exit /b 1
 )

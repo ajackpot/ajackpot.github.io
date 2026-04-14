@@ -1,0 +1,99 @@
+{
+  "candidateKey": "balanced13-alllate-smoothed-stability-090",
+  "evaluationProfileJson": "tools/engine-match/fixtures/stage135-evaluation-profile-finalists/balanced13-alllate-smoothed-stability-090/trained-evaluation-profile.patched.json",
+  "resolvedConfig": {
+    "tuple": {
+      "layoutName": "orthogonal-adjacent-pairs-outer2-v1-patched-patched",
+      "phaseBuckets": [
+        "late-b",
+        "endgame"
+      ],
+      "sampleStride": 4,
+      "sampleResidue": 0,
+      "epochs": 1,
+      "learningRate": 0.05,
+      "biasLearningRate": 0.05,
+      "l2": 0.0005,
+      "gradientClip": 90000,
+      "minVisits": 32,
+      "holdoutMod": 10,
+      "holdoutResidue": 0,
+      "progressEvery": 250000
+    },
+    "tupleCalibration": {
+      "scope": "holdout-selected",
+      "shrink": 1,
+      "maxBiasStones": 1.5,
+      "holdoutMod": 10,
+      "holdoutResidue": 0,
+      "progressEvery": 250000
+    },
+    "moveOrdering": {
+      "childBuckets": [
+        "11-12",
+        "15-16",
+        "17-18"
+      ],
+      "sampleStride": 200,
+      "sampleResidue": 0,
+      "maxRootsPerBucket": 500,
+      "holdoutMod": 10,
+      "holdoutResidue": 0,
+      "lambda": 5000,
+      "progressEvery": 20,
+      "exactRootMaxEmpties": 14,
+      "exactRootTimeLimitMs": 60000,
+      "teacherDepth": 6,
+      "teacherTimeLimitMs": 4000,
+      "teacherExactEndgameEmpties": 14,
+      "targetMode": "root-mean",
+      "rootWeighting": "uniform",
+      "exactRootWeightScale": 1
+    },
+    "mpc": {
+      "calibrationBuckets": [
+        "18-21:3>7",
+        "18-21:4>8",
+        "22-25:4>8",
+        "22-25:4>9",
+        "26-29:5>10",
+        "26-29:6>10",
+        "30-33:5>11",
+        "30-33:6>10"
+      ],
+      "sampleStride": 200,
+      "sampleResidue": 0,
+      "maxSamplesPerBucket": 400,
+      "holdoutMod": 10,
+      "holdoutResidue": 0,
+      "targetHoldoutCoverage": 0.99,
+      "timeLimitMs": 120000,
+      "progressEvery": 20,
+      "maxTableEntries": 200000,
+      "aspirationWindow": 40,
+      "zValues": [
+        1,
+        1.5,
+        1.96,
+        2.5,
+        3
+      ]
+    },
+    "runtime": {
+      "defaultMode": "high",
+      "enableHighCut": true,
+      "enableLowCut": false,
+      "maxWindow": 1,
+      "maxChecksPerNode": 2,
+      "minDepth": 2,
+      "minDepthGap": 2,
+      "maxDepthDistance": 1,
+      "minPly": 1,
+      "intervalScale": 1,
+      "highScale": 0.93,
+      "lowScale": 1,
+      "depthDistanceScale": 1.25
+    },
+    "moduleFormat": "compact"
+  }
+}

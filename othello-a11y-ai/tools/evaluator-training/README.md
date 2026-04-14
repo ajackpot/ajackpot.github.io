@@ -2,38 +2,44 @@
 
 이 폴더는 **현재 채택된 evaluator lane** 기준으로 정리한 오프라인 학습 도구 모음입니다.
 
-현재 권장 흐름은 여섯 가지입니다.
+현재 권장 흐름은 여덟 가지입니다.
 
-1. **Stage 126 사용자 실행용 richer-corpus bundle**
+1. **Stage 136 balanced13 support-stack bundle**
+   - `run-stage136-balanced13-support-stack-bundle`
+2. **Stage 130 evaluation-profile 확장 bundle**
+   - `run-stage130-evaluation-expansion-bundle`
+3. **Stage 126 사용자 실행용 richer-corpus bundle**
    - `run-stage126-weight-learning-bundle`
-2. **올인원 다중 tuple 후보 학습 suite**
+4. **올인원 evaluation-profile 확장 candidate suite**
+   - `run-evaluation-profile-candidate-suite`
+5. **올인원 evaluation-profile micro-patch suite**
+   - `run-evaluation-profile-patch-suite`
+6. **올인원 다중 tuple 후보 학습 suite**
    - `run-multi-candidate-training-suite`
-3. **올인원 다중 MPC 후보 학습 suite**
+7. **올인원 다중 MPC 후보 학습 suite**
    - `run-mpc-candidate-training-suite`
-4. **학습 완료 후보를 잘라내는 patch/prune/attenuate suite**
-   - `run-tuple-patch-suite`
-5. **단일 후보 학습**
-   - `train-phase-linear` → `train-tuple-residual-profile` → `calibrate-tuple-residual-profile` → `export-profile-module`
-6. **layout family 빠른 파일럿**
-   - `run-tuple-layout-family-pilot`
+8. **학습 완료 후보를 잘라내는 patch/prune/attenuate suite 및 단일 후보/파일럿 도구**
+   - `run-tuple-patch-suite`, `train-phase-linear`, `run-tuple-layout-family-pilot`
 
 핵심 원칙은 다음과 같습니다.
 
 - 브라우저 런타임은 계속 **정적 JS + 작은 table lookup** 구조를 유지합니다.
 - 더 큰 가중치는 **오프라인 학습**으로 만들고, 앱에는 compact generated module만 넣습니다.
-- 현재 evaluator lane은 **phase-linear core + tuple residual additive layer**가 중심입니다.
+- 현재 evaluator lane은 **phase-linear core + tuple residual additive layer**가 중심이지만, evaluation-profile lane도 다시 열어 **phase bucket 세분화 / optional scalar feature / smoothed interpolation** 을 실험할 수 있습니다.
 - 대형 family 학습 뒤에는 곧바로 채택하지 말고, **small-patch lane**으로 late-b 억제 / tuple pruning / attenuation을 먼저 비교하는 것이 안전합니다.
-- move-ordering 재학습은 역사적으로 중요하지만, **현재 기본 lane의 주력은 아닙니다.**
+- evaluation-profile 확장도 마찬가지로, broad candidate suite 뒤에 **micro-patch lane**으로 attenuation / interpolation off / late baseline blend를 다시 비교하는 것이 안전합니다.
+- move-ordering 재학습은 역사적으로 중요하지만, **현재 기본 lane의 주력은 아닙니다.** 다만 특정 evaluation-profile finalist를 공정하게 붙일 때는 Stage 136처럼 support-stack bundle로 함께 다시 맞추는 편이 안전합니다.
 - 여러 후보를 오래 돌릴 때는 **candidate별 출력 디렉터리 + status JSON + --resume** 을 기본으로 생각합니다.
 
 ## 현재 정리된 종료 상태
 
-- 기본 브라우저 런타임은 **baseline generated module 유지**가 현재 결론입니다.
+- 기본 브라우저 런타임은 현재 **Stage 136 balanced13 support-stack generated module**을 채택한 상태입니다. 이전 설치본 generated module은 `tools/engine-match/fixtures/historical-installed-modules/`에 기록용으로만 남깁니다.
+- evaluation-profile lane은 **stage130 bundle / candidate suite / patch suite** 형태로 다시 열어 두었습니다. 기본 실험축은 bucket 세분화, optional late scalar feature, smoothed interpolation입니다.
 - 대규모 layout family 재학습 lane은 문서/도구상으로는 남겨 두되, **지금 당장 기본 추천 흐름은 아닙니다.**
 - tuple lane 새 corpus가 생기면 먼저 `run-multi-candidate-training-suite`로 후보를 만들고, 이어서 `run-tuple-patch-suite`로 small-patch lane을 여는 것이 권장 경로입니다.
 - MPC lane 재학습은 `run-mpc-candidate-training-suite`로 baseline/high-only/overlap/both-mode 후보를 한 번에 묶어 돌린 뒤, suite summary 기준으로 채택/비채택을 결정하는 것이 권장 경로입니다.
 - `entryScales`는 **마지막 남은 mismatch slot을 겨냥하는 미세 조정용**으로만 보고, 이를 새 기본 최적화 축으로 삼지는 않습니다.
-- 즉 현재 유지/전달 관점의 우선순위는 **suite → patch suite → compact generated module export** 입니다.
+- 즉 현재 유지/전달 관점의 우선순위는 **support-stack bundle / suite → patch suite → compact generated module export** 입니다. evaluation-profile lane도 같은 구조를 따릅니다.
 
 ## Stage 126 사용자 실행용 권장 bundle
 
@@ -51,14 +57,13 @@ tools\evaluator-training\run-stage126-weight-learning-bundle.bat ^
 ```bash
 node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
   --input D:/othello-data/Egaroucid_Train_Data \
-  --phase suite \
   --resume
 ```
 
 권장 순서는 다음과 같습니다.
 
 1. `--phase eta` 로 대략적인 wall-time 추정
-2. `--phase suite` 로 richer-corpus family 학습 + profile/depth/exact benchmark
+2. 기본값(`--phase all`)으로 ETA + richer-corpus family 학습 + compact patch follow-up을 한 번에 실행
 3. `--phase patch` 로 compact top-k / bucket-restricted 후보 follow-up
 
 기본 config는 다음 세 파일입니다.
@@ -68,6 +73,121 @@ node tools/evaluator-training/run-stage126-weight-learning-bundle.mjs \
 - `examples/stage126-compact-tuple-patch-followup.example.json`
 
 핵심 의도는 "학습 자체를 가능한 많이 열어 두기"가 아니라, **지금 다시 돌릴 가치가 남아 있는 lane만 사용자가 바로 돌릴 수 있게 묶는 것**입니다. 그래서 move-ordering / broad MPC / broad hand-crafted evaluator 계열은 기본 bundle에서 제외했습니다.
+
+## Stage 136 balanced13 support-stack bundle
+
+Stage 135 결선 후보 `balanced13-alllate-smoothed-stability-090`을 실제로 공정하게 붙이려면, evaluation-profile만 바꾸는 것으로는 부족합니다.
+Stage 136에서는 `run-stage136-balanced13-support-stack-bundle`을 추가해 **balanced13 evaluation-profile 기준의 보조 학습 가중치 stack**을 한 번에 다시 만들 수 있게 했습니다.
+
+기본 진입점:
+
+```bat
+tools\evaluator-training\run-stage136-balanced13-support-stack-bundle.bat ^
+  D:\othello-data\Egaroucid_Train_Data
+```
+
+또는:
+
+```bash
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase all \
+  --resume
+```
+
+기본 phase는 `all` 이며, 다음 순서로 진행됩니다.
+
+1. tuple residual 재학습
+2. tuple calibration
+3. move-ordering 재학습
+4. MPC calibration + runtime variant 생성
+5. combined generated module export
+
+기본 후보 source는 repo 안의 `tools/engine-match/fixtures/stage135-evaluation-profile-finalists/balanced13-alllate-smoothed-stability-090/` 입니다.
+별도 `--evaluation-profile-json`을 주면 그 JSON을 기준으로 같은 support-stack bundle을 다시 돌릴 수도 있습니다.
+
+부분 재실행도 가능합니다.
+
+```bash
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase mpc \
+  --resume
+
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase export \
+  --resume
+```
+
+`--phase move-ordering|mpc|export` 는 같은 `--output-root` 아래의 선행 산출물(tuple calibrated / move-ordering / runtime MPC)을 재사용합니다.
+누락된 prerequisite가 있으면 bundle이 즉시 중단하고 필요한 선행 파일을 알려 줍니다.
+
+주요 산출물은 다음 구조로 남습니다.
+
+```text
+stage136-balanced13-support-stack/
+  shared/
+    source-evaluation-profile.json
+    active-move-ordering-profile.json
+    active-tuple-residual-profile.json
+    active-mpc-profile.json
+    resolved-stack-config.json
+  tuple/
+    trained-tuple-residual-profile.json
+    trained-tuple-residual-profile.calibrated.json
+  move-ordering/
+    trained-move-ordering-profile.json
+  mpc/
+    trained-mpc-profile.json
+    runtime-mpc-profile.json
+  exported/
+    learned-eval-profile.generated.js
+    generated-module-summary.json
+  bundle-manifest.json
+  stage136-balanced13-support-stack-bundle-summary.json
+```
+
+이번 단계에서 같이 정리된 포인트는 다음과 같습니다.
+
+- `train-move-ordering-profile`은 이제 teacher/runtime stack에서 `--teacher-tuple-profile-json off`, `--teacher-mpc-profile-json off`, `--tuple-profile-json off`, `--mpc-json off` 같은 **명시적 비활성화**를 지원합니다.
+- `calibrate-mpc-profile`도 `--tuple-profile-json off`, `--mpc-profile-json off`를 받아, 의도치 않게 active support stack을 상속하지 않도록 할 수 있습니다.
+- `calibrate-tuple-residual-profile`, `train-move-ordering-profile`, `calibrate-mpc-profile`에는 bucket lookup, reusable search-engine, calibration verification 단순화 같은 **저위험 가속화**가 같이 들어가 있습니다.
+
+즉 Stage 136의 핵심 의도는 **balanced13을 active의 부속 가중치에 기대지 않고, 자기 소속 stack으로 다시 학습시켜 결선에 올릴 수 있게 만드는 것**입니다.
+
+## Stage 130 evaluation-profile 확장 bundle
+
+현재 저장소 기준에서 evaluation-profile 확장 실험을 다시 열고 싶다면, 가장 권장하는 진입점은 `run-stage130-evaluation-expansion-bundle` 입니다.
+
+기본 진입점:
+
+```bat
+tools\evaluator-training\run-stage130-evaluation-expansion-bundle.bat ^
+  D:\othello-data\Egaroucid_Train_Data
+```
+
+또는:
+
+```bash
+node tools/evaluator-training/run-stage130-evaluation-expansion-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase all \
+  --resume
+```
+
+권장 순서는 다음과 같습니다.
+
+1. `--phase eta` 로 대략적인 wall-time 추정
+2. 기본값(`--phase all`)으로 ETA + evaluation-profile candidate 학습 + micro-patch follow-up을 한 번에 실행
+3. `--phase patch` 로 finalist candidate에 대한 micro-patch follow-up
+
+기본 config는 다음 두 파일입니다.
+
+- `examples/evaluation-profile-candidate-suite.train-plus-bench.example.json`
+- `examples/evaluation-profile-patch-suite.patch-plus-bench.example.json`
+
+핵심 의도는, 손으로 bucket/feature 조합을 일일이 붙이지 않고도 **유력한 후보군을 한 번에 학습하고, 바로 follow-up patch까지 이어 갈 수 있게 묶는 것**입니다.
 
 ## 현재 권장 학습 대상
 
@@ -150,6 +270,168 @@ node tools/evaluator-training/estimate-training-time.mjs \
   --input D:/othello-data/Egaroucid_Train_Data \
   --sample-limit 200000
 ```
+
+## 2-1. 권장: evaluation-profile 확장 candidate suite
+
+`run-evaluation-profile-candidate-suite` 는 evaluation-profile 확장 후보를 **순차적으로** 학습하고, 필요하면 바로 benchmark까지 이어 주는 상위 suite입니다.
+
+이 도구는 후보별로 다음을 실행합니다.
+
+1. seed evaluation profile 생성(active 또는 지정 baseline에서 파생)
+2. `train-phase-linear` 실행
+3. compact generated module export
+4. 선택적 profile/depth/exact benchmark
+5. candidate status / suite summary / review summary 기록
+
+### 가장 쉬운 실행
+
+```bat
+tools\evaluator-training\run-evaluation-profile-candidate-suite.bat D:\othello-data\Egaroucid_Train_Data
+```
+
+config 없이 실행하면 built-in 기본 후보 세트를 사용합니다.
+
+- `balanced12-control-hard`
+- `balanced13-control-hard`
+- `balanced12-control-smoothed`
+- `balanced13-control-smoothed`
+- `default8-alllate-hard`
+- `balanced12-alllate-smoothed`
+- `balanced13-alllate-smoothed`
+
+### config 파일로 실행
+
+```bat
+tools\evaluator-training\run-evaluation-profile-candidate-suite.bat ^
+  D:\othello-data\Egaroucid_Train_Data ^
+  tools\evaluator-training\out\stage130-eval-suite ^
+  --config tools\evaluator-training\examples\evaluation-profile-candidate-suite.train-plus-bench.example.json ^
+  --resume
+```
+
+직접 실행 예시:
+
+```bash
+node tools/evaluator-training/run-evaluation-profile-candidate-suite.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --output-dir tools/evaluator-training/out/stage130-eval-suite \
+  --config tools/evaluator-training/examples/evaluation-profile-candidate-suite.train-plus-bench.example.json \
+  --resume
+```
+
+### suite가 남기는 주요 산출물
+
+```text
+evaluation-profile-candidate-suite/
+  suite-manifest.json
+  suite-summary.json
+  suite-review-summary.json
+  shared/
+    seed-base-evaluation-profile.json
+    benchmark-baseline.generated.js
+  candidates/
+    balanced13-alllate-smoothed/
+      seed-evaluation-profile.json
+      trained-evaluation-profile.json
+      learned-eval-profile.generated.js
+      candidate-resolved-config.json
+      candidate-status.json
+      benchmarks/
+        profile.benchmark.json
+        depth-search.benchmark.json
+        exact-search.benchmark.json
+```
+
+### built-in 후보 축
+
+- **phase bucket family**: `default8`, `balanced12`, `balanced13`
+- **feature family**: `control`, `late-parity-region`, `late-mobility-corner-counts`, `midlate-stability-counts`, `all-late-scalars`
+- **sample assignment**: `hard`, `linear-adjacent`
+
+### example config
+
+- `tools/evaluator-training/examples/evaluation-profile-candidate-suite.train-only.example.json`
+- `tools/evaluator-training/examples/evaluation-profile-candidate-suite.train-plus-bench.example.json`
+
+첫 번째는 train/export 중심, 두 번째는 profile / depth / exact benchmark까지 같이 도는 예제입니다.
+
+## 2-2. 권장: evaluation-profile micro-patch suite
+
+`run-evaluation-profile-patch-suite` 는 candidate suite 결과를 source로 받아, final adoption 전에 **작은 attenuation / blend / interpolation toggle** 후보를 일괄 생성하는 상위 suite입니다.
+
+이 도구는 후보별로 다음을 실행합니다.
+
+1. source evaluation profile 선택(candidate suite finalist 또는 지정 source profile)
+2. `patch-evaluation-profile` 실행
+3. compact generated module export
+4. 선택적 profile/depth/exact benchmark
+5. candidate status / suite summary / review summary 기록
+
+### 가장 쉬운 실행
+
+```bat
+tools\evaluator-training\run-evaluation-profile-patch-suite.bat tools\evaluator-training\out\stage130-eval-suite
+```
+
+`source-suite-dir`만 주면 review summary의 finalist 후보들 위에 기본 patch template 세트를 자동 전개합니다.
+
+- `extras-090`
+- `extras-075`
+- `parity-090`
+- `stability-090`
+- `lateblend-010`
+- `interp-off`
+
+### config 파일로 실행
+
+```bat
+tools\evaluator-training\run-evaluation-profile-patch-suite.bat ^
+  tools\evaluator-training\out\stage130-eval-suite ^
+  tools\evaluator-training\out\stage130-eval-patch-suite ^
+  --input D:\othello-data\Egaroucid_Train_Data ^
+  --config tools\evaluator-training\examples\evaluation-profile-patch-suite.patch-plus-bench.example.json ^
+  --resume
+```
+
+직접 실행 예시:
+
+```bash
+node tools/evaluator-training/run-evaluation-profile-patch-suite.mjs \
+  --source-suite-dir tools/evaluator-training/out/stage130-eval-suite \
+  --output-dir tools/evaluator-training/out/stage130-eval-patch-suite \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --config tools/evaluator-training/examples/evaluation-profile-patch-suite.patch-plus-bench.example.json \
+  --resume
+```
+
+### suite가 남기는 주요 산출물
+
+```text
+evaluation-profile-patch-suite/
+  suite-manifest.json
+  suite-summary.json
+  suite-review-summary.json
+  shared/
+    benchmark-baseline.generated.js
+  candidates/
+    balanced13-alllate-smoothed__interp-off/
+      trained-evaluation-profile.patched.json
+      patch-summary.json
+      learned-eval-profile.generated.js
+      candidate-resolved-config.json
+      candidate-status.json
+      benchmarks/
+        profile.benchmark.json
+        depth-search.benchmark.json
+        exact-search.benchmark.json
+```
+
+### example config
+
+- `tools/evaluator-training/examples/evaluation-profile-patch-suite.patch-only.example.json`
+- `tools/evaluator-training/examples/evaluation-profile-patch-suite.patch-plus-bench.example.json`
+
+첫 번째는 patch/export 중심, 두 번째는 profile / depth / exact benchmark까지 같이 도는 예제입니다.
 
 ## 3. 권장: 올인원 다중 후보 suite
 
@@ -508,6 +790,50 @@ node tools/evaluator-training/build-generated-profile-module.mjs \
 
 generated module 자체는 선택 사항입니다.
 
+### E. balanced13 support-stack 재학습
+
+Stage 135 결선 후보 balanced13에 대해 move-ordering / tuple residual / MPC까지 공정하게 다시 맞추려면 아래 bundle을 사용하십시오.
+
+```bat
+tools\evaluator-training\run-stage136-balanced13-support-stack-bundle.bat ^
+  D:\othello-data\Egaroucid_Train_Data
+```
+
+직접 실행:
+
+```bash
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --resume
+```
+
+MPC만 다시 이어서 돌리고 싶으면:
+
+```bash
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase mpc \
+  --resume
+```
+
+export만 다시 만들고 싶으면:
+
+```bash
+node tools/evaluator-training/run-stage136-balanced13-support-stack-bundle.mjs \
+  --input D:/othello-data/Egaroucid_Train_Data \
+  --phase export \
+  --resume
+```
+
+학습 후 회수하면 좋은 핵심 파일은 다음입니다.
+
+- `tuple/trained-tuple-residual-profile.calibrated.json`
+- `move-ordering/trained-move-ordering-profile.json`
+- `mpc/trained-mpc-profile.json`
+- `mpc/runtime-mpc-profile.json`
+- `exported/learned-eval-profile.generated.js`
+- `stage136-balanced13-support-stack-bundle-summary.json`
+
 ## 6. layout family 빠른 파일럿
 
 `run-tuple-layout-family-pilot.mjs` 는 layout 비교만 빠르게 돌리고 싶을 때 여전히 유용합니다.
@@ -624,17 +950,25 @@ opening prior는 evaluator lane과 별개로 유지합니다.
 
 ## 11. 어떤 파일을 보내면 되는가
 
-현재 evaluator lane 기준으로는 아래 두 파일이면 충분합니다.
+현재 evaluator lane 기준으로는 보통 아래 파일 조합이면 충분합니다.
+
+### evaluation-profile lane
+
+1. `trained-evaluation-profile.json` 또는 `trained-evaluation-profile.patched.json`
+2. `suite-summary.json`
+3. 가능하면 `suite-review-summary.json`
+
+### tuple lane
 
 1. `trained-evaluation-profile.json`
 2. `trained-tuple-residual-profile.calibrated.json`
 
 같이 보내면 도움이 되는 선택 항목:
 
-- `suite-summary.json`
+- `learned-eval-profile.generated.js`
+- depth / exact benchmark JSON
 - `tuple_layout_candidate_size_summary.json`
 - `tuple-layout-family-pilot-summary.json`
-- depth / exact benchmark JSON
 
 ## 12. 도구 색인
 

@@ -11,7 +11,7 @@ import {
   rowColToIndex,
 } from '../core/bitboard.js';
 
-export const EVALUATION_FEATURE_KEYS = Object.freeze([
+export const DEFAULT_EVALUATION_FEATURE_KEYS = Object.freeze([
   'mobility',
   'potentialMobility',
   'corners',
@@ -33,6 +33,25 @@ export const EVALUATION_FEATURE_KEYS = Object.freeze([
   'parityRegion',
 ]);
 
+export const OPTIONAL_EVALUATION_FEATURE_KEYS = Object.freeze([
+  'parityRegionCount',
+  'parityOddRegions',
+  'parityEvenRegions',
+  'myMoveCount',
+  'opponentMoveCount',
+  'cornerMoveCount',
+  'opponentCornerMoveCount',
+  'stableDiscs',
+  'opponentStableDiscs',
+]);
+
+export const SUPPORTED_EVALUATION_FEATURE_KEYS = Object.freeze([
+  ...DEFAULT_EVALUATION_FEATURE_KEYS,
+  ...OPTIONAL_EVALUATION_FEATURE_KEYS,
+]);
+
+export const EVALUATION_FEATURE_KEYS = DEFAULT_EVALUATION_FEATURE_KEYS;
+
 export const MOVE_ORDERING_FEATURE_KEYS = Object.freeze([
   'mobility',
   'corners',
@@ -43,7 +62,7 @@ export const MOVE_ORDERING_FEATURE_KEYS = Object.freeze([
   'parity',
 ]);
 
-export const EVALUATION_PHASE_BUCKET_SPECS = Object.freeze([
+export const DEFAULT_EVALUATION_PHASE_BUCKET_SPECS = Object.freeze([
   Object.freeze({ key: 'opening-a', minEmpties: 52, maxEmpties: 60, label: '초반 1' }),
   Object.freeze({ key: 'opening-b', minEmpties: 44, maxEmpties: 51, label: '초반 2' }),
   Object.freeze({ key: 'midgame-a', minEmpties: 36, maxEmpties: 43, label: '중반 1' }),
@@ -53,6 +72,8 @@ export const EVALUATION_PHASE_BUCKET_SPECS = Object.freeze([
   Object.freeze({ key: 'late-b', minEmpties: 7, maxEmpties: 12, label: '후반 2' }),
   Object.freeze({ key: 'endgame', minEmpties: 0, maxEmpties: 6, label: '끝내기' }),
 ]);
+
+export const EVALUATION_PHASE_BUCKET_SPECS = DEFAULT_EVALUATION_PHASE_BUCKET_SPECS;
 
 export const DEFAULT_MOVE_ORDERING_TRAINED_BUCKETS = Object.freeze([
   Object.freeze({
@@ -167,16 +188,76 @@ function canonicalizeEvaluationWeightsForBucket(bucketSpec, weights = {}) {
 
 export { canonicalizeEvaluationWeightsForBucket };
 
-function normalizeWeights(sourceWeights = {}, fallbackWeights = {}, bucketSpec = null) {
+function trimWeightsToFeatureKeys(weights = {}, featureKeys = DEFAULT_EVALUATION_FEATURE_KEYS) {
+  const trimmed = {
+    bias: coerceFiniteNumber(weights.bias, 0),
+  };
+  for (const key of featureKeys) {
+    trimmed[key] = coerceFiniteNumber(weights[key], 0);
+  }
+  return trimmed;
+}
+
+function normalizeEvaluationFeatureKeys(featureKeys, fallback = DEFAULT_EVALUATION_FEATURE_KEYS) {
+  const resolved = [];
+  const seen = new Set();
+  const source = Array.isArray(featureKeys) && featureKeys.length > 0 ? featureKeys : fallback;
+
+  for (const rawKey of source) {
+    const key = typeof rawKey === 'string' ? rawKey.trim() : '';
+    if (!key || seen.has(key)) {
+      continue;
+    }
+    if (!SUPPORTED_EVALUATION_FEATURE_KEYS.includes(key)) {
+      throw new Error(`Unsupported evaluation feature key: ${key}`);
+    }
+    seen.add(key);
+    resolved.push(key);
+  }
+
+  return Object.freeze(resolved.length > 0 ? resolved : [...DEFAULT_EVALUATION_FEATURE_KEYS]);
+}
+
+function normalizeEvaluationInterpolation(interpolation) {
+  if (!interpolation) {
+    return null;
+  }
+
+  if (typeof interpolation === 'string') {
+    const mode = interpolation.trim().toLowerCase();
+    if (!mode || mode === 'off' || mode === 'none' || mode === 'disabled') {
+      return null;
+    }
+    if (['linear', 'linear-adjacent', 'linear-adjacent-midpoint', 'midpoint-linear'].includes(mode)) {
+      return Object.freeze({ enabled: true, mode: 'linear-adjacent-midpoint' });
+    }
+    throw new Error(`Unsupported evaluation interpolation mode: ${interpolation}`);
+  }
+
+  if (typeof interpolation === 'object') {
+    if (interpolation.enabled === false) {
+      return null;
+    }
+    const rawMode = typeof interpolation.mode === 'string' ? interpolation.mode : 'linear-adjacent-midpoint';
+    return normalizeEvaluationInterpolation(rawMode);
+  }
+
+  return null;
+}
+
+function normalizeWeights(sourceWeights = {}, fallbackWeights = {}, bucketSpec = null, featureKeys = DEFAULT_EVALUATION_FEATURE_KEYS) {
   const normalized = {
     bias: coerceFiniteNumber(sourceWeights.bias, fallbackWeights.bias ?? 0),
   };
 
-  for (const key of EVALUATION_FEATURE_KEYS) {
+  for (const key of featureKeys) {
     normalized[key] = coerceFiniteNumber(sourceWeights[key], fallbackWeights[key] ?? 0);
   }
 
-  return Object.freeze(canonicalizeEvaluationWeightsForBucket(bucketSpec, normalized));
+  return Object.freeze(trimWeightsToFeatureKeys(
+    canonicalizeEvaluationWeightsForBucket(bucketSpec, normalized),
+    featureKeys,
+  ));
 }
 
 function normalizeMoveOrderingWeights(sourceWeights = {}, fallbackWeights = {}) {
@@ -187,10 +268,10 @@ function normalizeMoveOrderingWeights(sourceWeights = {}, fallbackWeights = {}) 
   return Object.freeze(normalized);
 }
 
-function buildDefaultPhaseBuckets() {
-  return Object.freeze(EVALUATION_PHASE_BUCKET_SPECS.map((bucketSpec) => Object.freeze({
+function buildDefaultPhaseBuckets(bucketSpecs = DEFAULT_EVALUATION_PHASE_BUCKET_SPECS, featureKeys = DEFAULT_EVALUATION_FEATURE_KEYS) {
+  return Object.freeze(bucketSpecs.map((bucketSpec) => Object.freeze({
     ...bucketSpec,
-    weights: normalizeWeights(legacyWeightsForEmpties(midpointForBucket(bucketSpec)), {}, bucketSpec),
+    weights: normalizeWeights(legacyWeightsForEmpties(midpointForBucket(bucketSpec)), {}, bucketSpec, featureKeys),
   })));
 }
 
@@ -198,8 +279,9 @@ export const DEFAULT_EVALUATION_PROFILE = Object.freeze({
   version: 1,
   name: 'legacy-seed-bucketed-v1',
   description: '기존 수작업 evaluator를 phase bucket weight 구조로 옮긴 기본 프로필입니다.',
-  featureKeys: EVALUATION_FEATURE_KEYS,
+  featureKeys: DEFAULT_EVALUATION_FEATURE_KEYS,
   phaseBuckets: buildDefaultPhaseBuckets(),
+  interpolation: null,
 });
 
 function findMatchingBucket(sourcePhaseBuckets, bucketSpec) {
@@ -213,6 +295,161 @@ function findMatchingBucket(sourcePhaseBuckets, bucketSpec) {
     }
     return bucket?.minEmpties === bucketSpec.minEmpties && bucket?.maxEmpties === bucketSpec.maxEmpties;
   }) ?? null;
+}
+
+function normalizePhaseBucketKey(bucket, index) {
+  const rawKey = typeof bucket?.key === 'string' ? bucket.key.trim() : '';
+  if (rawKey !== '') {
+    return rawKey;
+  }
+  return `phase-${String(index + 1).padStart(2, '0')}`;
+}
+
+function sortPhaseBucketsDescending(phaseBuckets) {
+  return Object.freeze([...phaseBuckets].sort((left, right) => {
+    if (right.maxEmpties !== left.maxEmpties) {
+      return right.maxEmpties - left.maxEmpties;
+    }
+    if (right.minEmpties !== left.minEmpties) {
+      return right.minEmpties - left.minEmpties;
+    }
+    return String(left.key).localeCompare(String(right.key));
+  }));
+}
+
+function normalizeEvaluationPhaseBuckets(
+  sourcePhaseBuckets,
+  featureKeys,
+  fallbackBuckets = DEFAULT_EVALUATION_PROFILE.phaseBuckets,
+) {
+  const sourceBuckets = Array.isArray(sourcePhaseBuckets) && sourcePhaseBuckets.length > 0
+    ? sourcePhaseBuckets
+    : fallbackBuckets;
+
+  const normalized = sourceBuckets.map((bucket, index) => {
+    const fallbackBucket = findMatchingBucket(fallbackBuckets, bucket) ?? fallbackBuckets[index] ?? null;
+    const range = normalizeEmptyBucketRange(
+      bucket?.minEmpties,
+      bucket?.maxEmpties,
+      {
+        fallbackMin: fallbackBucket?.minEmpties ?? 0,
+        fallbackMax: fallbackBucket?.maxEmpties ?? 0,
+      },
+    );
+    const fallbackWeights = fallbackBucket?.weights ?? legacyWeightsForEmpties(midpointForBucket(range));
+    return Object.freeze({
+      key: normalizePhaseBucketKey(bucket, index),
+      ...(typeof bucket?.label === 'string' && bucket.label.trim() !== '' ? { label: bucket.label } : {}),
+      minEmpties: range.minEmpties,
+      maxEmpties: range.maxEmpties,
+      weights: normalizeWeights(bucket?.weights ?? {}, fallbackWeights, range, featureKeys),
+    });
+  });
+
+  return sortPhaseBucketsDescending(normalized);
+}
+
+function blendEvaluationWeights(leftWeights, rightWeights, featureKeys, ratio) {
+  const t = clamp(Number(ratio), 0, 1);
+  const blended = {
+    bias: lerp(leftWeights?.bias ?? 0, rightWeights?.bias ?? 0, t),
+  };
+  for (const key of featureKeys) {
+    blended[key] = lerp(leftWeights?.[key] ?? 0, rightWeights?.[key] ?? 0, t);
+  }
+  return Object.freeze(trimWeightsToFeatureKeys(blended, featureKeys));
+}
+
+function buildBucketsByCenterAscending(phaseBuckets) {
+  return Object.freeze([...phaseBuckets]
+    .map((bucket, index) => Object.freeze({
+      index,
+      bucket,
+      center: midpointForBucket(bucket),
+    }))
+    .sort((left, right) => left.center - right.center));
+}
+
+function buildInterpolatedWeightsByEmptyCount(resolvedProfile, bucketsByEmptyCount, bucketsByCenterAscending = null) {
+  const interpolation = normalizeEvaluationInterpolation(resolvedProfile?.interpolation ?? null);
+  if (!interpolation || resolvedProfile.phaseBuckets.length <= 1) {
+    return Object.freeze(bucketsByEmptyCount.map((bucket) => bucket?.weights ?? Object.freeze({ bias: 0 })));
+  }
+
+  const bucketsByCenter = bucketsByCenterAscending ?? buildBucketsByCenterAscending(resolvedProfile.phaseBuckets);
+  const featureKeys = resolvedProfile.featureKeys ?? DEFAULT_EVALUATION_FEATURE_KEYS;
+
+  return Object.freeze(Array.from({ length: 61 }, (_, empties) => {
+    const value = clamp(empties, 0, 60);
+    if (value <= bucketsByCenter[0].center) {
+      return bucketsByCenter[0].bucket.weights;
+    }
+    if (value >= bucketsByCenter[bucketsByCenter.length - 1].center) {
+      return bucketsByCenter[bucketsByCenter.length - 1].bucket.weights;
+    }
+
+    let rightIndex = 1;
+    while (rightIndex < bucketsByCenter.length && value > bucketsByCenter[rightIndex].center) {
+      rightIndex += 1;
+    }
+
+    const left = bucketsByCenter[rightIndex - 1];
+    const right = bucketsByCenter[rightIndex];
+    const span = right.center - left.center;
+    const ratio = span <= 1e-9 ? 0 : (value - left.center) / span;
+    return blendEvaluationWeights(left.bucket.weights, right.bucket.weights, featureKeys, ratio);
+  }));
+}
+
+function buildBucketIndexByEmptyCount(phaseBuckets, bucketsByEmptyCount) {
+  const bucketIndexByKey = new Map(phaseBuckets.map((bucket, index) => [bucket.key, index]));
+  return Object.freeze(bucketsByEmptyCount.map((bucket) => {
+    const bucketIndex = bucketIndexByKey.get(bucket?.key);
+    return Number.isInteger(bucketIndex) ? bucketIndex : Math.max(0, phaseBuckets.length - 1);
+  }));
+}
+
+function buildHardBucketAssignmentsByEmptyCount(bucketIndexByEmptyCount) {
+  return Object.freeze(bucketIndexByEmptyCount.map((bucketIndex) => Object.freeze([
+    Object.freeze({ bucketIndex, weight: 1 }),
+  ])));
+}
+
+function buildLinearAdjacentAssignmentsByEmptyCount(phaseBuckets, bucketIndexByEmptyCount, bucketsByCenterAscending = null) {
+  const hardAssignments = buildHardBucketAssignmentsByEmptyCount(bucketIndexByEmptyCount);
+  if (phaseBuckets.length <= 1) {
+    return hardAssignments;
+  }
+
+  const bucketsByCenter = bucketsByCenterAscending ?? buildBucketsByCenterAscending(phaseBuckets);
+  return Object.freeze(Array.from({ length: 61 }, (_, empties) => {
+    const value = clamp(empties, 0, 60);
+    if (value <= bucketsByCenter[0].center) {
+      return hardAssignments[value];
+    }
+    if (value >= bucketsByCenter[bucketsByCenter.length - 1].center) {
+      return hardAssignments[value];
+    }
+
+    let rightIndex = 1;
+    while (rightIndex < bucketsByCenter.length && value > bucketsByCenter[rightIndex].center) {
+      rightIndex += 1;
+    }
+
+    const left = bucketsByCenter[rightIndex - 1];
+    const right = bucketsByCenter[rightIndex];
+    const span = right.center - left.center;
+    const rightWeight = span <= 1e-9 ? 0 : clamp((value - left.center) / span, 0, 1);
+    const leftWeight = clamp(1 - rightWeight, 0, 1);
+    if (leftWeight <= 1e-9 || rightWeight <= 1e-9 || left.index === right.index) {
+      return hardAssignments[value];
+    }
+
+    return Object.freeze([
+      Object.freeze({ bucketIndex: left.index, weight: leftWeight }),
+      Object.freeze({ bucketIndex: right.index, weight: rightWeight }),
+    ]);
+  }));
 }
 
 function normalizeEmptyBucketRange(minEmpties, maxEmpties, { fallbackMin = 0, fallbackMax = 0 } = {}) {
@@ -460,17 +697,13 @@ export const ACTIVE_MPC_PROFILE = GENERATED_MPC_PROFILE ?? null;
 
 export function resolveEvaluationProfile(profile = ACTIVE_EVALUATION_PROFILE) {
   const source = profile && typeof profile === 'object' ? profile : DEFAULT_EVALUATION_PROFILE;
-  const fallbackBuckets = DEFAULT_EVALUATION_PROFILE.phaseBuckets;
-
-  const phaseBuckets = Object.freeze(EVALUATION_PHASE_BUCKET_SPECS.map((bucketSpec, index) => {
-    const fallbackBucket = fallbackBuckets[index];
-    const sourceBucket = findMatchingBucket(source.phaseBuckets, bucketSpec);
-
-    return Object.freeze({
-      ...bucketSpec,
-      weights: normalizeWeights(sourceBucket?.weights, fallbackBucket.weights, bucketSpec),
-    });
-  }));
+  const featureKeys = normalizeEvaluationFeatureKeys(source.featureKeys, DEFAULT_EVALUATION_PROFILE.featureKeys);
+  const phaseBuckets = normalizeEvaluationPhaseBuckets(
+    source.phaseBuckets,
+    featureKeys,
+    DEFAULT_EVALUATION_PROFILE.phaseBuckets,
+  );
+  const interpolation = normalizeEvaluationInterpolation(source.interpolation ?? source.phaseInterpolation ?? null);
 
   return Object.freeze({
     version: Number.isInteger(source.version) ? source.version : DEFAULT_EVALUATION_PROFILE.version,
@@ -478,14 +711,19 @@ export function resolveEvaluationProfile(profile = ACTIVE_EVALUATION_PROFILE) {
       ? source.name
       : DEFAULT_EVALUATION_PROFILE.name,
     description: typeof source.description === 'string' ? source.description : DEFAULT_EVALUATION_PROFILE.description,
-    featureKeys: EVALUATION_FEATURE_KEYS,
+    ...(Object.hasOwn(source, 'stage') ? { stage: source.stage } : {}),
+    ...(Object.hasOwn(source, 'source') ? { source: source.source } : {}),
+    ...(Object.hasOwn(source, 'diagnostics') ? { diagnostics: source.diagnostics } : {}),
+    featureKeys,
     phaseBuckets,
+    ...(interpolation ? { interpolation } : {}),
   });
 }
 
 export function compileEvaluationProfile(profile = ACTIVE_EVALUATION_PROFILE) {
   const resolved = resolveEvaluationProfile(profile);
-  const bucketsByEmptyCount = Array.from({ length: 61 }, () => resolved.phaseBuckets[resolved.phaseBuckets.length - 1]);
+  const fallbackBucket = resolved.phaseBuckets[resolved.phaseBuckets.length - 1] ?? DEFAULT_EVALUATION_PROFILE.phaseBuckets[DEFAULT_EVALUATION_PROFILE.phaseBuckets.length - 1];
+  const bucketsByEmptyCount = Array.from({ length: 61 }, () => fallbackBucket);
 
   for (const bucket of resolved.phaseBuckets) {
     for (let empties = bucket.minEmpties; empties <= bucket.maxEmpties; empties += 1) {
@@ -495,9 +733,28 @@ export function compileEvaluationProfile(profile = ACTIVE_EVALUATION_PROFILE) {
     }
   }
 
+  const bucketsByCenterAscending = buildBucketsByCenterAscending(resolved.phaseBuckets);
+  const bucketIndexByEmptyCount = buildBucketIndexByEmptyCount(resolved.phaseBuckets, bucketsByEmptyCount);
+  const hardBucketAssignmentsByEmptyCount = buildHardBucketAssignmentsByEmptyCount(bucketIndexByEmptyCount);
+  const linearAdjacentBucketAssignmentsByEmptyCount = buildLinearAdjacentAssignmentsByEmptyCount(
+    resolved.phaseBuckets,
+    bucketIndexByEmptyCount,
+    bucketsByCenterAscending,
+  );
+  const weightsByEmptyCount = buildInterpolatedWeightsByEmptyCount(
+    resolved,
+    bucketsByEmptyCount,
+    bucketsByCenterAscending,
+  );
+
   return Object.freeze({
     ...resolved,
     bucketsByEmptyCount: Object.freeze(bucketsByEmptyCount),
+    bucketIndexByEmptyCount,
+    bucketsByCenterAscending,
+    hardBucketAssignmentsByEmptyCount,
+    linearAdjacentBucketAssignmentsByEmptyCount,
+    weightsByEmptyCount,
   });
 }
 
@@ -817,7 +1074,9 @@ export function compileMpcProfile(profile = ACTIVE_MPC_PROFILE) {
 export function makeTrainingProfileFromWeights({
   name = 'trained-phase-linear',
   description = '외부 학습 도구로 생성한 phase bucket linear evaluator입니다.',
+  featureKeys = DEFAULT_EVALUATION_FEATURE_KEYS,
   phaseBuckets = [],
+  interpolation = null,
   stage = null,
   source = null,
   diagnostics = null,
@@ -826,6 +1085,8 @@ export function makeTrainingProfileFromWeights({
     version: 1,
     name,
     description,
+    featureKeys,
+    ...(interpolation ? { interpolation } : {}),
     ...(stage ? { stage } : {}),
     ...(source ? { source } : {}),
     ...(diagnostics ? { diagnostics } : {}),

@@ -999,7 +999,7 @@ function runSearchTests() {
     randomness: 0,
     styleKey: 'aggressive',
   });
-  assert.equal(engine.transpositionTable.size, sizeBeforeUpdate, 'Style changes should be ignored while custom difficulty is active.');
+  assert.equal(engine.transpositionTable.size, 0, 'Style changes should now clear the transposition table even while custom difficulty is active because the style overlay is part of the runtime semantics.');
 
   engine.updateOptions({
     presetKey: 'custom',

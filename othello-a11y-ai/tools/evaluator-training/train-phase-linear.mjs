@@ -8,15 +8,16 @@ import {
   ACTIVE_TUPLE_RESIDUAL_PROFILE,
 } from '../../js/ai/evaluation-profiles.js';
 import {
-  REGRESSION_FEATURE_KEYS,
   addOuterProductSubsetInPlace,
   addScaledVectorSubsetInPlace,
+  bucketAssignmentsForEmpties,
   bucketIndexForEmpties,
   buildProfileFromBucketWeights,
   calculateTotalInputBytes,
   collectInputFileEntries,
   createEvaluatorForProfile,
   createFeatureScratch,
+  createRegressionVectorScratch,
   createMetricAccumulator,
   defaultEvaluationProfileName,
   detectKnownDatasetSampleCount,
@@ -28,8 +29,10 @@ import {
   formatDurationSeconds,
   formatInteger,
   loadJsonFileIfPresent,
+  normalizeEvaluationSampleAssignmentMode,
   parseArgs,
   percentage,
+  regressionFeatureKeysForEvaluationFeatureList,
   resolveCliPath,
   resolveSeedProfile,
   resolveTrainingOutputPath,
@@ -52,6 +55,7 @@ function printUsage() {
     --input <file-or-dir> [--input <file-or-dir> ...] \
     [--target-scale 3000] [--holdout-mod 10] [--holdout-residue 0] \
     [--lambda 5000] [--limit 200000] [--progress-every 250000] [--skip-diagnostics] \
+    [--sample-assignment-mode hard|linear-adjacent] \
     [--exclude-features bias,potentialMobility] \
     [--exclude-features-by-bucket "late-a:potentialMobility,edgePattern;late-b:potentialMobility"] [--keep-parity-aliases] \
     [--seed-profile path/to/profile.json] \
@@ -212,11 +216,17 @@ const estimatedTotalSamples = limit ?? detectKnownDatasetSampleCount(inputFiles)
 
 const seedProfileInput = loadJsonFileIfPresent(args['seed-profile']);
 const seedProfile = resolveSeedProfile(seedProfileInput);
-const dimension = REGRESSION_FEATURE_KEYS.length;
-const globalExcludedFeatures = parseFeatureList(args['exclude-features'], REGRESSION_FEATURE_KEYS);
+const regressionFeatureKeys = regressionFeatureKeysForEvaluationFeatureList(seedProfile.featureKeys);
+const dimension = regressionFeatureKeys.length;
+const inferredSampleAssignmentMode = seedProfile.interpolation ? 'linear-adjacent' : 'hard';
+const sampleAssignmentMode = normalizeEvaluationSampleAssignmentMode(
+  args['sample-assignment-mode'],
+  inferredSampleAssignmentMode,
+);
+const globalExcludedFeatures = parseFeatureList(args['exclude-features'], regressionFeatureKeys);
 const bucketExcludedFeatures = parseBucketFeatureList(
   args['exclude-features-by-bucket'],
-  REGRESSION_FEATURE_KEYS,
+  regressionFeatureKeys,
   seedProfile.phaseBuckets.map((bucket) => bucket.key),
 );
 const keepParityAliases = Boolean(args['keep-parity-aliases']);
@@ -231,22 +241,26 @@ const excludedFeaturesByBucket = seedProfile.phaseBuckets.map((bucket) => {
   }
   return excluded;
 });
-const activeIndicesByBucket = excludedFeaturesByBucket.map((excluded) => REGRESSION_FEATURE_KEYS
+const activeIndicesByBucket = excludedFeaturesByBucket.map((excluded) => regressionFeatureKeys
   .map((key, index) => (excluded.has(key) ? null : index))
   .filter((index) => index !== null));
-const priorSolutions = seedProfile.phaseBuckets.map((bucket) => solutionFromWeights(bucket.weights));
+const priorSolutions = seedProfile.phaseBuckets.map((bucket) => solutionFromWeights(bucket.weights, seedProfile.featureKeys));
 const bucketTrainStats = seedProfile.phaseBuckets.map(() => ({
   xtx: zeroMatrix(dimension),
   xty: zeroVector(dimension),
   trainCount: 0,
+  trainWeightSum: 0,
   holdoutCount: 0,
+  holdoutWeightSum: 0,
 }));
-const scratches = seedProfile.phaseBuckets.map(() => createFeatureScratch());
+const scratch = createFeatureScratch();
+const vectorScratch = createRegressionVectorScratch(seedProfile.featureKeys);
 const globalStartMs = Date.now();
 const totalWorkBytes = totalInputBytes * (skipDiagnostics ? 1 : 2);
 
 console.log(`Training on ${inputFiles.length} file(s) with ${seedProfile.phaseBuckets.length} phase bucket(s).`);
 console.log(`targetScale=${targetScale}, holdoutMod=${holdoutMod}, lambda=${regularization}${limit ? `, limit=${limit}` : ''}`);
+console.log(`featureKeys=${seedProfile.featureKeys.length}, regressionDimension=${dimension}, sampleAssignmentMode=${sampleAssignmentMode}`);
 if (estimatedTotalSamples) {
   console.log(`Estimated samples: ${formatInteger(estimatedTotalSamples)}`);
 }
@@ -282,30 +296,36 @@ const fitProgress = progressEvery > 0
   : null;
 
 const seenSamples = await streamTrainingSamples(inputFiles, { targetScale, limit }, ({ state, target, sampleIndex, totalBytesProcessed }) => {
-  const scratch = scratches[0];
-  const { record, vector } = fillRegressionVectorFromState(state, scratch);
-  const bucketIndex = bucketIndexForEmpties(seedProfile, record.empties);
-  const bucketStats = bucketTrainStats[bucketIndex];
+  const { record, vector } = fillRegressionVectorFromState(state, scratch, seedProfile.featureKeys, vectorScratch);
+  const hardBucketIndex = bucketIndexForEmpties(seedProfile, record.empties);
+  const assignments = bucketAssignmentsForEmpties(seedProfile, record.empties, sampleAssignmentMode);
 
   if (shouldUseHoldout(sampleIndex, holdoutMod, holdoutResidue)) {
+    const bucketStats = bucketTrainStats[hardBucketIndex];
     bucketStats.holdoutCount += 1;
+    bucketStats.holdoutWeightSum += 1;
     if (fitProgress) {
       fitProgress({ sampleIndex, totalBytesProcessed });
     }
     return;
   }
 
-  const activeIndices = activeIndicesByBucket[bucketIndex];
-  addOuterProductSubsetInPlace(bucketStats.xtx, vector, activeIndices, 1);
-  addScaledVectorSubsetInPlace(bucketStats.xty, vector, target, activeIndices);
-  bucketStats.trainCount += 1;
+  for (const assignment of assignments) {
+    const bucketStats = bucketTrainStats[assignment.bucketIndex];
+    const activeIndices = activeIndicesByBucket[assignment.bucketIndex];
+    addOuterProductSubsetInPlace(bucketStats.xtx, vector, activeIndices, assignment.weight);
+    addScaledVectorSubsetInPlace(bucketStats.xty, vector, target * assignment.weight, activeIndices);
+    bucketStats.trainWeightSum += assignment.weight;
+  }
+
+  bucketTrainStats[hardBucketIndex].trainCount += 1;
   if (fitProgress) {
     fitProgress({ sampleIndex, totalBytesProcessed });
   }
 });
 
 const solvedWeightVectors = bucketTrainStats.map((stats, bucketIndex) => {
-  if (stats.trainCount === 0) {
+  if (stats.trainWeightSum <= 1e-9) {
     return [...priorSolutions[bucketIndex]];
   }
 
@@ -328,6 +348,8 @@ let trainedProfile = buildProfileFromBucketWeights(seedProfile, solvedWeightVect
     regularization,
     seenSamples,
     skipDiagnostics,
+    sampleAssignmentMode,
+    featureKeys: [...seedProfile.featureKeys],
     keepParityAliases,
     globalExcludedFeatures: formatFeatureSet(globalExcludedFeatures),
     bucketExcludedFeatures: seedProfile.phaseBuckets.map((bucket, index) => ({
@@ -344,7 +366,9 @@ const trainCountsByBucket = seedProfile.phaseBuckets.map((bucket, index) => ({
   minEmpties: bucket.minEmpties,
   maxEmpties: bucket.maxEmpties,
   trainCount: bucketTrainStats[index].trainCount,
+  trainWeightSum: bucketTrainStats[index].trainWeightSum,
   holdoutCount: bucketTrainStats[index].holdoutCount,
+  holdoutWeightSum: bucketTrainStats[index].holdoutWeightSum,
 }));
 const excludedFeatureSummaryByBucket = seedProfile.phaseBuckets.map((bucket, index) => ({
   key: bucket.key,
@@ -373,9 +397,7 @@ if (!skipDiagnostics) {
     : null;
 
   await streamTrainingSamples(inputFiles, { targetScale, limit }, ({ state, target, sampleIndex, totalBytesProcessed }) => {
-    const scratch = scratches[0];
-    const { record } = fillRegressionVectorFromState(state, scratch);
-    const bucketIndex = bucketIndexForEmpties(seedProfile, record.empties);
+    const bucketIndex = bucketIndexForEmpties(seedProfile, state.getEmptyCount());
     const prediction = evaluator.evaluate(state, state.currentPlayer);
     const residual = prediction - target;
 
@@ -409,6 +431,8 @@ if (!skipDiagnostics) {
     diagnostics: {
       trainCountsByBucket,
       excludedFeatureSummaryByBucket,
+      featureKeys: [...seedProfile.featureKeys],
+      sampleAssignmentMode,
       all: {
         ...allSummary,
         maeInStones: allSummary.mae === null ? null : allSummary.mae / targetScale,
@@ -453,6 +477,8 @@ if (!skipDiagnostics) {
     diagnostics: {
       trainCountsByBucket,
       excludedFeatureSummaryByBucket,
+      featureKeys: [...seedProfile.featureKeys],
+      sampleAssignmentMode,
       skipped: true,
       reason: '--skip-diagnostics option used',
       createdAt: new Date().toISOString(),

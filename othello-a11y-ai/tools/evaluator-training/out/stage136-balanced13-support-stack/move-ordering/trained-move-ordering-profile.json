@@ -1,0 +1,1735 @@
+{
+  "version": 1,
+  "name": "balanced13-alllate-smoothed-stability-090__move-ordering",
+  "description": "balanced13-alllate-smoothed-stability-090 evaluation profile 기준의 move-ordering retrain candidate",
+  "stage": {
+    "number": 136,
+    "tag": "stage136",
+    "file": "stage-info.json",
+    "label": "Stage 136",
+    "updatedAt": "2026-04-13T23:59:00+09:00",
+    "kind": "move-ordering-profile"
+  },
+  "featureKeys": [
+    "mobility",
+    "corners",
+    "cornerAdjacency",
+    "edgePattern",
+    "cornerPattern",
+    "discDifferential",
+    "parity"
+  ],
+  "source": {
+    "inputFiles": [
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000000.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000001.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000002.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000003.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000004.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000005.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000006.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000007.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000008.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000009.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000010.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000011.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000012.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000013.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000014.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000015.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000016.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000017.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000018.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000019.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000020.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000021.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000022.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000023.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000024.txt",
+      "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\Egaroucid_Train_Data\\0001_egaroucid_7_5_1_lv17\\0000025.txt"
+    ],
+    "teacherEvaluationProfileName": "balanced13-alllate-smoothed stability extras 0.90x",
+    "teacherEvaluationProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage136-balanced13-support-stack\\shared\\source-evaluation-profile.json",
+    "teacherMoveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+    "teacherMoveOrderingProfilePath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage136-balanced13-support-stack\\shared\\active-move-ordering-profile.json",
+    "regularization": 5000,
+    "scannedSamples": 3945617,
+    "eligibleRoots": 299801,
+    "acceptedRoots": 1500,
+    "targetMode": "root-mean",
+    "rootWeighting": "uniform",
+    "exactRootWeightScale": 1,
+    "excludedFeatureKeys": []
+  },
+  "diagnostics": {
+    "bucketCounts": [
+      {
+        "key": "child-11-12",
+        "minEmpties": 11,
+        "maxEmpties": 12,
+        "trainRootCount": 448,
+        "holdoutRootCount": 52,
+        "trainMoveCount": 3202,
+        "holdoutMoveCount": 353,
+        "exactRootCount": 500,
+        "depthRootCount": 0,
+        "rootWeightSum": 500
+      },
+      {
+        "key": "child-15-16",
+        "minEmpties": 15,
+        "maxEmpties": 16,
+        "trainRootCount": 445,
+        "holdoutRootCount": 55,
+        "trainMoveCount": 3818,
+        "holdoutMoveCount": 460,
+        "exactRootCount": 0,
+        "depthRootCount": 500,
+        "rootWeightSum": 500
+      },
+      {
+        "key": "child-17-18",
+        "minEmpties": 17,
+        "maxEmpties": 18,
+        "trainRootCount": 457,
+        "holdoutRootCount": 43,
+        "trainMoveCount": 4209,
+        "holdoutMoveCount": 434,
+        "exactRootCount": 0,
+        "depthRootCount": 500,
+        "rootWeightSum": 500
+      }
+    ],
+    "holdoutMoves": {
+      "targetMode": "root-mean",
+      "count": 1247,
+      "mae": 12261.706874365851,
+      "rmse": 25704.25483382587,
+      "meanResidual": -51.43142426110581,
+      "stdDevResidual": 25704.203379425304,
+      "maxAbsResidual": 259824.40541197557,
+      "maeInDiscs": 1.2261706874365852,
+      "rmseInDiscs": 2.570425483382587
+    },
+    "holdoutMovesRawAligned": {
+      "alignment": "per-root-mean",
+      "count": 1247,
+      "mae": 12026.43610840186,
+      "rmse": 25644.662080653765,
+      "meanResidual": 4.901206412120351e-13,
+      "stdDevResidual": 25644.662080653765,
+      "maxAbsResidual": 261805.65192534096,
+      "maeInDiscs": 1.2026436108401861,
+      "rmseInDiscs": 2.5644662080653764
+    },
+    "holdoutRoots": {
+      "count": 150,
+      "top1Accuracy": 0.47333333333333333,
+      "top3Accuracy": 0.7933333333333333,
+      "meanBestRank": 2.4266666666666667,
+      "meanRegret": 11532.8,
+      "meanRegretInDiscs": 1.1532799999999999,
+      "maxRegret": 440000,
+      "maxRegretInDiscs": 44
+    },
+    "holdoutPairwise": {
+      "comparablePairs": 4533,
+      "correctPairs": 2732,
+      "tiedTeacherPairs": 553,
+      "tiedPredictionPairs": 12,
+      "accuracy": 0.6026913743657621,
+      "weightedAccuracy": 0.6411558437513877,
+      "maxTeacherGap": 440000
+    },
+    "featureContribution": {
+      "overall": [
+        {
+          "key": "mobility",
+          "count": 1247,
+          "meanContribution": 29.579668275881914,
+          "meanAbsContribution": 720.3843930117758,
+          "maxAbsContribution": 3602.9632380915623,
+          "absContributionShare": 0.14401220629241807
+        },
+        {
+          "key": "corners",
+          "count": 1247,
+          "meanContribution": -10.557975748193662,
+          "meanAbsContribution": 928.1327881327863,
+          "maxAbsContribution": 2839.3629819520597,
+          "absContributionShare": 0.1855432347618212
+        },
+        {
+          "key": "cornerAdjacency",
+          "count": 1247,
+          "meanContribution": 34.41964301282552,
+          "meanAbsContribution": 164.17141842624744,
+          "maxAbsContribution": 574.1119047312982,
+          "absContributionShare": 0.0328195452414988
+        },
+        {
+          "key": "edgePattern",
+          "count": 1247,
+          "meanContribution": -99.09973179215234,
+          "meanAbsContribution": 726.6659479710369,
+          "maxAbsContribution": 3221.7303667722194,
+          "absContributionShare": 0.14526795335940856
+        },
+        {
+          "key": "cornerPattern",
+          "count": 1247,
+          "meanContribution": -44.28129646995398,
+          "meanAbsContribution": 2213.620656168051,
+          "maxAbsContribution": 9857.976795949826,
+          "absContributionShare": 0.44252540405052904
+        },
+        {
+          "key": "discDifferential",
+          "count": 1247,
+          "meanContribution": 38.389963752177444,
+          "meanAbsContribution": 235.3496515982861,
+          "maxAbsContribution": 1129.0679601124536,
+          "absContributionShare": 0.04704880186968051
+        },
+        {
+          "key": "parity",
+          "count": 1247,
+          "meanContribution": 0.1183047083092466,
+          "meanAbsContribution": 13.920520677721234,
+          "maxAbsContribution": 49.17532375387684,
+          "absContributionShare": 0.002782854424644776
+        }
+      ],
+      "byBucket": [
+        {
+          "key": "child-11-12",
+          "minEmpties": 11,
+          "maxEmpties": 12,
+          "features": [
+            {
+              "key": "mobility",
+              "count": 353,
+              "meanContribution": 189.46113465871665,
+              "meanAbsContribution": 628.5342585107747,
+              "maxAbsContribution": 2270.6679720523284,
+              "absContributionShare": 0.09158369748577287
+            },
+            {
+              "key": "corners",
+              "count": 353,
+              "meanContribution": 135.39927345474942,
+              "meanAbsContribution": 1797.726987156618,
+              "maxAbsContribution": 2839.3629819520597,
+              "absContributionShare": 0.26194671543259906
+            },
+            {
+              "key": "cornerAdjacency",
+              "count": 353,
+              "meanContribution": 49.47936427911518,
+              "meanAbsContribution": 256.4400068008266,
+              "maxAbsContribution": 574.1119047312982,
+              "absContributionShare": 0.03736586142773287
+            },
+            {
+              "key": "edgePattern",
+              "count": 353,
+              "meanContribution": 49.2188660600753,
+              "meanAbsContribution": 456.5270869883634,
+              "maxAbsContribution": 1466.928515214447,
+              "absContributionShare": 0.06652054054757087
+            },
+            {
+              "key": "cornerPattern",
+              "count": 353,
+              "meanContribution": -554.5923186485755,
+              "meanAbsContribution": 3456.5654583572186,
+              "maxAbsContribution": 9857.976795949826,
+              "absContributionShare": 0.5036559916845528
+            },
+            {
+              "key": "discDifferential",
+              "count": 353,
+              "meanContribution": -29.06036924953829,
+              "meanAbsContribution": 217.98002512312877,
+              "maxAbsContribution": 658.2981265975485,
+              "absContributionShare": 0.03176185929167705
+            },
+            {
+              "key": "parity",
+              "count": 353,
+              "meanContribution": 0.41792059847487395,
+              "meanAbsContribution": 49.17532375387642,
+              "maxAbsContribution": 49.17532375387684,
+              "absContributionShare": 0.0071653341300930125
+            }
+          ]
+        },
+        {
+          "key": "child-15-16",
+          "minEmpties": 15,
+          "maxEmpties": 16,
+          "features": [
+            {
+              "key": "mobility",
+              "count": 460,
+              "meanContribution": 10.445618176790115,
+              "meanAbsContribution": 918.0875814465978,
+              "maxAbsContribution": 3602.9632380915623,
+              "absContributionShare": 0.1943351653904989
+            },
+            {
+              "key": "corners",
+              "count": 460,
+              "meanContribution": -132.8776497997049,
+              "meanAbsContribution": 556.5294035544179,
+              "maxAbsContribution": 767.2433335715192,
+              "absContributionShare": 0.1178027411219421
+            },
+            {
+              "key": "cornerAdjacency",
+              "count": 460,
+              "meanContribution": 56.0794785263166,
+              "meanAbsContribution": 243.95940951106994,
+              "maxAbsContribution": 459.57816548396016,
+              "absContributionShare": 0.05163983606139204
+            },
+            {
+              "key": "edgePattern",
+              "count": 460,
+              "meanContribution": -302.48589409275826,
+              "meanAbsContribution": 925.260210232497,
+              "maxAbsContribution": 3203.4078242331575,
+              "absContributionShare": 0.19585342359326868
+            },
+            {
+              "key": "cornerPattern",
+              "count": 460,
+              "meanContribution": 427.8003214104275,
+              "meanAbsContribution": 1721.0926225529347,
+              "maxAbsContribution": 4336.733027014664,
+              "absContributionShare": 0.3643103623394856
+            },
+            {
+              "key": "discDifferential",
+              "count": 460,
+              "meanContribution": 87.60362692764089,
+              "meanAbsContribution": 359.31910728353864,
+              "maxAbsContribution": 1129.0679601124536,
+              "absContributionShare": 0.07605847149341338
+            },
+            {
+              "key": "parity",
+              "count": 460,
+              "meanContribution": 0,
+              "meanAbsContribution": 0,
+              "maxAbsContribution": 0,
+              "absContributionShare": 0
+            }
+          ]
+        },
+        {
+          "key": "child-17-18",
+          "minEmpties": 17,
+          "maxEmpties": 18,
+          "features": [
+            {
+              "key": "mobility",
+              "count": 434,
+              "meanContribution": -80.18183999038175,
+              "meanAbsContribution": 585.5448326404284,
+              "maxAbsContribution": 2760.2233818431955,
+              "absContributionShare": 0.15476408922813517
+            },
+            {
+              "key": "corners",
+              "count": 434,
+              "meanContribution": 0.37322493165946397,
+              "meanAbsContribution": 614.7014624430096,
+              "maxAbsContribution": 971.8777220410412,
+              "absContributionShare": 0.16247041503757045
+            },
+            {
+              "key": "cornerAdjacency",
+              "count": 434,
+              "meanContribution": -0.786822294101094,
+              "meanAbsContribution": 4.555548391121199,
+              "maxAbsContribution": 8.383327552533753,
+              "absContributionShare": 0.001204067149747212
+            },
+            {
+              "key": "edgePattern",
+              "count": 434,
+              "meanContribution": -4.1661612473542196,
+              "meanAbsContribution": 735.8955730553965,
+              "maxAbsContribution": 3221.7303667722194,
+              "absContributionShare": 0.194502968487253
+            },
+            {
+              "key": "cornerPattern",
+              "count": 434,
+              "meanContribution": -129.57565913336893,
+              "meanAbsContribution": 1724.6883526891975,
+              "maxAbsContribution": 6517.050160674194,
+              "absContributionShare": 0.4558486510805342
+            },
+            {
+              "key": "discDifferential",
+              "count": 434,
+              "meanContribution": 41.08969298925687,
+              "meanAbsContribution": 118.08128415707495,
+              "maxAbsContribution": 356.17376178477355,
+              "absContributionShare": 0.031209809016759772
+            },
+            {
+              "key": "parity",
+              "count": 434,
+              "meanContribution": 0,
+              "meanAbsContribution": 0,
+              "maxAbsContribution": 0,
+              "absContributionShare": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ablationAudit": {
+      "overall": {
+        "baseline": {
+          "holdoutRoots": {
+            "count": 150,
+            "top1Accuracy": 0.47333333333333333,
+            "top3Accuracy": 0.7933333333333333,
+            "meanBestRank": 2.4266666666666667,
+            "meanRegret": 11532.8,
+            "meanRegretInDiscs": 1.1532799999999999,
+            "maxRegret": 440000,
+            "maxRegretInDiscs": 44
+          },
+          "pairwise": {
+            "comparablePairs": 4533,
+            "correctPairs": 2732,
+            "tiedTeacherPairs": 553,
+            "tiedPredictionPairs": 12,
+            "accuracy": 0.6026913743657621,
+            "weightedAccuracy": 0.6411558437513877,
+            "maxTeacherGap": 440000
+          }
+        },
+        "byFeature": [
+          {
+            "key": "mobility",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.4066666666666667,
+              "top3Accuracy": 0.7533333333333333,
+              "meanBestRank": 2.8666666666666667,
+              "meanRegret": 9911.773333333333,
+              "meanRegretInDiscs": 0.9911773333333332,
+              "maxRegret": 300000,
+              "maxRegretInDiscs": 30
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2557,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 48,
+              "accuracy": 0.5640855945290095,
+              "weightedAccuracy": 0.6111784391119951,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": -0.06666666666666665,
+              "top3Accuracy": -0.040000000000000036,
+              "meanRegret": -1621.0266666666666,
+              "pairwiseAccuracy": -0.03860577983675262,
+              "weightedPairwiseAccuracy": -0.02997740463939258
+            }
+          },
+          {
+            "key": "corners",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.4866666666666667,
+              "top3Accuracy": 0.8066666666666666,
+              "meanBestRank": 2.3133333333333335,
+              "meanRegret": 9403.3,
+              "meanRegretInDiscs": 0.9403299999999999,
+              "maxRegret": 120000,
+              "maxRegretInDiscs": 12
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2758,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 12,
+              "accuracy": 0.6084270902272226,
+              "weightedAccuracy": 0.6574808211205928,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": 0.013333333333333364,
+              "top3Accuracy": 0.013333333333333308,
+              "meanRegret": -2129.5,
+              "pairwiseAccuracy": 0.005735715861460489,
+              "weightedPairwiseAccuracy": 0.01632497736920513
+            }
+          },
+          {
+            "key": "cornerAdjacency",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.4666666666666667,
+              "top3Accuracy": 0.7933333333333333,
+              "meanBestRank": 2.473333333333333,
+              "meanRegret": 11585.966666666667,
+              "meanRegretInDiscs": 1.1585966666666667,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2712,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 12,
+              "accuracy": 0.5982792852415619,
+              "weightedAccuracy": 0.6359388140546745,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": -0.006666666666666654,
+              "top3Accuracy": 0,
+              "meanRegret": 53.16666666666788,
+              "pairwiseAccuracy": -0.004412089124200214,
+              "weightedPairwiseAccuracy": -0.005217029696713227
+            }
+          },
+          {
+            "key": "edgePattern",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.5,
+              "top3Accuracy": 0.7866666666666666,
+              "meanBestRank": 2.3133333333333335,
+              "meanRegret": 10711.693333333333,
+              "meanRegretInDiscs": 1.0711693333333332,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2792,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 24,
+              "accuracy": 0.6159276417383631,
+              "weightedAccuracy": 0.6595340452132171,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": 0.026666666666666672,
+              "top3Accuracy": -0.00666666666666671,
+              "meanRegret": -821.1066666666666,
+              "pairwiseAccuracy": 0.013236267372600974,
+              "weightedPairwiseAccuracy": 0.018378201461829446
+            }
+          },
+          {
+            "key": "cornerPattern",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.4,
+              "top3Accuracy": 0.7133333333333334,
+              "meanBestRank": 3.16,
+              "meanRegret": 18258.633333333335,
+              "meanRegretInDiscs": 1.8258633333333334,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2507,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 38,
+              "accuracy": 0.5530553717185087,
+              "weightedAccuracy": 0.5360936390545721,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": -0.0733333333333333,
+              "top3Accuracy": -0.07999999999999996,
+              "meanRegret": 6725.833333333336,
+              "pairwiseAccuracy": -0.04963600264725343,
+              "weightedPairwiseAccuracy": -0.1050622046968156
+            }
+          },
+          {
+            "key": "discDifferential",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.5,
+              "top3Accuracy": 0.8266666666666667,
+              "meanBestRank": 2.3266666666666667,
+              "meanRegret": 10953.706666666667,
+              "meanRegretInDiscs": 1.0953706666666667,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2748,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 22,
+              "accuracy": 0.6062210456651225,
+              "weightedAccuracy": 0.6400430126514645,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": 0.026666666666666672,
+              "top3Accuracy": 0.033333333333333326,
+              "meanRegret": -579.0933333333323,
+              "pairwiseAccuracy": 0.0035296712993603263,
+              "weightedPairwiseAccuracy": -0.0011128310999232172
+            }
+          },
+          {
+            "key": "parity",
+            "holdoutRoots": {
+              "count": 150,
+              "top1Accuracy": 0.47333333333333333,
+              "top3Accuracy": 0.7933333333333333,
+              "meanBestRank": 2.4266666666666667,
+              "meanRegret": 11532.8,
+              "meanRegretInDiscs": 1.1532799999999999,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 4533,
+              "correctPairs": 2732,
+              "tiedTeacherPairs": 553,
+              "tiedPredictionPairs": 12,
+              "accuracy": 0.6026913743657621,
+              "weightedAccuracy": 0.6411558437513877,
+              "maxTeacherGap": 440000
+            },
+            "deltas": {
+              "top1Accuracy": 0,
+              "top3Accuracy": 0,
+              "meanRegret": 0,
+              "pairwiseAccuracy": 0,
+              "weightedPairwiseAccuracy": 0
+            }
+          }
+        ]
+      },
+      "byBucket": [
+        {
+          "key": "child-11-12",
+          "minEmpties": 11,
+          "maxEmpties": 12,
+          "baseline": {
+            "holdoutRoots": {
+              "count": 52,
+              "top1Accuracy": 0.5769230769230769,
+              "top3Accuracy": 0.9230769230769231,
+              "meanBestRank": 1.8076923076923077,
+              "meanRegret": 27307.69230769231,
+              "meanRegretInDiscs": 2.730769230769231,
+              "maxRegret": 440000,
+              "maxRegretInDiscs": 44
+            },
+            "pairwise": {
+              "comparablePairs": 589,
+              "correctPairs": 301,
+              "tiedTeacherPairs": 508,
+              "tiedPredictionPairs": 3,
+              "accuracy": 0.5110356536502547,
+              "weightedAccuracy": 0.5430672268907563,
+              "maxTeacherGap": 440000
+            }
+          },
+          "byFeature": [
+            {
+              "key": "mobility",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.7115384615384616,
+                "top3Accuracy": 0.9807692307692307,
+                "meanBestRank": 1.5,
+                "meanRegret": 20000,
+                "meanRegretInDiscs": 2,
+                "maxRegret": 300000,
+                "maxRegretInDiscs": 30
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 311,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 7,
+                "accuracy": 0.5280135823429541,
+                "weightedAccuracy": 0.5425420168067226,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0.1346153846153847,
+                "top3Accuracy": 0.0576923076923076,
+                "meanRegret": -7307.6923076923085,
+                "pairwiseAccuracy": 0.01697792869269943,
+                "weightedPairwiseAccuracy": -0.0005252100840336116
+              }
+            },
+            {
+              "key": "corners",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.5769230769230769,
+                "top3Accuracy": 0.9423076923076923,
+                "meanBestRank": 1.75,
+                "meanRegret": 21538.46153846154,
+                "meanRegretInDiscs": 2.1538461538461537,
+                "maxRegret": 120000,
+                "maxRegretInDiscs": 12
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 305,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 3,
+                "accuracy": 0.5178268251273345,
+                "weightedAccuracy": 0.5672268907563025,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0.019230769230769162,
+                "meanRegret": -5769.2307692307695,
+                "pairwiseAccuracy": 0.006791171477079749,
+                "weightedPairwiseAccuracy": 0.024159663865546244
+              }
+            },
+            {
+              "key": "cornerAdjacency",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.5769230769230769,
+                "top3Accuracy": 0.9230769230769231,
+                "meanBestRank": 1.8269230769230769,
+                "meanRegret": 27307.69230769231,
+                "meanRegretInDiscs": 2.730769230769231,
+                "maxRegret": 440000,
+                "maxRegretInDiscs": 44
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 298,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 3,
+                "accuracy": 0.5059422750424448,
+                "weightedAccuracy": 0.542016806722689,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 0,
+                "pairwiseAccuracy": -0.005093378607809895,
+                "weightedPairwiseAccuracy": -0.0010504201680672232
+              }
+            },
+            {
+              "key": "edgePattern",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.6153846153846154,
+                "top3Accuracy": 0.9230769230769231,
+                "meanBestRank": 1.7692307692307692,
+                "meanRegret": 25769.23076923077,
+                "meanRegretInDiscs": 2.576923076923077,
+                "maxRegret": 440000,
+                "maxRegretInDiscs": 44
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 304,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 4,
+                "accuracy": 0.5161290322580645,
+                "weightedAccuracy": 0.5551470588235294,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0.03846153846153855,
+                "top3Accuracy": 0,
+                "meanRegret": -1538.461538461539,
+                "pairwiseAccuracy": 0.005093378607809784,
+                "weightedPairwiseAccuracy": 0.012079831932773177
+              }
+            },
+            {
+              "key": "cornerPattern",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.5384615384615384,
+                "top3Accuracy": 0.8846153846153846,
+                "meanBestRank": 2.019230769230769,
+                "meanRegret": 42307.692307692305,
+                "meanRegretInDiscs": 4.230769230769231,
+                "maxRegret": 440000,
+                "maxRegretInDiscs": 44
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 282,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 6,
+                "accuracy": 0.47877758913412566,
+                "weightedAccuracy": 0.44616596638655465,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": -0.038461538461538436,
+                "top3Accuracy": -0.03846153846153855,
+                "meanRegret": 14999.999999999996,
+                "pairwiseAccuracy": -0.03225806451612906,
+                "weightedPairwiseAccuracy": -0.09690126050420161
+              }
+            },
+            {
+              "key": "discDifferential",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.6153846153846154,
+                "top3Accuracy": 0.9230769230769231,
+                "meanBestRank": 1.7692307692307692,
+                "meanRegret": 25769.23076923077,
+                "meanRegretInDiscs": 2.576923076923077,
+                "maxRegret": 440000,
+                "maxRegretInDiscs": 44
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 300,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 3,
+                "accuracy": 0.5093378607809848,
+                "weightedAccuracy": 0.5362394957983193,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0.03846153846153855,
+                "top3Accuracy": 0,
+                "meanRegret": -1538.461538461539,
+                "pairwiseAccuracy": -0.001697792869269965,
+                "weightedPairwiseAccuracy": -0.0068277310924369505
+              }
+            },
+            {
+              "key": "parity",
+              "holdoutRoots": {
+                "count": 52,
+                "top1Accuracy": 0.5769230769230769,
+                "top3Accuracy": 0.9230769230769231,
+                "meanBestRank": 1.8076923076923077,
+                "meanRegret": 27307.69230769231,
+                "meanRegretInDiscs": 2.730769230769231,
+                "maxRegret": 440000,
+                "maxRegretInDiscs": 44
+              },
+              "pairwise": {
+                "comparablePairs": 589,
+                "correctPairs": 301,
+                "tiedTeacherPairs": 508,
+                "tiedPredictionPairs": 3,
+                "accuracy": 0.5110356536502547,
+                "weightedAccuracy": 0.5430672268907563,
+                "maxTeacherGap": 440000
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 0,
+                "pairwiseAccuracy": 0,
+                "weightedPairwiseAccuracy": 0
+              }
+            }
+          ]
+        },
+        {
+          "key": "child-15-16",
+          "minEmpties": 15,
+          "maxEmpties": 16,
+          "baseline": {
+            "holdoutRoots": {
+              "count": 55,
+              "top1Accuracy": 0.4,
+              "top3Accuracy": 0.7090909090909091,
+              "meanBestRank": 2.709090909090909,
+              "meanRegret": 2357.090909090909,
+              "meanRegretInDiscs": 0.2357090909090909,
+              "maxRegret": 35284,
+              "maxRegretInDiscs": 3.5284
+            },
+            "pairwise": {
+              "comparablePairs": 1868,
+              "correctPairs": 1205,
+              "tiedTeacherPairs": 15,
+              "tiedPredictionPairs": 4,
+              "accuracy": 0.6450749464668094,
+              "weightedAccuracy": 0.8189123459033305,
+              "maxTeacherGap": 103552
+            }
+          },
+          "byFeature": [
+            {
+              "key": "mobility",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.12727272727272726,
+                "top3Accuracy": 0.6,
+                "meanBestRank": 3.727272727272727,
+                "meanRegret": 5119.418181818181,
+                "meanRegretInDiscs": 0.5119418181818182,
+                "maxRegret": 37870,
+                "maxRegretInDiscs": 3.787
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1107,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 20,
+                "accuracy": 0.5926124197002142,
+                "weightedAccuracy": 0.7346499214965907,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": -0.27272727272727276,
+                "top3Accuracy": -0.10909090909090913,
+                "meanRegret": 2762.3272727272724,
+                "pairwiseAccuracy": -0.05246252676659524,
+                "weightedPairwiseAccuracy": -0.08426242440673981
+              }
+            },
+            {
+              "key": "corners",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.41818181818181815,
+                "top3Accuracy": 0.7272727272727273,
+                "meanBestRank": 2.5636363636363635,
+                "meanRegret": 2317.7818181818184,
+                "meanRegretInDiscs": 0.23177818181818183,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1214,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 4,
+                "accuracy": 0.6498929336188437,
+                "weightedAccuracy": 0.8258613543865195,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": 0.018181818181818132,
+                "top3Accuracy": 0.018181818181818188,
+                "meanRegret": -39.30909090909063,
+                "pairwiseAccuracy": 0.004817987152034298,
+                "weightedPairwiseAccuracy": 0.006949008483189023
+              }
+            },
+            {
+              "key": "cornerAdjacency",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.38181818181818183,
+                "top3Accuracy": 0.7090909090909091,
+                "meanBestRank": 2.8181818181818183,
+                "meanRegret": 2502.090909090909,
+                "meanRegretInDiscs": 0.2502090909090909,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1188,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 4,
+                "accuracy": 0.6359743040685225,
+                "weightedAccuracy": 0.7994779029622426,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": -0.018181818181818188,
+                "top3Accuracy": 0,
+                "meanRegret": 145,
+                "pairwiseAccuracy": -0.009100642398286896,
+                "weightedPairwiseAccuracy": -0.01943444294108787
+              }
+            },
+            {
+              "key": "edgePattern",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.36363636363636365,
+                "top3Accuracy": 0.6909090909090909,
+                "meanBestRank": 2.581818181818182,
+                "meanRegret": 2553.4363636363637,
+                "meanRegretInDiscs": 0.2553436363636364,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1213,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 8,
+                "accuracy": 0.6493576017130621,
+                "weightedAccuracy": 0.8330283247704419,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": -0.036363636363636376,
+                "top3Accuracy": -0.018181818181818188,
+                "meanRegret": 196.3454545454547,
+                "pairwiseAccuracy": 0.004282655246252709,
+                "weightedPairwiseAccuracy": 0.014115978867111356
+              }
+            },
+            {
+              "key": "cornerPattern",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.4,
+                "top3Accuracy": 0.7090909090909091,
+                "meanBestRank": 3.018181818181818,
+                "meanRegret": 2690.4363636363637,
+                "meanRegretInDiscs": 0.2690436363636364,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1134,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 17,
+                "accuracy": 0.607066381156317,
+                "weightedAccuracy": 0.728779961623425,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 333.3454545454547,
+                "pairwiseAccuracy": -0.03800856531049246,
+                "weightedPairwiseAccuracy": -0.09013238427990555
+              }
+            },
+            {
+              "key": "discDifferential",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.4,
+                "top3Accuracy": 0.7818181818181819,
+                "meanBestRank": 2.5636363636363635,
+                "meanRegret": 2508.890909090909,
+                "meanRegretInDiscs": 0.2508890909090909,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1205,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 9,
+                "accuracy": 0.6450749464668094,
+                "weightedAccuracy": 0.815898111985069,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0.07272727272727275,
+                "meanRegret": 151.80000000000018,
+                "pairwiseAccuracy": 0,
+                "weightedPairwiseAccuracy": -0.0030142339182614997
+              }
+            },
+            {
+              "key": "parity",
+              "holdoutRoots": {
+                "count": 55,
+                "top1Accuracy": 0.4,
+                "top3Accuracy": 0.7090909090909091,
+                "meanBestRank": 2.709090909090909,
+                "meanRegret": 2357.090909090909,
+                "meanRegretInDiscs": 0.2357090909090909,
+                "maxRegret": 35284,
+                "maxRegretInDiscs": 3.5284
+              },
+              "pairwise": {
+                "comparablePairs": 1868,
+                "correctPairs": 1205,
+                "tiedTeacherPairs": 15,
+                "tiedPredictionPairs": 4,
+                "accuracy": 0.6450749464668094,
+                "weightedAccuracy": 0.8189123459033305,
+                "maxTeacherGap": 103552
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 0,
+                "pairwiseAccuracy": 0,
+                "weightedPairwiseAccuracy": 0
+              }
+            }
+          ]
+        },
+        {
+          "key": "child-17-18",
+          "minEmpties": 17,
+          "maxEmpties": 18,
+          "baseline": {
+            "holdoutRoots": {
+              "count": 43,
+              "top1Accuracy": 0.4418604651162791,
+              "top3Accuracy": 0.7441860465116279,
+              "meanBestRank": 2.813953488372093,
+              "meanRegret": 4192.558139534884,
+              "meanRegretInDiscs": 0.4192558139534884,
+              "maxRegret": 30428,
+              "maxRegretInDiscs": 3.0428
+            },
+            "pairwise": {
+              "comparablePairs": 2076,
+              "correctPairs": 1226,
+              "tiedTeacherPairs": 30,
+              "tiedPredictionPairs": 5,
+              "accuracy": 0.5905587668593449,
+              "weightedAccuracy": 0.662476284937129,
+              "maxTeacherGap": 142432
+            }
+          },
+          "byFeature": [
+            {
+              "key": "mobility",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.3953488372093023,
+                "top3Accuracy": 0.6744186046511628,
+                "meanBestRank": 3.4186046511627906,
+                "meanRegret": 3841.813953488372,
+                "meanRegretInDiscs": 0.3841813953488372,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1139,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 21,
+                "accuracy": 0.5486512524084779,
+                "weightedAccuracy": 0.6269344509090169,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": -0.04651162790697677,
+                "top3Accuracy": -0.06976744186046513,
+                "meanRegret": -350.74418604651146,
+                "pairwiseAccuracy": -0.041907514450867045,
+                "weightedPairwiseAccuracy": -0.03554183402811206
+              }
+            },
+            {
+              "key": "corners",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.46511627906976744,
+                "top3Accuracy": 0.7441860465116279,
+                "meanBestRank": 2.6744186046511627,
+                "meanRegret": 3791.093023255814,
+                "meanRegretInDiscs": 0.3791093023255814,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1239,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 5,
+                "accuracy": 0.596820809248555,
+                "weightedAccuracy": 0.6726697223688448,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": 0.023255813953488358,
+                "top3Accuracy": 0,
+                "meanRegret": -401.46511627906966,
+                "pairwiseAccuracy": 0.006262042389210021,
+                "weightedPairwiseAccuracy": 0.010193437431715857
+              }
+            },
+            {
+              "key": "cornerAdjacency",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.4418604651162791,
+                "top3Accuracy": 0.7441860465116279,
+                "meanBestRank": 2.813953488372093,
+                "meanRegret": 4192.558139534884,
+                "meanRegretInDiscs": 0.4192558139534884,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1226,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 5,
+                "accuracy": 0.5905587668593449,
+                "weightedAccuracy": 0.662476284937129,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 0,
+                "pairwiseAccuracy": 0,
+                "weightedPairwiseAccuracy": 0
+              }
+            },
+            {
+              "key": "edgePattern",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.5348837209302325,
+                "top3Accuracy": 0.7441860465116279,
+                "meanBestRank": 2.627906976744186,
+                "meanRegret": 2937.5581395348836,
+                "meanRegretInDiscs": 0.2937558139534884,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1275,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 12,
+                "accuracy": 0.6141618497109826,
+                "weightedAccuracy": 0.696620490506118,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": 0.09302325581395343,
+                "top3Accuracy": 0,
+                "meanRegret": -1255,
+                "pairwiseAccuracy": 0.023603082851637702,
+                "weightedPairwiseAccuracy": 0.034144205568989006
+              }
+            },
+            {
+              "key": "cornerPattern",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.23255813953488372,
+                "top3Accuracy": 0.5116279069767442,
+                "meanBestRank": 4.72093023255814,
+                "meanRegret": 9088.860465116279,
+                "meanRegretInDiscs": 0.9088860465116279,
+                "maxRegret": 123699,
+                "maxRegretInDiscs": 12.3699
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1091,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 15,
+                "accuracy": 0.5255298651252408,
+                "weightedAccuracy": 0.5283461525043709,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": -0.20930232558139536,
+                "top3Accuracy": -0.2325581395348837,
+                "meanRegret": 4896.302325581395,
+                "pairwiseAccuracy": -0.06502890173410414,
+                "weightedPairwiseAccuracy": -0.13413013243275806
+              }
+            },
+            {
+              "key": "discDifferential",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.4883720930232558,
+                "top3Accuracy": 0.7674418604651163,
+                "meanBestRank": 2.697674418604651,
+                "meanRegret": 3838.767441860465,
+                "meanRegretInDiscs": 0.3838767441860465,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1243,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 10,
+                "accuracy": 0.598747591522158,
+                "weightedAccuracy": 0.6738633694151811,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": 0.046511627906976716,
+                "top3Accuracy": 0.023255813953488413,
+                "meanRegret": -353.7906976744184,
+                "pairwiseAccuracy": 0.00818882466281301,
+                "weightedPairwiseAccuracy": 0.011387084478052145
+              }
+            },
+            {
+              "key": "parity",
+              "holdoutRoots": {
+                "count": 43,
+                "top1Accuracy": 0.4418604651162791,
+                "top3Accuracy": 0.7441860465116279,
+                "meanBestRank": 2.813953488372093,
+                "meanRegret": 4192.558139534884,
+                "meanRegretInDiscs": 0.4192558139534884,
+                "maxRegret": 30428,
+                "maxRegretInDiscs": 3.0428
+              },
+              "pairwise": {
+                "comparablePairs": 2076,
+                "correctPairs": 1226,
+                "tiedTeacherPairs": 30,
+                "tiedPredictionPairs": 5,
+                "accuracy": 0.5905587668593449,
+                "weightedAccuracy": 0.662476284937129,
+                "maxTeacherGap": 142432
+              },
+              "deltas": {
+                "top1Accuracy": 0,
+                "top3Accuracy": 0,
+                "meanRegret": 0,
+                "pairwiseAccuracy": 0,
+                "weightedPairwiseAccuracy": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "omittedFeatureResidualCorrelation": {
+      "overall": [
+        {
+          "key": "flipCount",
+          "count": 1247,
+          "correlation": 0.08183738767120309,
+          "meanAbsFeature": 2.7169206094627105
+        },
+        {
+          "key": "riskCSquare",
+          "count": 1247,
+          "correlation": 0.048003453278670234,
+          "meanAbsFeature": 0.19566960705693665
+        },
+        {
+          "key": "opponentCornerReplies",
+          "count": 1247,
+          "correlation": 0.03180848707048181,
+          "meanAbsFeature": 0.6744186046511628
+        },
+        {
+          "key": "myMoveCountRaw",
+          "count": 1247,
+          "correlation": -0.02717728131659403,
+          "meanAbsFeature": 7.97514033680834
+        },
+        {
+          "key": "passFlag",
+          "count": 1247,
+          "correlation": -0.025152426679685893,
+          "meanAbsFeature": 0.0016038492381716118
+        },
+        {
+          "key": "opponentMoveCountRaw",
+          "count": 1247,
+          "correlation": 0.006926666788316662,
+          "meanAbsFeature": 8.384923817161187
+        },
+        {
+          "key": "riskXSquare",
+          "count": 1247,
+          "correlation": 0.0005633568352410143,
+          "meanAbsFeature": 0.09222133119486768
+        }
+      ],
+      "byBucket": [
+        {
+          "key": "child-11-12",
+          "minEmpties": 11,
+          "maxEmpties": 12,
+          "correlations": [
+            {
+              "key": "myMoveCountRaw",
+              "count": 353,
+              "correlation": -0.08048701790392042,
+              "meanAbsFeature": 6.048158640226629
+            },
+            {
+              "key": "flipCount",
+              "count": 353,
+              "correlation": 0.05339562197026304,
+              "meanAbsFeature": 2.7422096317280453
+            },
+            {
+              "key": "opponentCornerReplies",
+              "count": 353,
+              "correlation": 0.020545074654127218,
+              "meanAbsFeature": 0.7025495750708215
+            },
+            {
+              "key": "riskCSquare",
+              "count": 353,
+              "correlation": 0.01806890708817189,
+              "meanAbsFeature": 0.21529745042492918
+            },
+            {
+              "key": "riskXSquare",
+              "count": 353,
+              "correlation": -0.017205238120696412,
+              "meanAbsFeature": 0.09915014164305949
+            },
+            {
+              "key": "opponentMoveCountRaw",
+              "count": 353,
+              "correlation": -0.0004631568326586089,
+              "meanAbsFeature": 6.9886685552407934
+            },
+            {
+              "key": "passFlag",
+              "count": 353,
+              "correlation": null,
+              "meanAbsFeature": 0
+            }
+          ]
+        },
+        {
+          "key": "child-15-16",
+          "minEmpties": 15,
+          "maxEmpties": 16,
+          "correlations": [
+            {
+              "key": "flipCount",
+              "count": 460,
+              "correlation": 0.17929109604697932,
+              "meanAbsFeature": 2.715217391304348
+            },
+            {
+              "key": "riskCSquare",
+              "count": 460,
+              "correlation": 0.1535601482343346,
+              "meanAbsFeature": 0.19130434782608696
+            },
+            {
+              "key": "riskXSquare",
+              "count": 460,
+              "correlation": 0.10357285457157245,
+              "meanAbsFeature": 0.10217391304347827
+            },
+            {
+              "key": "passFlag",
+              "count": 460,
+              "correlation": -0.0993496876593143,
+              "meanAbsFeature": 0.004347826086956522
+            },
+            {
+              "key": "opponentCornerReplies",
+              "count": 460,
+              "correlation": 0.08578325498169503,
+              "meanAbsFeature": 0.5934782608695652
+            },
+            {
+              "key": "opponentMoveCountRaw",
+              "count": 460,
+              "correlation": 0.032866733347838545,
+              "meanAbsFeature": 8.139130434782608
+            },
+            {
+              "key": "myMoveCountRaw",
+              "count": 460,
+              "correlation": -0.030111100427885586,
+              "meanAbsFeature": 8.126086956521739
+            }
+          ]
+        },
+        {
+          "key": "child-17-18",
+          "minEmpties": 17,
+          "maxEmpties": 18,
+          "correlations": [
+            {
+              "key": "flipCount",
+              "count": 434,
+              "correlation": 0.1890121016169241,
+              "meanAbsFeature": 2.69815668202765
+            },
+            {
+              "key": "riskCSquare",
+              "count": 434,
+              "correlation": 0.10712502704946371,
+              "meanAbsFeature": 0.18433179723502305
+            },
+            {
+              "key": "opponentCornerReplies",
+              "count": 434,
+              "correlation": 0.06165514172473518,
+              "meanAbsFeature": 0.7373271889400922
+            },
+            {
+              "key": "riskXSquare",
+              "count": 434,
+              "correlation": -0.05831151909912984,
+              "meanAbsFeature": 0.07603686635944701
+            },
+            {
+              "key": "myMoveCountRaw",
+              "count": 434,
+              "correlation": 0.029008706122996775,
+              "meanAbsFeature": 9.382488479262673
+            },
+            {
+              "key": "opponentMoveCountRaw",
+              "count": 434,
+              "correlation": 0.018004715886852173,
+              "meanAbsFeature": 9.78110599078341
+            },
+            {
+              "key": "passFlag",
+              "count": 434,
+              "correlation": null,
+              "meanAbsFeature": 0
+            }
+          ]
+        }
+      ]
+    },
+    "byBucket": [
+      {
+        "key": "child-11-12",
+        "minEmpties": 11,
+        "maxEmpties": 12,
+        "holdoutMoves": {
+          "targetMode": "root-mean",
+          "count": 353,
+          "mae": 27232.69874217177,
+          "rmse": 45195.45608776477,
+          "meanResidual": -159.67612884698192,
+          "stdDevResidual": 45195.17401797397,
+          "maxAbsResidual": 259824.40541197557,
+          "maeInDiscs": 2.723269874217177,
+          "rmseInDiscs": 4.519545608776477
+        },
+        "holdoutMovesRawAligned": {
+          "alignment": "per-root-mean",
+          "count": 353,
+          "mae": 26957.469889769578,
+          "rmse": 45157.567757926445,
+          "meanResidual": 9.481417854176702e-13,
+          "stdDevResidual": 45157.567757926445,
+          "maxAbsResidual": 261805.65192534096,
+          "maeInDiscs": 2.695746988976958,
+          "rmseInDiscs": 4.515756775792645
+        },
+        "holdoutRoots": {
+          "count": 52,
+          "top1Accuracy": 0.5769230769230769,
+          "top3Accuracy": 0.9230769230769231,
+          "meanBestRank": 1.8076923076923077,
+          "meanRegret": 27307.69230769231,
+          "meanRegretInDiscs": 2.730769230769231,
+          "maxRegret": 440000,
+          "maxRegretInDiscs": 44
+        },
+        "holdoutPairwise": {
+          "comparablePairs": 589,
+          "correctPairs": 301,
+          "tiedTeacherPairs": 508,
+          "tiedPredictionPairs": 3,
+          "accuracy": 0.5110356536502547,
+          "weightedAccuracy": 0.5430672268907563,
+          "maxTeacherGap": 440000
+        }
+      },
+      {
+        "key": "child-15-16",
+        "minEmpties": 15,
+        "maxEmpties": 16,
+        "holdoutMoves": {
+          "targetMode": "root-mean",
+          "count": 460,
+          "mae": 6350.907048191774,
+          "rmse": 10861.938001827213,
+          "meanResidual": 146.56550114871192,
+          "stdDevResidual": 10860.94911641755,
+          "maxAbsResidual": 66670.05223444232,
+          "maeInDiscs": 0.6350907048191774,
+          "rmseInDiscs": 1.0861938001827214
+        },
+        "holdoutMovesRawAligned": {
+          "alignment": "per-root-mean",
+          "count": 460,
+          "mae": 6176.538208580412,
+          "rmse": 10727.020603460924,
+          "meanResidual": 6.95961163095806e-13,
+          "stdDevResidual": 10727.020603460924,
+          "maxAbsResidual": 64550.36772533138,
+          "maeInDiscs": 0.6176538208580412,
+          "rmseInDiscs": 1.0727020603460924
+        },
+        "holdoutRoots": {
+          "count": 55,
+          "top1Accuracy": 0.4,
+          "top3Accuracy": 0.7090909090909091,
+          "meanBestRank": 2.709090909090909,
+          "meanRegret": 2357.090909090909,
+          "meanRegretInDiscs": 0.2357090909090909,
+          "maxRegret": 35284,
+          "maxRegretInDiscs": 3.5284
+        },
+        "holdoutPairwise": {
+          "comparablePairs": 1868,
+          "correctPairs": 1205,
+          "tiedTeacherPairs": 15,
+          "tiedPredictionPairs": 4,
+          "accuracy": 0.6450749464668094,
+          "weightedAccuracy": 0.8189123459033305,
+          "maxTeacherGap": 103552
+        }
+      },
+      {
+        "key": "child-17-18",
+        "minEmpties": 17,
+        "maxEmpties": 18,
+        "holdoutMoves": {
+          "targetMode": "root-mean",
+          "count": 434,
+          "mae": 6349.743258477746,
+          "rmse": 10580.399152836557,
+          "meanResidual": -173.24756474429026,
+          "stdDevResidual": 10578.980646293607,
+          "maxAbsResidual": 95879.11916870103,
+          "maeInDiscs": 0.6349743258477746,
+          "rmseInDiscs": 1.0580399152836557
+        },
+        "holdoutMovesRawAligned": {
+          "alignment": "per-root-mean",
+          "count": 434,
+          "mae": 6082.422534888191,
+          "rmse": 10441.465323363418,
+          "meanResidual": -3.017678273163633e-13,
+          "stdDevResidual": 10441.465323363418,
+          "maxAbsResidual": 95972.68444174387,
+          "maeInDiscs": 0.6082422534888191,
+          "rmseInDiscs": 1.044146532336342
+        },
+        "holdoutRoots": {
+          "count": 43,
+          "top1Accuracy": 0.4418604651162791,
+          "top3Accuracy": 0.7441860465116279,
+          "meanBestRank": 2.813953488372093,
+          "meanRegret": 4192.558139534884,
+          "meanRegretInDiscs": 0.4192558139534884,
+          "maxRegret": 30428,
+          "maxRegretInDiscs": 3.0428
+        },
+        "holdoutPairwise": {
+          "comparablePairs": 2076,
+          "correctPairs": 1226,
+          "tiedTeacherPairs": 30,
+          "tiedPredictionPairs": 5,
+          "accuracy": 0.5905587668593449,
+          "weightedAccuracy": 0.662476284937129,
+          "maxTeacherGap": 142432
+        }
+      }
+    ],
+    "teacherConfig": {
+      "exactRootMaxEmpties": 14,
+      "exactRootTimeLimitMs": 60000,
+      "teacherDepth": 6,
+      "teacherTimeLimitMs": 4000,
+      "teacherExactEndgameEmpties": 14
+    },
+    "sampling": {
+      "sampleStride": 200,
+      "sampleResidue": 0,
+      "maxRootsPerBucket": 500,
+      "holdoutMod": 10,
+      "holdoutResidue": 0,
+      "targetMode": "root-mean",
+      "rootWeighting": "uniform",
+      "exactRootWeightScale": 1,
+      "excludedFeatureKeys": []
+    },
+    "scanSummary": {
+      "scannedSamples": 3945617,
+      "eligibleRoots": 299801,
+      "acceptedRoots": 1500,
+      "skipped": {
+        "rootRange": 3632124,
+        "noMoves": 0,
+        "singleMove": 2356,
+        "stride": 298301,
+        "bucketFull": 11336,
+        "incomplete": 0,
+        "timeout": 0,
+        "depthShort": 0,
+        "other": 0
+      }
+    },
+    "createdAt": "2026-04-14T02:16:39.562Z"
+  },
+  "trainedBuckets": [
+    {
+      "key": "child-11-12",
+      "minEmpties": 11,
+      "maxEmpties": 12,
+      "weights": {
+        "mobility": -27.752609,
+        "corners": -28.39363,
+        "cornerAdjacency": -5.741119,
+        "edgePattern": -10.403748,
+        "cornerPattern": 138.844744,
+        "discDifferential": -13.95592,
+        "parity": 0.491753
+      }
+    },
+    {
+      "key": "child-15-16",
+      "minEmpties": 15,
+      "maxEmpties": 16,
+      "weights": {
+        "mobility": 36.029632,
+        "corners": -7.672433,
+        "cornerAdjacency": 4.595782,
+        "edgePattern": -24.085773,
+        "cornerPattern": 71.093984,
+        "discDifferential": 19.077355,
+        "parity": 0
+      }
+    },
+    {
+      "key": "child-17-18",
+      "minEmpties": 17,
+      "maxEmpties": 18,
+      "weights": {
+        "mobility": 32.202606,
+        "corners": -9.718777,
+        "cornerAdjacency": 0.083833,
+        "edgePattern": -32.8748,
+        "cornerPattern": 105.113712,
+        "discDifferential": 7.278333,
+        "parity": 0
+      }
+    }
+  ]
+}

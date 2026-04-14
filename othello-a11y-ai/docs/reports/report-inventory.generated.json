@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-04-12T16:40:00+09:00",
+  "generatedAt": "2026-04-13T23:59:00+09:00",
   "stageInfo": {
-    "stage": 126,
-    "tag": "stage126",
-    "label": "Stage 126",
-    "updatedAt": "2026-04-12T16:40:00+09:00",
-    "summary": "Prepared a user-executable richer-corpus weight-learning bundle and trainer package for the only still-meaningful offline tuple lane, while keeping the active Stage 123 runtime semantics unchanged"
+    "stage": 136,
+    "tag": "stage136",
+    "label": "Stage 136",
+    "updatedAt": "2026-04-13T23:59:00+09:00",
+    "summary": "Added Stage 136 balanced13 support-stack training tooling, removed implicit active-support leakage from move-ordering/MPC retraining paths via explicit off controls, and adopted low-risk speedups across move-ordering, MPC calibration, and tuple calibration"
   },
-  "totalDocumentCount": 102,
+  "totalDocumentCount": 103,
   "quickLinks": [
     {
       "label": "AI 구현 체크리스트",
       "relativePath": "checklists/ai-implementation-checklist.md"
     },
     {
-      "label": "최신 구현 보고서 (Stage 126)",
-      "relativePath": "implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md"
+      "label": "최신 구현 보고서 (Stage 129)",
+      "relativePath": "implementation/impl-stage-129-settings-ui-refactor-and-documentation-closeout.md"
     },
     {
       "label": "생성된 리포트 인벤토리 JSON",
@@ -42,9 +42,15 @@
       "key": "implementation",
       "label": "구현",
       "description": "실제 코드 변경이 반영된 구현 보고서",
-      "count": 76,
-      "latestStage": 126,
+      "count": 77,
+      "latestStage": 129,
       "entries": [
+        {
+          "fileName": "impl-stage-129-settings-ui-refactor-and-documentation-closeout.md",
+          "title": "Stage 129 - 설정 UI 리팩토링과 문서화 마감 정리",
+          "relativePath": "implementation/impl-stage-129-settings-ui-refactor-and-documentation-closeout.md",
+          "stageNumber": 129
+        },
         {
           "fileName": "impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md",
           "title": "Stage 126 - user-executable weight learning bundle and trainer refresh",

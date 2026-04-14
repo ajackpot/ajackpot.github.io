@@ -56,13 +56,15 @@ function toFiniteNumber(value, fallback) {
 function benchmarkEvaluator(evaluator, states, loops) {
   const start = Date.now();
   let checksum = 0;
+  const stateCount = states.length;
   for (let loop = 0; loop < loops; loop += 1) {
-    for (const state of states) {
+    for (let index = 0; index < stateCount; index += 1) {
+      const state = states[index];
       checksum += evaluator.evaluate(state, state.currentPlayer);
     }
   }
   const elapsedMs = Date.now() - start;
-  const evalCount = loops * states.length;
+  const evalCount = loops * stateCount;
   return {
     evalCount,
     elapsedMs,

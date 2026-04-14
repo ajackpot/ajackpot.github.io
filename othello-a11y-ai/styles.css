@@ -515,7 +515,11 @@ main.app-shell {
   gap: 8px;
 }
 
-.custom-grid {
+.detail-button-row {
+  margin-top: 10px;
+}
+
+.dialog-field-grid {
   display: grid;
   gap: 10px;
 }
@@ -537,9 +541,12 @@ main.app-shell {
 }
 
 .button-stack button,
+.detail-button-row button,
 .settings-form select,
 .settings-form textarea,
 .settings-form input[type='number'],
+.settings-detail-dialog-form select,
+.settings-detail-dialog-form input[type='number'],
 .manual-move-input {
   width: 100%;
   padding: 0.65rem 0.8rem;
@@ -553,8 +560,9 @@ main.app-shell {
   background: var(--button-disabled-bg);
 }
 
+.settings-detail-dialog,
 .manual-move-dialog {
-  width: min(28rem, calc(100vw - 2rem));
+  width: min(40rem, calc(100vw - 2rem));
   max-width: calc(100vw - 2rem);
   margin: auto;
   padding: 0;
@@ -565,14 +573,33 @@ main.app-shell {
   box-shadow: var(--shadow);
 }
 
+.settings-detail-dialog::backdrop,
 .manual-move-dialog::backdrop {
   background: var(--dialog-backdrop);
 }
 
+.settings-detail-dialog-form,
 .manual-move-dialog-form {
   display: grid;
   gap: 12px;
   padding: 18px;
+}
+
+.settings-detail-dialog-form {
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+}
+
+.settings-detail-dialog-form fieldset {
+  margin: 0;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.settings-detail-dialog-form legend {
+  padding: 0 6px;
+  font-weight: 700;
 }
 
 .dialog-button-row {

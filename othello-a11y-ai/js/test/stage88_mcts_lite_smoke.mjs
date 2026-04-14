@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 import { SearchEngine } from '../ai/search-engine.js';
 import { GameState } from '../core/game-state.js';
-import { describeSearchAlgorithm, normalizeSearchAlgorithm } from '../ai/search-algorithms.js';
+import { DEFAULT_SEARCH_ALGORITHM, describeSearchAlgorithm, normalizeSearchAlgorithm } from '../ai/search-algorithms.js';
 import { playSeededRandomUntilEmptyCount } from './benchmark-helpers.mjs';
 
 function withMockedRandom(value, callback) {
@@ -50,7 +50,7 @@ assert.ok(exactOverrideResult.isExactResult, 'The exact override path should rem
 assert.equal(exactOverrideResult.options.searchAlgorithm, 'mcts-lite', 'Exact override results should still report the parent algorithm selection in their resolved options.');
 
 const invalidAlgorithmEngine = new SearchEngine({ searchAlgorithm: 'does-not-exist' });
-assert.equal(invalidAlgorithmEngine.options.searchAlgorithm, 'classic', 'Unknown search algorithms should normalize back to the classic engine.');
+assert.equal(invalidAlgorithmEngine.options.searchAlgorithm, DEFAULT_SEARCH_ALGORITHM, 'Unknown search algorithms should normalize back to the current default engine.');
 assert.equal(normalizeSearchAlgorithm('mcts-lite'), 'mcts-lite', 'Known MCTS Lite algorithm keys should survive normalization unchanged.');
 assert.equal(describeSearchAlgorithm('mcts-lite')?.key, 'mcts-lite', 'The MCTS Lite search-algorithm descriptor should be discoverable for UI rendering.');
 

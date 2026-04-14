@@ -156,21 +156,81 @@ async def main() -> None:
         assert '10초 이상 생각할 수 있지만' in status_text
         assert '가장 강한 퍼포먼스를 목표로 합니다' in status_text
 
+        assert await page.locator('#custom-options-fieldset').count() == 0
+        assert await page.locator('#difficulty-detail-button').is_disabled() is True
+        assert await page.locator('#style-detail-button').is_disabled() is True
+        style_values = await page.evaluate("Array.from(document.querySelectorAll('#style-select option')).map((option) => option.value)")
+        assert style_values == ['balanced', 'aggressive', 'fortress', 'positional', 'chaotic', 'custom']
         assert await page.input_value('#style-select') == 'balanced'
+
         await page.select_option('#style-select', 'chaotic')
         await page.wait_for_timeout(50)
         summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
         assert '변칙형' in summary_text
+        assert await page.locator('#style-detail-button').is_disabled() is True
+
+        await page.select_option('#style-select', 'custom')
+        await page.wait_for_timeout(50)
+        assert await page.locator('#style-detail-button').is_enabled() is True
+        await page.locator('#style-detail-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("Boolean(document.querySelector('#style-detail-dialog')?.open)") is True
+        await page.fill('#style-detail-mobilityScale', '1.6')
+        await page.fill('#style-detail-riskPenaltyScale', '0.8')
+        await page.locator('#style-detail-save-button').click()
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '사용자 지정' in summary_text
+
         await page.select_option('#preset-select', 'custom')
         await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#style-select').disabled") is True
-        assert await page.input_value('#style-select') == 'chaotic'
-        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
-        assert '스타일 적용 안 함' in summary_text
-        await page.select_option('#preset-select', 'normal')
+        assert await page.locator('#difficulty-detail-button').is_enabled() is True
+        assert await page.locator('#style-detail-button').is_enabled() is True
+        await page.locator('#difficulty-detail-button').click()
         await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#style-select').disabled") is False
-        assert await page.input_value('#style-select') == 'chaotic'
+        assert await page.evaluate("Boolean(document.querySelector('#difficulty-detail-dialog')?.open)") is True
+        assert await page.evaluate("document.querySelector('#difficulty-detail-dialog [data-difficulty-group=\"classic\"]').hidden") is False
+        assert await page.evaluate("document.querySelector('#difficulty-detail-dialog [data-difficulty-group=\"mcts\"]').hidden") is True
+        await page.fill('#difficulty-detail-maxDepth', '9')
+        await page.select_option('#difficulty-detail-wldPreExactEmpties', '2')
+        await page.locator('#difficulty-detail-save-button').click()
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '깊이 9' in summary_text and '사전 WLD +2' in summary_text
+
+        await page.select_option('#search-algorithm-select', 'mcts-guided')
+        await page.wait_for_timeout(50)
+        await page.locator('#difficulty-detail-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.evaluate("document.querySelector('#difficulty-detail-dialog [data-difficulty-group=\"classic\"]').hidden") is True
+        assert await page.evaluate("document.querySelector('#difficulty-detail-dialog [data-difficulty-group=\"mcts\"]').hidden") is False
+        assert await page.evaluate("document.querySelector('#difficulty-detail-dialog [data-difficulty-group=\"guided\"]').hidden") is False
+        await page.fill('#difficulty-detail-mctsExploration', '1.7')
+        await page.locator('#difficulty-detail-save-button').click()
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert 'MCTS Guided' in summary_text and '탐험 1.7' in summary_text
+
+        await page.select_option('#preset-select', 'beginner')
+        await page.wait_for_timeout(50)
+        await page.select_option('#search-algorithm-select', 'mcts-lite')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert 'MCTS Lite' in summary_text and '스타일 적용 안 함' in summary_text
+        assert '메인 탐색 스타일 미적용' in summary_text
+        assert await page.locator('#difficulty-detail-button').is_disabled() is True
+        assert await page.locator('#style-detail-button').is_enabled() is True
+        await page.locator('#style-detail-button').click()
+        await page.wait_for_timeout(50)
+        assert await page.input_value('#style-detail-mobilityScale') == '1.6'
+        assert await page.input_value('#style-detail-riskPenaltyScale') == '0.8'
+        await page.locator('#style-detail-cancel-button').click()
+        await page.wait_for_timeout(50)
+
+        await page.select_option('#search-algorithm-select', 'mcts-guided')
+        await page.wait_for_timeout(50)
+        summary_text = (await page.locator('#engine-summary-output').text_content()) or ''
+        assert '스타일 적용 안 함' not in summary_text and '사용자 지정' in summary_text
 
         await page.locator('button[data-board-index="26"]').focus()
         await page.keyboard.press('ArrowRight')
@@ -208,19 +268,6 @@ async def main() -> None:
         assert await page.input_value('#position-sequence-input') == 'F5 D6 C4 D3 C2 B3 B4 B5'
         live_text = (await page.locator('#live-region').text_content()) or ''
         assert 'XOT 모드로 새 게임을 시작했습니다' in live_text
-
-        await page.select_option('#preset-select', 'custom')
-        await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is False
-        assert await page.evaluate("document.querySelector('#style-select').disabled") is True
-        await page.fill('#custom-maxDepth', '9')
-        await page.select_option('#preset-select', 'beginner')
-        await page.wait_for_timeout(50)
-        assert await page.evaluate("document.querySelector('#custom-maxDepth').disabled") is True
-        assert await page.evaluate("document.querySelector('#style-select').disabled") is False
-        await page.select_option('#preset-select', 'custom')
-        await page.wait_for_timeout(50)
-        assert await page.input_value('#custom-maxDepth') == '9'
 
         await page.select_option('#preset-select', 'normal')
         await page.wait_for_timeout(50)

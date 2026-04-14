@@ -25,15 +25,15 @@
 
 | 항목 | 현재 상태 | 근거 파일 |
 | --- | --- | --- |
-| 저장소 현재 Stage | **Stage 126** | `stage-info.json` |
+| 저장소 현재 Stage | **Stage 136** | `stage-info.json` |
 | 기본 난이도 | `normal` | `js/ai/search-engine.js`, `js/ai/presets.js` |
 | 기본 스타일 | `balanced` | `js/ai/presets.js` |
-| 기본 AI 모드(search algorithm) | `classic` | `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
+| 기본 AI 모드(search algorithm) | `classic-mtdf-2ply` (`Classic MTD(f)`) | `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
 | 기본 오프닝 hybrid 프로필 | `stage59-cap9-prior-veto` | `js/ai/opening-tuning.js`, Stage 123 replay revalidation 유지 |
-| active evaluation profile | `trained-phase-linear-v1` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
-| active move-ordering profile | `stage44-candidateH2-edgePattern125-cornerPattern125-11-12` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
-| active tuple residual profile | `top24-retrain-retrained-calibrated-lateb-endgame` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
-| active MPC profile | `trained-mpc-overlap-8bucket-high-tight` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active evaluation profile | `balanced13-alllate-smoothed stability extras 0.90x` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active move-ordering profile | `balanced13-alllate-smoothed-stability-090__move-ordering` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active tuple residual profile | `balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
+| active MPC profile | `balanced13-alllate-smoothed-stability-090__runtime-mpc` | `js/ai/evaluation-profiles.js`, `js/ai/learned-eval-profile.generated.js` |
 | exact micro-solver threshold | `optimizedFewEmptiesExactSolverEmpties = 6` | `js/ai/search-engine.js`, Stage 84 보고서 |
 | specialized few-empties exact solver | 활성 | `js/ai/search-engine.js` |
 | root WLD pre-exact | 기본 꺼짐 (`0`), 사용자 지정에서만 `+2` 선택 가능 | `js/ai/presets.js`, `js/ai/search-engine.js` |
@@ -63,6 +63,7 @@
 | fortress | 활성 | 안정성/봉쇄 성향 강화 |
 | positional | 활성 | 코너/위치 감각 강화 |
 | chaotic | 활성 | 근접 후보 다양성 확대 |
+| custom | 선택형 | detail dialog에서 evaluator scale을 직접 조절 |
 
 ## 런타임 AI 구현 체크리스트
 
@@ -81,8 +82,8 @@
 | 활성 | enhanced transposition cutoff (ETC) | exact/WLD 모두 child TT 재사용을 포함한 cutoff 경로 유지 | Stage 17/20/80/81, `js/ai/search-engine.js` |
 | 활성 | allocation-light search move path | classic search 내부 노드는 prepared move record + fixed ordering metadata shape + inline flip-count 누적 경로를 기본 사용, `allocationLightSearchMoves: false`로 baseline 재현 가능 | Stage 122, `js/core/rules.js`, `js/ai/search-engine.js` |
 | 활성 | pass/terminal TT 저장 | 패스/종료 노드도 재사용 | Stage 06 보강, `js/ai/search-engine.js` |
-| 활성 | MPC runtime lane | worker / UI fallback / direct `SearchEngine` 기본 경로에서 active MPC profile 상속, explicit `mpcProfile: null` preserve | Stage 72~74, 121, `js/ai/search-engine.js`, `js/ui/engine-client.js`, `js/ai/worker.js` |
-| 활성 | preset-aware AI 모드 선택기 | `beginner`: `classic / mcts-lite / mcts-guided`, `easy` 이상: `classic / mcts-guided / mcts-hybrid` | Stage 88~93, `js/ai/search-algorithms.js`, `js/ui/settings-panel-view.js`, `js/ai/search-engine.js` |
+| 활성 | MPC runtime lane | worker / UI fallback / direct `SearchEngine` 기본 경로에서 balanced13 runtime MPC profile 상속, explicit `mpcProfile: null` preserve | Stage 72~74, 121, `js/ai/search-engine.js`, `js/ui/engine-client.js`, `js/ai/worker.js` |
+| 활성 | preset-aware AI 모드 선택기 | `beginner`: `Classic MTD(f) / Classic PVS / MCTS Lite / MCTS Guided`, `easy` 이상: `Classic MTD(f) / Classic PVS / MCTS Guided / MCTS Hybrid` | Stage 88~93, `js/ai/search-algorithms.js`, `js/ui/settings-panel-view.js`, `js/ai/search-engine.js` |
 | 선택형 | MCTS lite / guided / hybrid lane | 기본값은 `classic`, 프리셋 허용 범위 안에서만 선택 가능 | Stage 88~93, `js/ai/mcts.js`, `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
 | 선택형 | MCTS late solved-subtree lane | `mctsSolverEnabled = true`, `mctsSolverWldEmpties = 2` | Stage 100, `js/ai/search-engine.js`, `js/ai/mcts.js` |
 | 선택형 | MCTS root exact continuation | base `+3` + adaptive post-proof continuation(`loss-only`, 추가 `+1`) 유지 | Stage 101/104/110, `js/ai/search-engine.js`, `js/ai/mcts.js`, `js/ui/formatters.js` |
@@ -134,15 +135,16 @@
 | 활성 | opening hybrid tuning | confidence gate / direct use / ordering bias 조합 | Stage 56~59, `js/ai/opening-tuning.js` |
 | 활성 | prior contradiction veto | 기본 hybrid key `stage59-cap9-prior-veto`에 포함, Stage 123 replay revalidation에서도 기본값 유지 확인 | Stage 59, 123, `js/ai/opening-tuning.js` |
 | 활성 | opening randomness / search randomness 분리 | 초반과 중후반 무작위성 제어를 분리 | Stage 59, `js/ai/presets.js` |
-| 활성 | zero-randomness opening tie-band | preset 엔진에서 `openingRandomness=0`이어도 거의 동점인 오프닝 분기만 제한적으로 허용 | Stage 98, `js/ai/search-engine.js` |
+| 활성 | zero-randomness opening tie-band | hard/expert/impossible 프리셋은 `openingRandomness=0`이어도 거의 동점인 오프닝 분기만 제한적으로 무작위 허용하고, custom에서는 explicit tie-break toggle로 같은 동작을 고를 수 있음 | Stage 98, 128, `js/ai/search-engine.js`, `js/ai/presets.js` |
 
 ### 6. 사용자 노출 설정 / 안전 장치
 
 | 상태 | 항목 | 현재 상태 | 주요 Stage / 파일 |
 | --- | --- | --- | --- |
-| 활성 | typed custom controls | number/select 기반으로 사용자 지정 엔진 입력 렌더링 | Stage 83, `js/ui/settings-panel-view.js` |
+| 활성 | detail custom setting dialogs | 메인 설정 화면에서는 사용자 지정 수치를 직접 노출하지 않고, 난이도/스타일 상세 대화상자에서 number/select 기반 입력을 렌더링 | Stage 126~129, `js/ui/settings-panel-view.js`, `js/ui/settings-search-algorithm-presentations.js` |
 | 활성 | custom 전용 엔진 수치 적용 | custom이 아닐 때는 프리셋 우선 | `js/ai/presets.js`, `js/main.js` |
 | 활성 | WLD pre-exact 변경 시 TT 무효화 | 의미가 바뀌는 옵션 변경에 대해 TT 즉시 비움 | Stage 83, `js/main.js`, `js/ai/search-engine.js` |
+| 활성 | 설정 쿠키 저장/복원/초기화 | 현재 설정을 cookie에 저장해 다음 로드에 복원하고, 초기화 시 다음 로드부터 기본값으로 되돌림 | Stage 127, `js/ui/settings-cookie-store.js`, `js/ui/settings-panel-view.js`, `js/ui/app-controller.js` |
 | 활성 | UI-only 설정 변경 시 AI 재시작 방지 | theme/accessibility 변경이 search runtime을 불필요하게 건드리지 않음 | Stage 83, `js/main.js` |
 | 활성 | 설정 요약 수동 재낭독 | 설정 변경 시 자동 낭독 제거, 사용자 요청 시에만 현재 설정을 읽음 | Stage 98, `js/ui/settings-panel-view.js`, `js/ui/app-controller.js` |
 
@@ -158,7 +160,7 @@
 | 도구 | package slimming | runtime/trainer 패키지 생성과 용량 분석 유지 | `tools/package/*` |
 | 도구 | report inventory generator | 보고서 인덱스를 수동 관리 대신 생성물로 유지 | `tools/docs/generate-report-inventory.mjs` |
 | 도구 | 문서 동기화 점검 | `stage-info.json`, README, runtime reference, checklist, generated inventory의 Stage 표기를 검사 | `tools/docs/check-doc-sync.mjs` |
-| 도구 | 코어 회귀 | core smoke / perft / stage83 custom WLD smoke / stage86 stability smoke / stage122 allocation-light move path smoke / stage123 opening default revalidation smoke / stage125 compact tuple bounded pilot smoke / stage126 weight-learning bundle smoke 유지 | `js/test/core-smoke.mjs`, `js/test/perft.mjs`, `js/test/stage83_custom_wld_toggle_smoke.mjs`, `js/test/stage86_stability_hotpath_smoke.mjs`, `js/test/stage122_allocation_light_search_moves_smoke.mjs`, `js/test/stage123_opening_default_revalidation_smoke.mjs`, `js/test/stage125_compact_tuple_family_pilot_smoke.mjs`, `js/test/stage126_weight_learning_bundle_smoke.mjs` |
+| 도구 | 코어 회귀 | core smoke / perft / stage83 custom WLD smoke / stage86 stability smoke / stage122 allocation-light move path smoke / stage123 opening default revalidation smoke / stage125 compact tuple bounded pilot smoke / stage126 settings split/style support / stage127 cookie / stage128 opening tie-break-depth gate / stage129 settings presentation smoke / stage132 classic MTD(f) driver / stage136 balanced13 bundle / stage137~139 classic search adoption / stage142 trineutron mode smoke / stage143 release default smoke 유지 | `js/test/core-smoke.mjs`, `js/test/perft.mjs`, `js/test/stage83_custom_wld_toggle_smoke.mjs`, `js/test/stage86_stability_hotpath_smoke.mjs`, `js/test/stage122_allocation_light_search_moves_smoke.mjs`, `js/test/stage123_opening_default_revalidation_smoke.mjs`, `js/test/stage125_compact_tuple_family_pilot_smoke.mjs`, `js/test/stage126_custom_setting_groups_smoke.mjs`, `js/test/stage126_search_engine_custom_style_support_smoke.mjs`, `js/test/stage127_settings_cookie_smoke.mjs`, `js/test/stage128_opening_tie_randomization_smoke.mjs`, `js/test/stage128_classic_depth_gate_smoke.mjs`, `js/test/stage129_settings_ui_presentation_smoke.mjs`, `js/test/stage132_classic_mtdf_search_driver_smoke.mjs`, `js/test/stage136_balanced13_support_stack_bundle_smoke.mjs`, `js/test/stage137_mtdf_root_light_probe_smoke.mjs`, `js/test/stage138_pvs_aspiration_defaults_smoke.mjs`, `js/test/stage139_mtdf_etc_suppression_smoke.mjs`, `js/test/stage142_trineutron_algorithm_modes_smoke.mjs`, `js/test/stage143_release_defaults_smoke.mjs`, `js/test/stage126_weight_learning_bundle_smoke.mjs` |
 | 도구 | special-ending 회귀셋 | stage94~98 스모크와 공통 픽스처를 통해 classic/MCTS trap 회귀 유지 | `js/test/stage94_special_ending_scout_smoke.mjs`, `js/test/stage95_immediate_wipeout_guard_smoke.mjs`, `js/test/stage96_mcts_immediate_wipeout_bias_smoke.mjs`, `js/test/stage97_mcts_root_threat_penalty_smoke.mjs`, `js/test/stage98_special_ending_regression_suite.mjs`, `js/test/special-ending-regression-helpers.mjs` |
 | 도구 | 브라우저 UI 스모크 | 번들/원본 모듈 로드 스모크 유지 | `tests/ui_smoke.py`, `tests/virtual_host_smoke.py` |
 

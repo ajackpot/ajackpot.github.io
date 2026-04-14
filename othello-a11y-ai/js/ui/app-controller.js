@@ -1,4 +1,13 @@
-import { ENGINE_PRESETS, ENGINE_STYLE_PRESETS, resolveEngineOptions } from '../ai/presets.js';
+import {
+  createDefaultCustomDifficultyInputs,
+  createDefaultCustomStyleInputs,
+  CUSTOM_STYLE_KEY,
+  ENGINE_PRESETS,
+  ENGINE_STYLE_PRESETS,
+  mergeCustomInputGroups,
+  resolveEngineOptionsWithCustomizations,
+  splitCustomInputGroups,
+} from '../ai/presets.js';
 import {
   describeSearchAlgorithm,
   DEFAULT_SEARCH_ALGORITHM,
@@ -26,14 +35,16 @@ import {
 } from './formatters.js';
 import { LiveRegionAnnouncer } from './live-region-announcer.js';
 import { SettingsPanelView } from './settings-panel-view.js';
+import { closeDialog, isDialogOpen, openDialog } from './dialog-utils.js';
+import {
+  clearPersistedSettingsCookie,
+  readPersistedSettingsCookie,
+  writePersistedSettingsCookie,
+} from './settings-cookie-store.js';
 
 function createDefaultSettings() {
-  const customInputs = {};
-  for (const [key, value] of Object.entries(ENGINE_PRESETS.custom)) {
-    if (typeof value === 'number') {
-      customInputs[key] = value;
-    }
-  }
+  const customDifficultyInputs = createDefaultCustomDifficultyInputs();
+  const customStyleInputs = createDefaultCustomStyleInputs();
 
   return {
     humanColor: 'black',
@@ -43,7 +54,9 @@ function createDefaultSettings() {
     showLegalHints: true,
     enableBoardShortcuts: true,
     themeMode: 'system',
-    customInputs,
+    customDifficultyInputs,
+    customStyleInputs,
+    customInputs: mergeCustomInputGroups(customDifficultyInputs, customStyleInputs),
   };
 }
 
@@ -51,6 +64,91 @@ function normalizeThemeMode(themeMode) {
   return themeMode === 'dark' || themeMode === 'high-contrast'
     ? themeMode
     : 'system';
+}
+
+function normalizeHumanColor(humanColor, fallback = 'black') {
+  if (humanColor === 'white' || humanColor === 'black') {
+    return humanColor;
+  }
+  return fallback === 'white' ? 'white' : 'black';
+}
+
+function normalizeStyleKey(styleKey, fallback = 'balanced') {
+  if (styleKey === CUSTOM_STYLE_KEY) {
+    return CUSTOM_STYLE_KEY;
+  }
+  if (ENGINE_STYLE_PRESETS[styleKey]) {
+    return styleKey;
+  }
+  return ENGINE_STYLE_PRESETS[fallback] ? fallback : 'balanced';
+}
+
+function normalizeSettingsPayload(settings = {}, baseSettings = createDefaultSettings()) {
+  const fallbackSettings = baseSettings && typeof baseSettings === 'object'
+    ? baseSettings
+    : createDefaultSettings();
+  const rawSettings = settings && typeof settings === 'object'
+    ? settings
+    : {};
+  const rawCustomInputs = rawSettings.customInputs && typeof rawSettings.customInputs === 'object'
+    ? rawSettings.customInputs
+    : {};
+  const splitCustomInputs = splitCustomInputGroups(rawCustomInputs);
+  const customDifficultyInputs = {
+    ...(fallbackSettings.customDifficultyInputs ?? createDefaultCustomDifficultyInputs()),
+    ...splitCustomInputs.customDifficultyInputs,
+    ...((rawSettings.customDifficultyInputs && typeof rawSettings.customDifficultyInputs === 'object')
+      ? rawSettings.customDifficultyInputs
+      : {}),
+  };
+  const customStyleInputs = {
+    ...(fallbackSettings.customStyleInputs ?? createDefaultCustomStyleInputs()),
+    ...splitCustomInputs.customStyleInputs,
+    ...((rawSettings.customStyleInputs && typeof rawSettings.customStyleInputs === 'object')
+      ? rawSettings.customStyleInputs
+      : {}),
+  };
+  const presetKey = ENGINE_PRESETS[rawSettings.presetKey]
+    ? rawSettings.presetKey
+    : (fallbackSettings.presetKey ?? 'normal');
+  const styleKey = normalizeStyleKey(rawSettings.styleKey, fallbackSettings.styleKey ?? 'balanced');
+  const searchAlgorithm = normalizeSearchAlgorithmForPreset(
+    describeSearchAlgorithm(rawSettings.searchAlgorithm)?.key ?? fallbackSettings.searchAlgorithm ?? DEFAULT_SEARCH_ALGORITHM,
+    presetKey,
+  );
+
+  return {
+    ...fallbackSettings,
+    humanColor: normalizeHumanColor(rawSettings.humanColor, fallbackSettings.humanColor),
+    presetKey,
+    styleKey,
+    searchAlgorithm,
+    showLegalHints: typeof rawSettings.showLegalHints === 'boolean'
+      ? rawSettings.showLegalHints
+      : fallbackSettings.showLegalHints,
+    enableBoardShortcuts: typeof rawSettings.enableBoardShortcuts === 'boolean'
+      ? rawSettings.enableBoardShortcuts
+      : fallbackSettings.enableBoardShortcuts,
+    themeMode: normalizeThemeMode(rawSettings.themeMode ?? fallbackSettings.themeMode),
+    customDifficultyInputs,
+    customStyleInputs,
+    customInputs: mergeCustomInputGroups(customDifficultyInputs, customStyleInputs),
+  };
+}
+
+function createPersistableSettingsSnapshot(settings = {}) {
+  const normalizedSettings = normalizeSettingsPayload(settings, createDefaultSettings());
+  return {
+    humanColor: normalizedSettings.humanColor,
+    presetKey: normalizedSettings.presetKey,
+    styleKey: normalizedSettings.styleKey,
+    searchAlgorithm: normalizedSettings.searchAlgorithm,
+    showLegalHints: normalizedSettings.showLegalHints,
+    enableBoardShortcuts: normalizedSettings.enableBoardShortcuts,
+    themeMode: normalizedSettings.themeMode,
+    customDifficultyInputs: { ...normalizedSettings.customDifficultyInputs },
+    customStyleInputs: { ...normalizedSettings.customStyleInputs },
+  };
 }
 
 function customInputsChanged(leftInputs = {}, rightInputs = {}) {
@@ -84,36 +182,6 @@ function nextAnimationFrame() {
 
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function isDialogOpen(dialog) {
-  return Boolean(dialog?.open);
-}
-
-function openDialog(dialog) {
-  if (!dialog || isDialogOpen(dialog)) {
-    return;
-  }
-
-  if (typeof dialog.showModal === 'function') {
-    dialog.showModal();
-    return;
-  }
-
-  dialog.setAttribute('open', 'open');
-}
-
-function closeDialog(dialog) {
-  if (!dialog || !isDialogOpen(dialog)) {
-    return;
-  }
-
-  if (typeof dialog.close === 'function') {
-    dialog.close();
-    return;
-  }
-
-  dialog.removeAttribute('open');
 }
 
 function formatCompactSequenceWithSpaces(sequenceText) {
@@ -174,7 +242,8 @@ async function copyTextToClipboard(text) {
 export class AppController {
   constructor(root) {
     this.root = root;
-    this.settings = createDefaultSettings();
+    this.defaultSettings = createDefaultSettings();
+    this.settings = normalizeSettingsPayload(readPersistedSettingsCookie(document), this.defaultSettings);
     this.stateHistory = [GameState.initial()];
     this.currentState = this.stateHistory[0];
     this.searchResult = null;
@@ -212,6 +281,8 @@ export class AppController {
       onReadSettings: () => this.handleReadSettings(),
       onStartFromSequence: (sequenceText) => this.handleStartFromSequence(sequenceText),
       onCopyMoveSequence: () => this.handleCopyMoveSequence(),
+      onSaveSettingsCookie: () => this.handleSaveSettingsCookie(),
+      onResetSettingsCookie: () => this.handleResetSettingsCookie(),
     });
     this.setupManualMoveDialog();
     this.applyThemeMode(this.settings.themeMode);
@@ -363,16 +434,39 @@ export class AppController {
   }
 
   getResolvedOptions() {
-    const resolved = resolveEngineOptions(this.settings.presetKey, this.settings.customInputs, this.settings.styleKey);
-    return {
+    const normalizedSearchAlgorithm = normalizeSearchAlgorithmForPreset(
+      this.settings.searchAlgorithm ?? DEFAULT_SEARCH_ALGORITHM,
+      this.settings.presetKey,
+    );
+    const resolved = resolveEngineOptionsWithCustomizations({
+      presetKey: this.settings.presetKey,
+      customDifficultyInputs: this.settings.customDifficultyInputs,
+      customStyleInputs: this.settings.customStyleInputs,
+      styleKey: this.settings.styleKey,
+      searchAlgorithm: normalizedSearchAlgorithm,
+      allowStyleWithCustomDifficulty: true,
+    });
+    const baseResolved = {
       ...resolved,
-      searchAlgorithm: normalizeSearchAlgorithmForPreset(
-        this.settings.searchAlgorithm ?? DEFAULT_SEARCH_ALGORITHM,
-        this.settings.presetKey,
-      ),
+      searchAlgorithm: normalizedSearchAlgorithm,
       mctsExploration: resolved.mctsExploration ?? 1.35,
       mctsMaxIterations: resolved.mctsMaxIterations ?? 200000,
       mctsMaxNodes: resolved.mctsMaxNodes ?? Math.max(2048, Math.min(160000, Math.round((resolved.maxTableEntries ?? 50000) * 0.75))),
+    };
+
+    if (normalizedSearchAlgorithm !== 'mcts-lite') {
+      return baseResolved;
+    }
+
+    const configuredStyleLabel = resolved.styleLabel ?? resolved.styleKey ?? '알 수 없음';
+    return {
+      ...baseResolved,
+      configuredStyleKey: resolved.styleKey,
+      configuredStyleLabel,
+      configuredStyleDescription: resolved.styleDescription ?? '',
+      styleApplied: false,
+      styleSuppressedBySearchAlgorithm: true,
+      styleDescription: `${configuredStyleLabel} 선택은 유지되지만, MCTS Lite의 메인 탐색은 baseline 랜덤 rollout을 사용하므로 스타일 evaluator를 쓰지 않습니다.`,
     };
   }
 
@@ -429,20 +523,13 @@ export class AppController {
   handleSettingsChange(settings) {
     this.closeManualMoveDialog({ restoreFocus: false });
 
-    const nextSettings = {
-      ...settings,
-      themeMode: normalizeThemeMode(settings.themeMode),
-      searchAlgorithm: normalizeSearchAlgorithmForPreset(
-        describeSearchAlgorithm(settings.searchAlgorithm)?.key ?? DEFAULT_SEARCH_ALGORITHM,
-        settings.presetKey,
-      ),
-      customInputs: { ...settings.customInputs },
-    };
+    const nextSettings = normalizeSettingsPayload(settings, this.settings);
     const engineOrTurnSettingsChanged = this.settings.humanColor !== nextSettings.humanColor
       || this.settings.presetKey !== nextSettings.presetKey
       || this.settings.styleKey !== nextSettings.styleKey
       || this.settings.searchAlgorithm !== nextSettings.searchAlgorithm
-      || customInputsChanged(this.settings.customInputs, nextSettings.customInputs);
+      || customInputsChanged(this.settings.customDifficultyInputs, nextSettings.customDifficultyInputs)
+      || customInputsChanged(this.settings.customStyleInputs, nextSettings.customStyleInputs);
     const accessibilitySettingsChanged = this.settings.showLegalHints !== nextSettings.showLegalHints
       || this.settings.enableBoardShortcuts !== nextSettings.enableBoardShortcuts;
     const themeChanged = normalizeThemeMode(this.settings.themeMode) !== nextSettings.themeMode;
@@ -463,6 +550,23 @@ export class AppController {
     if (accessibilitySettingsChanged || themeChanged) {
       this.render();
     }
+  }
+
+  handleSaveSettingsCookie() {
+    const saved = writePersistedSettingsCookie(
+      createPersistableSettingsSnapshot(this.settings),
+      { documentLike: document },
+    );
+    this.announcer.announce(saved
+      ? '현재 설정을 쿠키에 저장했습니다. 다음에 페이지를 열면 자동으로 불러옵니다.'
+      : '설정 쿠키를 저장하지 못했습니다. 브라우저가 쿠키를 허용하는지 확인해 주세요.');
+  }
+
+  handleResetSettingsCookie() {
+    const cleared = clearPersistedSettingsCookie({ documentLike: document });
+    this.announcer.announce(cleared
+      ? '설정 쿠키를 초기화했습니다. 다음에 페이지를 열면 기본 설정으로 시작합니다. 현재 페이지의 설정은 그대로 유지됩니다.'
+      : '설정 쿠키를 초기화하지 못했습니다. 브라우저가 쿠키를 허용하는지 확인해 주세요.');
   }
 
   handleNewGame() {
@@ -591,7 +695,7 @@ export class AppController {
     const searchAlgorithm = describeSearchAlgorithm(resolvedOptions.searchAlgorithm);
     const presetDescription = ENGINE_PRESETS[resolvedOptions.presetKey]?.description ?? '';
     const styleDescription = resolvedOptions.styleApplied === false
-      ? '스타일 적용 안 함'
+      ? (resolvedOptions.styleDescription ?? '스타일 적용 안 함')
       : (ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? resolvedOptions.styleDescription ?? '');
 
     const segments = [
@@ -787,7 +891,7 @@ export class AppController {
       presetKey: this.settings.presetKey,
       styleKey: this.settings.styleKey,
       searchAlgorithm: this.settings.searchAlgorithm,
-      ...this.settings.customInputs,
+      ...mergeCustomInputGroups(this.settings.customDifficultyInputs, this.settings.customStyleInputs),
     };
     const turnToken = this.aiTurnToken + 1;
     this.aiTurnToken = turnToken;
@@ -890,6 +994,9 @@ export class AppController {
     const resolvedList = formatResolvedOptionsList(resolvedOptions).map((entry) => `
       <li><strong>${escapeHtml(entry.label)}:</strong> ${escapeHtml(entry.value)}</li>
     `).join('');
+    const styleDescriptionText = resolvedOptions.styleApplied === false
+      ? (resolvedOptions.styleDescription ?? '스타일 적용 안 함')
+      : (ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? resolvedOptions.styleDescription ?? '');
 
     this.statusContainer.innerHTML = `
       <div class="status-block">
@@ -911,7 +1018,7 @@ export class AppController {
         <p>${escapeHtml(formatEngineSummaryLine(resolvedOptions))}</p>
         <p><strong>AI 모드:</strong> ${escapeHtml(searchAlgorithm?.description ?? '')}</p>
         <p><strong>난이도:</strong> ${escapeHtml(ENGINE_PRESETS[resolvedOptions.presetKey]?.description ?? '')}</p>
-        <p><strong>스타일:</strong> ${escapeHtml(ENGINE_STYLE_PRESETS[resolvedOptions.styleKey]?.description ?? resolvedOptions.styleDescription ?? '')}</p>
+        <p><strong>스타일:</strong> ${escapeHtml(styleDescriptionText)}</p>
       </div>
 
       <div class="status-block">

@@ -7,6 +7,7 @@ import { SearchEngine } from '../../js/ai/search-engine.js';
 import { GameState, serializeMoveHistoryCompact } from '../../js/core/game-state.js';
 import { PLAYER_COLORS } from '../../js/core/rules.js';
 import { parseArgs, relativePathFromCwd, resolveCliPath } from '../evaluator-training/lib.mjs';
+import { buildEngineProfileOverrides, describeVariantForSummary, loadProfileVariant } from './lib-profile-variants.mjs';
 
 const NUMBER_FORMATTER = new Intl.NumberFormat('en-US');
 
@@ -23,8 +24,15 @@ const DEFAULTS = Object.freeze({
   solverAdjudicationEmpties: 12,
   solverAdjudicationTimeMs: 30000,
   maxTableEntries: 60000,
+  aspirationWindow: 0,
+  firstClassicSearchDriver: null,
+  secondClassicSearchDriver: null,
+  firstClassicMtdfGuessPlyOffset: null,
+  secondClassicMtdfGuessPlyOffset: null,
+  classicMtdfVerificationPassEnabled: true,
   presetKey: 'custom',
   styleKey: 'balanced',
+  progressEveryPairs: 4,
 });
 
 function printUsage() {
@@ -43,6 +51,12 @@ function printUsage() {
     [--solver-adjudication-empties 12] \
     [--solver-adjudication-time-ms 30000] \
     [--max-table-entries 60000]
+    [--aspiration-window 0]
+    [--first-classic-search-driver pvs|mtdf] [--second-classic-search-driver pvs|mtdf]
+    [--first-classic-mtdf-guess-ply-offset 1|2] [--second-classic-mtdf-guess-ply-offset 1|2]
+    [--classic-mtdf-verification-pass-enabled true|false]
+    [--generated-module js/ai/learned-eval-profile.generated.js | --evaluation-json <file> [--move-ordering-json <file>] [--tuple-json <file>] [--mpc-json <file>]]
+    [--progress-every-pairs 4]
 
 설명:
 - 같은 random opening에서 색을 바꿔 두 번 대국하여 색 편향을 줄입니다.
@@ -50,6 +64,8 @@ function printUsage() {
 - 각 시나리오는 지정한 time-ms-list 버킷마다 games * seedCount개의 opening pair(실제 2 * games * seedCount 판)를 실행합니다.
 - solver-adjudication-empties 이하에 들어가면 classic exact lane으로 승패/디스크 차를 판정하여 전체 시간을 줄입니다.
 - 현재 도구는 mcts-lite / mcts-guided / mcts-hybrid 같은 내부 알고리즘 조합 비교에 그대로 사용할 수 있습니다.
+- progress-every-pairs를 주면 paired opening 진행 상황을 주기적으로 출력해 장시간 벤치의 진행률을 확인할 수 있습니다.
+- generated-module / evaluation-json 계열 옵션을 주면 두 알고리즘 모두 같은 custom profile 묶음을 공유한 상태에서 비교할 수 있습니다.
 `);
 }
 
@@ -172,26 +188,39 @@ function createOpeningState(openingPlies, seed) {
 
 function createEngine({
   algorithm,
+  classicSearchDriver = null,
+  classicMtdfGuessPlyOffset = null,
+  classicMtdfVerificationPassEnabled = true,
   timeLimitMs,
   maxDepth,
   exactEndgameEmpties,
+  aspirationWindow,
   maxTableEntries,
   presetKey,
   styleKey,
+  profileVariant = null,
 }) {
   return new SearchEngine({
     presetKey,
     styleKey,
     searchAlgorithm: algorithm,
+    ...(typeof classicSearchDriver === 'string' && classicSearchDriver.trim() !== ''
+      ? { classicSearchDriver }
+      : {}),
+    ...(Number.isFinite(Number(classicMtdfGuessPlyOffset))
+      ? { classicMtdfGuessPlyOffset: Math.max(1, Math.min(2, Math.round(Number(classicMtdfGuessPlyOffset)))) }
+      : {}),
+    classicMtdfVerificationPassEnabled,
     maxDepth,
     timeLimitMs,
     exactEndgameEmpties,
     wldPreExactEmpties: 0,
-    aspirationWindow: 0,
+    aspirationWindow,
     openingRandomness: 0,
     searchRandomness: 0,
     randomness: 0,
     maxTableEntries,
+    ...buildEngineProfileOverrides(profileVariant),
   });
 }
 
@@ -203,6 +232,12 @@ function createPerColorStats() {
     heuristicFallbackSearches: 0,
     totalElapsedMs: 0,
     totalNodes: 0,
+    totalCutoffs: 0,
+    totalTtHits: 0,
+    totalMtdfPasses: 0,
+    totalMtdfFailHighs: 0,
+    totalMtdfFailLows: 0,
+    totalMtdfVerificationPasses: 0,
     totalMctsIterations: 0,
     totalMctsRollouts: 0,
     totalMctsRolloutPlies: 0,
@@ -226,6 +261,12 @@ function mergeSearchResultIntoPerColorStats(target, result) {
   target.turns += 1;
   target.totalElapsedMs += Number(result.stats?.elapsedMs ?? 0);
   target.totalNodes += Number(result.stats?.nodes ?? 0);
+  target.totalCutoffs += Number(result.stats?.cutoffs ?? 0);
+  target.totalTtHits += Number(result.stats?.ttHits ?? 0);
+  target.totalMtdfPasses += Number(result.stats?.mtdfPasses ?? 0);
+  target.totalMtdfFailHighs += Number(result.stats?.mtdfFailHighs ?? 0);
+  target.totalMtdfFailLows += Number(result.stats?.mtdfFailLows ?? 0);
+  target.totalMtdfVerificationPasses += Number(result.stats?.mtdfVerificationPasses ?? 0);
   target.totalMctsIterations += Number(result.stats?.mctsIterations ?? 0);
   target.totalMctsRollouts += Number(result.stats?.mctsRollouts ?? 0);
   target.totalMctsRolloutPlies += Number(result.stats?.mctsRolloutPlies ?? 0);
@@ -249,10 +290,18 @@ function mergeSearchResultIntoPerColorStats(target, result) {
 }
 
 function finalizePerColorStats(stats) {
+  const averageElapsedMsPerTurn = stats.turns > 0 ? stats.totalElapsedMs / stats.turns : 0;
   return {
     ...stats,
-    averageElapsedMsPerTurn: stats.turns > 0 ? stats.totalElapsedMs / stats.turns : 0,
+    averageElapsedMsPerTurn,
     averageNodesPerTurn: stats.turns > 0 ? stats.totalNodes / stats.turns : 0,
+    averageNodesPerMs: averageElapsedMsPerTurn > 0 ? stats.totalNodes / stats.totalElapsedMs : 0,
+    averageCutoffsPerTurn: stats.turns > 0 ? stats.totalCutoffs / stats.turns : 0,
+    averageTtHitsPerTurn: stats.turns > 0 ? stats.totalTtHits / stats.turns : 0,
+    averageMtdfPassesPerTurn: stats.turns > 0 ? stats.totalMtdfPasses / stats.turns : 0,
+    averageMtdfFailHighsPerTurn: stats.turns > 0 ? stats.totalMtdfFailHighs / stats.turns : 0,
+    averageMtdfFailLowsPerTurn: stats.turns > 0 ? stats.totalMtdfFailLows / stats.turns : 0,
+    averageMtdfVerificationPassesPerTurn: stats.turns > 0 ? stats.totalMtdfVerificationPasses / stats.turns : 0,
     averageMctsIterationsPerTurn: stats.turns > 0 ? stats.totalMctsIterations / stats.turns : 0,
     averageMctsRolloutsPerTurn: stats.turns > 0 ? stats.totalMctsRollouts / stats.turns : 0,
     averageMctsTreeNodesPerTurn: stats.turns > 0 ? stats.totalMctsTreeNodes / stats.turns : 0,
@@ -278,6 +327,12 @@ function createAlgorithmAggregate() {
     heuristicFallbackSearches: 0,
     totalElapsedMs: 0,
     totalNodes: 0,
+    totalCutoffs: 0,
+    totalTtHits: 0,
+    totalMtdfPasses: 0,
+    totalMtdfFailHighs: 0,
+    totalMtdfFailLows: 0,
+    totalMtdfVerificationPasses: 0,
     totalMctsIterations: 0,
     totalMctsRollouts: 0,
     totalMctsRolloutPlies: 0,
@@ -300,6 +355,12 @@ function absorbGameStatsIntoAggregate(aggregate, stats) {
   aggregate.heuristicFallbackSearches += Number(stats.heuristicFallbackSearches ?? 0);
   aggregate.totalElapsedMs += Number(stats.totalElapsedMs ?? 0);
   aggregate.totalNodes += Number(stats.totalNodes ?? 0);
+  aggregate.totalCutoffs += Number(stats.totalCutoffs ?? 0);
+  aggregate.totalTtHits += Number(stats.totalTtHits ?? 0);
+  aggregate.totalMtdfPasses += Number(stats.totalMtdfPasses ?? 0);
+  aggregate.totalMtdfFailHighs += Number(stats.totalMtdfFailHighs ?? 0);
+  aggregate.totalMtdfFailLows += Number(stats.totalMtdfFailLows ?? 0);
+  aggregate.totalMtdfVerificationPasses += Number(stats.totalMtdfVerificationPasses ?? 0);
   aggregate.totalMctsIterations += Number(stats.totalMctsIterations ?? 0);
   aggregate.totalMctsRollouts += Number(stats.totalMctsRollouts ?? 0);
   aggregate.totalMctsRolloutPlies += Number(stats.totalMctsRolloutPlies ?? 0);
@@ -318,14 +379,22 @@ function absorbGameStatsIntoAggregate(aggregate, stats) {
 }
 
 function finalizeAlgorithmAggregate(aggregate) {
+  const averageElapsedMsPerTurn = aggregate.turns > 0 ? aggregate.totalElapsedMs / aggregate.turns : 0;
   return {
     ...aggregate,
     scoreRate: aggregate.games > 0 ? aggregate.points / aggregate.games : 0,
     averageDiscDiff: aggregate.games > 0 ? aggregate.discDiff / aggregate.games : 0,
     averageElapsedMsPerGame: aggregate.games > 0 ? aggregate.totalElapsedMs / aggregate.games : 0,
-    averageElapsedMsPerTurn: aggregate.turns > 0 ? aggregate.totalElapsedMs / aggregate.turns : 0,
+    averageElapsedMsPerTurn,
     averageNodesPerGame: aggregate.games > 0 ? aggregate.totalNodes / aggregate.games : 0,
     averageNodesPerTurn: aggregate.turns > 0 ? aggregate.totalNodes / aggregate.turns : 0,
+    averageNodesPerMs: averageElapsedMsPerTurn > 0 ? aggregate.totalNodes / aggregate.totalElapsedMs : 0,
+    averageCutoffsPerTurn: aggregate.turns > 0 ? aggregate.totalCutoffs / aggregate.turns : 0,
+    averageTtHitsPerTurn: aggregate.turns > 0 ? aggregate.totalTtHits / aggregate.turns : 0,
+    averageMtdfPassesPerTurn: aggregate.turns > 0 ? aggregate.totalMtdfPasses / aggregate.turns : 0,
+    averageMtdfFailHighsPerTurn: aggregate.turns > 0 ? aggregate.totalMtdfFailHighs / aggregate.turns : 0,
+    averageMtdfFailLowsPerTurn: aggregate.turns > 0 ? aggregate.totalMtdfFailLows / aggregate.turns : 0,
+    averageMtdfVerificationPassesPerTurn: aggregate.turns > 0 ? aggregate.totalMtdfVerificationPasses / aggregate.turns : 0,
     averageMctsIterationsPerTurn: aggregate.turns > 0 ? aggregate.totalMctsIterations / aggregate.turns : 0,
     averageMctsRolloutsPerTurn: aggregate.turns > 0 ? aggregate.totalMctsRollouts / aggregate.turns : 0,
     averageMctsTreeNodesPerTurn: aggregate.turns > 0 ? aggregate.totalMctsTreeNodes / aggregate.turns : 0,
@@ -356,7 +425,7 @@ function winnerColorFromBlackDiff(blackDiff) {
   return null;
 }
 
-function createExactAdjudicator({ timeLimitMs, maxTableEntries, styleKey }) {
+function createExactAdjudicator({ timeLimitMs, maxTableEntries, styleKey, profileVariant = null }) {
   return new SearchEngine({
     presetKey: 'custom',
     styleKey,
@@ -370,6 +439,7 @@ function createExactAdjudicator({ timeLimitMs, maxTableEntries, styleKey }) {
     searchRandomness: 0,
     randomness: 0,
     maxTableEntries: Math.max(180000, maxTableEntries),
+    ...buildEngineProfileOverrides(profileVariant),
   });
 }
 
@@ -440,14 +510,21 @@ function playSingleGame({
   openingMeta,
   blackAlgorithm,
   whiteAlgorithm,
+  blackClassicSearchDriver = null,
+  whiteClassicSearchDriver = null,
+  blackClassicMtdfGuessPlyOffset = 1,
+  whiteClassicMtdfGuessPlyOffset = 1,
+  classicMtdfVerificationPassEnabled = true,
   timeLimitMs,
   maxDepth,
   exactEndgameEmpties,
+  aspirationWindow,
   solverAdjudicationEmpties,
   solverAdjudicationTimeMs,
   maxTableEntries,
   presetKey,
   styleKey,
+  profileVariant = null,
   gameSeed,
 }) {
   let state = startingState.clone();
@@ -455,21 +532,31 @@ function playSingleGame({
   const engines = {
     black: createEngine({
       algorithm: blackAlgorithm,
+      classicSearchDriver: blackClassicSearchDriver,
+      classicMtdfGuessPlyOffset: blackClassicMtdfGuessPlyOffset,
+      classicMtdfVerificationPassEnabled,
       timeLimitMs,
       maxDepth,
       exactEndgameEmpties,
+      aspirationWindow,
       maxTableEntries,
       presetKey,
       styleKey,
+      profileVariant,
     }),
     white: createEngine({
       algorithm: whiteAlgorithm,
+      classicSearchDriver: whiteClassicSearchDriver,
+      classicMtdfGuessPlyOffset: whiteClassicMtdfGuessPlyOffset,
+      classicMtdfVerificationPassEnabled,
       timeLimitMs,
       maxDepth,
       exactEndgameEmpties,
+      aspirationWindow,
       maxTableEntries,
       presetKey,
       styleKey,
+      profileVariant,
     }),
   };
   const adjudicator = solverAdjudicationEmpties >= 0
@@ -477,6 +564,7 @@ function playSingleGame({
       timeLimitMs: solverAdjudicationTimeMs,
       maxTableEntries,
       styleKey,
+      profileVariant,
     })
     : null;
 
@@ -694,18 +782,61 @@ const exactEndgameEmpties = toFiniteInteger(args['exact-endgame-empties'], DEFAU
 const solverAdjudicationEmpties = toFiniteInteger(args['solver-adjudication-empties'], DEFAULTS.solverAdjudicationEmpties, -1, 24);
 const solverAdjudicationTimeMs = toFiniteInteger(args['solver-adjudication-time-ms'], DEFAULTS.solverAdjudicationTimeMs, 100, 300000);
 const maxTableEntries = toFiniteInteger(args['max-table-entries'], DEFAULTS.maxTableEntries, 1000, 600000);
+const aspirationWindow = toFiniteInteger(args['aspiration-window'], DEFAULTS.aspirationWindow, 0, 5000);
+const firstClassicSearchDriver = typeof args['first-classic-search-driver'] === 'string' && args['first-classic-search-driver'].trim() !== ''
+  ? args['first-classic-search-driver'].trim()
+  : DEFAULTS.firstClassicSearchDriver;
+const secondClassicSearchDriver = typeof args['second-classic-search-driver'] === 'string' && args['second-classic-search-driver'].trim() !== ''
+  ? args['second-classic-search-driver'].trim()
+  : DEFAULTS.secondClassicSearchDriver;
+const firstClassicMtdfGuessPlyOffset = toFiniteInteger(
+  args['first-classic-mtdf-guess-ply-offset'],
+  DEFAULTS.firstClassicMtdfGuessPlyOffset,
+  1,
+  2,
+);
+const secondClassicMtdfGuessPlyOffset = toFiniteInteger(
+  args['second-classic-mtdf-guess-ply-offset'],
+  DEFAULTS.secondClassicMtdfGuessPlyOffset,
+  1,
+  2,
+);
+const classicMtdfVerificationPassEnabled = typeof args['classic-mtdf-verification-pass-enabled'] === 'string'
+  ? args['classic-mtdf-verification-pass-enabled'].trim().toLowerCase() !== 'false'
+  : DEFAULTS.classicMtdfVerificationPassEnabled;
 const presetKey = typeof args['preset-key'] === 'string' && args['preset-key'].trim() !== ''
   ? args['preset-key'].trim()
   : DEFAULTS.presetKey;
 const styleKey = typeof args['style-key'] === 'string' && args['style-key'].trim() !== ''
   ? args['style-key'].trim()
   : DEFAULTS.styleKey;
+const progressEveryPairs = toFiniteInteger(args['progress-every-pairs'], DEFAULTS.progressEveryPairs, 0, 10_000);
+
+const sharedProfileVariant = (typeof args['generated-module'] === 'string' && args['generated-module'].trim() !== '')
+  || (typeof args['evaluation-json'] === 'string' && args['evaluation-json'].trim() !== '')
+  || (typeof args['move-ordering-json'] === 'string' && args['move-ordering-json'].trim() !== '')
+  || (typeof args['tuple-json'] === 'string' && args['tuple-json'].trim() !== '')
+  || (typeof args['mpc-json'] === 'string' && args['mpc-json'].trim() !== '')
+  ? await loadProfileVariant({
+    label: 'shared-profile',
+    generatedModule: args['generated-module'] ?? null,
+    evaluationJson: args['evaluation-json'] ?? null,
+    moveOrderingJson: args['move-ordering-json'] ?? null,
+    tupleJson: args['tuple-json'] ?? null,
+    mpcJson: args['mpc-json'] ?? null,
+  })
+  : null;
 
 const firstLabel = describeSearchAlgorithm(firstAlgorithm)?.label ?? firstAlgorithm;
 const secondLabel = describeSearchAlgorithm(secondAlgorithm)?.label ?? secondAlgorithm;
 
 console.log(`Running internal pair benchmark: ${firstAlgorithm} (${firstLabel}) vs ${secondAlgorithm} (${secondLabel})`);
 console.log(`Scenarios: ${timeMsList.join(', ')} ms | paired openings per seed: ${games} | seeds: ${seedList.join(', ')} | opening plies: ${openingPlies}`);
+console.log(`Classic driver overrides: first=${firstClassicSearchDriver ?? 'default'} (guess ${Number.isFinite(Number(firstClassicMtdfGuessPlyOffset)) ? firstClassicMtdfGuessPlyOffset : 'default'}) | second=${secondClassicSearchDriver ?? 'default'} (guess ${Number.isFinite(Number(secondClassicMtdfGuessPlyOffset)) ? secondClassicMtdfGuessPlyOffset : 'default'}) | aspiration ${aspirationWindow}`);
+console.log(`Progress logging: every ${progressEveryPairs} paired opening(s)`);
+if (sharedProfileVariant) {
+  console.log(`Shared profile override: ${sharedProfileVariant.evaluationProfile?.name ?? 'custom'} | move ordering ${sharedProfileVariant.moveOrderingProfile?.name ?? 'null'} | tuple ${sharedProfileVariant.tupleResidualProfile?.name ?? 'null'} | mpc ${sharedProfileVariant.mpcProfile?.name ?? 'null'}`);
+}
 
 const scenarioSummaries = [];
 
@@ -713,6 +844,7 @@ for (let scenarioIndex = 0; scenarioIndex < timeMsList.length; scenarioIndex += 
   const timeLimitMs = timeMsList[scenarioIndex];
   const pairs = [];
   let pairSerial = 0;
+  const totalPairsForScenario = seedList.length * games;
 
   for (let seedIndex = 0; seedIndex < seedList.length; seedIndex += 1) {
     const baseSeed = seedList[seedIndex];
@@ -739,14 +871,21 @@ for (let scenarioIndex = 0; scenarioIndex < timeMsList.length; scenarioIndex += 
           openingMeta,
           blackAlgorithm: firstAlgorithm,
           whiteAlgorithm: secondAlgorithm,
+          blackClassicSearchDriver: firstClassicSearchDriver,
+          whiteClassicSearchDriver: secondClassicSearchDriver,
+          blackClassicMtdfGuessPlyOffset: firstClassicMtdfGuessPlyOffset,
+          whiteClassicMtdfGuessPlyOffset: secondClassicMtdfGuessPlyOffset,
+          classicMtdfVerificationPassEnabled,
           timeLimitMs,
           maxDepth,
           exactEndgameEmpties,
+          aspirationWindow,
           solverAdjudicationEmpties,
           solverAdjudicationTimeMs,
           maxTableEntries,
           presetKey,
           styleKey,
+          profileVariant: sharedProfileVariant,
           gameSeed: firstAsBlackSeed,
         }),
         secondAsBlack: playSingleGame({
@@ -754,18 +893,28 @@ for (let scenarioIndex = 0; scenarioIndex < timeMsList.length; scenarioIndex += 
           openingMeta,
           blackAlgorithm: secondAlgorithm,
           whiteAlgorithm: firstAlgorithm,
+          blackClassicSearchDriver: secondClassicSearchDriver,
+          whiteClassicSearchDriver: firstClassicSearchDriver,
+          blackClassicMtdfGuessPlyOffset: secondClassicMtdfGuessPlyOffset,
+          whiteClassicMtdfGuessPlyOffset: firstClassicMtdfGuessPlyOffset,
+          classicMtdfVerificationPassEnabled,
           timeLimitMs,
           maxDepth,
           exactEndgameEmpties,
+          aspirationWindow,
           solverAdjudicationEmpties,
           solverAdjudicationTimeMs,
           maxTableEntries,
           presetKey,
           styleKey,
+          profileVariant: sharedProfileVariant,
           gameSeed: secondAsBlackSeed,
         }),
       });
       pairSerial += 1;
+      if (progressEveryPairs > 0 && (pairSerial % progressEveryPairs === 0 || pairSerial === totalPairsForScenario)) {
+        console.log(`  progress ${pairSerial}/${totalPairsForScenario} paired opening(s) @ ${timeLimitMs}ms`);
+      }
     }
   }
 
@@ -800,9 +949,17 @@ const finalSummary = {
     solverAdjudicationEmpties,
     solverAdjudicationTimeMs,
     maxTableEntries,
+    aspirationWindow,
+    firstClassicSearchDriver,
+    secondClassicSearchDriver,
+    firstClassicMtdfGuessPlyOffset,
+    secondClassicMtdfGuessPlyOffset,
+    classicMtdfVerificationPassEnabled,
     presetKey,
     styleKey,
+    progressEveryPairs,
   },
+  sharedProfileVariant: sharedProfileVariant ? describeVariantForSummary(sharedProfileVariant) : null,
   scenarios: scenarioSummaries,
   condensedRecommendations: scenarioSummaries.map((scenario) => ({
     timeLimitMs: scenario.timeLimitMs,

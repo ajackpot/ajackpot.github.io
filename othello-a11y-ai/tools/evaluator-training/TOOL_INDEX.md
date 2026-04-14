@@ -2,6 +2,36 @@
 
 ## 0. 추천 엔트리포인트
 
+### `run-stage136-balanced13-support-stack-bundle.mjs` / `.bat`
+Stage 135 결선 후보 `balanced13`를 **active의 보조 학습 가중치(move-ordering / tuple residual / MPC)에 기대지 않고** 다시 학습시키는 stage-specific wrapper입니다.
+
+역할:
+- stage135 finalist fixture의 evaluation-profile을 source로 사용
+- tuple residual 학습 + calibration
+- move-ordering 재학습
+- MPC calibration + runtime variant 생성
+- combined generated module export
+- `--phase tuple|move-ordering|mpc|export|all`, `--resume`, `--plan-only` 지원
+
+권장 용도:
+- `active` vs `balanced13` 결선 전에 balanced13 전용 support stack을 공정하게 다시 만들고 싶을 때
+- evaluation-profile finalist 하나를 기준으로 부속 학습 산출물을 통째로 다시 맞추고 싶을 때
+- 기존 active support stack의 무의식적 상속을 막고 싶을 때
+
+### `run-stage130-evaluation-expansion-bundle.mjs` / `.bat`
+evaluation-profile 확장 lane을 한 번에 실행하는 **stage-specific wrapper**입니다.
+
+역할:
+- phase bucket 세분화 / extra scalar feature / smoothed phase interpolation 후보 suite 호출
+- 필요하면 ETA 추정과 micro-patch follow-up까지 같은 output root 아래로 정리
+- stage130 bundle manifest / summary JSON 기록
+- `--phase eta|suite|patch|all`, `--resume`, `--plan-only` 지원
+
+권장 용도:
+- 사용자가 외부 corpus를 직접 학습시켜 evaluation-profile 확장 후보를 한 번에 뽑고 싶을 때
+- 후보 학습 결과와 micro-patch follow-up을 같은 패키지 구조로 전달하고 싶을 때
+- tuple / MPC lane을 건드리지 않고 evaluation-profile lane만 다시 열고 싶을 때
+
 ### `run-stage126-weight-learning-bundle.mjs` / `.bat`
 현재 저장소 기준에서 **실험 가치가 남아 있는 가중치 학습 lane만 묶은 stage-specific wrapper**입니다.
 
@@ -75,6 +105,10 @@ layout family만 빠르게 비교하는 경량 파일럿입니다.
 
 > 현재 정리 기준의 기본 결론: **브라우저 기본값은 baseline runtime 유지**입니다. 사용자가 외부 corpus를 직접 돌릴 때는 먼저 `run-stage126-weight-learning-bundle`을 쓰고, 그 내부 구성요소로 `run-multi-candidate-training-suite`와 `run-tuple-patch-suite`를 이어 가는 것이 권장 경로입니다. MPC lane은 `run-mpc-candidate-training-suite` 중심으로 남기되, 이번 기본 bundle에는 넣지 않았습니다. `entryScales`는 마지막 미세 패치용입니다.
 
+> evaluation-profile 확장 lane만 다시 열고 싶다면 `run-stage130-evaluation-expansion-bundle` → `run-evaluation-profile-candidate-suite` → `run-evaluation-profile-patch-suite` 순서가 현재 권장 경로입니다.
+
+> stage135 결선 후보 `balanced13`를 공정하게 다시 붙이려면 `run-stage136-balanced13-support-stack-bundle`로 move-ordering / tuple residual / MPC까지 같은 evaluation-profile 기준으로 다시 맞추는 것이 현재 권장 경로입니다.
+
 ## 1. 데이터 준비 / 샘플링
 
 ### `download-egaroucid-data.bat`
@@ -91,6 +125,12 @@ layout family만 빠르게 비교하는 경량 파일럿입니다.
 ### `train-phase-linear.mjs` / `.bat`
 현재 base evaluator를 다시 학습합니다.
 
+이제 지원:
+- custom `featureKeys`
+- custom `phaseBuckets`
+- `--sample-assignment-mode hard|linear-adjacent`
+- bucket별 feature exclusion과 함께 phase overlap/smoothing 학습
+
 입력:
 - 학습 corpus
 
@@ -100,6 +140,53 @@ layout family만 빠르게 비교하는 경량 파일럿입니다.
 ### `benchmark-profile.mjs` / `.bat`
 phase evaluator 또는 tuple 포함 candidate의 holdout/corpus 오차를 측정합니다.
 
+### `run-evaluation-profile-candidate-suite.mjs` / `.bat`
+evaluation-profile 확장 후보를 순차적으로 묶어 돌리는 상위 suite입니다.
+
+특징:
+- built-in candidate family 제공 (`default8`, `balanced12`, `balanced13`, `all-late-scalars`, `smoothed` 등)
+- candidate별 seed profile 생성
+- `train-phase-linear` + generated module export + 선택적 profile/depth/exact benchmark
+- candidate별 `candidate-status.json`
+- `suite-summary.json`, `suite-review-summary.json`
+- `--resume`, `--plan-only`, `--continue-on-error`
+
+### `patch-evaluation-profile.mjs` / `.bat`
+이미 학습된 evaluation profile을 재학습 없이 잘라내거나 약화시킵니다.
+
+권장 용도:
+- optional scalar feature attenuation
+- interpolation off 비교
+- late bucket baseline blend 같은 micro-patch 재검증
+
+### `run-evaluation-profile-patch-suite.mjs` / `.bat`
+evaluation-profile candidate suite 산출물을 source로 받아 micro-patch 후보를 일괄 생성하는 상위 suite입니다.
+
+특징:
+- source suite의 finalist candidate 자동 선택
+- 기본 6개 patch template 자동 전개
+- patch + generated module export + 선택적 benchmark
+- candidate별 `candidate-status.json`
+- `suite-summary.json`, `suite-review-summary.json`
+- `--resume`, `--plan-only`, `--continue-on-error`
+
+## 2-1. move-ordering / support stack
+
+### `train-move-ordering-profile.mjs` / `.bat`
+child bucket별 root ordering feature를 학습합니다.
+
+Stage 136부터는 다음이 중요합니다.
+- `--teacher-tuple-profile-json off`, `--teacher-mpc-profile-json off` 로 teacher stack에서 tuple/MPC를 명시적으로 끌 수 있습니다.
+- `--tuple-profile-json off`, `--mpc-json off` 로 exported candidate stack에도 tuple/MPC를 남기지 않을 수 있습니다.
+- child bucket lookup table과 reusable `SearchEngine`을 사용해 holdout/teacher search 반복 비용을 줄입니다.
+
+### `calibrate-mpc-profile.mjs` / `.bat`
+MPC calibration bucket마다 shallow/deep search 오차 분포를 다시 맞춥니다.
+
+Stage 136부터는 다음이 중요합니다.
+- `--tuple-profile-json off`, `--mpc-profile-json off` 로 active support stack의 암묵적 상속을 막을 수 있습니다.
+- calibration bucket lookup table, reusable `SearchEngine`, running accepted-sample counter를 사용해 필수 병목을 줄였습니다.
+
 ## 3. tuple residual
 
 ### `train-tuple-residual-profile.mjs` / `.bat`
@@ -107,6 +194,7 @@ phase evaluator 또는 tuple 포함 candidate의 holdout/corpus 오차를 측정
 
 ### `calibrate-tuple-residual-profile.mjs` / `.bat`
 학습된 tuple residual의 bucket bias를 재중심화합니다.
+Stage 136부터는 bucket lookup table과 `beforeResidual + biasDelta` verification을 사용해 같은 샘플을 두 번 평가하지 않도록 단순화했습니다.
 
 ### `inspect-tuple-residual-profile.mjs` / `.bat`
 layout, tuple 수, bucket 범위, 진단값을 빠르게 확인합니다.
@@ -233,6 +321,21 @@ patch/export 중심의 small-patch suite 예제입니다.
 
 ### `examples/tuple-patch-suite.patch-plus-bench.example.json`
 calibration / profile / depth / exact benchmark까지 같이 도는 small-patch suite 예제입니다.
+
+### `examples/evaluation-profile-candidate-suite.train-only.example.json`
+evaluation-profile 확장 후보를 train/export만 돌리는 예제입니다.
+
+### `examples/evaluation-profile-candidate-suite.train-plus-bench.example.json`
+evaluation-profile 확장 후보에 profile/depth/exact benchmark까지 포함하는 예제입니다.
+
+### `examples/evaluation-profile-patch-suite.patch-only.example.json`
+evaluation-profile micro-patch 후보를 patch/export만 돌리는 예제입니다.
+
+### `examples/evaluation-profile-patch-suite.patch-plus-bench.example.json`
+evaluation-profile micro-patch 후보에 profile/depth/exact benchmark까지 포함하는 예제입니다.
+
+### `examples/stage136-balanced13-support-stack.example.json`
+balanced13 finalist를 기준으로 tuple residual / move-ordering / MPC support stack을 다시 학습시키는 stage136 bundle 예제입니다.
 
 ### `examples/tuple-patch-suite.final-entry-followup.example.json`
 남은 mismatch slot을 entryScales로 직접 줄여보는 마지막 micro-patch 예제입니다.

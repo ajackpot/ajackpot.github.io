@@ -1,4 +1,5 @@
 import { indexToCoord } from '../core/bitboard.js';
+import { doesSearchAlgorithmUseStyleEvaluator } from '../ai/presets.js';
 import { describeSearchAlgorithm, isMctsSearchAlgorithm } from '../ai/search-algorithms.js';
 
 export const PLAYER_NAMES = Object.freeze({
@@ -59,6 +60,10 @@ export function formatWldPreExactSetting(value, { compact = false } = {}) {
     return compact ? '끔' : '사용 안 함';
   }
   return compact ? `+${numericValue}` : `+${numericValue} 사용`;
+}
+
+function formatBooleanToggle(value) {
+  return value === true ? '켬' : '끔';
 }
 
 function describeRootMaturityGateConfig(source = {}) {
@@ -171,20 +176,30 @@ export function formatResolvedOptionsList(options) {
   }
 
   const searchAlgorithm = describeSearchAlgorithm(options.searchAlgorithm);
+  const isMctsMode = isMctsSearchAlgorithm(options.searchAlgorithm);
+
+  const styleValue = doesSearchAlgorithmUseStyleEvaluator(options.searchAlgorithm)
+    ? (options.styleLabel ?? options.styleKey ?? '알 수 없음')
+    : `${options.configuredStyleLabel ?? options.styleLabel ?? options.styleKey ?? '알 수 없음'} (메인 탐색 미적용)`;
 
   return [
     { label: 'AI 모드', value: searchAlgorithm?.label ?? options.searchAlgorithm ?? '알 수 없음' },
     { label: '난이도 프리셋', value: options.label ?? options.presetKey ?? '알 수 없음' },
-    { label: '스타일 프리셋', value: options.styleLabel ?? options.styleKey ?? '알 수 없음' },
-    { label: '최대 탐색 깊이', value: String(options.maxDepth) },
+    { label: '스타일 프리셋', value: styleValue },
+    ...(isMctsMode
+      ? []
+      : [{ label: '최대 탐색 깊이', value: String(options.maxDepth) }]),
     { label: '수 읽기 제한 시간', value: `${options.timeLimitMs}ms` },
     { label: '후반 완전 탐색 시작 빈칸 수', value: String(options.exactEndgameEmpties) },
     { label: '사전 승무패 탐색 범위', value: formatWldPreExactSetting(options.wldPreExactEmpties) },
-    { label: '흡입 창 크기', value: String(options.aspirationWindow) },
+    ...(isMctsMode
+      ? []
+      : [{ label: '흡입 창 크기', value: String(options.aspirationWindow) }]),
     { label: '오프닝 수 무작위성 범위', value: String(options.openingRandomness ?? options.randomness ?? 0) },
+    { label: '오프닝 동률 시 무작위 선택', value: formatBooleanToggle(options.openingTieBreakRandomization) },
     { label: '중반 이후 근접 수 무작위성 범위', value: String(options.searchRandomness ?? options.randomness ?? 0) },
     { label: '전이표 최대 엔트리 수', value: String(options.maxTableEntries) },
-    ...(isMctsSearchAlgorithm(options.searchAlgorithm)
+    ...(isMctsMode
       ? [
         { label: 'MCTS 탐험 계수', value: String(options.mctsExploration ?? '') },
         { label: 'MCTS 최대 반복 수', value: String(options.mctsMaxIterations ?? '') },
@@ -221,6 +236,12 @@ export function formatResolvedOptionsList(options) {
             )
             : '끔',
         },
+        ...(searchAlgorithm?.key === 'mcts-hybrid'
+          ? [
+            { label: 'Hybrid prior minimax 깊이', value: String(options.mctsHybridMinimaxDepth ?? '') },
+            { label: 'Hybrid prior 후보 수', value: String(options.mctsHybridMinimaxTopK ?? '') },
+          ]
+          : []),
       ]
       : []),
     { label: '기동성 배율', value: String(options.mobilityScale) },
@@ -245,12 +266,15 @@ export function formatEngineSummaryLine(options) {
     ? '스타일 적용 안 함'
     : options.styleLabel ?? options.styleKey ?? '알 수 없음';
   const searchAlgorithm = describeSearchAlgorithm(options.searchAlgorithm);
+  const styleMainLaneSuffix = doesSearchAlgorithmUseStyleEvaluator(options.searchAlgorithm)
+    ? ''
+    : ' · 메인 탐색 스타일 미적용';
 
   if (isMctsSearchAlgorithm(options.searchAlgorithm)) {
-    return `${searchAlgorithm?.summaryLabel ?? searchAlgorithm?.label ?? 'MCTS'} · ${presetLabel} · ${styleLabel} · 제한 ${options.timeLimitMs}ms · 탐험 ${options.mctsExploration ?? ''} · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하 · 사전 WLD ${formatWldPreExactSetting(options.wldPreExactEmpties, { compact: true })}`;
+    return `${searchAlgorithm?.summaryLabel ?? searchAlgorithm?.label ?? 'MCTS'} · ${presetLabel} · ${styleLabel} · 제한 ${options.timeLimitMs}ms · 탐험 ${options.mctsExploration ?? ''} · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하 · 사전 WLD ${formatWldPreExactSetting(options.wldPreExactEmpties, { compact: true })}${styleMainLaneSuffix}`;
   }
 
-  return `${searchAlgorithm?.summaryLabel ?? searchAlgorithm?.label ?? '클래식'} · ${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하 · 사전 WLD ${formatWldPreExactSetting(options.wldPreExactEmpties, { compact: true })}`;
+  return `${searchAlgorithm?.summaryLabel ?? searchAlgorithm?.label ?? '클래식'} · ${presetLabel} · ${styleLabel} · 깊이 ${options.maxDepth} · 제한 ${options.timeLimitMs}ms · 후반 완전 탐색 ${options.exactEndgameEmpties}칸 이하 · 사전 WLD ${formatWldPreExactSetting(options.wldPreExactEmpties, { compact: true })}${styleMainLaneSuffix}`;
 }
 
 function formatWldOutcome(outcome, score) {

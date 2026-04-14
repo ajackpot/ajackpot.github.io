@@ -63,14 +63,23 @@ function shouldUseHoldout(sampleIndex, holdoutMod, holdoutResidue) {
   return holdoutMod > 0 && (sampleIndex % holdoutMod) === holdoutResidue;
 }
 
-function pickBucketIndexForEmpties(bucketSpecs, empties) {
+function buildBucketIndexLookupTable(bucketSpecs) {
+  const table = Array.from({ length: 61 }, () => -1);
   for (let index = 0; index < bucketSpecs.length; index += 1) {
     const bucket = bucketSpecs[index];
-    if (empties >= bucket.minEmpties && empties <= bucket.maxEmpties) {
-      return index;
+    for (let empties = Math.max(0, bucket.minEmpties); empties <= Math.min(60, bucket.maxEmpties); empties += 1) {
+      table[empties] = index;
     }
   }
-  return -1;
+  return table;
+}
+
+function pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties) {
+  if (!Number.isFinite(empties)) {
+    return -1;
+  }
+  const normalized = Math.max(0, Math.min(60, Math.round(empties)));
+  return bucketIndexLookupTable[normalized] ?? -1;
 }
 
 function decorateMetricSummary(summary, targetScale) {
@@ -325,6 +334,7 @@ async function collectResidualMeansFromCorpus({
   inputFiles,
   evaluator,
   bucketSpecs,
+  bucketIndexLookupTable,
   targetScale,
   holdoutMod,
   holdoutResidue,
@@ -353,7 +363,7 @@ async function collectResidualMeansFromCorpus({
     const prediction = evaluator.evaluate(state, state.currentPlayer);
     const residual = prediction - target;
     const empties = state.getEmptyCount();
-    const bucketIndex = pickBucketIndexForEmpties(bucketSpecs, empties);
+    const bucketIndex = pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties);
     const holdoutSample = shouldUseHoldout(sampleIndex, holdoutMod, holdoutResidue);
 
     updateMetricAccumulator(overall, residual);
@@ -408,8 +418,9 @@ function buildBiasDeltasFromCorpusStats({
 async function verifyCalibrationOnCorpus({
   inputFiles,
   beforeEvaluator,
-  afterEvaluator,
   bucketSpecs,
+  bucketIndexLookupTable,
+  bucketBiasDeltas,
   targetScale,
   holdoutMod,
   holdoutResidue,
@@ -433,9 +444,10 @@ async function verifyCalibrationOnCorpus({
 
   await streamTrainingSamples(inputFiles, { targetScale, limit }, ({ state, target, sampleIndex, totalBytesProcessed }) => {
     const beforeResidual = beforeEvaluator.evaluate(state, state.currentPlayer) - target;
-    const afterResidual = afterEvaluator.evaluate(state, state.currentPlayer) - target;
     const empties = state.getEmptyCount();
-    const bucketIndex = pickBucketIndexForEmpties(bucketSpecs, empties);
+    const bucketIndex = pickBucketIndexFromLookupTable(bucketIndexLookupTable, empties);
+    const biasDelta = bucketIndex >= 0 ? Number(bucketBiasDeltas[bucketIndex] ?? 0) : 0;
+    const afterResidual = beforeResidual + biasDelta;
     const holdoutSample = shouldUseHoldout(sampleIndex, holdoutMod, holdoutResidue);
 
     updateMetricAccumulator(before.all, beforeResidual);
@@ -479,6 +491,7 @@ const tupleProfile = resolveTupleResidualProfile(loadJsonFileIfPresent(tupleJson
 if (!tupleProfile) {
   throw new Error(`tuple residual profile JSON을 읽지 못했습니다: ${tupleJsonPath}`);
 }
+const bucketIndexLookupTable = buildBucketIndexLookupTable(tupleProfile.trainedBuckets);
 
 const targetScale = Math.max(1, toFiniteNumber(args['target-scale'], tupleProfile?.source?.targetScale ?? 3000));
 const maxBiasStones = Math.abs(toFiniteNumber(args['max-bias-stones'], 1.5));
@@ -517,6 +530,7 @@ if (corpusFiles.length > 0) {
     inputFiles: corpusFiles,
     evaluator: beforeEvaluator,
     bucketSpecs: tupleProfile.trainedBuckets,
+    bucketIndexLookupTable,
     targetScale,
     holdoutMod,
     holdoutResidue,
@@ -568,15 +582,12 @@ if (corpusFiles.length > 0) {
     evaluationProfile,
     tupleResidualProfile: tupleProfile,
   });
-  const afterEvaluator = new Evaluator({
-    evaluationProfile,
-    tupleResidualProfile: calibratedProfile,
-  });
   verificationDiagnostics = await verifyCalibrationOnCorpus({
     inputFiles: corpusFiles,
     beforeEvaluator,
-    afterEvaluator,
     bucketSpecs: calibratedProfile.trainedBuckets,
+    bucketIndexLookupTable,
+    bucketBiasDeltas,
     targetScale,
     holdoutMod,
     holdoutResidue,
