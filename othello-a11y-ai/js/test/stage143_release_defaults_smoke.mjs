@@ -15,9 +15,13 @@ import {
 } from '../ai/search-algorithms.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const historicalModulePath = path.join(
+const historicalPreBalanced13ModulePath = path.join(
   repoRoot,
   'tools/engine-match/fixtures/historical-installed-modules/active-prebalanced13.learned-eval-profile.generated.js',
+);
+const historicalPreCompactTupleModulePath = path.join(
+  repoRoot,
+  'tools/engine-match/fixtures/historical-installed-modules/active-precompact-tuple.learned-eval-profile.generated.js',
 );
 
 assert.equal(DEFAULT_SEARCH_ALGORITHM, 'classic-mtdf-2ply');
@@ -33,9 +37,10 @@ assert.deepEqual(
 );
 
 assert.equal(GENERATED_EVALUATION_PROFILE.name, 'balanced13-alllate-smoothed stability extras 0.90x');
-assert.equal(GENERATED_MOVE_ORDERING_PROFILE.name, 'balanced13-alllate-smoothed-stability-090__move-ordering');
-assert.equal(GENERATED_TUPLE_RESIDUAL_PROFILE.name, 'balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated');
+assert.equal(GENERATED_MOVE_ORDERING_PROFILE.name, 'trained-move-ordering-linear-v2');
+assert.equal(GENERATED_TUPLE_RESIDUAL_PROFILE.name, 'diagonal-top24-latea-endgame-patched-calibrated');
 assert.equal(GENERATED_MPC_PROFILE.name, 'balanced13-alllate-smoothed-stability-090__runtime-mpc');
-assert.ok(fs.existsSync(historicalModulePath), 'the pre-balanced13 installed module should remain as a historical record fixture.');
+assert.ok(fs.existsSync(historicalPreBalanced13ModulePath), 'the pre-balanced13 installed module should remain as a historical record fixture.');
+assert.ok(fs.existsSync(historicalPreCompactTupleModulePath), 'the pre-compact-tuple installed module should remain as a historical record fixture.');
 
 console.log('stage143 release defaults smoke passed');

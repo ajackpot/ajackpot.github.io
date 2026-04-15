@@ -1,7 +1,7 @@
 {
-  "stage": 136,
-  "tag": "stage136",
-  "label": "Stage 136",
-  "updatedAt": "2026-04-13T23:59:00+09:00",
-  "summary": "Added Stage 136 balanced13 support-stack training tooling, removed implicit active-support leakage from move-ordering/MPC retraining paths via explicit off controls, and adopted low-risk speedups across move-ordering, MPC calibration, and tuple calibration"
+  "stage": 147,
+  "tag": "stage147",
+  "label": "Stage 147",
+  "updatedAt": "2026-04-15T04:10:00+09:00",
+  "summary": "Documented the Stage 144-147 compact-tuple adoption pipeline, refactored shared engine-match helpers, and finalized the Stage 147 runtime-install closeout with synced report inventory"
 }

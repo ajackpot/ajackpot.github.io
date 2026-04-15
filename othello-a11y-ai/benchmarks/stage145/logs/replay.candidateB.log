@@ -1,0 +1,8 @@
+Base profile : trained-move-ordering-linear-v2
+Output       : /mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/replay-chain/stage38-candidateB-mob0-10-12-fallback13-14.json
+Scale specs  : mobility@10-12=0
+Drop ranges  : 13-14
+Buckets hit  : 3
+  removed child-13-14 [13-14] -> runtime fallback
+  child-10-10 [10-10] mobility 48.546131 -> 0 (x0)
+  child-11-12 [11-12] mobility 73.225047 -> 0 (x0)

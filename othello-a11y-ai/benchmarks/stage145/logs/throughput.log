@@ -1,0 +1,6 @@
+Running profile-variant throughput compare | algorithm classic-mtdf-2ply (Classic MTD(f))
+Variants: candidateH2, candidateF, candidateD, candidateC, candidateB, baseline, legacy
+Time buckets: 280, 500 ms | positions: 4 | opening plies: 20
+280ms | candidateH2 depth 4.00 nodes/ms 12.37 | candidateF depth 4.00 nodes/ms 18.60 | candidateD depth 4.00 nodes/ms 18.68 | candidateC depth 4.00 nodes/ms 19.32 | candidateB depth 4.00 nodes/ms 19.49 | baseline depth 4.00 nodes/ms 19.67 | legacy depth 4.00 nodes/ms 19.67
+500ms | candidateH2 depth 4.00 nodes/ms 19.49 | candidateF depth 4.00 nodes/ms 18.60 | candidateD depth 4.00 nodes/ms 17.86 | candidateC depth 4.00 nodes/ms 18.52 | candidateB depth 4.00 nodes/ms 18.00 | baseline depth 4.00 nodes/ms 18.84 | legacy depth 4.00 nodes/ms 19.32
+Saved benchmark summary to benchmarks/stage145/throughput/stage145_move_ordering_throughput.json

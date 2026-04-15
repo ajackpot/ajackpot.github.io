@@ -1,0 +1,245 @@
+{
+  "type": "stage146-final-compact-tuple-adoption-gate",
+  "generatedAt": "2026-04-15T00:17:42.896Z",
+  "options": {
+    "outputDir": "benchmarks/stage146",
+    "openingPlies": 20,
+    "styleKey": "balanced",
+    "smoke": false,
+    "force": true
+  },
+  "variants": [
+    {
+      "label": "active",
+      "role": "baseline",
+      "generatedModule": "js/ai/learned-eval-profile.generated.js"
+    },
+    {
+      "label": "diagonal-top24-latea-endgame-baseline-ordering",
+      "role": "candidate",
+      "generatedModule": "tools/engine-match/fixtures/stage146-compact-tuple-adoption-candidate/learned-eval-profile.generated.js"
+    }
+  ],
+  "throughputResults": [
+    {
+      "scenarioKey": "mtdf_2ply_throughput",
+      "label": "Classic MTD(f) 2ply throughput",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage146/throughput/mtdf_2ply_throughput.json",
+      "reused": false
+    },
+    {
+      "scenarioKey": "classic_throughput_sanity",
+      "label": "Classic throughput sanity",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage146/throughput/classic_throughput_sanity.json",
+      "reused": false
+    }
+  ],
+  "pairResults": [
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "scenarioLabel": "Classic MTD(f) 2ply fast noisy 280ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage146/pairs/active_vs_diagonal-top24-latea-endgame-baseline-ordering.mtdf_fast_noisy_280.json",
+      "reused": false
+    },
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+      "scenarioKey": "mtdf_normal_500",
+      "scenarioLabel": "Classic MTD(f) 2ply normal noisy 500ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage146/pairs/active_vs_diagonal-top24-latea-endgame-baseline-ordering.mtdf_normal_500.json",
+      "reused": false
+    },
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+      "scenarioKey": "classic_sanity_280",
+      "scenarioLabel": "Classic PVS sanity 280ms",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage146/pairs/active_vs_diagonal-top24-latea-endgame-baseline-ordering.classic_sanity_280.json",
+      "reused": false
+    }
+  ],
+  "throughput": {
+    "primary": {
+      "variantLabel": "diagonal-top24-latea-endgame-baseline-ordering",
+      "weightedNodesPerMs": 12.722049549549547,
+      "weightedDepth": 4,
+      "weightedCompletionRate": 1,
+      "weightedNodesPerMsGainVsBaseline": 0.19429054054054043,
+      "weightedDepthGainVsBaseline": 0,
+      "weightedMoveAgreementVsBaseline": 1
+    },
+    "sanity": {
+      "variantLabel": "diagonal-top24-latea-endgame-baseline-ordering",
+      "weightedNodesPerMs": 12.554447890513464,
+      "weightedDepth": 4,
+      "weightedCompletionRate": 1,
+      "weightedNodesPerMsGainVsBaseline": 0.4615568411455597,
+      "weightedDepthGainVsBaseline": 0.125,
+      "weightedMoveAgreementVsBaseline": 1
+    }
+  },
+  "headToHead": {
+    "primary": {
+      "leftLabel": "active",
+      "rightLabel": "diagonal-top24-latea-endgame-baseline-ordering",
+      "family": "primary",
+      "scenarioCount": 2,
+      "totalGames": 6,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    "sanity": {
+      "leftLabel": "active",
+      "rightLabel": "diagonal-top24-latea-endgame-baseline-ordering",
+      "family": "sanity",
+      "scenarioCount": 1,
+      "totalGames": 2,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    "all": {
+      "leftLabel": "active",
+      "rightLabel": "diagonal-top24-latea-endgame-baseline-ordering",
+      "family": "all",
+      "scenarioCount": 3,
+      "totalGames": 8,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame-baseline-ordering",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    }
+  },
+  "searchCost": {
+    "depth": {
+      "cases": 12,
+      "sameBestRate": 0.9166666666666666,
+      "nodeDeltaPercent": -11.640911159756389,
+      "elapsedDeltaPercent": -12.352941176470589,
+      "overall": {
+        "cases": 12,
+        "identicalBestMoveCases": 11,
+        "baselineNodes": 46139,
+        "candidateNodes": 40768,
+        "baselineElapsedMs": 3570,
+        "candidateElapsedMs": 3129,
+        "baselineTtHits": 14362,
+        "candidateTtHits": 10317,
+        "nodeDeltaPercent": -11.640911159756389,
+        "elapsedDeltaPercent": -12.352941176470589,
+        "ttHitDeltaPercent": -28.164601030497145
+      }
+    },
+    "exact": {
+      "cases": 6,
+      "sameScoreRate": 1,
+      "sameBestRate": 1,
+      "nodeDeltaPercent": 0,
+      "elapsedDeltaPercent": -37.80487804878049,
+      "overall": {
+        "cases": 6,
+        "exactCases": 6,
+        "identicalScoreCases": 6,
+        "identicalBestMoveCases": 6,
+        "baselineNodes": 463,
+        "candidateNodes": 463,
+        "baselineElapsedMs": 246,
+        "candidateElapsedMs": 153,
+        "baselineTtHits": 52,
+        "candidateTtHits": 52,
+        "nodeRatio": 1,
+        "elapsedRatio": 0.6219512195121951,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -37.80487804878049
+      }
+    },
+    "combined": {
+      "baselineNodes": 46602,
+      "candidateNodes": 41231,
+      "baselineElapsedMs": 3816,
+      "candidateElapsedMs": 3282,
+      "nodeDeltaPercent": -11.5252564267628,
+      "elapsedDeltaPercent": -13.9937106918239
+    },
+    "searchAlgorithm": "classic-mtdf-2ply",
+    "depthOutputPath": "benchmarks/stage146/search-cost/active_vs_candidate.depth.json",
+    "exactOutputPath": "benchmarks/stage146/search-cost/active_vs_candidate.exact.json"
+  },
+  "finalDecision": {
+    "action": "adopt-compact-tuple-runtime-switch",
+    "selectedVariant": "diagonal-top24-latea-endgame-baseline-ordering",
+    "keepActiveBaseline": false,
+    "rationale": "Stage 145 compatible ordering까지 반영한 diagonal compact-tuple candidate가 exact safety를 유지했고 paired self-play에서도 유의미한 열세를 보이지 않으면서 search-cost/throughput 효율 개선을 함께 보여 최종 runtime 교체 후보로 채택합니다.",
+    "nextAction": "prepare-runtime-install-and-post-adoption-validation",
+    "selectedGeneratedModulePath": "benchmarks/stage146/selected-final-generated-module.js"
+  }
+}

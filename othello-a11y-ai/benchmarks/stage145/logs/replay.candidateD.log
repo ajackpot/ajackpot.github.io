@@ -1,0 +1,6 @@
+Base profile : stage38-candidateC-disc0-10-12
+Output       : /mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/replay-chain/stage39-candidateD-fallback10-10.json
+Scale specs  : (none)
+Drop ranges  : 10-10
+Buckets hit  : 1
+  removed child-10-10 [10-10] -> runtime fallback

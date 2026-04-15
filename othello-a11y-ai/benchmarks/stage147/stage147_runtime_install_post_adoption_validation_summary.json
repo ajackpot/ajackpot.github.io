@@ -1,0 +1,291 @@
+{
+  "type": "stage147-runtime-install-and-post-adoption-validation",
+  "generatedAt": "2026-04-15T01:41:10.211Z",
+  "options": {
+    "outputDir": "benchmarks/stage147",
+    "activeModule": "js/ai/learned-eval-profile.generated.js",
+    "selectedModule": "benchmarks/stage146/selected-final-generated-module.js",
+    "archiveModule": "tools/engine-match/fixtures/historical-installed-modules/active-precompact-tuple.learned-eval-profile.generated.js",
+    "installedSnapshotModule": "benchmarks/stage147/installed-active-generated-module.js",
+    "openingPlies": 20,
+    "styleKey": "balanced",
+    "smoke": false,
+    "force": false
+  },
+  "installation": {
+    "archiveCreated": false,
+    "archiveOverwritten": false,
+    "installPerformed": true,
+    "rollbackPerformed": false,
+    "activeAlreadySelected": false,
+    "activeSha256AfterFinalization": "afb5b8b3c0c7f411a51125bb2f476e2aace8dfd4363b0177fe0504184342e5b7"
+  },
+  "parity": {
+    "selectedModulePath": "benchmarks/stage146/selected-final-generated-module.js",
+    "activeModulePath": "js/ai/learned-eval-profile.generated.js",
+    "archiveModulePath": "tools/engine-match/fixtures/historical-installed-modules/active-precompact-tuple.learned-eval-profile.generated.js",
+    "installedSnapshotModulePath": "benchmarks/stage147/installed-active-generated-module.js",
+    "selectedSha256": "afb5b8b3c0c7f411a51125bb2f476e2aace8dfd4363b0177fe0504184342e5b7",
+    "activeSha256BeforeInstall": "58c06534a4f82611d7f49c187a1f7f1542600ef7ef37a38fdc613fa1f141c276",
+    "archiveSha256": "58c06534a4f82611d7f49c187a1f7f1542600ef7ef37a38fdc613fa1f141c276",
+    "installedSha256": "afb5b8b3c0c7f411a51125bb2f476e2aace8dfd4363b0177fe0504184342e5b7",
+    "installedSnapshotSha256": "afb5b8b3c0c7f411a51125bb2f476e2aace8dfd4363b0177fe0504184342e5b7",
+    "installedMatchesSelected": true,
+    "snapshotMatchesInstalled": true
+  },
+  "variants": [
+    {
+      "label": "previous-active",
+      "role": "baseline",
+      "generatedModule": "tools/engine-match/fixtures/historical-installed-modules/active-precompact-tuple.learned-eval-profile.generated.js"
+    },
+    {
+      "label": "installed-active",
+      "role": "candidate",
+      "generatedModule": "js/ai/learned-eval-profile.generated.js"
+    }
+  ],
+  "activeRuntime": {
+    "evaluationProfileName": "balanced13-alllate-smoothed stability extras 0.90x",
+    "moveOrderingProfileName": "trained-move-ordering-linear-v2",
+    "tupleResidualProfileName": "diagonal-top24-latea-endgame-patched-calibrated",
+    "mpcProfileName": "balanced13-alllate-smoothed-stability-090__runtime-mpc",
+    "evaluationStage": 129,
+    "moveOrderingStage": null,
+    "tupleResidualStage": 143,
+    "mpcStage": 136
+  },
+  "previousActive": {
+    "evaluationProfileName": "balanced13-alllate-smoothed stability extras 0.90x",
+    "moveOrderingProfileName": "balanced13-alllate-smoothed-stability-090__move-ordering",
+    "tupleResidualProfileName": "balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated",
+    "mpcProfileName": "balanced13-alllate-smoothed-stability-090__runtime-mpc"
+  },
+  "selectedModule": {
+    "evaluationProfileName": "balanced13-alllate-smoothed stability extras 0.90x",
+    "moveOrderingProfileName": "trained-move-ordering-linear-v2",
+    "tupleResidualProfileName": "diagonal-top24-latea-endgame-patched-calibrated",
+    "mpcProfileName": "balanced13-alllate-smoothed-stability-090__runtime-mpc"
+  },
+  "throughputResults": [
+    {
+      "scenarioKey": "mtdf_2ply_throughput",
+      "label": "Classic MTD(f) 2ply throughput",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage147/throughput/mtdf_2ply_throughput.json",
+      "reused": true
+    },
+    {
+      "scenarioKey": "classic_throughput_sanity",
+      "label": "Classic throughput sanity",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage147/throughput/classic_throughput_sanity.json",
+      "reused": true
+    }
+  ],
+  "pairResults": [
+    {
+      "pairSlug": "previous-active_vs_installed-active",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "scenarioLabel": "Classic MTD(f) 2ply fast noisy 280ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage147/pairs/previous-active_vs_installed-active.mtdf_fast_noisy_280.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "previous-active_vs_installed-active",
+      "scenarioKey": "mtdf_normal_500",
+      "scenarioLabel": "Classic MTD(f) 2ply normal noisy 500ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage147/pairs/previous-active_vs_installed-active.mtdf_normal_500.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "previous-active_vs_installed-active",
+      "scenarioKey": "classic_sanity_280",
+      "scenarioLabel": "Classic PVS sanity 280ms",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage147/pairs/previous-active_vs_installed-active.classic_sanity_280.json",
+      "reused": true
+    }
+  ],
+  "throughput": {
+    "primary": {
+      "variantLabel": "installed-active",
+      "weightedNodesPerMs": 8.72444647129582,
+      "weightedDepth": 4,
+      "weightedCompletionRate": 1,
+      "weightedNodesPerMsGainVsBaseline": 0.1809689305240547,
+      "weightedDepthGainVsBaseline": 0.08333333333333326,
+      "weightedMoveAgreementVsBaseline": 1
+    },
+    "sanity": {
+      "variantLabel": "installed-active",
+      "weightedNodesPerMs": 8.032568626989754,
+      "weightedDepth": 4,
+      "weightedCompletionRate": 1,
+      "weightedNodesPerMsGainVsBaseline": 0.5291101333375076,
+      "weightedDepthGainVsBaseline": 0.375,
+      "weightedMoveAgreementVsBaseline": 0.875
+    }
+  },
+  "headToHead": {
+    "primary": {
+      "leftLabel": "previous-active",
+      "rightLabel": "installed-active",
+      "family": "primary",
+      "scenarioCount": 2,
+      "totalGames": 6,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    "sanity": {
+      "leftLabel": "previous-active",
+      "rightLabel": "installed-active",
+      "family": "sanity",
+      "scenarioCount": 1,
+      "totalGames": 2,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    "all": {
+      "leftLabel": "previous-active",
+      "rightLabel": "installed-active",
+      "family": "all",
+      "scenarioCount": 3,
+      "totalGames": 8,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "previous-active_vs_installed-active",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    }
+  },
+  "searchCost": {
+    "depth": {
+      "cases": 12,
+      "sameBestRate": 0.9166666666666666,
+      "nodeDeltaPercent": -11.640911159756389,
+      "elapsedDeltaPercent": -12.791633145615448,
+      "overall": {
+        "cases": 12,
+        "identicalBestMoveCases": 11,
+        "baselineNodes": 46139,
+        "candidateNodes": 40768,
+        "baselineElapsedMs": 4972,
+        "candidateElapsedMs": 4336,
+        "baselineTtHits": 14362,
+        "candidateTtHits": 10317,
+        "nodeDeltaPercent": -11.640911159756389,
+        "elapsedDeltaPercent": -12.791633145615448,
+        "ttHitDeltaPercent": -28.164601030497145
+      }
+    },
+    "exact": {
+      "cases": 6,
+      "sameScoreRate": 1,
+      "sameBestRate": 1,
+      "nodeDeltaPercent": 0,
+      "elapsedDeltaPercent": -36.61538461538461,
+      "overall": {
+        "cases": 6,
+        "exactCases": 6,
+        "identicalScoreCases": 6,
+        "identicalBestMoveCases": 6,
+        "baselineNodes": 463,
+        "candidateNodes": 463,
+        "baselineElapsedMs": 325,
+        "candidateElapsedMs": 206,
+        "baselineTtHits": 52,
+        "candidateTtHits": 52,
+        "nodeRatio": 1,
+        "elapsedRatio": 0.6338461538461538,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -36.61538461538461
+      }
+    },
+    "combined": {
+      "baselineNodes": 46602,
+      "candidateNodes": 41231,
+      "baselineElapsedMs": 5297,
+      "candidateElapsedMs": 4542,
+      "nodeDeltaPercent": -11.5252564267628,
+      "elapsedDeltaPercent": -14.25335095336983
+    },
+    "searchAlgorithm": "classic-mtdf-2ply",
+    "depthOutputPath": "benchmarks/stage147/search-cost/previous_vs_installed.depth.json",
+    "exactOutputPath": "benchmarks/stage147/search-cost/previous_vs_installed.exact.json"
+  },
+  "finalDecision": {
+    "action": "confirm-active-runtime-switch-installed",
+    "keepInstalled": true,
+    "rollbackRequired": false,
+    "rationale": "설치된 active runtime이 Stage 146 selected module과 byte-level parity를 유지했고, archived previous-active 대비 paired self-play / throughput / explicit search-cost post-adoption validation도 최종 adoption gate와 같은 방향으로 통과했습니다.",
+    "nextAction": "treat-diagonal-compact-tuple-stack-as-active-default"
+  }
+}

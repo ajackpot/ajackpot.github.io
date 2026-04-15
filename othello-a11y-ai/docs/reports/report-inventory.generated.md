@@ -3,20 +3,20 @@
 이 문서는 `node tools/docs/generate-report-inventory.mjs`로 생성됩니다.
 수동으로 문서 목록을 유지하지 않고, 현재 저장소 상태를 기준으로 구현/검토/기능/체크리스트 문서를 한 번에 정리합니다.
 
-- 생성 시각: `2026-04-13T23:59:00+09:00`
-- 현재 저장소 Stage: **Stage 136** (tag: `stage136`)
-- 총 분류 문서 수: **103**
+- 생성 시각: `2026-04-15T04:10:00+09:00`
+- 현재 저장소 Stage: **Stage 147** (tag: `stage147`)
+- 총 분류 문서 수: **104**
 
 ## 빠른 진입점
 - [AI 구현 체크리스트](checklists/ai-implementation-checklist.md)
-- [최신 구현 보고서 (Stage 129)](implementation/impl-stage-129-settings-ui-refactor-and-documentation-closeout.md)
+- [최신 구현 보고서 (Stage 147)](implementation/impl-stage-147-compact-tuple-adoption-closeout-and-runtime-install.md)
 - [생성된 리포트 인벤토리 JSON](report-inventory.generated.json)
 
 ## 요약
 | 구분 | 설명 | 문서 수 | 최신 Stage |
 | --- | --- | ---: | --- |
 | 체크리스트 | 현재 구현 상태를 빠르게 확인하는 운영 문서 | 1 | — |
-| 구현 | 실제 코드 변경이 반영된 구현 보고서 | 77 | Stage 129 |
+| 구현 | 실제 코드 변경이 반영된 구현 보고서 | 78 | Stage 147 |
 | 검토 | 실험, 검토, 채택/비채택 판단 문서 | 24 | Stage 124 |
 | 기능 | 특정 기능 단위의 보충 설계/통합 문서 | 1 | — |
 
@@ -28,6 +28,7 @@
 ## 구현
 | Stage | 파일 | 제목 |
 | --- | --- | --- |
+| Stage 147 | [impl-stage-147-compact-tuple-adoption-closeout-and-runtime-install.md](implementation/impl-stage-147-compact-tuple-adoption-closeout-and-runtime-install.md) | Stage 147 - compact tuple adoption closeout, runtime install, and documentation finalization |
 | Stage 129 | [impl-stage-129-settings-ui-refactor-and-documentation-closeout.md](implementation/impl-stage-129-settings-ui-refactor-and-documentation-closeout.md) | Stage 129 - 설정 UI 리팩토링과 문서화 마감 정리 |
 | Stage 126 | [impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md](implementation/impl-stage-126-user-executable-weight-learning-bundle-and-trainer-refresh.md) | Stage 126 - user-executable weight learning bundle and trainer refresh |
 | Stage 125 | [impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md](implementation/impl-stage-125-compact-tuple-family-bounded-pilot-and-no-adoption.md) | Stage 125 - compact tuple family bounded pilot and no adoption |

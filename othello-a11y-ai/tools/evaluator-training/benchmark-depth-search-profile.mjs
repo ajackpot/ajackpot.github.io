@@ -4,6 +4,11 @@ import path from 'node:path';
 
 import { DEFAULT_EVALUATION_PROFILE } from '../../js/ai/evaluation-profiles.js';
 import {
+  DEFAULT_SEARCH_ALGORITHM,
+  describeSearchAlgorithm,
+  normalizeSearchAlgorithm,
+} from '../../js/ai/search-algorithms.js';
+import {
   playSeededRandomUntilEmptyCount,
   runMedianSearch,
 } from '../../js/test/benchmark-helpers.mjs';
@@ -40,7 +45,8 @@ function printUsage() {
     [--candidate-mpc-profile ${displayTrainingOutputPath('trained-mpc-profile.json')}] \
     [--output-json ${outputJsonPath}] \
     [--empties 18,20,24] [--seed-start 1] [--seed-count 8] [--repetitions 1] \
-    [--time-limit-ms 2000] [--max-depth 6] [--exact-endgame-empties 10]
+    [--time-limit-ms 2000] [--max-depth 6] [--exact-endgame-empties 10] \
+    [--search-algorithm classic-mtdf-2ply]
 
 최소한 candidate evaluator / candidate move-ordering / candidate tuple / candidate MPC / candidate generated module 중 하나는 지정해야 합니다.
 지정하지 않은 쪽은 baseline 값을 그대로 사용합니다.
@@ -73,6 +79,7 @@ function createSearchOptions({
   timeLimitMs,
   maxDepth,
   exactEndgameEmpties,
+  searchAlgorithm,
 }) {
   return {
     presetKey: 'custom',
@@ -80,6 +87,7 @@ function createSearchOptions({
     maxDepth,
     timeLimitMs,
     exactEndgameEmpties,
+    searchAlgorithm,
     aspirationWindow: 40,
     randomness: 0,
     evaluationProfile,
@@ -177,6 +185,12 @@ const repetitions = Math.max(1, toFiniteInteger(args.repetitions, 1));
 const timeLimitMs = Math.max(50, toFiniteInteger(args['time-limit-ms'], 2000));
 const maxDepth = Math.max(1, toFiniteInteger(args['max-depth'], 6));
 const exactEndgameEmpties = Math.max(0, toFiniteInteger(args['exact-endgame-empties'], 10));
+const searchAlgorithm = normalizeSearchAlgorithm(
+  typeof args['search-algorithm'] === 'string' && args['search-algorithm'].trim() !== ''
+    ? args['search-algorithm'].trim()
+    : DEFAULT_SEARCH_ALGORITHM,
+);
+const searchAlgorithmLabel = describeSearchAlgorithm(searchAlgorithm)?.label ?? searchAlgorithm;
 const outputJsonPath = args['output-json'] ? resolveCliPath(args['output-json']) : null;
 
 const overall = createAggregate();
@@ -191,7 +205,8 @@ console.log(`Baseline tuple residual : ${baselineTupleProfile?.name ?? 'none'}`)
 console.log(`Candidate tuple residual: ${candidateTupleProfile?.name ?? 'none'}`);
 console.log(`Baseline MPC profile    : ${baselineMpcProfile?.name ?? 'none'}`);
 console.log(`Candidate MPC profile   : ${candidateMpcProfile?.name ?? 'none'}`);
-console.log(`Search benchmark empties: ${emptiesList.join(', ')} | seeds: ${seedStart}..${seedStart + seedCount - 1} | depth=${maxDepth} | exactEndgameEmpties=${exactEndgameEmpties}`);
+console.log(`Search algorithm        : ${searchAlgorithm} (${searchAlgorithmLabel})`);
+console.log(`Benchmark empties: ${emptiesList.join(', ')} | seeds: ${seedStart}..${seedStart + seedCount - 1} | repetitions=${repetitions}`);
 
 for (const empties of emptiesList) {
   const bucketAggregate = createAggregate();
@@ -209,6 +224,7 @@ for (const empties of emptiesList) {
         timeLimitMs,
         maxDepth,
         exactEndgameEmpties,
+        searchAlgorithm,
       }),
       repetitions,
     ).summary;
@@ -222,6 +238,7 @@ for (const empties of emptiesList) {
         timeLimitMs,
         maxDepth,
         exactEndgameEmpties,
+        searchAlgorithm,
       }),
       repetitions,
     ).summary;
@@ -241,13 +258,16 @@ for (const empties of emptiesList) {
 
     const moveMarker = baseline.bestMove === candidate.bestMove ? '=' : '!';
     console.log(
-      `seed=${String(seed).padStart(2, '0')} move ${baseline.bestMove} ${moveMarker} ${candidate.bestMove} `
+      `seed=${String(seed).padStart(2, '0')} score=${baseline.score} ${moveMarker} `
       + `nodes ${formatInteger(baseline.nodes)} -> ${formatInteger(candidate.nodes)} (${ratioText(Number(baseline.nodes), Number(candidate.nodes))}) `
       + `time ${formatInteger(baseline.elapsedMs)}ms -> ${formatInteger(candidate.elapsedMs)}ms (${ratioText(Number(baseline.elapsedMs), Number(candidate.elapsedMs))})`,
     );
   }
 
-  byEmpties.push({ empties, ...finalizeAggregate(bucketAggregate) });
+  byEmpties.push({
+    empties,
+    ...finalizeAggregate(bucketAggregate),
+  });
 }
 
 const summary = {
@@ -260,6 +280,8 @@ const summary = {
   candidateTupleResidualProfileName: candidateTupleProfile?.name ?? null,
   baselineMpcProfileName: baselineMpcProfile?.name ?? null,
   candidateMpcProfileName: candidateMpcProfile?.name ?? null,
+  searchAlgorithm,
+  searchAlgorithmLabel,
   options: {
     emptiesList,
     seedStart,
@@ -268,6 +290,8 @@ const summary = {
     timeLimitMs,
     maxDepth,
     exactEndgameEmpties,
+    searchAlgorithm,
+    searchAlgorithmLabel,
     baselineGeneratedModulePath,
     candidateGeneratedModulePath,
   },

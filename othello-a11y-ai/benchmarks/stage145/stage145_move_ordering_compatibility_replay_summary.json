@@ -1,0 +1,1211 @@
+{
+  "type": "stage145-move-ordering-compatibility-replay-suite",
+  "generatedAt": "2026-04-14T23:33:17.860Z",
+  "targetCandidate": {
+    "label": "diagonal-top24-latea-endgame",
+    "generatedModulePath": "tools/engine-match/fixtures/stage144-compact-tuple-finalists/diagonal-top24-latea-endgame/learned-eval-profile.generated.js",
+    "evaluationProfileName": "balanced13-alllate-smoothed stability extras 0.90x",
+    "sourceMoveOrderingProfileName": "balanced13-alllate-smoothed-stability-090__move-ordering",
+    "tupleResidualProfileName": "diagonal-top24-latea-endgame-patched-calibrated",
+    "mpcProfileName": "balanced13-alllate-smoothed-stability-090__runtime-mpc"
+  },
+  "options": {
+    "outputDir": "benchmarks/stage145",
+    "smoke": false,
+    "searchCost": {
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "depthEmpties": [
+        18,
+        16,
+        14
+      ],
+      "depthSeedStart": 1,
+      "depthSeedCount": 4,
+      "depthRepetitions": 1,
+      "depthTimeLimitMs": 1200,
+      "depthMaxDepth": 6,
+      "depthExactEndgameEmpties": 10,
+      "exactEmpties": [
+        10,
+        8
+      ],
+      "exactSeedStart": 1,
+      "exactSeedCount": 3,
+      "exactRepetitions": 1,
+      "exactTimeLimitMs": 12000,
+      "exactMaxDepth": 12
+    },
+    "throughput": {
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "timeMsList": [
+        280,
+        500
+      ],
+      "positionSeedList": [
+        17,
+        31,
+        41,
+        53
+      ],
+      "openingPlies": 20,
+      "maxDepth": 4,
+      "exactEndgameEmpties": 8,
+      "aspirationWindow": 60,
+      "maxTableEntries": 90000,
+      "presetKey": "custom",
+      "styleKey": "balanced"
+    },
+    "pairScenarios": [
+      {
+        "key": "mtdf_fast_noisy_280",
+        "label": "Classic MTD(f) 2ply fast noisy 280ms",
+        "family": "primary",
+        "searchAlgorithm": "classic-mtdf-2ply",
+        "timeMsList": [
+          280
+        ],
+        "maxDepth": 4,
+        "exactEndgameEmpties": 8,
+        "aspirationWindow": 60,
+        "maxTableEntries": 90000,
+        "seedList": [
+          17,
+          31
+        ],
+        "games": 1,
+        "openingPlies": 20,
+        "solverAdjudicationEmpties": 14,
+        "solverAdjudicationTimeMs": 9000
+      },
+      {
+        "key": "classic_sanity_280",
+        "label": "Classic PVS sanity 280ms",
+        "family": "sanity",
+        "searchAlgorithm": "classic",
+        "timeMsList": [
+          280
+        ],
+        "maxDepth": 4,
+        "exactEndgameEmpties": 8,
+        "aspirationWindow": 60,
+        "maxTableEntries": 90000,
+        "seedList": [
+          17
+        ],
+        "games": 1,
+        "openingPlies": 20,
+        "solverAdjudicationEmpties": 14,
+        "solverAdjudicationTimeMs": 9000
+      }
+    ]
+  },
+  "replayChain": {
+    "baselineProfilePath": "tools/evaluator-training/out/stage38_baseline_trained_move_ordering_linear_v2.json",
+    "replayedChain": [
+      {
+        "key": "candidateB",
+        "from": "baseline",
+        "generatedPath": "benchmarks/stage145/replay-chain/stage38-candidateB-mob0-10-12-fallback13-14.json",
+        "storedReferencePath": "tools/evaluator-training/out/stage38_candidateB_mob0_10_12_fallback13_14.json",
+        "matchesStoredReference": true,
+        "scaleSpecs": [
+          "mobility@10-12=0"
+        ],
+        "dropRanges": [
+          "13-14"
+        ]
+      },
+      {
+        "key": "candidateC",
+        "from": "candidateB",
+        "generatedPath": "benchmarks/stage145/replay-chain/stage38-candidateC-disc0-10-12.json",
+        "storedReferencePath": "tools/evaluator-training/out/stage38_candidateC_disc0_10_12.json",
+        "matchesStoredReference": true,
+        "scaleSpecs": [
+          "discDifferential@10-12=0"
+        ],
+        "dropRanges": []
+      },
+      {
+        "key": "candidateD",
+        "from": "candidateC",
+        "generatedPath": "benchmarks/stage145/replay-chain/stage39-candidateD-fallback10-10.json",
+        "storedReferencePath": "tools/evaluator-training/out/stage39_candidateD_fallback10_10.json",
+        "matchesStoredReference": true,
+        "scaleSpecs": [],
+        "dropRanges": [
+          "10-10"
+        ]
+      },
+      {
+        "key": "candidateF",
+        "from": "candidateD",
+        "generatedPath": "benchmarks/stage145/replay-chain/stage41-candidateF-cornerPattern125-11-12.json",
+        "storedReferencePath": "tools/evaluator-training/out/stage41_candidateF_cornerPattern125_11_12.json",
+        "matchesStoredReference": true,
+        "scaleSpecs": [
+          "cornerPattern@11-12=1.25"
+        ],
+        "dropRanges": []
+      },
+      {
+        "key": "candidateH2",
+        "from": "candidateF",
+        "generatedPath": "benchmarks/stage145/replay-chain/stage44-candidateH2-edgePattern125-cornerPattern125-11-12.json",
+        "storedReferencePath": "tools/evaluator-training/out/stage44_candidateH2_edgePattern125_cornerPattern125_11_12.json",
+        "matchesStoredReference": true,
+        "scaleSpecs": [
+          "edgePattern@11-12=1.25",
+          "cornerPattern@11-12=1.25"
+        ],
+        "dropRanges": []
+      }
+    ]
+  },
+  "candidateVariants": [
+    {
+      "key": "candidateH2",
+      "label": "candidateH2",
+      "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+      "moveOrderingSourcePath": "benchmarks/stage145/replay-chain/stage44-candidateH2-edgePattern125-cornerPattern125-11-12.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/candidateH2.generated.js"
+    },
+    {
+      "key": "candidateF",
+      "label": "candidateF",
+      "moveOrderingProfileName": "stage41-candidateF-cornerPattern125-11-12",
+      "moveOrderingSourcePath": "benchmarks/stage145/replay-chain/stage41-candidateF-cornerPattern125-11-12.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/candidateF.generated.js"
+    },
+    {
+      "key": "candidateD",
+      "label": "candidateD",
+      "moveOrderingProfileName": "stage39-candidateD-fallback10-10",
+      "moveOrderingSourcePath": "benchmarks/stage145/replay-chain/stage39-candidateD-fallback10-10.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/candidateD.generated.js"
+    },
+    {
+      "key": "candidateC",
+      "label": "candidateC",
+      "moveOrderingProfileName": "stage38-candidateC-disc0-10-12",
+      "moveOrderingSourcePath": "benchmarks/stage145/replay-chain/stage38-candidateC-disc0-10-12.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/candidateC.generated.js"
+    },
+    {
+      "key": "candidateB",
+      "label": "candidateB",
+      "moveOrderingProfileName": "stage38-candidateB-mob0-10-12-fallback13-14",
+      "moveOrderingSourcePath": "benchmarks/stage145/replay-chain/stage38-candidateB-mob0-10-12-fallback13-14.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/candidateB.generated.js"
+    },
+    {
+      "key": "baseline",
+      "label": "baseline",
+      "moveOrderingProfileName": "trained-move-ordering-linear-v2",
+      "moveOrderingSourcePath": "tools/evaluator-training/out/stage38_baseline_trained_move_ordering_linear_v2.json",
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/baseline.generated.js"
+    },
+    {
+      "key": "legacy",
+      "label": "legacy",
+      "moveOrderingProfileName": null,
+      "moveOrderingSourcePath": null,
+      "generatedModulePath": "/mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/generated-modules/legacy.generated.js"
+    }
+  ],
+  "throughput": {
+    "outputJsonPath": "benchmarks/stage145/throughput/stage145_move_ordering_throughput.json",
+    "summaryByKey": {
+      "candidateH2": {
+        "variantLabel": "candidateH2",
+        "weightedNodesPerMs": 15.929550375594237,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 0
+      },
+      "candidateF": {
+        "variantLabel": "candidateF",
+        "weightedNodesPerMs": 18.6,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.2291666666666668,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      },
+      "candidateD": {
+        "variantLabel": "candidateD",
+        "weightedNodesPerMs": 18.266912133891214,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.21323012552301263,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      },
+      "candidateC": {
+        "variantLabel": "candidateC",
+        "weightedNodesPerMs": 18.92374845071941,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.2564890158251155,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      },
+      "candidateB": {
+        "variantLabel": "candidateB",
+        "weightedNodesPerMs": 18.746724890829697,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.24990315537399643,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      },
+      "baseline": {
+        "variantLabel": "baseline",
+        "weightedNodesPerMs": 19.250320637930074,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.2782765478912248,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      },
+      "legacy": {
+        "variantLabel": "legacy",
+        "weightedNodesPerMs": 19.494936781280394,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsH2": 0.29082518069302216,
+        "weightedDepthGainVsH2": 0,
+        "weightedMoveAgreementVsH2": 1
+      }
+    }
+  },
+  "searchCostResults": [
+    {
+      "key": "candidateH2",
+      "label": "candidateH2",
+      "moveOrderingProfileName": "stage44-candidateH2-edgePattern125-cornerPattern125-11-12",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateH2.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateH2.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateH2.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -4.506534474988734,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40949,
+          "baselineElapsedMs": 2219,
+          "candidateElapsedMs": 2119,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10538,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -4.506534474988734,
+          "ttHitDeltaPercent": 0
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -42.073170731707314,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 164,
+          "candidateElapsedMs": 95,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.5792682926829268,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -42.073170731707314
+        }
+      },
+      "combinedNodesDeltaPercent": 0,
+      "combinedElapsedDeltaPercent": -7.091900965169954,
+      "throughputNodesPerMsGainVsH2": 0,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 0,
+      "viable": true
+    },
+    {
+      "key": "candidateF",
+      "label": "candidateF",
+      "moveOrderingProfileName": "stage41-candidateF-cornerPattern125-11-12",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateF.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateF.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateF.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.004884124154436006,
+        "elapsedDeltaPercent": -4.828879512423816,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40947,
+          "baselineElapsedMs": 2133,
+          "candidateElapsedMs": 2030,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10539,
+          "nodeDeltaPercent": -0.004884124154436006,
+          "elapsedDeltaPercent": -4.828879512423816,
+          "ttHitDeltaPercent": 0.00948946669197191
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -40.50632911392405,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 158,
+          "candidateElapsedMs": 94,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.5949367088607594,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -40.50632911392405
+        }
+      },
+      "combinedNodesDeltaPercent": -0.004829518014102193,
+      "combinedElapsedDeltaPercent": -7.289393278044522,
+      "throughputNodesPerMsGainVsH2": 0.2291666666666668,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "key": "candidateD",
+      "label": "candidateD",
+      "moveOrderingProfileName": "stage39-candidateD-fallback10-10",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateD.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateD.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateD.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0.009768248308872012,
+        "elapsedDeltaPercent": -4.295051353874883,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40953,
+          "baselineElapsedMs": 2142,
+          "candidateElapsedMs": 2050,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10539,
+          "nodeDeltaPercent": 0.009768248308872012,
+          "elapsedDeltaPercent": -4.295051353874883,
+          "ttHitDeltaPercent": 0.00948946669197191
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -38.036809815950924,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 163,
+          "candidateElapsedMs": 101,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6196319018404908,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -38.036809815950924
+        }
+      },
+      "combinedNodesDeltaPercent": 0.009659036028204386,
+      "combinedElapsedDeltaPercent": -6.68112798264642,
+      "throughputNodesPerMsGainVsH2": 0.21323012552301263,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "key": "candidateC",
+      "label": "candidateC",
+      "moveOrderingProfileName": "stage38-candidateC-disc0-10-12",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateC.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateC.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateC.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.11233485555202814,
+        "elapsedDeltaPercent": -4.394141145139813,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40903,
+          "baselineElapsedMs": 2253,
+          "candidateElapsedMs": 2154,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10497,
+          "nodeDeltaPercent": -0.11233485555202814,
+          "elapsedDeltaPercent": -4.394141145139813,
+          "ttHitDeltaPercent": -0.38906813437084836
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -37.77777777777778,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 180,
+          "candidateElapsedMs": 112,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6222222222222222,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -37.77777777777778
+        }
+      },
+      "combinedNodesDeltaPercent": -0.11107891432435044,
+      "combinedElapsedDeltaPercent": -6.863953966296752,
+      "throughputNodesPerMsGainVsH2": 0.2564890158251155,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "key": "candidateB",
+      "label": "candidateB",
+      "moveOrderingProfileName": "stage38-candidateB-mob0-10-12-fallback13-14",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateB.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateB.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateB.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.11233485555202814,
+        "elapsedDeltaPercent": -3.577981651376147,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40903,
+          "baselineElapsedMs": 2180,
+          "candidateElapsedMs": 2102,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10497,
+          "nodeDeltaPercent": -0.11233485555202814,
+          "elapsedDeltaPercent": -3.577981651376147,
+          "ttHitDeltaPercent": -0.38906813437084836
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -26.143790849673206,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 153,
+          "candidateElapsedMs": 113,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.738562091503268,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -26.143790849673206
+        }
+      },
+      "combinedNodesDeltaPercent": -0.11107891432435044,
+      "combinedElapsedDeltaPercent": -5.057865409344192,
+      "throughputNodesPerMsGainVsH2": 0.24990315537399643,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "key": "baseline",
+      "label": "baseline",
+      "moveOrderingProfileName": "trained-move-ordering-linear-v2",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/baseline.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/baseline.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/baseline.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.44201323597645853,
+        "elapsedDeltaPercent": -4.1589648798521255,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40768,
+          "baselineElapsedMs": 2164,
+          "candidateElapsedMs": 2074,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10317,
+          "nodeDeltaPercent": -0.44201323597645853,
+          "elapsedDeltaPercent": -4.1589648798521255,
+          "ttHitDeltaPercent": -2.0971721389257922
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -42.44186046511628,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 172,
+          "candidateElapsedMs": 99,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.5755813953488372,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -42.44186046511628
+        }
+      },
+      "combinedNodesDeltaPercent": -0.4370713802762484,
+      "combinedElapsedDeltaPercent": -6.977739726027397,
+      "throughputNodesPerMsGainVsH2": 0.2782765478912248,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "key": "legacy",
+      "label": "legacy",
+      "moveOrderingProfileName": null,
+      "generatedModulePath": "benchmarks/stage145/generated-modules/legacy.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/legacy.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/legacy.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -6.116071428571428,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40949,
+          "baselineElapsedMs": 2240,
+          "candidateElapsedMs": 2103,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10538,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -6.116071428571428,
+          "ttHitDeltaPercent": 0
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -40,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 170,
+          "candidateElapsedMs": 102,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -40
+        }
+      },
+      "combinedNodesDeltaPercent": 0,
+      "combinedElapsedDeltaPercent": -8.506224066390041,
+      "throughputNodesPerMsGainVsH2": 0.29082518069302216,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    }
+  ],
+  "rankedChallengers": [
+    {
+      "rank": 1,
+      "key": "baseline",
+      "label": "baseline",
+      "moveOrderingProfileName": "trained-move-ordering-linear-v2",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/baseline.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/baseline.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/baseline.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.44201323597645853,
+        "elapsedDeltaPercent": -4.1589648798521255,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40768,
+          "baselineElapsedMs": 2164,
+          "candidateElapsedMs": 2074,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10317,
+          "nodeDeltaPercent": -0.44201323597645853,
+          "elapsedDeltaPercent": -4.1589648798521255,
+          "ttHitDeltaPercent": -2.0971721389257922
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -42.44186046511628,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 172,
+          "candidateElapsedMs": 99,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.5755813953488372,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -42.44186046511628
+        }
+      },
+      "combinedNodesDeltaPercent": -0.4370713802762484,
+      "combinedElapsedDeltaPercent": -6.977739726027397,
+      "throughputNodesPerMsGainVsH2": 0.2782765478912248,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "rank": 2,
+      "key": "candidateC",
+      "label": "candidateC",
+      "moveOrderingProfileName": "stage38-candidateC-disc0-10-12",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateC.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateC.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateC.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.11233485555202814,
+        "elapsedDeltaPercent": -4.394141145139813,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40903,
+          "baselineElapsedMs": 2253,
+          "candidateElapsedMs": 2154,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10497,
+          "nodeDeltaPercent": -0.11233485555202814,
+          "elapsedDeltaPercent": -4.394141145139813,
+          "ttHitDeltaPercent": -0.38906813437084836
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -37.77777777777778,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 180,
+          "candidateElapsedMs": 112,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6222222222222222,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -37.77777777777778
+        }
+      },
+      "combinedNodesDeltaPercent": -0.11107891432435044,
+      "combinedElapsedDeltaPercent": -6.863953966296752,
+      "throughputNodesPerMsGainVsH2": 0.2564890158251155,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "rank": 3,
+      "key": "candidateB",
+      "label": "candidateB",
+      "moveOrderingProfileName": "stage38-candidateB-mob0-10-12-fallback13-14",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateB.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateB.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateB.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.11233485555202814,
+        "elapsedDeltaPercent": -3.577981651376147,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40903,
+          "baselineElapsedMs": 2180,
+          "candidateElapsedMs": 2102,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10497,
+          "nodeDeltaPercent": -0.11233485555202814,
+          "elapsedDeltaPercent": -3.577981651376147,
+          "ttHitDeltaPercent": -0.38906813437084836
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -26.143790849673206,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 153,
+          "candidateElapsedMs": 113,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.738562091503268,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -26.143790849673206
+        }
+      },
+      "combinedNodesDeltaPercent": -0.11107891432435044,
+      "combinedElapsedDeltaPercent": -5.057865409344192,
+      "throughputNodesPerMsGainVsH2": 0.24990315537399643,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "rank": 4,
+      "key": "candidateF",
+      "label": "candidateF",
+      "moveOrderingProfileName": "stage41-candidateF-cornerPattern125-11-12",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateF.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateF.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateF.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": -0.004884124154436006,
+        "elapsedDeltaPercent": -4.828879512423816,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40947,
+          "baselineElapsedMs": 2133,
+          "candidateElapsedMs": 2030,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10539,
+          "nodeDeltaPercent": -0.004884124154436006,
+          "elapsedDeltaPercent": -4.828879512423816,
+          "ttHitDeltaPercent": 0.00948946669197191
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -40.50632911392405,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 158,
+          "candidateElapsedMs": 94,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.5949367088607594,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -40.50632911392405
+        }
+      },
+      "combinedNodesDeltaPercent": -0.004829518014102193,
+      "combinedElapsedDeltaPercent": -7.289393278044522,
+      "throughputNodesPerMsGainVsH2": 0.2291666666666668,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "rank": 5,
+      "key": "legacy",
+      "label": "legacy",
+      "moveOrderingProfileName": null,
+      "generatedModulePath": "benchmarks/stage145/generated-modules/legacy.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/legacy.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/legacy.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -6.116071428571428,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40949,
+          "baselineElapsedMs": 2240,
+          "candidateElapsedMs": 2103,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10538,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -6.116071428571428,
+          "ttHitDeltaPercent": 0
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -40,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 170,
+          "candidateElapsedMs": 102,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -40
+        }
+      },
+      "combinedNodesDeltaPercent": 0,
+      "combinedElapsedDeltaPercent": -8.506224066390041,
+      "throughputNodesPerMsGainVsH2": 0.29082518069302216,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    },
+    {
+      "rank": 6,
+      "key": "candidateD",
+      "label": "candidateD",
+      "moveOrderingProfileName": "stage39-candidateD-fallback10-10",
+      "generatedModulePath": "benchmarks/stage145/generated-modules/candidateD.generated.js",
+      "depthOutputPath": "benchmarks/stage145/search-cost/candidateD.depth.json",
+      "exactOutputPath": "benchmarks/stage145/search-cost/candidateD.exact.json",
+      "depth": {
+        "cases": 12,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0.009768248308872012,
+        "elapsedDeltaPercent": -4.295051353874883,
+        "overall": {
+          "cases": 12,
+          "identicalBestMoveCases": 12,
+          "baselineNodes": 40949,
+          "candidateNodes": 40953,
+          "baselineElapsedMs": 2142,
+          "candidateElapsedMs": 2050,
+          "baselineTtHits": 10538,
+          "candidateTtHits": 10539,
+          "nodeDeltaPercent": 0.009768248308872012,
+          "elapsedDeltaPercent": -4.295051353874883,
+          "ttHitDeltaPercent": 0.00948946669197191
+        }
+      },
+      "exact": {
+        "cases": 6,
+        "sameScoreRate": 1,
+        "sameBestRate": 1,
+        "nodeDeltaPercent": 0,
+        "elapsedDeltaPercent": -38.036809815950924,
+        "overall": {
+          "cases": 6,
+          "exactCases": 6,
+          "identicalScoreCases": 6,
+          "identicalBestMoveCases": 6,
+          "baselineNodes": 463,
+          "candidateNodes": 463,
+          "baselineElapsedMs": 163,
+          "candidateElapsedMs": 101,
+          "baselineTtHits": 52,
+          "candidateTtHits": 52,
+          "nodeRatio": 1,
+          "elapsedRatio": 0.6196319018404908,
+          "nodeDeltaPercent": 0,
+          "elapsedDeltaPercent": -38.036809815950924
+        }
+      },
+      "combinedNodesDeltaPercent": 0.009659036028204386,
+      "combinedElapsedDeltaPercent": -6.68112798264642,
+      "throughputNodesPerMsGainVsH2": 0.21323012552301263,
+      "throughputDepthGainVsH2": 0,
+      "throughputMoveAgreementVsH2": 1,
+      "viable": true
+    }
+  ],
+  "pairBenchmarks": [
+    {
+      "pairSlug": "candidateH2_vs_baseline",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage145/pairs/candidateH2_vs_baseline.mtdf_fast_noisy_280.json"
+    },
+    {
+      "pairSlug": "candidateH2_vs_baseline",
+      "scenarioKey": "classic_sanity_280",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage145/pairs/candidateH2_vs_baseline.classic_sanity_280.json"
+    },
+    {
+      "pairSlug": "candidateH2_vs_candidateC",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage145/pairs/candidateH2_vs_candidateC.mtdf_fast_noisy_280.json"
+    },
+    {
+      "pairSlug": "candidateH2_vs_candidateC",
+      "scenarioKey": "classic_sanity_280",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage145/pairs/candidateH2_vs_candidateC.classic_sanity_280.json"
+    }
+  ],
+  "pairHeadToHead": {
+    "baseline": {
+      "primary": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "baseline",
+        "family": "primary",
+        "scenarioCount": 1,
+        "totalGames": 4,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_baseline",
+            "scenarioKey": "mtdf_fast_noisy_280",
+            "scenarioFamily": "primary",
+            "searchAlgorithm": "classic-mtdf-2ply",
+            "timeLimitMs": 280,
+            "totalGames": 4,
+            "pointGap": 0
+          }
+        ]
+      },
+      "sanity": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "baseline",
+        "family": "sanity",
+        "scenarioCount": 1,
+        "totalGames": 2,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_baseline",
+            "scenarioKey": "classic_sanity_280",
+            "scenarioFamily": "sanity",
+            "searchAlgorithm": "classic",
+            "timeLimitMs": 280,
+            "totalGames": 2,
+            "pointGap": 0
+          }
+        ]
+      },
+      "all": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "baseline",
+        "family": "all",
+        "scenarioCount": 2,
+        "totalGames": 6,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_baseline",
+            "scenarioKey": "mtdf_fast_noisy_280",
+            "scenarioFamily": "primary",
+            "searchAlgorithm": "classic-mtdf-2ply",
+            "timeLimitMs": 280,
+            "totalGames": 4,
+            "pointGap": 0
+          },
+          {
+            "pairSlug": "candidateH2_vs_baseline",
+            "scenarioKey": "classic_sanity_280",
+            "scenarioFamily": "sanity",
+            "searchAlgorithm": "classic",
+            "timeLimitMs": 280,
+            "totalGames": 2,
+            "pointGap": 0
+          }
+        ]
+      }
+    },
+    "candidateC": {
+      "primary": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "candidateC",
+        "family": "primary",
+        "scenarioCount": 1,
+        "totalGames": 4,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_candidateC",
+            "scenarioKey": "mtdf_fast_noisy_280",
+            "scenarioFamily": "primary",
+            "searchAlgorithm": "classic-mtdf-2ply",
+            "timeLimitMs": 280,
+            "totalGames": 4,
+            "pointGap": 0
+          }
+        ]
+      },
+      "sanity": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "candidateC",
+        "family": "sanity",
+        "scenarioCount": 1,
+        "totalGames": 2,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_candidateC",
+            "scenarioKey": "classic_sanity_280",
+            "scenarioFamily": "sanity",
+            "searchAlgorithm": "classic",
+            "timeLimitMs": 280,
+            "totalGames": 2,
+            "pointGap": 0
+          }
+        ]
+      },
+      "all": {
+        "leftLabel": "candidateH2",
+        "rightLabel": "candidateC",
+        "family": "all",
+        "scenarioCount": 2,
+        "totalGames": 6,
+        "weightedPointGap": 0,
+        "worstPointGap": 0,
+        "bestPointGap": 0,
+        "scenarios": [
+          {
+            "pairSlug": "candidateH2_vs_candidateC",
+            "scenarioKey": "mtdf_fast_noisy_280",
+            "scenarioFamily": "primary",
+            "searchAlgorithm": "classic-mtdf-2ply",
+            "timeLimitMs": 280,
+            "totalGames": 4,
+            "pointGap": 0
+          },
+          {
+            "pairSlug": "candidateH2_vs_candidateC",
+            "scenarioKey": "classic_sanity_280",
+            "scenarioFamily": "sanity",
+            "searchAlgorithm": "classic",
+            "timeLimitMs": 280,
+            "totalGames": 2,
+            "pointGap": 0
+          }
+        ]
+      }
+    }
+  },
+  "finalDecision": {
+    "action": "select-compatible-ordering-switch",
+    "selectedMoveOrderingKey": "baseline",
+    "keepActiveMoveOrdering": false,
+    "rationale": "baseline가 diagonal candidate 위에서 H2 대비 search-cost/throughput 이득을 보였고 paired self-play에서도 유의미한 악화를 보이지 않아 compatible ordering으로 승격합니다.",
+    "nextAction": "open-final-compact-tuple-adoption-gate",
+    "selectedMoveOrderingProfileName": "trained-move-ordering-linear-v2",
+    "selectedGeneratedModulePath": "benchmarks/stage145/selected-compatible-generated-module.js"
+  }
+}

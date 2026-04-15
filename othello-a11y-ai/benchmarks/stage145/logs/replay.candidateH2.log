@@ -1,0 +1,6 @@
+Base profile : stage41-candidateF-cornerPattern125-11-12
+Output       : /mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/replay-chain/stage44-candidateH2-edgePattern125-cornerPattern125-11-12.json
+Scale specs  : edgePattern@11-12=1.25, cornerPattern@11-12=1.25
+Drop ranges  : (none)
+Buckets hit  : 1
+  child-11-12 [11-12] edgePattern -146.755623 -> -183.444529 (x1.25) | cornerPattern 369.429885 -> 461.787356 (x1.25)

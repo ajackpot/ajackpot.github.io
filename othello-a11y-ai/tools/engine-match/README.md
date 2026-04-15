@@ -32,6 +32,18 @@
 - `run-stage135-evaluation-profile-adoption-suite.mjs` / `run-stage135-evaluation-profile-adoption-suite.bat`
   - active / balanced12 / balanced13 evaluation profile finalists를 classic, MCTS, MTD(f) 재시험까지 묶어 최종 round-robin 채택 판정을 내립니다. 현재 설치본이 balanced13으로 교체된 뒤에는 historical fixture와 finalist generated module을 함께 써서 회고 비교를 계속할 수 있습니다.
   - 기존 JSON output을 재사용해 resume하고, `stage135_evaluation_profile_adoption_summary.json`과 notes markdown을 남깁니다.
+- `run-stage144-compact-tuple-confirmation-suite.mjs` / `run-stage144-compact-tuple-confirmation-suite.bat`
+  - Stage 126 weight learning에서 살아남은 compact tuple finalists(`diagonal-top24-latea-endgame`, `outer2-top24-lateb-endgame`)를 현재 active baseline과 paired noisy match + throughput으로 다시 확인합니다.
+  - Stage 124/125 순서대로 noisy confirmation까지만 수행하고, diagonal candidate가 살아남았을 때만 다음 단계 `move-ordering compatibility replay`를 권고합니다.
+  - 기존 JSON output을 재사용해 resume하고, `stage144_compact_tuple_confirmation_summary.json`과 notes markdown을 남깁니다.
+- `run-stage145-move-ordering-compatibility-replay.mjs` / `run-stage145-move-ordering-compatibility-replay.bat`
+  - Stage 144를 통과한 `diagonal-top24-latea-endgame` 위에서 Stage 38→44 move-ordering adoption chain(`baseline`, `candidateB`, `candidateC`, `candidateD`, `candidateF`, `candidateH2`)을 다시 재생성하고 compatibility를 확인합니다.
+  - 동일한 diagonal candidate evaluation/tuple/MPC stack 위에 각 move-ordering variant를 다시 얹어 search-cost / throughput / paired self-play를 비교해 current H2 ordering을 유지할지, 더 잘 맞는 이전 chain variant로 되돌릴지 판정합니다.
+  - 기존 JSON output을 재사용해 resume하고, `stage145_move_ordering_compatibility_replay_summary.json`과 notes markdown을 남깁니다.
+- `run-stage147-runtime-install-and-post-adoption-validation.mjs` / `run-stage147-runtime-install-and-post-adoption-validation.bat`
+  - Stage 146에서 선택한 final generated module을 실제 active runtime에 설치하고, 설치 직전 active module은 historical fixture로 archive합니다.
+  - archived previous-active 대비 paired self-play / throughput / explicit search-cost(depth/exact) post-adoption validation을 다시 수행하고, parity 실패나 regression이 있으면 자동으로 previous-active로 rollback합니다.
+  - 기존 JSON output을 재사용해 resume하고, `stage147_runtime_install_post_adoption_validation_summary.json`과 notes markdown을 남깁니다.
 - `opponents/trineutron-engine.mjs`
   - upstream `trineutron/othello` 브라우저 엔진을 Node에서 호출할 수 있도록 옮긴 어댑터입니다.
   - 원본 UI는 사람이 항상 흑, AI가 항상 백인 구조인데, 어댑터에서는 **흑/백 어느 쪽도 플레이 가능**하게 만들었습니다.

@@ -1,0 +1,6 @@
+Running profile-variant throughput compare | algorithm classic (Classic PVS)
+Variants: previous-active, installed-active
+Time buckets: 160, 280 ms | positions: 4 | opening plies: 20
+160ms | previous-active depth 3.25 nodes/ms 3.76 | installed-active depth 4.00 nodes/ms 7.69
+280ms | previous-active depth 4.00 nodes/ms 8.28 | installed-active depth 4.00 nodes/ms 8.37
+Saved benchmark summary to benchmarks/stage147/throughput/classic_throughput_sanity.json

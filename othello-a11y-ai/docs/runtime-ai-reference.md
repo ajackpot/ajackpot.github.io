@@ -21,14 +21,14 @@ Stage별 실험 이력이나 비채택 후보는 `docs/reports/`에서 추적하
 
 | 항목 | 현재 상태 | 근거 파일 |
 | --- | --- | --- |
-| 저장소 현재 Stage | **Stage 136** | `stage-info.json` |
+| 저장소 현재 Stage | **Stage 147** | `stage-info.json` |
 | 기본 난이도 | `normal` | `js/ai/presets.js`, `js/ai/search-engine.js` |
 | 기본 스타일 | `balanced` | `js/ai/presets.js` |
 | 기본 AI 모드(search algorithm) | `classic-mtdf-2ply` (`Classic MTD(f)`) | `js/ai/search-algorithms.js`, `js/ai/search-engine.js` |
 | 기본 opening hybrid key | `stage59-cap9-prior-veto` | `js/ai/opening-tuning.js` |
 | active evaluation profile | `balanced13-alllate-smoothed stability extras 0.90x` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
-| active move-ordering profile | `balanced13-alllate-smoothed-stability-090__move-ordering` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
-| active tuple residual profile | `balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
+| active move-ordering profile | `trained-move-ordering-linear-v2` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
+| active tuple residual profile | `diagonal-top24-latea-endgame-patched-calibrated` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
 | active MPC profile | `balanced13-alllate-smoothed-stability-090__runtime-mpc` | `js/ai/learned-eval-profile.generated.js`, `js/ai/evaluation-profiles.js` |
 | exact micro-solver threshold | `optimizedFewEmptiesExactSolverEmpties = 6` | `js/ai/search-engine.js` |
 | allocation-light search move path | 활성 (`allocationLightSearchMoves = true`) | `js/core/rules.js`, `js/ai/search-engine.js` |
@@ -242,7 +242,7 @@ Stage 84 검증 기준으로 `8`보다 보편적 exact workload에서 더 안정
 - `mctsProofPriorityLateBiasPackageMode = budget-conditioned`의 기본값 승격. Stage 113 duplicate-control에서는 280ms 이득이 time-budget noise 범위와 겹쳤고, Stage 114 fixed-iteration control에서도 `per-player + pnmax`가 proof completion만 약간 더 닫을 뿐 exact-best / average score-loss 우세는 끝내 만들지 못해 기본값으로는 계속 보류합니다.
 - `mctsProofPriorityRootMaturityGateEnabled = true`의 기본값 승격. Stage 116 runtime prototype은 거의 항상 너무 일찍 켜졌고, Stage 117 refined trigger는 activation을 줄이면서 fixed-iteration target 재현까지는 회수했습니다. 그러나 Stage 118 activation-causal audit까지 합치면 time-budget duplicate rerun pooled changed scenario를 `4/11 = 36.4%`만 설명해, gate activation이 output gain의 직접 원인이라고 보기에는 여전히 부족하므로 기본값으로는 계속 보류합니다.
 - 다만 Sensei류의 proof-oriented UI annotation은 일부 telemetry 형태로 이미 도입되었고, 이는 full PN/PPN mode와는 별개의 관측/UX lane으로 유지합니다.
-- Stage 125 bounded compact tuple family pilot은 실제로 수행했지만, tested family 누구도 active runtime을 넘지 못해 채택하지 않았습니다. active tuple residual은 계속 `top24-retrain-retrained-calibrated-lateb-endgame`이고, richer external corpus 또는 larger offline budget이 없으면 이 lane은 다시 열지 않습니다.
+- Stage 125 bounded compact tuple family pilot은 당시 no-adoption으로 닫혔지만, 이후 Stage 126 richer external weight-learning → Stage 144 confirmation → Stage 145 move-ordering compatibility replay → Stage 146 final adoption gate → Stage 147 install/post-adoption validation을 거치며 lane이 다시 열렸습니다. 현재 active tuple residual은 `diagonal-top24-latea-endgame-patched-calibrated`, active move-ordering은 `trained-move-ordering-linear-v2`이고, pre-switch baseline은 `tools/engine-match/fixtures/historical-installed-modules/active-precompact-tuple.learned-eval-profile.generated.js`에 archive되어 있습니다.
 - 독립 move-ordering 재튜닝, broad hand-crafted evaluator 확장, 5–6 empties 추가 미세 특화, broad special-ending 확장은 현재 저장소 기준으로는 비재개 권고입니다. 새 failure corpus나 profiling hotspot, evaluator family 변화가 생긴 뒤에만 다시 봅니다.
 
 ## 유지보수 메모

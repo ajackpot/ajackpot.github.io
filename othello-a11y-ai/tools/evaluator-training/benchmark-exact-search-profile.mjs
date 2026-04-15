@@ -4,6 +4,11 @@ import path from 'node:path';
 
 import { DEFAULT_EVALUATION_PROFILE } from '../../js/ai/evaluation-profiles.js';
 import {
+  DEFAULT_SEARCH_ALGORITHM,
+  describeSearchAlgorithm,
+  normalizeSearchAlgorithm,
+} from '../../js/ai/search-algorithms.js';
+import {
   playSeededRandomUntilEmptyCount,
   runMedianSearch,
 } from '../../js/test/benchmark-helpers.mjs';
@@ -40,7 +45,7 @@ function printUsage() {
     [--candidate-mpc-profile ${displayTrainingOutputPath('trained-mpc-profile.json')}] \
     [--output-json ${outputJsonPath}] \
     [--empties 10,12,14] [--seed-start 1] [--seed-count 12] [--repetitions 3] \
-    [--time-limit-ms 60000] [--max-depth 12]
+    [--time-limit-ms 60000] [--max-depth 12] [--search-algorithm classic-mtdf-2ply]
 
 최소한 candidate evaluator / candidate move-ordering / candidate tuple / candidate MPC / candidate generated module 중 하나는 지정해야 합니다.
 지정하지 않은 쪽은 baseline 값을 그대로 사용합니다.
@@ -73,6 +78,7 @@ function createSearchOptions({
   timeLimitMs,
   maxDepth,
   exactEndgameEmpties,
+  searchAlgorithm,
 }) {
   return {
     presetKey: 'custom',
@@ -80,6 +86,7 @@ function createSearchOptions({
     maxDepth,
     timeLimitMs,
     exactEndgameEmpties,
+    searchAlgorithm,
     aspirationWindow: 0,
     randomness: 0,
     evaluationProfile,
@@ -186,6 +193,12 @@ const seedCount = Math.max(1, toFiniteInteger(args['seed-count'], 12));
 const repetitions = Math.max(1, toFiniteInteger(args.repetitions, 3));
 const timeLimitMs = Math.max(1000, toFiniteInteger(args['time-limit-ms'], 60000));
 const maxDepth = Math.max(1, toFiniteInteger(args['max-depth'], 12));
+const searchAlgorithm = normalizeSearchAlgorithm(
+  typeof args['search-algorithm'] === 'string' && args['search-algorithm'].trim() !== ''
+    ? args['search-algorithm'].trim()
+    : DEFAULT_SEARCH_ALGORITHM,
+);
+const searchAlgorithmLabel = describeSearchAlgorithm(searchAlgorithm)?.label ?? searchAlgorithm;
 const outputJsonPath = args['output-json'] ? resolveCliPath(args['output-json']) : null;
 
 const overall = createAggregate();
@@ -200,6 +213,7 @@ console.log(`Baseline tuple residual : ${baselineTupleProfile?.name ?? 'none'}`)
 console.log(`Candidate tuple residual: ${candidateTupleProfile?.name ?? 'none'}`);
 console.log(`Baseline MPC profile    : ${baselineMpcProfile?.name ?? 'none'}`);
 console.log(`Candidate MPC profile   : ${candidateMpcProfile?.name ?? 'none'}`);
+console.log(`Search algorithm        : ${searchAlgorithm} (${searchAlgorithmLabel})`);
 console.log(`Benchmark empties: ${emptiesList.join(', ')} | seeds: ${seedStart}..${seedStart + seedCount - 1} | repetitions=${repetitions}`);
 
 for (const empties of emptiesList) {
@@ -218,6 +232,7 @@ for (const empties of emptiesList) {
         timeLimitMs,
         maxDepth,
         exactEndgameEmpties: empties,
+        searchAlgorithm,
       }),
       repetitions,
     ).summary;
@@ -231,6 +246,7 @@ for (const empties of emptiesList) {
         timeLimitMs,
         maxDepth,
         exactEndgameEmpties: empties,
+        searchAlgorithm,
       }),
       repetitions,
     ).summary;
@@ -272,6 +288,8 @@ const summary = {
   candidateTupleResidualProfileName: candidateTupleProfile?.name ?? null,
   baselineMpcProfileName: baselineMpcProfile?.name ?? null,
   candidateMpcProfileName: candidateMpcProfile?.name ?? null,
+  searchAlgorithm,
+  searchAlgorithmLabel,
   options: {
     emptiesList,
     seedStart,
@@ -279,6 +297,8 @@ const summary = {
     repetitions,
     timeLimitMs,
     maxDepth,
+    searchAlgorithm,
+    searchAlgorithmLabel,
     baselineGeneratedModulePath,
     candidateGeneratedModulePath,
   },

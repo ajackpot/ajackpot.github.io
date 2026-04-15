@@ -1,0 +1,435 @@
+{
+  "type": "stage144-compact-tuple-confirmation-suite",
+  "generatedAt": "2026-04-14T20:47:12.782Z",
+  "options": {
+    "outputDir": "benchmarks/stage144",
+    "openingPlies": 20,
+    "styleKey": "balanced",
+    "smoke": false,
+    "force": false
+  },
+  "variants": [
+    {
+      "label": "active",
+      "generatedModule": "js/ai/learned-eval-profile.generated.js",
+      "role": "baseline"
+    },
+    {
+      "label": "diagonal-top24-latea-endgame",
+      "generatedModule": "tools/engine-match/fixtures/stage144-compact-tuple-finalists/diagonal-top24-latea-endgame/learned-eval-profile.generated.js",
+      "role": "primary-candidate"
+    },
+    {
+      "label": "outer2-top24-lateb-endgame",
+      "generatedModule": "tools/engine-match/fixtures/stage144-compact-tuple-finalists/outer2-top24-lateb-endgame/learned-eval-profile.generated.js",
+      "role": "control-candidate"
+    }
+  ],
+  "throughputResults": [
+    {
+      "scenarioKey": "mtdf_2ply_throughput",
+      "label": "Classic MTD(f) 2ply throughput",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/throughput/mtdf_2ply_throughput.json",
+      "reused": true
+    },
+    {
+      "scenarioKey": "classic_throughput_sanity",
+      "label": "Classic throughput sanity",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage144/throughput/classic_throughput_sanity.json",
+      "reused": true
+    }
+  ],
+  "pairResults": [
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "scenarioLabel": "Classic MTD(f) 2ply fast noisy 280ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_diagonal-top24-latea-endgame.mtdf_fast_noisy_280.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+      "scenarioKey": "mtdf_normal_500",
+      "scenarioLabel": "Classic MTD(f) 2ply normal noisy 500ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_diagonal-top24-latea-endgame.mtdf_normal_500.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+      "scenarioKey": "classic_sanity_280",
+      "scenarioLabel": "Classic PVS sanity 280ms",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_diagonal-top24-latea-endgame.classic_sanity_280.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "scenarioLabel": "Classic MTD(f) 2ply fast noisy 280ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_outer2-top24-lateb-endgame.mtdf_fast_noisy_280.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "mtdf_normal_500",
+      "scenarioLabel": "Classic MTD(f) 2ply normal noisy 500ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_outer2-top24-lateb-endgame.mtdf_normal_500.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "classic_sanity_280",
+      "scenarioLabel": "Classic PVS sanity 280ms",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage144/pairs/active_vs_outer2-top24-lateb-endgame.classic_sanity_280.json",
+      "reused": true
+    },
+    {
+      "pairSlug": "diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "mtdf_fast_noisy_280",
+      "scenarioLabel": "Classic MTD(f) 2ply fast noisy 280ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame.mtdf_fast_noisy_280.json",
+      "reused": false
+    },
+    {
+      "pairSlug": "diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "mtdf_normal_500",
+      "scenarioLabel": "Classic MTD(f) 2ply normal noisy 500ms",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "outputJsonPath": "benchmarks/stage144/pairs/diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame.mtdf_normal_500.json",
+      "reused": false
+    },
+    {
+      "pairSlug": "diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame",
+      "scenarioKey": "classic_sanity_280",
+      "scenarioLabel": "Classic PVS sanity 280ms",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "outputJsonPath": "benchmarks/stage144/pairs/diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame.classic_sanity_280.json",
+      "reused": false
+    }
+  ],
+  "throughputSummaries": [
+    {
+      "scenarioKey": "mtdf_2ply_throughput",
+      "label": "Classic MTD(f) 2ply throughput",
+      "family": "primary",
+      "searchAlgorithm": "classic-mtdf-2ply",
+      "perVariant": [
+        {
+          "variantLabel": "active",
+          "weightedNodesPerMs": 7.094822062995001,
+          "weightedDepth": 3.9166666666666665,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0,
+          "weightedDepthGainVsBaseline": 0,
+          "weightedMoveAgreementVsBaseline": 0
+        },
+        {
+          "variantLabel": "diagonal-top24-latea-endgame",
+          "weightedNodesPerMs": 8.543066071313014,
+          "weightedDepth": 4,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0.2243001386937874,
+          "weightedDepthGainVsBaseline": 0.08333333333333326,
+          "weightedMoveAgreementVsBaseline": 1
+        },
+        {
+          "variantLabel": "outer2-top24-lateb-endgame",
+          "weightedNodesPerMs": 8.4016882558782,
+          "weightedDepth": 4,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0.20946457750840383,
+          "weightedDepthGainVsBaseline": 0.08333333333333326,
+          "weightedMoveAgreementVsBaseline": 1
+        }
+      ]
+    },
+    {
+      "scenarioKey": "classic_throughput_sanity",
+      "label": "Classic throughput sanity",
+      "family": "sanity",
+      "searchAlgorithm": "classic",
+      "perVariant": [
+        {
+          "variantLabel": "active",
+          "weightedNodesPerMs": 6.044492101286191,
+          "weightedDepth": 3.625,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0,
+          "weightedDepthGainVsBaseline": 0,
+          "weightedMoveAgreementVsBaseline": 0
+        },
+        {
+          "variantLabel": "diagonal-top24-latea-endgame",
+          "weightedNodesPerMs": 7.8327904769334795,
+          "weightedDepth": 3.875,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0.4645498833919308,
+          "weightedDepthGainVsBaseline": 0.25,
+          "weightedMoveAgreementVsBaseline": 0.875
+        },
+        {
+          "variantLabel": "outer2-top24-lateb-endgame",
+          "weightedNodesPerMs": 8.510411481665837,
+          "weightedDepth": 4,
+          "weightedCompletionRate": 1,
+          "weightedNodesPerMsGainVsBaseline": 0.6511034972971822,
+          "weightedDepthGainVsBaseline": 0.375,
+          "weightedMoveAgreementVsBaseline": 0.875
+        }
+      ]
+    }
+  ],
+  "variantRoundRobin": [
+    {
+      "variantLabel": "active",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 8.58952537209109,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16
+    },
+    {
+      "variantLabel": "diagonal-top24-latea-endgame",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 8.65614526140825,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16
+    },
+    {
+      "variantLabel": "outer2-top24-lateb-endgame",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 9.056558685967318,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16
+    }
+  ],
+  "activeHeadToHead": [
+    {
+      "leftLabel": "active",
+      "rightLabel": "diagonal-top24-latea-endgame",
+      "family": "primary",
+      "scenarioCount": 2,
+      "totalGames": 6,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    {
+      "leftLabel": "active",
+      "rightLabel": "diagonal-top24-latea-endgame",
+      "family": "all",
+      "scenarioCount": 3,
+      "totalGames": 8,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_diagonal-top24-latea-endgame",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    {
+      "leftLabel": "active",
+      "rightLabel": "outer2-top24-lateb-endgame",
+      "family": "primary",
+      "scenarioCount": 2,
+      "totalGames": 6,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    },
+    {
+      "leftLabel": "active",
+      "rightLabel": "outer2-top24-lateb-endgame",
+      "family": "all",
+      "scenarioCount": 3,
+      "totalGames": 8,
+      "weightedPointGap": 0,
+      "worstPointGap": 0,
+      "bestPointGap": 0,
+      "scenarios": [
+        {
+          "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+          "scenarioKey": "mtdf_fast_noisy_280",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 280,
+          "totalGames": 4,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+          "scenarioKey": "mtdf_normal_500",
+          "scenarioFamily": "primary",
+          "searchAlgorithm": "classic-mtdf-2ply",
+          "timeLimitMs": 500,
+          "totalGames": 2,
+          "pointGap": 0
+        },
+        {
+          "pairSlug": "active_vs_outer2-top24-lateb-endgame",
+          "scenarioKey": "classic_sanity_280",
+          "scenarioFamily": "sanity",
+          "searchAlgorithm": "classic",
+          "timeLimitMs": 280,
+          "totalGames": 2,
+          "pointGap": 0
+        }
+      ]
+    }
+  ],
+  "variantRanking": [
+    {
+      "variantLabel": "diagonal-top24-latea-endgame",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 8.65614526140825,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16,
+      "throughput": {
+        "variantLabel": "diagonal-top24-latea-endgame",
+        "weightedNodesPerMs": 8.543066071313014,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsBaseline": 0.2243001386937874,
+        "weightedDepthGainVsBaseline": 0.08333333333333326,
+        "weightedMoveAgreementVsBaseline": 1
+      },
+      "rankingScore": 0.5083956708274803
+    },
+    {
+      "variantLabel": "outer2-top24-lateb-endgame",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 9.056558685967318,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16,
+      "throughput": {
+        "variantLabel": "outer2-top24-lateb-endgame",
+        "weightedNodesPerMs": 8.4016882558782,
+        "weightedDepth": 4,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsBaseline": 0.20946457750840383,
+        "weightedDepthGainVsBaseline": 0.08333333333333326,
+        "weightedMoveAgreementVsBaseline": 1
+      },
+      "rankingScore": 0.5079506039919188
+    },
+    {
+      "variantLabel": "active",
+      "weightedScoreRate": 0.5,
+      "weightedAverageDiscDiff": 0,
+      "weightedNodesPerMs": 8.58952537209109,
+      "weightedFallbackRate": 0,
+      "scenarioCount": 6,
+      "totalGames": 16,
+      "throughput": {
+        "variantLabel": "active",
+        "weightedNodesPerMs": 7.094822062995001,
+        "weightedDepth": 3.9166666666666665,
+        "weightedCompletionRate": 1,
+        "weightedNodesPerMsGainVsBaseline": 0,
+        "weightedDepthGainVsBaseline": 0,
+        "weightedMoveAgreementVsBaseline": 0
+      },
+      "rankingScore": 0.5
+    }
+  ],
+  "finalDecision": {
+    "action": "open-move-ordering-compatibility-replay",
+    "selectedCandidate": "diagonal-top24-latea-endgame",
+    "controlCandidate": "outer2-top24-lateb-endgame",
+    "rationale": "Stage 124/125 ordering대로 diagonal new-family patch가 noisy confirmation을 통과했으므로 다음 단계는 move-ordering compatibility replay입니다."
+  }
+}

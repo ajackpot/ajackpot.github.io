@@ -1,0 +1,7 @@
+Base profile : stage38-candidateB-mob0-10-12-fallback13-14
+Output       : /mnt/data/stage144_repo/othello_stage144/benchmarks/stage145/replay-chain/stage38-candidateC-disc0-10-12.json
+Scale specs  : discDifferential@10-12=0
+Drop ranges  : (none)
+Buckets hit  : 2
+  child-10-10 [10-10] discDifferential 18.246613 -> 0 (x0)
+  child-11-12 [11-12] discDifferential 2.973249 -> 0 (x0)

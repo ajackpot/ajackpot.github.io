@@ -1,0 +1,27 @@
+Baseline evaluator      : balanced13-alllate-smoothed stability extras 0.90x
+Candidate evaluator     : balanced13-alllate-smoothed stability extras 0.90x
+Baseline move-ordering  : balanced13-alllate-smoothed-stability-090__move-ordering
+Candidate move-ordering : trained-move-ordering-linear-v2
+Baseline tuple residual : balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated
+Candidate tuple residual: diagonal-top24-latea-endgame-patched-calibrated
+Baseline MPC profile    : balanced13-alllate-smoothed-stability-090__runtime-mpc
+Candidate MPC profile   : balanced13-alllate-smoothed-stability-090__runtime-mpc
+Search algorithm        : classic-mtdf-2ply (Classic MTD(f))
+Benchmark empties: 10, 8 | seeds: 1..3 | repetitions=1
+
+[empties 10]
+seed=01 score=-60000 = nodes 157 -> 157 (100.0%) time 146ms -> 53ms (36.3%)
+seed=02 score=180000 = nodes 114 -> 114 (100.0%) time 28ms -> 28ms (100.0%)
+seed=03 score=220000 = nodes 133 -> 133 (100.0%) time 43ms -> 38ms (88.4%)
+
+[empties 8]
+seed=01 score=-60000 = nodes 23 -> 23 (100.0%) time 13ms -> 12ms (92.3%)
+seed=02 score=400000 = nodes 23 -> 23 (100.0%) time 9ms -> 8ms (88.9%)
+seed=03 score=140000 = nodes 13 -> 13 (100.0%) time 7ms -> 14ms (200.0%)
+
+[overall]
+cases=6, exact=6
+same score=6/6, same best move=6/6
+nodes: 463 -> 463 (100.0%)
+time : 246ms -> 153ms (62.2%)
+Saved benchmark summary to /mnt/data/repo/othello_stage144/benchmarks/stage146/search-cost/active_vs_candidate.exact.json

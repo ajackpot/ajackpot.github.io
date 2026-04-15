@@ -1,0 +1,8 @@
+Running profile-variant pair benchmark: previous-active vs installed-active | algorithm classic (Classic PVS)
+Scenarios: 280 ms | paired openings per seed: 1 | seeds: 17 | opening plies: 20
+Progress logging: every 1 paired opening(s)
+  progress 1/1 paired opening(s) @ 280ms
+280ms | previous-active 1.0/2 (50.0%) | installed-active 1.0/2 (50.0%) | gap 0.0pp | nodes/ms previous-active 6.70 / installed-active 6.86
+  -> 두 profile variant의 paired score가 사실상 동률입니다.
+Saved benchmark summary to benchmarks/stage147/pairs/previous-active_vs_installed-active.classic_sanity_280.json
+Completed 1 scenario(s), 2 game(s).

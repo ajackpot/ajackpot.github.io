@@ -1,0 +1,34 @@
+Baseline evaluator      : balanced13-alllate-smoothed stability extras 0.90x
+Candidate evaluator     : balanced13-alllate-smoothed stability extras 0.90x
+Baseline move-ordering  : balanced13-alllate-smoothed-stability-090__move-ordering
+Candidate move-ordering : trained-move-ordering-linear-v2
+Baseline tuple residual : balanced13-alllate-smoothed-stability-090__tuple-residual-calibrated
+Candidate tuple residual: diagonal-top24-latea-endgame-patched-calibrated
+Baseline MPC profile    : balanced13-alllate-smoothed-stability-090__runtime-mpc
+Candidate MPC profile   : balanced13-alllate-smoothed-stability-090__runtime-mpc
+Search algorithm        : classic-mtdf-2ply (Classic MTD(f))
+Benchmark empties: 18, 16, 14 | seeds: 1..4 | repetitions=1
+
+[empties 18]
+seed=01 score=-39804 = nodes 5,423 -> 2,903 (53.5%) time 573ms -> 288ms (50.3%)
+seed=02 score=74193 = nodes 7,236 -> 6,099 (84.3%) time 446ms -> 402ms (90.1%)
+seed=03 score=70756 = nodes 5,079 -> 4,891 (96.3%) time 354ms -> 339ms (95.8%)
+seed=04 score=32582 = nodes 1,949 -> 1,999 (102.6%) time 160ms -> 168ms (105.0%)
+
+[empties 16]
+seed=01 score=11274 = nodes 2,971 -> 3,095 (104.2%) time 251ms -> 273ms (108.8%)
+seed=02 score=77669 = nodes 4,782 -> 3,108 (65.0%) time 340ms -> 293ms (86.2%)
+seed=03 score=52973 = nodes 3,926 -> 4,236 (107.9%) time 342ms -> 292ms (85.4%)
+seed=04 score=-45951 = nodes 1,641 -> 1,550 (94.5%) time 134ms -> 133ms (99.3%)
+
+[empties 14]
+seed=01 score=-1985 = nodes 4,892 -> 3,103 (63.4%) time 327ms -> 239ms (73.1%)
+seed=02 score=29967 = nodes 2,136 -> 2,545 (119.1%) time 171ms -> 175ms (102.3%)
+seed=03 score=50811 ! nodes 3,578 -> 4,306 (120.3%) time 271ms -> 303ms (111.8%)
+seed=04 score=-5431 = nodes 2,526 -> 2,933 (116.1%) time 201ms -> 224ms (111.4%)
+
+[overall]
+cases=12, same best move=11/12
+nodes: 46,139 -> 40,768 (88.4%)
+time : 3,570ms -> 3,129ms (87.6%)
+Saved benchmark summary to /mnt/data/repo/othello_stage144/benchmarks/stage146/search-cost/active_vs_candidate.depth.json

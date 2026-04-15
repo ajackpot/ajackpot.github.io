@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-04-14T18:04:23.926Z",
+  "tupleJsonPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage126-weight-learning\\tuple-patch-followup\\candidates\\diagonal-top24-latea-endgame\\trained-tuple-residual-profile.patched.json",
+  "outputJsonPath": "C:\\Downloads\\othello-a11y-ai\\tools\\evaluator-training\\out\\stage126-weight-learning\\tuple-patch-followup\\candidates\\diagonal-top24-latea-endgame\\trained-tuple-residual-profile.patched.calibrated.json",
+  "mode": "corpus",
+  "scope": "holdout-selected",
+  "shrink": 1,
+  "targetScale": 3000,
+  "maxBiasStones": 1.5,
+  "sourceTupleProfileName": "diagonal-top24-latea-endgame-patched",
+  "outputTupleProfileName": "diagonal-top24-latea-endgame-patched-calibrated",
+  "bucketBiasAdjustments": [
+    {
+      "key": "late-a",
+      "minEmpties": 13,
+      "maxEmpties": 19,
+      "previousBias": 137.96285959073953,
+      "deltaBias": -191.39047580919592,
+      "nextBias": -53.42761621845639
+    },
+    {
+      "key": "endgame",
+      "minEmpties": 0,
+      "maxEmpties": 6,
+      "previousBias": 623.1004524351979,
+      "deltaBias": -278.7370944664426,
+      "nextBias": 344.3633579687553
+    }
+  ],
+  "verification": {
+    "holdoutMaeDeltaInStones": -0.0006568452941598177,
+    "holdoutMeanResidualBeforeInStones": 0.07725376598090826,
+    "holdoutMeanResidualAfterInStones": 3.623767348300064e-13,
+    "selectedMaeDeltaInStones": -0.0007733897120015172
+  }
+}
