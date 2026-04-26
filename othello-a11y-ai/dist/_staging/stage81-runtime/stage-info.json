@@ -1,7 +1,0 @@
-{
-  "stage": 81,
-  "tag": "stage81",
-  "label": "Stage 81",
-  "updatedAt": "2026-04-08T23:35:00+09:00",
-  "summary": "Non-MPC ETC child-TT ordering reuse, safe per-engine/per-search freshness guards, and deterministic benchmark validation are reflected in the current source package"
-}

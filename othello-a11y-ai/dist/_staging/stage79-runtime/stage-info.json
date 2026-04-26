@@ -1,7 +1,0 @@
-{
-  "stage": 79,
-  "tag": "stage79",
-  "label": "Stage 79",
-  "updatedAt": "2026-04-08T20:05:00+09:00",
-  "summary": "Non-MPC TT-first hotpath cleanup, in-place preferred-move extraction, and deterministic benchmark validation are reflected in the current source package"
-}

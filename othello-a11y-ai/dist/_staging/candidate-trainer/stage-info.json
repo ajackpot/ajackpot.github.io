@@ -1,7 +1,0 @@
-{
-  "stage": 78,
-  "tag": "stage78",
-  "label": "Stage 78",
-  "updatedAt": "2026-04-08T19:15:00+09:00",
-  "summary": "Non-MPC move-ordering runtime cleanup/refactor, empties-indexed ordering caches, and conservative benchmark validation are reflected in the current source package"
-}

@@ -1,6 +1,0 @@
-Running profile-variant throughput compare | algorithm classic (Classic PVS)
-Variants: active, diagonal-top24-latea-endgame-baseline-ordering
-Time buckets: 160, 280 ms | positions: 4 | opening plies: 20
-160ms | active depth 3.75 nodes/ms 6.79 | diagonal-top24-latea-endgame-baseline-ordering depth 4.00 nodes/ms 11.96
-280ms | active depth 4.00 nodes/ms 11.31 | diagonal-top24-latea-endgame-baseline-ordering depth 4.00 nodes/ms 13.15
-Saved benchmark summary to benchmarks/stage146/throughput/classic_throughput_sanity.json

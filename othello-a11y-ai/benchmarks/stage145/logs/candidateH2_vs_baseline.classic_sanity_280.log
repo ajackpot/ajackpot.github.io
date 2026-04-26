@@ -1,7 +1,0 @@
-Running profile-variant pair benchmark: candidateH2 vs baseline | algorithm classic (Classic PVS)
-Scenarios: 280 ms | paired openings per seed: 1 | seeds: 17 | opening plies: 20
-Progress logging: every 0 paired opening(s)
-280ms | candidateH2 1.0/2 (50.0%) | baseline 1.0/2 (50.0%) | gap 0.0pp | nodes/ms candidateH2 13.12 / baseline 13.74
-  -> 두 profile variant의 paired score가 사실상 동률입니다.
-Saved benchmark summary to benchmarks/stage145/pairs/candidateH2_vs_baseline.classic_sanity_280.json
-Completed 1 scenario(s), 2 game(s).

@@ -1,8 +1,0 @@
-{
-  "generatedAt": "2026-04-03T14:00:00+09:00",
-  "installedModulePath": "/mnt/data/stage52_upload/tuple-pipeline/top24-retrain-lateb-endgame/top24-retrain-lateb-endgame.generated.js",
-  "status": "passed",
-  "returnCode": 0,
-  "stdout": "core-smoke: all assertions passed\n",
-  "stderr": ""
-}

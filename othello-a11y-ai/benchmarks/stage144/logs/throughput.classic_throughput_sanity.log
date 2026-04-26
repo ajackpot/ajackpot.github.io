@@ -1,6 +1,0 @@
-Running profile-variant throughput compare | algorithm classic (Classic PVS)
-Variants: active, diagonal-top24-latea-endgame, outer2-top24-lateb-endgame
-Time buckets: 160, 280 ms | positions: 4 | opening plies: 20
-160ms | active depth 3.25 nodes/ms 3.60 | diagonal-top24-latea-endgame depth 3.75 nodes/ms 6.79 | outer2-top24-lateb-endgame depth 4.00 nodes/ms 8.12
-280ms | active depth 4.00 nodes/ms 8.48 | diagonal-top24-latea-endgame depth 4.00 nodes/ms 8.88 | outer2-top24-lateb-endgame depth 4.00 nodes/ms 8.90
-Saved benchmark summary to benchmarks/stage144/throughput/classic_throughput_sanity.json

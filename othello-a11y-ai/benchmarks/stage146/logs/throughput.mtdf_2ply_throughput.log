@@ -1,6 +1,0 @@
-Running profile-variant throughput compare | algorithm classic-mtdf-2ply (Classic MTD(f))
-Variants: active, diagonal-top24-latea-endgame-baseline-ordering
-Time buckets: 280, 500 ms | positions: 6 | opening plies: 20
-280ms | active depth 4.00 nodes/ms 9.19 | diagonal-top24-latea-endgame-baseline-ordering depth 4.00 nodes/ms 12.81
-500ms | active depth 4.00 nodes/ms 12.70 | diagonal-top24-latea-endgame-baseline-ordering depth 4.00 nodes/ms 12.64
-Saved benchmark summary to benchmarks/stage146/throughput/mtdf_2ply_throughput.json

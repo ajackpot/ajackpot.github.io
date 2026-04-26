@@ -1,7 +1,0 @@
-{
-  "stage": 80,
-  "tag": "stage80",
-  "label": "Stage 80",
-  "updatedAt": "2026-04-08T22:35:00+09:00",
-  "summary": "Non-MPC ETC-side hotpath cleanup, in-place prepared-move reuse, and deterministic benchmark validation are reflected in the current source package"
-}

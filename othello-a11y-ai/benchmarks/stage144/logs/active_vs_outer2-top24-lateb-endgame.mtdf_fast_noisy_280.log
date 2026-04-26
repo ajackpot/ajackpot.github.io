@@ -1,9 +1,0 @@
-Running profile-variant pair benchmark: active vs outer2-top24-lateb-endgame | algorithm classic-mtdf-2ply (Classic MTD(f))
-Scenarios: 280 ms | paired openings per seed: 1 | seeds: 17, 31 | opening plies: 20
-Progress logging: every 1 paired opening(s)
-  progress 1/2 paired opening(s) @ 280ms
-  progress 2/2 paired opening(s) @ 280ms
-280ms | active 2.0/4 (50.0%) | outer2-top24-lateb-endgame 2.0/4 (50.0%) | gap 0.0pp | nodes/ms active 9.86 / outer2-top24-lateb-endgame 10.26
-  -> 두 profile variant의 paired score가 사실상 동률입니다.
-Saved benchmark summary to benchmarks/stage144/pairs/active_vs_outer2-top24-lateb-endgame.mtdf_fast_noisy_280.json
-Completed 1 scenario(s), 4 game(s).

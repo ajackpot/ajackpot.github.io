@@ -1,8 +1,0 @@
-Running profile-variant pair benchmark: active vs diagonal-top24-latea-endgame | algorithm classic (Classic PVS)
-Scenarios: 280 ms | paired openings per seed: 1 | seeds: 17 | opening plies: 20
-Progress logging: every 1 paired opening(s)
-  progress 1/1 paired opening(s) @ 280ms
-280ms | active 1.0/2 (50.0%) | diagonal-top24-latea-endgame 1.0/2 (50.0%) | gap 0.0pp | nodes/ms active 6.07 / diagonal-top24-latea-endgame 6.62
-  -> 두 profile variant의 paired score가 사실상 동률입니다.
-Saved benchmark summary to benchmarks/stage144/pairs/active_vs_diagonal-top24-latea-endgame.classic_sanity_280.json
-Completed 1 scenario(s), 2 game(s).

@@ -1,7 +1,0 @@
-{
-  "stage": 76,
-  "tag": "stage76",
-  "label": "Stage 76",
-  "updatedAt": "2026-04-08T15:55:00+09:00",
-  "summary": "Trineutron match validation suite, fair shared-seed engine-match support, and active-vs-no-MPC pilot benchmarking are reflected in the current source package"
-}

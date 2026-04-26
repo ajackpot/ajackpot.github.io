@@ -1,8 +1,0 @@
-{
-  "type": "stage146-compact-tuple-adoption-candidate",
-  "sourceStage": 145,
-  "sourceSummaryPath": "benchmarks/stage145/stage145_move_ordering_compatibility_replay_summary.json",
-  "sourceGeneratedModulePath": "benchmarks/stage145/selected-compatible-generated-module.js",
-  "candidateLabel": "diagonal-top24-latea-endgame + baseline-ordering",
-  "rationale": "Stage 145 move-ordering compatibility replay selected the stage38 baseline ordering as the best compatible support-stack match for the Stage 144 diagonal compact-tuple finalist."
-}

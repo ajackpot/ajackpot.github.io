@@ -1,9 +1,0 @@
-Running profile-variant pair benchmark: diagonal-top24-latea-endgame vs outer2-top24-lateb-endgame | algorithm classic-mtdf-2ply (Classic MTD(f))
-Scenarios: 280 ms | paired openings per seed: 1 | seeds: 17, 31 | opening plies: 20
-Progress logging: every 1 paired opening(s)
-  progress 1/2 paired opening(s) @ 280ms
-  progress 2/2 paired opening(s) @ 280ms
-280ms | diagonal-top24-latea-endgame 2.0/4 (50.0%) | outer2-top24-lateb-endgame 2.0/4 (50.0%) | gap 0.0pp | nodes/ms diagonal-top24-latea-endgame 9.70 / outer2-top24-lateb-endgame 10.14
-  -> 두 profile variant의 paired score가 사실상 동률입니다.
-Saved benchmark summary to benchmarks/stage144/pairs/diagonal-top24-latea-endgame_vs_outer2-top24-lateb-endgame.mtdf_fast_noisy_280.json
-Completed 1 scenario(s), 4 game(s).
