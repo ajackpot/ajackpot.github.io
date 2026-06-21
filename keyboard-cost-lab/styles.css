@@ -1205,3 +1205,63 @@ input {
   border-style: dashed;
   background: #f8fbff;
 }
+
+.feature-panel {
+  display: grid;
+  gap: 1rem;
+  border-style: dashed;
+}
+
+.feature-panel-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.feature-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mini-card {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.mini-card h3,
+.mini-card p,
+.mini-card ul {
+  margin: 0;
+}
+
+.mini-card label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mini-card textarea,
+.mini-card select {
+  width: 100%;
+}
+
+.mini-card-selected {
+  border-width: 2px;
+}
+
+.feature-panel-actions {
+  justify-content: flex-end;
+}
+
+.compact-table th,
+.compact-table td {
+  white-space: nowrap;
+}

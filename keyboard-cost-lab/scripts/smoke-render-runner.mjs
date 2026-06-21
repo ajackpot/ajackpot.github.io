@@ -79,7 +79,7 @@ class FakeHTMLInputElement extends FakeHTMLElement {}
 class FakeHTMLSelectElement extends FakeHTMLElement {}
 class FakeHTMLFormElement extends FakeHTMLElement {}
 
-function configureGlobals({ serviceId, conditionId, taskIndex, showRequest }) {
+function configureGlobals({ serviceId, conditionId, taskIndex, showRequest, snapshotOverrides = {} }) {
   const root = {
     innerHTML: '',
     addEventListener() {},
@@ -97,7 +97,10 @@ function configureGlobals({ serviceId, conditionId, taskIndex, showRequest }) {
     conditionId,
     taskIndex,
     taskId: `task-${taskIndex + 1}`,
-    runSnapshot: service.baseSnapshot(conditionId),
+    runSnapshot: {
+      ...service.baseSnapshot(conditionId),
+      ...snapshotOverrides,
+    },
     runnerTaskRequestVisible: showRequest,
   }));
 
@@ -139,8 +142,8 @@ function configureGlobals({ serviceId, conditionId, taskIndex, showRequest }) {
   return root;
 }
 
-async function renderRunner({ serviceId, conditionId, taskIndex, showRequest }) {
-  const root = configureGlobals({ serviceId, conditionId, taskIndex, showRequest });
+async function renderRunner({ serviceId, conditionId, taskIndex, showRequest, snapshotOverrides = {} }) {
+  const root = configureGlobals({ serviceId, conditionId, taskIndex, showRequest, snapshotOverrides });
   const moduleUrl = pathToFileURL(path.join(projectDir, services[serviceId].appFile)).href
     + `?smoke=${Date.now()}-${Math.random()}`;
   await import(moduleUrl);
@@ -163,6 +166,11 @@ async function renderRunner({ serviceId, conditionId, taskIndex, showRequest }) 
     leaksSessionId: html.includes('smoke-session'),
     gridButtonCount: gridButtons.length,
     gridButtonsWithActionCount: gridButtonsWithAction.length,
+    hasCalendarFeatureActions: serviceId === 'calendar'
+      ? html.includes('data-action="open-feature-panel"') && html.includes('data-feature-id="providers"') && html.includes('data-feature-id="my-counseling"')
+      : true,
+    hasFeaturePanel: html.includes('data-feature-panel') && html.includes('feature-panel-title'),
+    placeholderTextCount: (html.match(/현재 점검 중/g) ?? []).length,
     hasRequiredCalendarActions: serviceId === 'calendar'
       ? html.includes('data-action="apply-filters"') && html.includes('data-action="slot-open"') && html.includes('data-action="end-task"')
       : true,
@@ -179,6 +187,21 @@ for (const serviceId of Object.keys(services)) {
   reports.push(await renderRunner({ serviceId, conditionId: 'variantA', taskIndex: 0, showRequest: true }));
 }
 
+for (const featureId of ['home', 'providers', 'passes', 'reviews', 'pricing', 'faq', 'policy', 'support', 'notifications', 'my-counseling', 'usage-guide', 'search']) {
+  reports.push(await renderRunner({
+    serviceId: 'calendar',
+    conditionId: 'variantA',
+    taskIndex: 0,
+    showRequest: false,
+    snapshotOverrides: {
+      featurePanel: { featureId, triggerFocusId: 'nav-1', query: '심리 상담' },
+      savedFeatureItems: {},
+      selectedPass: 'single',
+      reminderSettings: { email: true, sms: false },
+    },
+  }));
+}
+
 let failed = false;
 for (const report of reports) {
   const checks = [
@@ -189,10 +212,17 @@ for (const report of reports) {
     !report.leaksSessionId,
     report.showRequest ? report.hasTaskRequestPanel : !report.hasTaskRequestPanel,
     report.hasRequiredCalendarActions,
+    report.hasCalendarFeatureActions,
   ];
   if (report.service === 'calendar' && report.condition === 'variantB') {
     checks.push(report.gridButtonCount > 0);
     checks.push(report.gridButtonCount === report.gridButtonsWithActionCount);
+  }
+  if (report.service === 'calendar' && report.hasFeaturePanel) {
+    checks.push(report.placeholderTextCount <= 1);
+  }
+  if (report.service === 'calendar' && !report.showRequest && report.taskIndex === 0 && report.condition === 'variantA' && report.htmlLength > 26000) {
+    checks.push(report.hasFeaturePanel);
   }
   report.ok = checks.every(Boolean);
   if (!report.ok) failed = true;

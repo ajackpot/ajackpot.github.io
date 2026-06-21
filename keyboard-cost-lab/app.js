@@ -288,6 +288,10 @@ function createConditionRuntime(variantId) {
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
     siteNotice: '',
+    featurePanel: null,
+    savedFeatureItems: {},
+    selectedPass: 'single',
+    reminderSettings: { email: true, sms: false },
   };
 }
 
@@ -336,6 +340,10 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
   runtime.siteNotice = snapshot.siteNotice ?? '';
+  runtime.featurePanel = snapshot.featurePanel ? deepClone(snapshot.featurePanel) : null;
+  runtime.savedFeatureItems = snapshot.savedFeatureItems ? deepClone(snapshot.savedFeatureItems) : {};
+  runtime.selectedPass = snapshot.selectedPass ?? runtime.selectedPass;
+  runtime.reminderSettings = snapshot.reminderSettings ? deepClone(snapshot.reminderSettings) : runtime.reminderSettings;
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   return runtime;
 }
@@ -351,6 +359,10 @@ function serializeRuntimeSnapshot(run) {
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
     siteNotice: run.siteNotice,
+    featurePanel: run.featurePanel ? deepClone(run.featurePanel) : null,
+    savedFeatureItems: deepClone(run.savedFeatureItems),
+    selectedPass: run.selectedPass,
+    reminderSettings: deepClone(run.reminderSettings),
     liveStatus: run.liveStatus,
   };
 }
@@ -365,6 +377,10 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
   targetRun.siteNotice = hydrated.siteNotice;
+  targetRun.featurePanel = hydrated.featurePanel;
+  targetRun.savedFeatureItems = hydrated.savedFeatureItems;
+  targetRun.selectedPass = hydrated.selectedPass;
+  targetRun.reminderSettings = hydrated.reminderSettings;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
   targetRun.isApplying = false;
@@ -444,6 +460,7 @@ function prepareCurrentTaskForMain() {
   run.cancelPerformedThisTask = false;
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
+  run.featurePanel = null;
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
@@ -651,7 +668,9 @@ function handleRootSubmit(event) {
   if (APP_MODE !== 'runner') return;
   if (form.matches('[data-simulated-submit="calendar-search"]')) {
     event.preventDefault();
-    showSiteNotice('검색 결과 화면은 현재 점검 중입니다. 예약 화면에서 계속 진행하십시오.');
+    const input = form.querySelector('input[type="search"]');
+    const query = input instanceof HTMLInputElement ? input.value.trim() : '';
+    openFeaturePanel('search', 'calendar-search-submit', { query: query || '심리 상담' });
   }
 }
 
@@ -728,6 +747,56 @@ function handleRootClick(event) {
   if (action === 'site-placeholder') {
     event.preventDefault();
     showSiteNotice(actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.');
+    return;
+  }
+
+  if (action === 'open-feature-panel') {
+    event.preventDefault();
+    openFeaturePanel(actionTarget.dataset.featureId, actionTarget.dataset.focusId, {
+      query: getSearchQueryFromPage(),
+    });
+    return;
+  }
+
+  if (action === 'close-feature-panel') {
+    event.preventDefault();
+    closeFeaturePanel();
+    return;
+  }
+
+  if (action === 'set-provider-filter') {
+    event.preventDefault();
+    setDraftFilter({ provider: actionTarget.dataset.providerId || 'all' }, '상담사 조건을 입력했습니다. 조건 적용을 누르면 예약 가능 시간이 갱신됩니다.');
+    return;
+  }
+
+  if (action === 'set-mode-filter') {
+    event.preventDefault();
+    setDraftFilter({ mode: actionTarget.dataset.modeId || 'all' }, '상담 방식 조건을 입력했습니다. 조건 적용을 누르면 예약 가능 시간이 갱신됩니다.');
+    return;
+  }
+
+  if (action === 'select-pass') {
+    event.preventDefault();
+    selectPass(actionTarget.dataset.passId || 'single', actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'feature-save') {
+    event.preventDefault();
+    toggleFeatureSave(actionTarget.dataset.itemId || actionTarget.textContent?.trim() || 'item', actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'feature-message') {
+    event.preventDefault();
+    showFeatureActionNotice(actionTarget.dataset.notice || '요청을 접수했습니다.', actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'toggle-reminder') {
+    event.preventDefault();
+    toggleReminder(actionTarget.dataset.reminder || 'email', actionTarget.dataset.focusId);
     return;
   }
 
@@ -1406,7 +1475,8 @@ function renderRunnerPage() {
       <main class="runner-main" aria-label="예약 캘린더 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">예약 캘린더 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
-        ${renderSimulatedHeader(conditionId)}
+        ${renderSimulatedHeader(conditionId, run)}
+        ${renderFeaturePanel(run)}
         ${conditionId === 'variantB' ? renderBookingPanel(run, true) : ''}
         ${renderFilters(conditionId, run)}
         ${renderResults(conditionId, run, availableSlots, unavailableSlots)}
@@ -1753,26 +1823,432 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
   });
 }
 
-function renderSimulatedHeader(conditionId) {
-  const links = ['처음 화면', '상담사 소개', '이용권', '이용 후기', '가격 안내', '자주 묻는 질문', '운영 정책', '문의'];
+function renderSimulatedHeader(conditionId, run) {
+  const links = [
+    { label: '처음 화면', featureId: 'home' },
+    { label: '상담사 소개', featureId: 'providers' },
+    { label: '이용권', featureId: 'passes' },
+    { label: '이용 후기', featureId: 'reviews' },
+    { label: '가격 안내', featureId: 'pricing' },
+    { label: '자주 묻는 질문', featureId: 'faq' },
+    { label: '운영 정책', featureId: 'policy' },
+    { label: '문의', featureId: 'support' },
+  ];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       <div class="sim-topbar">
-        <a href="#" class="brand-link" data-focus-id="brand-home" data-inert-link="true">온마음 상담</a>
+        <a href="#" class="brand-link" data-action="open-feature-panel" data-feature-id="home" data-focus-id="brand-home">온마음 상담</a>
         <form class="sim-search" role="search" aria-label="상담 검색" data-simulated-submit="calendar-search">
           <label class="sr-only" for="calendar-search-input">상담사나 프로그램 검색</label>
-          <input id="calendar-search-input" type="search" value="심리 상담" data-focus-id="calendar-search-input">
-          <button class="button button-ghost" type="button" data-action="site-placeholder" data-focus-id="calendar-search-submit" data-notice="검색 결과 화면은 현재 점검 중입니다. 예약 화면에서 계속 진행하십시오.">검색</button>
+          <input id="calendar-search-input" type="search" value="${escapeHtml(run.featurePanel?.query || '심리 상담')}" data-focus-id="calendar-search-input">
+          <button class="button button-ghost" type="submit" data-action="open-feature-panel" data-feature-id="search" data-focus-id="calendar-search-submit">검색</button>
         </form>
         <div class="sim-actions">
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="calendar-notice" data-notice="알림함은 현재 점검 중입니다.">알림</button>
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="calendar-my" data-notice="내 상담 메뉴는 현재 점검 중입니다.">내 상담</button>
+          <button class="button button-ghost" data-action="open-feature-panel" data-feature-id="notifications" data-focus-id="calendar-notice">알림</button>
+          <button class="button button-ghost" data-action="open-feature-panel" data-feature-id="my-counseling" data-focus-id="calendar-my">내 상담</button>
         </div>
       </div>
       <nav aria-label="서비스 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
+        ${links.map((item, index) => `<a href="#" class="nav-link" data-action="open-feature-panel" data-feature-id="${escapeHtml(item.featureId)}" data-focus-id="nav-${index + 1}">${escapeHtml(item.label)}</a>`).join('')}
       </nav>
     </header>
+  `;
+}
+
+function getSearchQueryFromPage() {
+  const input = document.querySelector('#calendar-search-input');
+  return input instanceof HTMLInputElement ? input.value.trim() : '';
+}
+
+function openFeaturePanel(featureId, triggerFocusId = '', options = {}) {
+  const run = getCurrentRun();
+  if (!run || !featureId) return;
+  run.featurePanel = {
+    featureId,
+    triggerFocusId,
+    query: options.query || run.featurePanel?.query || '심리 상담',
+  };
+  run.siteNotice = '';
+  requestFocus('#feature-panel-title');
+  render();
+}
+
+function closeFeaturePanel() {
+  const run = getCurrentRun();
+  if (!run || !run.featurePanel) return;
+  const triggerFocusId = run.featurePanel.triggerFocusId;
+  run.featurePanel = null;
+  if (triggerFocusId) {
+    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  }
+  render();
+}
+
+function setDraftFilter(partialFilters, message) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.filtersDraft = {
+    ...run.filtersDraft,
+    ...partialFilters,
+  };
+  run.siteNotice = message;
+  run.liveStatus = message;
+  requestFocus('[data-focus-id="apply-criteria"]');
+  render();
+}
+
+function showFeatureActionNotice(message, focusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.siteNotice = message;
+  run.liveStatus = message;
+  if (focusId) {
+    requestFocus(`[data-focus-id="${focusId}"]`);
+  }
+  render();
+}
+
+function selectPass(passId, focusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.selectedPass = passId;
+  showFeatureActionNotice('이용권을 선택했습니다. 예약 단계에서 선택한 이용권을 사용할 수 있습니다.', focusId);
+}
+
+function toggleFeatureSave(itemId, focusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.savedFeatureItems[itemId] = !run.savedFeatureItems[itemId];
+  showFeatureActionNotice(run.savedFeatureItems[itemId] ? '보관함에 저장했습니다.' : '보관함에서 제거했습니다.', focusId);
+}
+
+function toggleReminder(reminderId, focusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.reminderSettings[reminderId] = !run.reminderSettings[reminderId];
+  const label = reminderId === 'sms' ? '문자 알림' : '이메일 알림';
+  showFeatureActionNotice(`${label}을 ${run.reminderSettings[reminderId] ? '켰습니다' : '껐습니다'}.`, focusId);
+}
+
+function getNextAvailableSlotForProvider(providerId) {
+  return calendarScenario.slots.find((slot) => slot.provider === providerId && slot.available) ?? null;
+}
+
+function renderFeaturePanel(run) {
+  if (!run.featurePanel) return '';
+  const { featureId } = run.featurePanel;
+  const content = renderFeaturePanelContent(featureId, run);
+  if (!content) return '';
+  return `
+    <section class="card feature-panel" aria-labelledby="feature-panel-title" data-feature-panel>
+      ${content}
+      <div class="button-row feature-panel-actions">
+        <button class="button button-secondary" data-action="close-feature-panel" data-focus-id="feature-panel-close">이 영역 닫기</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderFeaturePanelContent(featureId, run) {
+  if (featureId === 'home') return renderHomeFeaturePanel();
+  if (featureId === 'providers') return renderProvidersFeaturePanel(run);
+  if (featureId === 'passes') return renderPassesFeaturePanel(run);
+  if (featureId === 'reviews') return renderReviewsFeaturePanel(run);
+  if (featureId === 'pricing') return renderPricingFeaturePanel();
+  if (featureId === 'faq') return renderFaqFeaturePanel();
+  if (featureId === 'policy' || featureId === 'change-policy') return renderPolicyFeaturePanel(featureId);
+  if (featureId === 'support') return renderSupportFeaturePanel();
+  if (featureId === 'notifications') return renderNotificationsFeaturePanel(run);
+  if (featureId === 'my-counseling') return renderMyCounselingFeaturePanel(run);
+  if (featureId === 'usage-guide') return renderUsageGuideFeaturePanel();
+  if (featureId === 'search') return renderSearchFeaturePanel(run);
+  if (featureId === 'receipt') return renderReceiptFeaturePanel();
+  return '';
+}
+
+function renderHomeFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">온마음 상담</p>
+      <h2 id="feature-panel-title" tabindex="-1">처음 화면</h2>
+      <p class="muted">오늘 운영 시간은 09:00부터 18:00까지입니다. 비대면 상담은 예약 시간 10분 전부터 입장할 수 있습니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <h3>최근 공지</h3>
+        <ul>
+          <li>4월 셋째 주 야간 상담 일부 시간이 추가되었습니다.</li>
+          <li>비대면 상담 전 카메라와 마이크 상태를 미리 확인해 주십시오.</li>
+        </ul>
+      </article>
+      <article class="mini-card">
+        <h3>빠른 메뉴</h3>
+        <div class="button-row compact-row">
+          <button class="button button-secondary" data-action="open-feature-panel" data-feature-id="providers" data-focus-id="home-providers">상담사 보기</button>
+          <button class="button button-secondary" data-action="open-feature-panel" data-feature-id="faq" data-focus-id="home-faq">자주 묻는 질문</button>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderProvidersFeaturePanel(run) {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">상담사 소개</p>
+      <h2 id="feature-panel-title" tabindex="-1">상담사별 안내</h2>
+      <p class="muted">상담 분야와 다음 예약 가능 시간을 확인할 수 있습니다.</p>
+    </div>
+    <div class="feature-grid">
+      ${calendarScenario.providers.map((provider) => {
+        const nextSlot = getNextAvailableSlotForProvider(provider.id);
+        const specialties = {
+          kim: '불안, 수면, 직장 스트레스',
+          lee: '관계, 의사소통, 청년 상담',
+          park: '가족, 진로, 심리검사 해석',
+        }[provider.id] || '일반 상담';
+        return `
+          <article class="mini-card">
+            <h3>${escapeHtml(provider.label)}</h3>
+            <p>${escapeHtml(specialties)}</p>
+            <p class="muted">다음 예약 가능 시간: ${nextSlot ? escapeHtml(formatSlotLabel(nextSlot)) : '확인 필요'}</p>
+            <div class="button-row compact-row">
+              <button class="button button-secondary" data-action="set-provider-filter" data-provider-id="${escapeHtml(provider.id)}" data-focus-id="provider-${escapeHtml(provider.id)}-schedule">이 상담사 일정 보기</button>
+              <button class="button button-ghost" data-action="feature-save" data-item-id="provider-${escapeHtml(provider.id)}" data-focus-id="provider-${escapeHtml(provider.id)}-save">${run.savedFeatureItems[`provider-${provider.id}`] ? '보관 해제' : '소개 보관'}</button>
+            </div>
+          </article>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderPassesFeaturePanel(run) {
+  const passes = [
+    { id: 'single', title: '1회 상담권', price: '55,000원', description: '처음 상담하거나 일정이 불규칙한 경우에 적합합니다.' },
+    { id: 'three', title: '3회 묶음권', price: '156,000원', description: '2주 안에 여러 번 상담할 예정인 경우에 사용할 수 있습니다.' },
+    { id: 'student', title: '청년 할인권', price: '42,000원', description: '만 24세 이하 또는 재학 증빙이 있는 이용자 대상입니다.' },
+  ];
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">이용권</p>
+      <h2 id="feature-panel-title" tabindex="-1">이용권 선택</h2>
+      <p class="muted">선택한 이용권은 예약 확인 화면에서 사용할 수 있습니다.</p>
+    </div>
+    <div class="feature-grid">
+      ${passes.map((pass) => `
+        <article class="mini-card ${run.selectedPass === pass.id ? 'mini-card-selected' : ''}">
+          <h3>${escapeHtml(pass.title)}</h3>
+          <p><strong>${escapeHtml(pass.price)}</strong></p>
+          <p>${escapeHtml(pass.description)}</p>
+          <button class="button ${run.selectedPass === pass.id ? 'button-primary' : 'button-secondary'}" data-action="select-pass" data-pass-id="${escapeHtml(pass.id)}" data-focus-id="pass-${escapeHtml(pass.id)}">
+            ${run.selectedPass === pass.id ? '선택됨' : '선택'}
+          </button>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderReviewsFeaturePanel(run) {
+  const reviews = [
+    { id: 'review-1', title: '첫 상담 전 긴장이 줄었습니다', body: '예약 전 안내가 자세해서 준비물을 미리 확인할 수 있었습니다.' },
+    { id: 'review-2', title: '퇴근 후 비대면 상담이 편했습니다', body: '상담 전 알림과 접속 안내가 같이 와서 늦지 않게 들어갔습니다.' },
+    { id: 'review-3', title: '일정 변경이 필요할 때 도움이 됐습니다', body: '가능한 시간이 한눈에 보여서 다른 날짜를 고르기 쉬웠습니다.' },
+  ];
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">이용 후기</p>
+      <h2 id="feature-panel-title" tabindex="-1">최근 이용 후기</h2>
+    </div>
+    <div class="feature-list">
+      ${reviews.map((review) => `
+        <article class="mini-card">
+          <h3>${escapeHtml(review.title)}</h3>
+          <p>${escapeHtml(review.body)}</p>
+          <button class="button button-ghost" data-action="feature-save" data-item-id="${escapeHtml(review.id)}" data-focus-id="${escapeHtml(review.id)}-save">${run.savedFeatureItems[review.id] ? '보관 해제' : '후기 보관'}</button>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderPricingFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">가격 안내</p>
+      <h2 id="feature-panel-title" tabindex="-1">상담 비용</h2>
+      <p class="muted">실제 결제는 예약 확정 뒤 안내됩니다.</p>
+    </div>
+    <table class="summary-table compact-table">
+      <thead><tr><th>구분</th><th>30분</th><th>45분</th></tr></thead>
+      <tbody>
+        <tr><th>비대면 상담</th><td>55,000원</td><td>72,000원</td></tr>
+        <tr><th>대면 상담</th><td>60,000원</td><td>78,000원</td></tr>
+        <tr><th>청년 할인</th><td>42,000원</td><td>58,000원</td></tr>
+      </tbody>
+    </table>
+  `;
+}
+
+function renderFaqFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">자주 묻는 질문</p>
+      <h2 id="feature-panel-title" tabindex="-1">예약 전 확인할 내용</h2>
+    </div>
+    <div class="feature-list">
+      <details class="mini-card"><summary>비대면 상담은 어떻게 들어가나요?</summary><p>예약 시간 10분 전부터 내 상담 메뉴에서 입장 버튼이 표시됩니다.</p></details>
+      <details class="mini-card"><summary>예약 변경은 언제까지 가능한가요?</summary><p>상담 시작 6시간 전까지 직접 변경할 수 있습니다.</p></details>
+      <details class="mini-card"><summary>상담사에게 남길 말을 미리 적을 수 있나요?</summary><p>예약 확정 뒤 내 상담 메뉴에서 상담 전 메모를 남길 수 있습니다.</p></details>
+    </div>
+  `;
+}
+
+function renderPolicyFeaturePanel(featureId) {
+  const isChangePolicy = featureId === 'change-policy';
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">${isChangePolicy ? '변경 기준' : '운영 정책'}</p>
+      <h2 id="feature-panel-title" tabindex="-1">${isChangePolicy ? '예약 변경과 취소 기준' : '서비스 운영 정책'}</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>변경 가능 시간</h3><p>상담 시작 6시간 전까지 같은 주의 다른 시간으로 변경할 수 있습니다.</p></article>
+      <article class="mini-card"><h3>취소와 환불</h3><p>상담 시작 24시간 전 취소는 전액 환불, 이후 취소는 이용권으로 전환됩니다.</p></article>
+      <article class="mini-card"><h3>개인정보 보관</h3><p>상담 기록은 법정 보관 기간과 이용자 요청 기준에 따라 분리 보관됩니다.</p></article>
+    </div>
+  `;
+}
+
+function renderSupportFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">문의</p>
+      <h2 id="feature-panel-title" tabindex="-1">고객센터</h2>
+      <p class="muted">운영 시간 안에는 평균 20분 안에 답변합니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <h3>문의 남기기</h3>
+        <label><span>문의 종류</span><select><option>예약 변경</option><option>결제</option><option>상담사 문의</option></select></label>
+        <label><span>문의 내용</span><textarea rows="3">예약 전에 확인하고 싶은 내용이 있습니다.</textarea></label>
+        <button class="button button-primary" data-action="feature-message" data-notice="문의가 접수되었습니다. 답변은 알림에서 확인할 수 있습니다." data-focus-id="support-submit">문의 접수</button>
+      </article>
+      <article class="mini-card">
+        <h3>빠른 연결</h3>
+        <p>전화 상담: 02-0000-1200</p>
+        <p>이메일: help@example.test</p>
+        <button class="button button-secondary" data-action="site-placeholder" data-notice="실시간 채팅 연결은 현재 점검 중입니다. 문의 접수나 전화 상담을 이용하십시오." data-focus-id="support-chat">실시간 채팅 열기</button>
+      </article>
+    </div>
+  `;
+}
+
+function renderNotificationsFeaturePanel(run) {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">알림</p>
+      <h2 id="feature-panel-title" tabindex="-1">알림함</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <h3>최근 알림</h3>
+        <ul>
+          <li>4월 셋째 주 상담 가능 시간이 추가되었습니다.</li>
+          <li>비대면 상담 전 준비 안내가 갱신되었습니다.</li>
+          <li>이용권 만료 7일 전 알림을 받을 수 있습니다.</li>
+        </ul>
+      </article>
+      <article class="mini-card">
+        <h3>알림 받는 방법</h3>
+        <div class="button-row compact-row">
+          <button class="button ${run.reminderSettings.email ? 'button-primary' : 'button-secondary'}" data-action="toggle-reminder" data-reminder="email" data-focus-id="reminder-email">이메일 ${run.reminderSettings.email ? '켜짐' : '꺼짐'}</button>
+          <button class="button ${run.reminderSettings.sms ? 'button-primary' : 'button-secondary'}" data-action="toggle-reminder" data-reminder="sms" data-focus-id="reminder-sms">문자 ${run.reminderSettings.sms ? '켜짐' : '꺼짐'}</button>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderMyCounselingFeaturePanel(run) {
+  const bookingText = formatBookingSummary(run.booking);
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">내 상담</p>
+      <h2 id="feature-panel-title" tabindex="-1">내 상담 현황</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <h3>다가오는 상담</h3>
+        <p>${escapeHtml(bookingText)}</p>
+        <div class="button-row compact-row">
+          <button class="button button-secondary" data-action="open-feature-panel" data-feature-id="usage-guide" data-focus-id="my-guide">상담 전 안내 보기</button>
+          <button class="button button-ghost" data-action="open-feature-panel" data-feature-id="receipt" data-focus-id="my-receipt">결제 내역 보기</button>
+        </div>
+      </article>
+      <article class="mini-card">
+        <h3>최근 이용 내역</h3>
+        <ul>
+          <li>3월 28일 비대면 상담 30분 완료</li>
+          <li>3월 14일 대면 상담 45분 완료</li>
+        </ul>
+      </article>
+    </div>
+  `;
+}
+
+function renderUsageGuideFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">이용 안내</p>
+      <h2 id="feature-panel-title" tabindex="-1">상담 전 준비 안내</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>비대면 상담</h3><p>조용한 장소, 이어폰, 안정적인 인터넷 연결을 준비하십시오.</p></article>
+      <article class="mini-card"><h3>대면 상담</h3><p>상담 시작 10분 전까지 센터에 도착하면 접수대에서 안내받을 수 있습니다.</p></article>
+      <article class="mini-card"><h3>상담 메모</h3><p>최근에 힘들었던 일이나 상담에서 다루고 싶은 주제를 간단히 적어 두면 도움이 됩니다.</p></article>
+    </div>
+  `;
+}
+
+function renderSearchFeaturePanel(run) {
+  const query = run.featurePanel?.query || '심리 상담';
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">검색 결과</p>
+      <h2 id="feature-panel-title" tabindex="-1">${escapeHtml(query)} 검색 결과</h2>
+      <p class="muted">예약 가능한 상담 프로그램과 상담사 정보를 함께 보여 줍니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <h3>비대면 심리 상담</h3>
+        <p>집이나 직장에서 화상으로 상담을 받을 수 있습니다.</p>
+        <button class="button button-secondary" data-action="set-mode-filter" data-mode-id="remote" data-focus-id="search-remote-filter">비대면 조건 입력</button>
+      </article>
+      <article class="mini-card">
+        <h3>대면 심리 상담</h3>
+        <p>센터 상담실에서 진행하는 상담입니다.</p>
+        <button class="button button-secondary" data-action="set-mode-filter" data-mode-id="clinic" data-focus-id="search-clinic-filter">대면 조건 입력</button>
+      </article>
+      <article class="mini-card">
+        <h3>상담사 이름으로 찾기</h3>
+        <p>상담사 소개에서 분야와 가능한 시간을 볼 수 있습니다.</p>
+        <button class="button button-ghost" data-action="open-feature-panel" data-feature-id="providers" data-focus-id="search-providers">상담사 소개 보기</button>
+      </article>
+    </div>
+  `;
+}
+
+function renderReceiptFeaturePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">결제 내역</p>
+      <h2 id="feature-panel-title" tabindex="-1">최근 결제 내역</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>3월 28일 비대면 상담</h3><p>결제 금액 55,000원 · 카드 결제 완료</p><button class="button button-ghost" data-action="feature-message" data-notice="영수증 내려받기를 준비했습니다." data-focus-id="receipt-download">영수증 내려받기</button></article>
+      <article class="mini-card"><h3>3월 14일 대면 상담</h3><p>결제 금액 78,000원 · 카드 결제 완료</p></article>
+    </div>
   `;
 }
 
@@ -1826,8 +2302,8 @@ function renderFilters(conditionId, run) {
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="policy-link" data-inert-link="true">변경 기준 보기</a>
-        <a href="#" class="inline-link" data-focus-id="support-link" data-inert-link="true">이용 안내 보기</a>
+        <a href="#" class="inline-link" data-action="open-feature-panel" data-feature-id="change-policy" data-focus-id="policy-link">변경 기준 보기</a>
+        <a href="#" class="inline-link" data-action="open-feature-panel" data-feature-id="usage-guide" data-focus-id="support-link">이용 안내 보기</a>
         <button class="button button-primary" data-action="apply-filters" data-focus-id="apply-criteria" ${run.isApplying ? 'disabled' : ''}>
           ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>

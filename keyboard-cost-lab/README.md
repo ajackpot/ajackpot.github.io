@@ -15,7 +15,8 @@
 - 내부 실험 번호와 실행 ID는 결과 저장과 탭 간 연결에만 사용하고 화면에는 노출하지 않습니다.
 - 과업 준비 화면의 `과업 요청 사항을 수행 탭에서도 보기` 스위치를 켜면 수행 탭 맨 위에도 이번 요청이 표시됩니다. 기본값은 꺼짐입니다.
 - 수행 탭은 실제 서비스 화면처럼 보이도록 검색, 알림, 보관, 안내 같은 보조 기능을 노출합니다.
-- 아직 실제로 동작하지 않는 보조 기능은 점검 중 안내를 띄우고, 페이지 밖으로 벗어나지 않게 처리합니다.
+- 예약 캘린더의 간단한 보조 기능은 점검 중 안내 대신 화면 안 패널, 상태 변경, 조건 입력, 안내 표처럼 실제 기능에 가깝게 반응합니다.
+- 구현 범위가 큰 기능만 점검 중 안내를 띄우고, 페이지 밖으로 벗어나지 않게 처리합니다.
 - 과업은 자동 종료되지 않습니다. 사용자가 수행 탭 하단의 `과업 종료` 버튼을 눌러야 해당 과업 기록이 저장됩니다.
 - `과업 종료` 버튼을 누르면 먼저 종료 확인 대화상자가 열립니다. 이 대화상자는 종료 여부만 묻고 성공·실패 결과를 미리 알려 주지 않습니다.
 - 종료 확인에서 `아니요, 계속합니다`를 누르면 과업 수행으로 돌아가고, `예, 종료합니다`를 누르면 현재 상태로 기록합니다.
@@ -70,7 +71,7 @@ python -m http.server 4173
 - `lib/service-shell.js`: 공통 비교 요약, 결과 내보내기, 설문 링크 생성
 - `lib/utils.js`: 공통 유틸리티와 수행 탭 하단/완료/과업 종료 확인 대화상자 렌더링
 - `scripts/run-benchmark.mjs`: 서비스별 사전 계산 결과 생성 스크립트
-- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/smoke-render-runner.mjs`: 내부 식별값 비노출, 수행 탭 과업 요청 표시 옵션, 주요 실행 버튼 연결, 수행 화면 렌더링을 확인하는 점검 스크립트
+- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/smoke-render-runner.mjs`: 내부 식별값 비노출, 수행 탭 과업 요청 표시 옵션, 주요 실행 버튼 연결, 예약 캘린더 보조 기능 패널, 수행 화면 렌더링을 확인하는 점검 스크립트
 - `docs/`: 단계별 구현 보고서, 용어 가이드, 수동 점검표
 
 ## 설문지 연동
@@ -89,5 +90,6 @@ python -m http.server 4173
 - `docs/step-14-scope-randomization-and-end-task-report.md`: 14단계 범위 축소, 순서 무작위화, 과업 종료 방식 정비 보고서
 - `docs/step-15-no-hint-end-confirm-and-runner-smoke-report.md`: 15단계 수행 중 힌트 제거, 과업 종료 확인, 수행 화면 렌더링 점검 보고서
 - `docs/step-16-internal-id-task-request-and-calendar-actions-report.md`: 16단계 내부 식별값 비노출, 수행 탭 과업 요청 표시 옵션, 예약 시간표 실행 동작 수정 보고서
+- `docs/step-17-calendar-realistic-support-features-report.md`: 17단계 예약 캘린더 보조 기능 현실감 강화 보고서
 
-이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 공개 범위와 운영 규칙은 이 README, 수동 점검표, 16단계 보고서를 기준으로 확인합니다.
+이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 공개 범위와 운영 규칙은 이 README, 수동 점검표, 17단계 보고서를 기준으로 확인합니다.
