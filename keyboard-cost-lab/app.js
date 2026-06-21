@@ -7,10 +7,12 @@ import {
   formatSeconds,
   escapeHtml,
   deepClone,
+  chunkArray,
   formatServiceScreenButtonLabel,
   getDefaultConditionOrder,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
+  renderEndTaskConfirmDialogHtml,
   renderSiteNoticeHtml,
 } from './lib/utils.js';
 import { serviceRegistry, getServiceById } from './data/service-registry.js';
@@ -231,7 +233,7 @@ function createRunnerState() {
   runtime.isApplying = false;
   runtime.isWorking = false;
   runtime.cancelPerformedThisTask = false;
-  runtime.liveStatus = '조건을 적용한 뒤 원하는 예약 시간을 여십시오.';
+  runtime.liveStatus = '';
   const visibleAvailableSlots = getAvailableVisibleSlots(runtime);
   runtime.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === runtime.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
   runtime.currentTaskLogger = createTaskLogger({
@@ -272,7 +274,7 @@ function createConditionRuntime(variantId) {
     filtersDraft: defaultFilters(),
     booking: null,
     modal: null,
-    liveStatus: '필터를 적용하면 결과 수가 갱신됩니다.',
+    liveStatus: '',
     taskResults: [],
     currentTaskLogger: null,
     currentGridSlotId: null,
@@ -281,6 +283,7 @@ function createConditionRuntime(variantId) {
     isWorking: false,
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
+    completionResultMessage: '',
     siteNotice: '',
   };
 }
@@ -329,6 +332,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.cancelPerformedThisTask = Boolean(snapshot.cancelPerformedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
+  runtime.completionResultMessage = snapshot.completionResultMessage ?? '';
   runtime.siteNotice = snapshot.siteNotice ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   return runtime;
@@ -344,6 +348,7 @@ function serializeRuntimeSnapshot(run) {
     cancelPerformedThisTask: run.cancelPerformedThisTask,
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+    completionResultMessage: run.completionResultMessage,
     siteNotice: run.siteNotice,
     liveStatus: run.liveStatus,
   };
@@ -358,6 +363,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.cancelPerformedThisTask = hydrated.cancelPerformedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
+  targetRun.completionResultMessage = hydrated.completionResultMessage;
   targetRun.siteNotice = hydrated.siteNotice;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -436,8 +442,9 @@ function prepareCurrentTaskForMain() {
   run.isWorking = false;
   run.cancelPerformedThisTask = false;
   run.finalConfirmationAcknowledged = false;
+  run.completionResultMessage = '';
   run.siteNotice = '';
-  run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
+  run.liveStatus = '';
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
   state.activeLaunch = null;
@@ -705,7 +712,19 @@ function handleRootClick(event) {
 
   if (action === 'end-task') {
     event.preventDefault();
-    endRunnerTask();
+    openEndTaskConfirmation();
+    return;
+  }
+
+  if (action === 'confirm-end-task') {
+    event.preventDefault();
+    confirmEndRunnerTask();
+    return;
+  }
+
+  if (action === 'cancel-end-task') {
+    event.preventDefault();
+    closeEndTaskConfirmation();
     return;
   }
 
@@ -801,7 +820,9 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    if (run.modal.kind !== 'task-final') {
+    if (run.modal.kind === 'end-confirm') {
+      closeEndTaskConfirmation();
+    } else if (run.modal.kind !== 'service-confirmation') {
       closeModal();
     }
     return;
@@ -841,7 +862,6 @@ function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
   run.siteNotice = message;
-  run.liveStatus = message;
   render();
 }
 
@@ -871,7 +891,6 @@ function applyFilters() {
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '조건을 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
@@ -879,9 +898,6 @@ function applyFilters() {
     run.filters = normalizeFilters(run.filtersDraft);
     const visibleAvailableSlots = getAvailableVisibleSlots(run);
     run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
-    const resultCount = visibleAvailableSlots.length;
-    run.liveStatus = `예약 가능한 시간이 ${resultCount}개 표시되었습니다.`;
-
     if (state.conditionId === 'variantB') {
       requestFocus('#results-heading');
     } else {
@@ -943,11 +959,11 @@ function openCancelModal(triggerFocusId) {
   render();
 }
 
-function openTaskFinalModal({ title, description }) {
+function openServiceConfirmationModal({ title, description }) {
   const run = getCurrentRun();
   if (!run) return;
   run.modal = {
-    kind: 'task-final',
+    kind: 'service-confirmation',
     title,
     description,
     triggerFocusId: 'runner-footer-end',
@@ -967,15 +983,20 @@ function closeModal() {
   const closingModal = run.modal;
   run.modal = null;
 
-  if (closingModal.kind === 'task-final') {
+  if (closingModal.kind === 'service-confirmation') {
     run.finalConfirmationAcknowledged = true;
-    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
       triggerFocusId: closingModal.triggerFocusId,
       closedAt: performance.now(),
     });
+    requestFocus('[data-focus-id="runner-footer-end"]');
+    render();
+    return;
+  }
+
+  if (closingModal.kind === 'end-confirm') {
     requestFocus('[data-focus-id="runner-footer-end"]');
     render();
     return;
@@ -1039,25 +1060,12 @@ function confirmSlotFromModal() {
       closedAt: performance.now(),
     });
 
-    if (isTaskSatisfied(task, run)) {
-      openTaskFinalModal({
-        title: '예약 내용이 저장되었습니다.',
-        description: '예약 내용이 저장되었습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
-      });
-      return;
-    }
-
-    run.liveStatus = wasCorrect
-      ? '예약이 반영되었습니다. 과업의 완료 조건을 다시 확인하십시오.'
-      : '예약은 되었지만 목표 예약 시간과 일치하지 않습니다. 다시 시도하십시오.';
-
-    if (state.conditionId === 'variantB') {
-      requestFocus('#booking-summary');
-    } else {
-      run.currentTaskLogger?.note('context-reset', { reason: 'variant-a-booking-confirmed' });
-      requestFocus('#results-heading');
-    }
-    render();
+    run.finalConfirmationAcknowledged = false;
+    openServiceConfirmationModal({
+      title: '예약 확정',
+      description: '예약 내용이 접수되었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+    });
+    return;
   }, 360);
 }
 
@@ -1083,7 +1091,7 @@ function confirmCancelFromModal() {
       closedAt: performance.now(),
     });
 
-    run.liveStatus = '기존 예약을 취소했습니다. 새 예약 시간을 선택하십시오.';
+    run.finalConfirmationAcknowledged = false;
 
     if (state.conditionId === 'variantB') {
       requestFocus('#booking-summary');
@@ -1103,24 +1111,91 @@ function isTaskSatisfied(task, run) {
   return bookingMatches;
 }
 
-function endRunnerTask() {
+function openEndTaskConfirmation() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run || state.completed || run.modal) return;
+  run.modal = {
+    kind: 'end-confirm',
+    triggerFocusId: 'runner-footer-end',
+  };
+  requestFocus('[data-focus-id="end-task-confirm"]');
+  render();
+}
+
+function closeEndTaskConfirmation() {
+  const run = getCurrentRun();
+  if (!run || !run.modal || run.modal.kind !== 'end-confirm') return;
+  run.modal = null;
+  requestFocus('[data-focus-id="runner-footer-end"]');
+  render();
+}
+
+function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger || state.completed) return;
 
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
-  const reason = success ? 'participant-ended-after-final-confirmation' : 'participant-ended-incomplete-or-unable';
-  if (!success) {
+  run.modal = null;
+  const outcome = evaluateTaskOutcome(task, run);
+  if (!outcome.success) {
     run.currentTaskLogger.note('task-ended-incomplete', {
       taskId: task.id,
       finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+      outcomeCode: outcome.code,
     });
   }
-  finishRunnerTask(reason, success);
+  finishRunnerTask(outcome.reason, outcome.success, outcome.message);
 }
 
-function finishRunnerTask(reason, success = true) {
+function evaluateTaskOutcome(task, run) {
+  const taskSatisfied = isTaskSatisfied(task, run);
+  if (taskSatisfied && run.finalConfirmationAcknowledged) {
+    return {
+      success: true,
+      reason: 'participant-ended-success',
+      code: 'success',
+      message: '과업 수행에 성공했습니다.',
+    };
+  }
+
+  if (run.booking?.slotId && run.booking.slotId !== task.targetSlotId && run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-different-slot',
+      code: 'different-slot',
+      message: '요청한 상담 예약 시간과 다른 시간을 예약했습니다.',
+    };
+  }
+
+  if (task.requiresCancellation && run.booking?.slotId === task.targetSlotId && !run.cancelPerformedThisTask) {
+    return {
+      success: false,
+      reason: 'participant-ended-without-required-cancel',
+      code: 'cancel-missing',
+      message: '기존 예약 취소를 완료하지 못했습니다.',
+    };
+  }
+
+  if (run.booking?.slotId === task.targetSlotId && !run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-without-final-confirmation',
+      code: 'confirmation-missing',
+      message: '예약 확정 화면을 확인하지 않았습니다.',
+    };
+  }
+
+  return {
+    success: false,
+    reason: 'participant-ended-incomplete-or-unable',
+    code: 'confirmation-not-reached',
+    message: '예약 확정 화면에 진입하지 못했습니다.',
+  };
+}
+
+function finishRunnerTask(reason, success = true, outcomeMessage = '') {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
@@ -1129,6 +1204,7 @@ function finishRunnerTask(reason, success = true) {
   const summary = run.currentTaskLogger.finish({
     success,
     reason,
+    outcomeMessage,
     notes: [
       `booking=${run.booking?.slotId ?? 'none'}`,
       `cancelPerformed=${run.cancelPerformedThisTask}`,
@@ -1139,9 +1215,9 @@ function finishRunnerTask(reason, success = true) {
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
+  run.completionResultMessage = outcomeMessage || '과업 수행 결과를 저장했습니다.';
   run.modal = null;
   state.completed = true;
-  run.liveStatus = '과업 수행이 끝났습니다. 확인을 누르면 이 탭이 닫힙니다.';
 
   postBridgeMessage({
     type: 'task-complete',
@@ -1313,12 +1389,12 @@ function renderRunnerPage() {
         ${renderResults(conditionId, run, availableSlots, unavailableSlots)}
         ${conditionId === 'variantA' ? renderBookingPanel(run, false) : ''}
       </main>
-      ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
       ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderModal(run.modal, run, task) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
+          title: run.completionResultMessage || '과업 수행 결과를 저장했습니다.',
           description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.`,
         })
         : ''}
@@ -1745,7 +1821,6 @@ function renderResults(conditionId, run, availableSlots, unavailableSlots) {
           <h2 id="results-heading" tabindex="-1">예약 가능 시간</h2>
           <p class="muted">예약 가능한 시간 ${availableSlots.length}개 · 예약할 수 없는 시간 ${unavailableSlots.length}개</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 이동하고 엔터 키나 스페이스바로 열기</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 예약 시간을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
         ? renderVariantAResults(availableSlots, unavailableSlots)
@@ -1845,14 +1920,18 @@ function renderBookingPanel(run, emphasized) {
 }
 
 function renderModal(modal, run, task) {
-  if (modal.kind === 'task-final') {
+  if (modal.kind === 'end-confirm') {
+    return renderEndTaskConfirmDialogHtml();
+  }
+
+  if (modal.kind === 'service-confirmation') {
     return `
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
           <p id="dialog-description">${escapeHtml(modal.description)}</p>
           <div class="button-row">
-            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="service-confirmation-confirm">확인</button>
           </div>
         </div>
       </div>

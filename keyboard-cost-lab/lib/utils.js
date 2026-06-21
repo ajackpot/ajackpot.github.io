@@ -79,6 +79,36 @@ export function renderRunnerCompletionDialogHtml({
   `;
 }
 
+
+
+export function renderEndTaskConfirmDialogHtml({
+  title = '과업을 종료하시겠습니까?',
+  description = '예를 누르면 현재 상태로 과업 기록을 저장하고 다음 단계로 넘어갑니다. 아니요를 누르면 계속 수행할 수 있습니다.',
+  confirmLabel = '예, 종료합니다',
+  cancelLabel = '아니요, 계속합니다',
+} = {}) {
+  return `
+    <div class="modal-backdrop" data-measurement-exempt="true">
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="end-task-confirm-title"
+        aria-describedby="end-task-confirm-description"
+        data-modal-dialog
+        data-end-task-confirm-dialog="true"
+      >
+        <h2 id="end-task-confirm-title" tabindex="-1">${escapeHtml(title)}</h2>
+        <p id="end-task-confirm-description">${escapeHtml(description)}</p>
+        <div class="button-row" data-measurement-exempt="true">
+          <button class="button button-ghost" data-action="cancel-end-task" data-dialog-close data-focus-id="end-task-cancel">${escapeHtml(cancelLabel)}</button>
+          <button class="button button-primary" data-action="confirm-end-task" data-dialog-primary data-focus-id="end-task-confirm">${escapeHtml(confirmLabel)}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderSiteNoticeHtml(message) {
   if (!message) return '';
   return `
@@ -95,4 +125,13 @@ export function toQueryString(params) {
     search.set(key, typeof value === 'string' ? value : JSON.stringify(value));
   }
   return search.toString();
+}
+
+
+export function chunkArray(items, size) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
 }

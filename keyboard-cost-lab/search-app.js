@@ -10,6 +10,7 @@ import {
   getDefaultConditionOrder,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
+  renderEndTaskConfirmDialogHtml,
   renderSiteNoticeHtml,
 } from './lib/utils.js';
 import {
@@ -209,7 +210,7 @@ function createRunnerState() {
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.liveStatus = '정렬 기준과 자료 범위를 맞춘 뒤 원하는 자료를 찾으십시오.';
+  runtime.liveStatus = '';
   ensureCurrentResultVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
@@ -253,13 +254,14 @@ function createConditionRuntime(variantId) {
     currentResultId: searchScenario.results[0]?.id ?? null,
     previewVisitedThisTask: {},
     modal: null,
-    liveStatus: '정렬 기준을 바꾸면 검색 결과 목록이 갱신됩니다.',
+    liveStatus: '',
     taskResults: [],
     currentTaskLogger: null,
     isApplying: false,
     isWorking: false,
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
+    completionResultMessage: '',
     siteNotice: '',
   };
 }
@@ -299,6 +301,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.previewVisitedThisTask = deepClone(snapshot.previewVisitedThisTask ?? runtime.previewVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
+  runtime.completionResultMessage = snapshot.completionResultMessage ?? '';
   runtime.siteNotice = snapshot.siteNotice ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   ensureCurrentResultVisible(runtime);
@@ -318,6 +321,7 @@ function serializeRuntimeSnapshot(run) {
     previewVisitedThisTask: deepClone(run.previewVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+    completionResultMessage: run.completionResultMessage,
     siteNotice: run.siteNotice,
     liveStatus: run.liveStatus,
   };
@@ -335,6 +339,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.previewVisitedThisTask = hydrated.previewVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
+  targetRun.completionResultMessage = hydrated.completionResultMessage;
   targetRun.siteNotice = hydrated.siteNotice;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -387,8 +392,9 @@ function prepareCurrentTaskForMain() {
   run.previewVisitedThisTask = {};
   run.openedResultId = null;
   run.finalConfirmationAcknowledged = false;
+  run.completionResultMessage = '';
   run.siteNotice = '';
-  run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
+  run.liveStatus = '';
   ensureCurrentResultVisible(run);
   state.activeLaunch = null;
 }
@@ -640,7 +646,19 @@ function handleRootClick(event) {
 
   if (action === 'end-task') {
     event.preventDefault();
-    endRunnerTask();
+    openEndTaskConfirmation();
+    return;
+  }
+
+  if (action === 'confirm-end-task') {
+    event.preventDefault();
+    confirmEndRunnerTask();
+    return;
+  }
+
+  if (action === 'cancel-end-task') {
+    event.preventDefault();
+    closeEndTaskConfirmation();
     return;
   }
 
@@ -733,7 +751,9 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    if (run.modal.kind !== 'task-final') {
+    if (run.modal.kind === 'end-confirm') {
+      closeEndTaskConfirmation();
+    } else if (run.modal.kind !== 'service-confirmation') {
       closeModal();
     }
     return;
@@ -773,7 +793,6 @@ function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
   run.siteNotice = message;
-  run.liveStatus = message;
   render();
 }
 
@@ -870,7 +889,6 @@ function applyResultFilters() {
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '정렬 기준과 자료 범위를 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
@@ -879,7 +897,6 @@ function applyResultFilters() {
     run.type = run.typeDraft;
     ensureCurrentResultVisible(run);
     const visibleSearch = getVisibleSearch(run);
-    run.liveStatus = `현재 ${visibleSearch.length}개의 자료가 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
       requestFocus('#search-heading');
@@ -941,11 +958,11 @@ function openResultPreview(resultId, triggerFocusId) {
   render();
 }
 
-function openTaskFinalModal({ title, description }) {
+function openServiceConfirmationModal({ title, description }) {
   const run = getCurrentRun();
   if (!run) return;
   run.modal = {
-    kind: 'task-final',
+    kind: 'service-confirmation',
     title,
     description,
     triggerFocusId: 'runner-footer-end',
@@ -966,15 +983,20 @@ function closeModal() {
   const closingModal = run.modal;
   run.modal = null;
 
-  if (closingModal.kind === 'task-final') {
+  if (closingModal.kind === 'service-confirmation') {
     run.finalConfirmationAcknowledged = true;
-    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
       triggerFocusId: closingModal.triggerFocusId,
       closedAt: performance.now(),
     });
+    requestFocus('[data-focus-id="runner-footer-end"]');
+    render();
+    return;
+  }
+
+  if (closingModal.kind === 'end-confirm') {
     requestFocus('[data-focus-id="runner-footer-end"]');
     render();
     return;
@@ -1001,10 +1023,11 @@ function closeModal() {
     requestFocus('#search-heading');
   }
 
-  if (task && isTaskSatisfied(task, run) && task.completion === 'closePreview' && closingModal.resultId === task.targetResultId) {
-    openTaskFinalModal({
-      title: '미리보기를 확인했습니다.',
-      description: '자료 미리보기를 닫았습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
+  if (closingModal.kind === 'result-preview' && closingModal.resultId) {
+    run.finalConfirmationAcknowledged = false;
+    openServiceConfirmationModal({
+      title: '미리보기 닫기',
+      description: '자료 미리보기를 닫았습니다. 확인한 뒤 화면을 계속 이용하십시오.',
     });
     return;
   }
@@ -1030,22 +1053,12 @@ function saveResult(resultId, triggerFocusId) {
     alreadySaved,
   });
 
-  if (isTaskSatisfied(task, run)) {
-    openTaskFinalModal({
-      title: '자료를 저장했습니다.',
-      description: '선택한 자료가 보관 목록에 저장되었습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
-    });
-    return;
-  }
-
-  run.liveStatus = alreadySaved
-    ? `${result.title} 자료는 이미 저장되어 있습니다.`
-    : `${result.title} 자료를 저장했습니다.`;
-
-  if (triggerFocusId) {
-    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-  }
-  render();
+  run.finalConfirmationAcknowledged = false;
+  openServiceConfirmationModal({
+    title: '자료 저장',
+    description: alreadySaved ? '이미 보관 목록에 있는 자료입니다. 확인한 뒤 화면을 계속 이용하십시오.' : '자료를 보관 목록에 저장했습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  });
+  return;
 }
 
 function openResult(resultId, triggerFocusId) {
@@ -1064,20 +1077,12 @@ function openResult(resultId, triggerFocusId) {
   run.openedResultId = resultId;
   run.currentTaskLogger?.note('open-result', { resultId });
 
-  if (isTaskSatisfied(task, run)) {
-    openTaskFinalModal({
-      title: '자료를 열었습니다.',
-      description: '선택한 자료를 여는 동작이 완료되었습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
-    });
-    return;
-  }
-
-  run.liveStatus = `${result.title} 자료를 바로 열었습니다.`;
-
-  if (triggerFocusId) {
-    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-  }
-  render();
+  run.finalConfirmationAcknowledged = false;
+  openServiceConfirmationModal({
+    title: '자료 열기',
+    description: '자료 열기 요청이 접수되었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  });
+  return;
 }
 
 function isTaskSatisfied(task, run) {
@@ -1104,24 +1109,97 @@ function isTaskSatisfied(task, run) {
   return false;
 }
 
-function endRunnerTask() {
+function openEndTaskConfirmation() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run || state.completed || run.modal) return;
+  run.modal = {
+    kind: 'end-confirm',
+    triggerFocusId: 'runner-footer-end',
+  };
+  requestFocus('[data-focus-id="end-task-confirm"]');
+  render();
+}
+
+function closeEndTaskConfirmation() {
+  const run = getCurrentRun();
+  if (!run || !run.modal || run.modal.kind !== 'end-confirm') return;
+  run.modal = null;
+  requestFocus('[data-focus-id="runner-footer-end"]');
+  render();
+}
+
+function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger || state.completed) return;
 
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
-  const reason = success ? 'participant-ended-after-final-confirmation' : 'participant-ended-incomplete-or-unable';
-  if (!success) {
+  run.modal = null;
+  const outcome = evaluateTaskOutcome(task, run);
+  if (!outcome.success) {
     run.currentTaskLogger.note('task-ended-incomplete', {
       taskId: task.id,
       finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+      outcomeCode: outcome.code,
     });
   }
-  finishRunnerTask(reason, success);
+  finishRunnerTask(outcome.reason, outcome.success, outcome.message);
 }
 
-function finishRunnerTask(reason, success = true) {
+function didWorkOnDifferentResult(task, run) {
+  if (run.openedResultId && run.openedResultId !== task.targetResultId) return true;
+  return Object.keys(run.savedByResultId).some((resultId) => run.savedByResultId[resultId] && resultId !== task.targetResultId)
+    || Object.keys(run.previewVisitedThisTask).some((resultId) => run.previewVisitedThisTask[resultId] && resultId !== task.targetResultId);
+}
+
+function evaluateTaskOutcome(task, run) {
+  const taskSatisfied = isTaskSatisfied(task, run);
+  if (taskSatisfied && run.finalConfirmationAcknowledged) {
+    return {
+      success: true,
+      reason: 'participant-ended-success',
+      code: 'success',
+      message: '과업 수행에 성공했습니다.',
+    };
+  }
+
+  if (didWorkOnDifferentResult(task, run) && run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-different-result',
+      code: 'different-result',
+      message: '요청한 자료와 다른 자료에서 작업했습니다.',
+    };
+  }
+
+  if ((task.requiredSort && run.sort !== task.requiredSort) || (task.requiredType && run.type !== task.requiredType)) {
+    return {
+      success: false,
+      reason: 'participant-ended-filter-mismatch',
+      code: 'filter-mismatch',
+      message: '요청한 검색 조건을 맞추지 못했습니다.',
+    };
+  }
+
+  if (taskSatisfied && !run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-without-final-confirmation',
+      code: 'confirmation-missing',
+      message: '자료 작업 확인 화면을 확인하지 않았습니다.',
+    };
+  }
+
+  return {
+    success: false,
+    reason: 'participant-ended-incomplete-or-unable',
+    code: 'result-action-not-complete',
+    message: '요청한 자료 작업을 완료하지 못했습니다.',
+  };
+}
+
+function finishRunnerTask(reason, success = true, outcomeMessage = '') {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
@@ -1130,6 +1208,7 @@ function finishRunnerTask(reason, success = true) {
   const summary = run.currentTaskLogger.finish({
     success,
     reason,
+    outcomeMessage,
     notes: [
       `openedResult=${run.openedResultId ?? 'none'}`,
       `saved=${Object.keys(run.savedByResultId).filter((resultId) => run.savedByResultId[resultId]).join(',') || 'none'}`,
@@ -1141,9 +1220,9 @@ function finishRunnerTask(reason, success = true) {
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
+  run.completionResultMessage = outcomeMessage || '과업 수행 결과를 저장했습니다.';
   run.modal = null;
   state.completed = true;
-  run.liveStatus = '과업 수행이 끝났습니다. 확인을 누르면 이 탭이 닫힙니다.';
 
   postBridgeMessage({
     type: 'task-complete',
@@ -1247,12 +1326,12 @@ function renderRunnerPage() {
         ${renderResultControls(conditionId, run)}
         ${renderSearchSection(conditionId, run, visibleSearch)}
       </main>
-      ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
       ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderResultModal(run.modal, run) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
+          title: run.completionResultMessage || '과업 수행 결과를 저장했습니다.',
           description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.`,
         })
         : ''}
@@ -1617,7 +1696,6 @@ function renderSearchSection(conditionId, run, visibleSearch) {
           <h2 id="search-heading" tabindex="-1">검색 결과</h2>
           <p class="muted">검색어 ${escapeHtml(searchScenario.queryLabel)} · 표시된 자료 ${visibleSearch.length}개</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 자료를 고르고 탭 키로 선택한 자료 작업으로 이동</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 자료와 자료 작업을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
         ? renderVariantAResultList(run, visibleSearch)
@@ -1728,14 +1806,18 @@ function renderOpenedResultStatus(result) {
 }
 
 function renderResultModal(modal, run) {
-  if (modal.kind === 'task-final') {
+  if (modal.kind === 'end-confirm') {
+    return renderEndTaskConfirmDialogHtml();
+  }
+
+  if (modal.kind === 'service-confirmation') {
     return `
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
           <p id="dialog-description">${escapeHtml(modal.description)}</p>
           <div class="button-row">
-            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="service-confirmation-confirm">확인</button>
           </div>
         </div>
       </div>

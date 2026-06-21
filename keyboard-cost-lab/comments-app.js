@@ -10,6 +10,7 @@ import {
   getDefaultConditionOrder,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
+  renderEndTaskConfirmDialogHtml,
   renderSiteNoticeHtml,
 } from './lib/utils.js';
 import {
@@ -209,7 +210,7 @@ function createRunnerState() {
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.liveStatus = '정렬 기준과 댓글 범위를 맞춘 뒤 원하는 댓글을 찾으십시오.';
+  runtime.liveStatus = '';
   ensureCurrentCommentVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
@@ -253,13 +254,14 @@ function createConditionRuntime(variantId) {
     currentCommentId: commentsScenario.comments[0]?.id ?? null,
     detailVisitedThisTask: {},
     modal: null,
-    liveStatus: '정렬 기준을 바꾸면 댓글 목록이 갱신됩니다.',
+    liveStatus: '',
     taskResults: [],
     currentTaskLogger: null,
     isApplying: false,
     isWorking: false,
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
+    completionResultMessage: '',
     siteNotice: '',
   };
 }
@@ -299,6 +301,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
+  runtime.completionResultMessage = snapshot.completionResultMessage ?? '';
   runtime.siteNotice = snapshot.siteNotice ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   ensureCurrentCommentVisible(runtime);
@@ -318,6 +321,7 @@ function serializeRuntimeSnapshot(run) {
     detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+    completionResultMessage: run.completionResultMessage,
     siteNotice: run.siteNotice,
     liveStatus: run.liveStatus,
   };
@@ -335,6 +339,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
+  targetRun.completionResultMessage = hydrated.completionResultMessage;
   targetRun.siteNotice = hydrated.siteNotice;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -386,8 +391,9 @@ function prepareCurrentTaskForMain() {
   run.isWorking = false;
   run.detailVisitedThisTask = {};
   run.finalConfirmationAcknowledged = false;
+  run.completionResultMessage = '';
   run.siteNotice = '';
-  run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
+  run.liveStatus = '';
   ensureCurrentCommentVisible(run);
   state.activeLaunch = null;
 }
@@ -639,7 +645,19 @@ function handleRootClick(event) {
 
   if (action === 'end-task') {
     event.preventDefault();
-    endRunnerTask();
+    openEndTaskConfirmation();
+    return;
+  }
+
+  if (action === 'confirm-end-task') {
+    event.preventDefault();
+    confirmEndRunnerTask();
+    return;
+  }
+
+  if (action === 'cancel-end-task') {
+    event.preventDefault();
+    closeEndTaskConfirmation();
     return;
   }
 
@@ -732,7 +750,9 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    if (run.modal.kind !== 'task-final') {
+    if (run.modal.kind === 'end-confirm') {
+      closeEndTaskConfirmation();
+    } else if (run.modal.kind !== 'service-confirmation') {
       closeModal();
     }
     return;
@@ -772,7 +792,6 @@ function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
   run.siteNotice = message;
-  run.liveStatus = message;
   render();
 }
 
@@ -870,7 +889,6 @@ function applyCommentFilters() {
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
-  run.liveStatus = '정렬 기준과 댓글 범위를 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
@@ -879,7 +897,6 @@ function applyCommentFilters() {
     run.category = run.categoryDraft;
     ensureCurrentCommentVisible(run);
     const visibleComments = getVisibleComments(run);
-    run.liveStatus = `현재 ${visibleComments.length}개의 댓글이 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
       requestFocus('#comments-heading');
@@ -931,11 +948,11 @@ function openCommentDetail(commentId, triggerFocusId) {
   render();
 }
 
-function openTaskFinalModal({ title, description }) {
+function openServiceConfirmationModal({ title, description }) {
   const run = getCurrentRun();
   if (!run) return;
   run.modal = {
-    kind: 'task-final',
+    kind: 'service-confirmation',
     title,
     description,
     triggerFocusId: 'runner-footer-end',
@@ -955,15 +972,20 @@ function closeModal() {
   const closingModal = run.modal;
   run.modal = null;
 
-  if (closingModal.kind === 'task-final') {
+  if (closingModal.kind === 'service-confirmation') {
     run.finalConfirmationAcknowledged = true;
-    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
       triggerFocusId: closingModal.triggerFocusId,
       closedAt: performance.now(),
     });
+    requestFocus('[data-focus-id="runner-footer-end"]');
+    render();
+    return;
+  }
+
+  if (closingModal.kind === 'end-confirm') {
     requestFocus('[data-focus-id="runner-footer-end"]');
     render();
     return;
@@ -1006,22 +1028,12 @@ function toggleReplies(commentId, triggerFocusId) {
     expanded: expanding,
   });
 
-  if (isTaskSatisfied(task, run)) {
-    openTaskFinalModal({
-      title: '답글을 표시했습니다.',
-      description: '요청한 댓글의 답글이 화면에 열렸습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
-    });
-    return;
-  }
-
-  run.liveStatus = expanding
-    ? `${comment.author} 댓글의 답글 ${comment.replyCount}개를 펼쳤습니다.`
-    : `${comment.author} 댓글의 답글을 접었습니다.`;
-
-  if (triggerFocusId) {
-    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-  }
-  render();
+  run.finalConfirmationAcknowledged = false;
+  openServiceConfirmationModal({
+    title: expanding ? '답글 표시' : '답글 숨김',
+    description: expanding ? '답글 목록을 표시했습니다. 확인한 뒤 화면을 계속 이용하십시오.' : '답글 목록을 접었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  });
+  return;
 }
 
 function markHelpful(commentId, triggerFocusId) {
@@ -1042,21 +1054,12 @@ function markHelpful(commentId, triggerFocusId) {
     alreadyHelpful,
   });
 
-  if (isTaskSatisfied(task, run)) {
-    openTaskFinalModal({
-      title: '의견이 반영되었습니다.',
-      description: '도움이 돼요 표시가 반영되었습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
-    });
-    return;
-  }
-
-  run.liveStatus = alreadyHelpful
-    ? `${comment.author} 댓글에는 이미 도움이 돼요가 표시되어 있습니다.`
-    : `${comment.author} 댓글에 도움이 돼요를 표시했습니다.`;
-  if (triggerFocusId) {
-    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-  }
-  render();
+  run.finalConfirmationAcknowledged = false;
+  openServiceConfirmationModal({
+    title: '의견 반영',
+    description: alreadyHelpful ? '이미 반영된 의견입니다. 확인한 뒤 화면을 계속 이용하십시오.' : '의견이 반영되었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  });
+  return;
 }
 
 function isTaskSatisfied(task, run) {
@@ -1077,24 +1080,97 @@ function isTaskSatisfied(task, run) {
   return false;
 }
 
-function endRunnerTask() {
+function openEndTaskConfirmation() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run || state.completed || run.modal) return;
+  run.modal = {
+    kind: 'end-confirm',
+    triggerFocusId: 'runner-footer-end',
+  };
+  requestFocus('[data-focus-id="end-task-confirm"]');
+  render();
+}
+
+function closeEndTaskConfirmation() {
+  const run = getCurrentRun();
+  if (!run || !run.modal || run.modal.kind !== 'end-confirm') return;
+  run.modal = null;
+  requestFocus('[data-focus-id="runner-footer-end"]');
+  render();
+}
+
+function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger || state.completed) return;
 
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
-  const reason = success ? 'participant-ended-after-final-confirmation' : 'participant-ended-incomplete-or-unable';
-  if (!success) {
+  run.modal = null;
+  const outcome = evaluateTaskOutcome(task, run);
+  if (!outcome.success) {
     run.currentTaskLogger.note('task-ended-incomplete', {
       taskId: task.id,
       finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+      outcomeCode: outcome.code,
     });
   }
-  finishRunnerTask(reason, success);
+  finishRunnerTask(outcome.reason, outcome.success, outcome.message);
 }
 
-function finishRunnerTask(reason, success = true) {
+function didWorkOnDifferentComment(task, run) {
+  if (run.expandedCommentId && run.expandedCommentId !== task.targetCommentId) return true;
+  return Object.keys(run.helpfulByCommentId).some((commentId) => run.helpfulByCommentId[commentId] && commentId !== task.targetCommentId)
+    || Object.keys(run.detailVisitedThisTask).some((commentId) => run.detailVisitedThisTask[commentId] && commentId !== task.targetCommentId);
+}
+
+function evaluateTaskOutcome(task, run) {
+  const taskSatisfied = isTaskSatisfied(task, run);
+  if (taskSatisfied && run.finalConfirmationAcknowledged) {
+    return {
+      success: true,
+      reason: 'participant-ended-success',
+      code: 'success',
+      message: '과업 수행에 성공했습니다.',
+    };
+  }
+
+  if (didWorkOnDifferentComment(task, run) && run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-different-comment',
+      code: 'different-comment',
+      message: '요청한 댓글과 다른 댓글에서 작업했습니다.',
+    };
+  }
+
+  if ((task.requiredSort && run.sort !== task.requiredSort) || (task.requiredCategory && run.category !== task.requiredCategory)) {
+    return {
+      success: false,
+      reason: 'participant-ended-filter-mismatch',
+      code: 'filter-mismatch',
+      message: '요청한 댓글 목록 조건을 맞추지 못했습니다.',
+    };
+  }
+
+  if (taskSatisfied && !run.finalConfirmationAcknowledged) {
+    return {
+      success: false,
+      reason: 'participant-ended-without-final-confirmation',
+      code: 'confirmation-missing',
+      message: '댓글 작업 확인 화면을 확인하지 않았습니다.',
+    };
+  }
+
+  return {
+    success: false,
+    reason: 'participant-ended-incomplete-or-unable',
+    code: 'comment-action-not-complete',
+    message: '요청한 댓글 작업을 완료하지 못했습니다.',
+  };
+}
+
+function finishRunnerTask(reason, success = true, outcomeMessage = '') {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
@@ -1103,6 +1179,7 @@ function finishRunnerTask(reason, success = true) {
   const summary = run.currentTaskLogger.finish({
     success,
     reason,
+    outcomeMessage,
     notes: [
       `expandedComment=${run.expandedCommentId ?? 'none'}`,
       `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
@@ -1113,9 +1190,9 @@ function finishRunnerTask(reason, success = true) {
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
+  run.completionResultMessage = outcomeMessage || '과업 수행 결과를 저장했습니다.';
   run.modal = null;
   state.completed = true;
-  run.liveStatus = '과업 수행이 끝났습니다. 확인을 누르면 이 탭이 닫힙니다.';
 
   postBridgeMessage({
     type: 'task-complete',
@@ -1219,12 +1296,12 @@ function renderRunnerPage() {
         ${renderCommentControls(conditionId, run)}
         ${renderCommentsSection(conditionId, run, visibleComments)}
       </main>
-      ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
       ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
       ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderCommentModal(run.modal, run) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
+          title: run.completionResultMessage || '과업 수행 결과를 저장했습니다.',
           description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.`,
         })
         : ''}
@@ -1588,7 +1665,6 @@ function renderCommentsSection(conditionId, run, visibleComments) {
           <h2 id="comments-heading" tabindex="-1">댓글 목록</h2>
           <p class="muted">표시된 댓글 ${visibleComments.length}개 · 게시글 제목 ${escapeHtml(commentsScenario.postTitle)}</p>
         </div>
-        ${conditionId === 'variantB' ? '<p class="keyboard-tip">방향키로 댓글을 고르고 탭 키로 댓글 작업으로 이동</p>' : '<p class="keyboard-tip">탭 키와 Shift+탭 키로 댓글과 댓글 작업을 차례대로 이동</p>'}
       </div>
       ${conditionId === 'variantA'
         ? renderVariantACommentList(run, visibleComments)
@@ -1691,14 +1767,18 @@ function renderReplyList(comment) {
 }
 
 function renderCommentModal(modal, run) {
-  if (modal.kind === 'task-final') {
+  if (modal.kind === 'end-confirm') {
+    return renderEndTaskConfirmDialogHtml();
+  }
+
+  if (modal.kind === 'service-confirmation') {
     return `
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
           <p id="dialog-description">${escapeHtml(modal.description)}</p>
           <div class="button-row">
-            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="service-confirmation-confirm">확인</button>
           </div>
         </div>
       </div>

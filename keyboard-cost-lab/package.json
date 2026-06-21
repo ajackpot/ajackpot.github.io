@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "benchmark": "node scripts/run-benchmark.mjs",
-    "serve": "python -m http.server 4173"
+    "serve": "python -m http.server 4173",
+    "smoke:runner": "node scripts/smoke-render-runner.mjs"
   }
 }
