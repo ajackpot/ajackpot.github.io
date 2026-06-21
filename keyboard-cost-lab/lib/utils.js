@@ -33,25 +33,29 @@ export function clsx(...tokens) {
 }
 
 export function getDefaultConditionOrder() {
-  return ['variantA', 'variantB'];
+  const baseOrder = ['variantA', 'variantB'];
+  const randomValue = globalThis.crypto?.getRandomValues
+    ? globalThis.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+    : Math.random();
+  return randomValue < 0.5 ? baseOrder : baseOrder.slice().reverse();
 }
 
 export function formatServiceScreenButtonLabel(serviceLabel) {
   return `${serviceLabel} 화면으로 이동`;
 }
 
-export function renderRunnerFooterHtml({ jumpLabel, closeLabel = '이 탭 닫기' } = {}) {
+export function renderRunnerFooterHtml({ jumpLabel, endLabel = '과업 종료' } = {}) {
   return `
     <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
       <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">${escapeHtml(jumpLabel)}</button>
-      <button class="button button-primary" data-action="close-runner" data-focus-id="runner-footer-close">${escapeHtml(closeLabel)}</button>
+      <button class="button button-primary" data-action="end-task" data-focus-id="runner-footer-end">${escapeHtml(endLabel)}</button>
     </footer>
   `;
 }
 
 export function renderRunnerCompletionDialogHtml({
-  title = '과업 수행이 끝났습니다.',
-  description = '확인 버튼을 누르면 이 탭이 자동으로 닫힙니다.',
+  title = '과업 기록을 저장했습니다.',
+  description = '확인 버튼을 누르면 이 탭이 닫힙니다.',
   confirmLabel = '확인',
 } = {}) {
   return `
@@ -71,6 +75,15 @@ export function renderRunnerCompletionDialogHtml({
           <button class="button button-primary" data-action="acknowledge-task-complete" data-completion-confirm>${escapeHtml(confirmLabel)}</button>
         </div>
       </div>
+    </div>
+  `;
+}
+
+export function renderSiteNoticeHtml(message) {
+  if (!message) return '';
+  return `
+    <div class="site-notice" role="status" aria-live="polite" data-measurement-exempt="true">
+      ${escapeHtml(message)}
     </div>
   `;
 }

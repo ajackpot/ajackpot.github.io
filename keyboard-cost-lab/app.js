@@ -11,6 +11,7 @@ import {
   getDefaultConditionOrder,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
+  renderSiteNoticeHtml,
 } from './lib/utils.js';
 import { serviceRegistry, getServiceById } from './data/service-registry.js';
 import { commonMeasurementRules } from './data/measurement-rules.js';
@@ -40,17 +41,9 @@ import {
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
-import {
-  renderStudyServiceCompletionCard,
-  saveCompletedServiceRecord,
-  getStudyProgress,
-  buildStudySurveyUrl,
-  getStudyServiceRecord,
-  clearStudyState,
-} from './lib/study-session.js';
 
 const APP_MODE = getAppMode();
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-study-session-id';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-channel';
 const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-channel-fallback';
@@ -107,10 +100,6 @@ const GLOSSARY_ENTRIES = [
   {
     term: '비교안 A/B',
     description: '같은 과업을 두 가지 화면 구조로 비교하기 위한 화면입니다. 내용은 같고 이동 방식만 다릅니다.',
-  },
-  {
-    term: '사전 계산 기준',
-    description: '실제 실험 전에 미리 계산해 둔 예상 조작 부담 값입니다. 실제 기록과 나란히 비교합니다.',
   },
   {
     term: '초점',
@@ -291,6 +280,8 @@ function createConditionRuntime(variantId) {
     isApplying: false,
     isWorking: false,
     lastTaskCompletionNote: '',
+    finalConfirmationAcknowledged: false,
+    siteNotice: '',
   };
 }
 
@@ -337,6 +328,8 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.currentGridSlotId = snapshot.currentGridSlotId ?? null;
   runtime.cancelPerformedThisTask = Boolean(snapshot.cancelPerformedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
+  runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
+  runtime.siteNotice = snapshot.siteNotice ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   return runtime;
 }
@@ -350,6 +343,8 @@ function serializeRuntimeSnapshot(run) {
     currentGridSlotId: run.currentGridSlotId,
     cancelPerformedThisTask: run.cancelPerformedThisTask,
     lastTaskCompletionNote: run.lastTaskCompletionNote,
+    finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+    siteNotice: run.siteNotice,
     liveStatus: run.liveStatus,
   };
 }
@@ -362,6 +357,8 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.currentGridSlotId = hydrated.currentGridSlotId;
   targetRun.cancelPerformedThisTask = hydrated.cancelPerformedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
+  targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
+  targetRun.siteNotice = hydrated.siteNotice;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
   targetRun.isApplying = false;
@@ -371,6 +368,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
 function resetExperimentState() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
+  state.order = getDefaultConditionOrder();
   state.activeLaunch = null;
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
@@ -411,6 +409,7 @@ function startExperiment() {
   if (!selectedService || !selectedService.available) return;
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
+  state.order = getDefaultConditionOrder();
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
   prepareCurrentTaskForMain();
@@ -436,6 +435,8 @@ function prepareCurrentTaskForMain() {
   run.isApplying = false;
   run.isWorking = false;
   run.cancelPerformedThisTask = false;
+  run.finalConfirmationAcknowledged = false;
+  run.siteNotice = '';
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
@@ -575,9 +576,35 @@ function acceptRunnerTaskCompletion(message) {
     clearLaunchSnapshot(state.activeLaunch.launchId);
   }
 
+  advanceAfterRunnerCompletion();
+}
+
+function advanceAfterRunnerCompletion() {
   state.activeLaunch = null;
-  state.view = 'taskReview';
-  requestFocus('#review-heading');
+
+  if (state.currentTaskIndex < calendarTasks.length - 1) {
+    state.currentTaskIndex += 1;
+    prepareCurrentTaskForMain();
+    state.view = 'taskPrep';
+    requestFocus('#task-prep-heading');
+    render();
+    return;
+  }
+
+  if (state.currentConditionIndex < state.order.length - 1) {
+    state.currentConditionIndex += 1;
+    state.currentTaskIndex = 0;
+    const nextVariant = getCurrentConditionId();
+    state.runs[nextVariant] = createConditionRuntime(nextVariant);
+    prepareCurrentTaskForMain();
+    state.view = 'taskPrep';
+    requestFocus('#task-prep-heading');
+    render();
+    return;
+  }
+
+  state.view = 'final';
+  requestFocus('#final-summary-heading');
   render();
 }
 
@@ -613,6 +640,11 @@ function handleRootClick(event) {
   const inertLink = event.target.closest('[data-inert-link="true"]');
   if (inertLink) {
     event.preventDefault();
+    if (APP_MODE === 'runner') {
+      const label = inertLink.textContent?.trim() || '해당';
+      showSiteNotice(`${label} 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.`);
+      return;
+    }
   }
 
   const actionTarget = event.target.closest('[data-action]');
@@ -662,18 +694,18 @@ function handleRootClick(event) {
       return;
     }
 
-    if (action === 'save-service-evaluation') {
-      event.preventDefault();
-      saveServiceEvaluation();
-      return;
-    }
+    return;
+  }
 
-    if (action === 'reset-study-session') {
-      event.preventDefault();
-      resetStudySession();
-      return;
-    }
+  if (action === 'site-placeholder') {
+    event.preventDefault();
+    showSiteNotice(actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.');
+    return;
+  }
 
+  if (action === 'end-task') {
+    event.preventDefault();
+    endRunnerTask();
     return;
   }
 
@@ -733,32 +765,6 @@ function handleRootClick(event) {
   }
 }
 
-
-function resetStudySession() {
-  clearStudyState(state.sessionId);
-  window.localStorage.removeItem(STORAGE_KEY_SESSION);
-  window.location.href = './index.html';
-}
-
-function saveServiceEvaluation() {
-
-  const form = document.querySelector('[data-service-survey-form]');
-  if (!(form instanceof HTMLFormElement)) return;
-  if (!form.reportValidity()) return;
-
-  saveCompletedServiceRecord({
-    sessionId: state.sessionId,
-    serviceId: 'calendar',
-    serviceLabel: '예약 캘린더',
-    order: state.order,
-    actualA: aggregateActualCondition(state.runs.variantA),
-    actualB: aggregateActualCondition(state.runs.variantB),
-    formElement: form,
-  });
-
-  goHome();
-}
-
 function handleRootChange(event) {
   const element = event.target;
   if (!(element instanceof HTMLInputElement || element instanceof HTMLSelectElement)) return;
@@ -795,7 +801,9 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    closeModal();
+    if (run.modal.kind !== 'task-final') {
+      closeModal();
+    }
     return;
   }
 
@@ -827,6 +835,14 @@ function focusElementNow(selector) {
   }
   requestFocus(selector);
   return false;
+}
+
+function showSiteNotice(message) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.siteNotice = message;
+  run.liveStatus = message;
+  render();
 }
 
 function applyPendingFocus() {
@@ -927,11 +943,44 @@ function openCancelModal(triggerFocusId) {
   render();
 }
 
+function openTaskFinalModal({ title, description }) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.modal = {
+    kind: 'task-final',
+    title,
+    description,
+    triggerFocusId: 'runner-footer-end',
+  };
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId: 'runner-footer-end',
+  });
+  requestFocus('[data-dialog-primary]');
+  render();
+}
+
 function closeModal() {
   const run = getCurrentRun();
   if (!run || !run.modal) return;
   const closingModal = run.modal;
   run.modal = null;
+
+  if (closingModal.kind === 'task-final') {
+    run.finalConfirmationAcknowledged = true;
+    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
+    run.currentTaskLogger?.setModalState({
+      open: false,
+      containerSelector: null,
+      triggerFocusId: closingModal.triggerFocusId,
+      closedAt: performance.now(),
+    });
+    requestFocus('[data-focus-id="runner-footer-end"]');
+    render();
+    return;
+  }
+
   run.currentTaskLogger?.setModalState({
     open: false,
     containerSelector: null,
@@ -991,7 +1040,10 @@ function confirmSlotFromModal() {
     });
 
     if (isTaskSatisfied(task, run)) {
-      finishRunnerTask(wasCorrect ? 'target-slot-confirmed' : 'task-satisfied-after-reselection');
+      openTaskFinalModal({
+        title: '예약 내용이 저장되었습니다.',
+        description: '예약 내용이 저장되었습니다. 확인한 뒤 과업 종료 버튼을 누르십시오.',
+      });
       return;
     }
 
@@ -1051,18 +1103,36 @@ function isTaskSatisfied(task, run) {
   return bookingMatches;
 }
 
-function finishRunnerTask(reason) {
+function endRunnerTask() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  const task = getCurrentTask();
+  if (!run || !task || !run.currentTaskLogger || state.completed) return;
+
+  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
+  const reason = success ? 'participant-ended-after-final-confirmation' : 'participant-ended-incomplete-or-unable';
+  if (!success) {
+    run.currentTaskLogger.note('task-ended-incomplete', {
+      taskId: task.id,
+      finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
+    });
+  }
+  finishRunnerTask(reason, success);
+}
+
+function finishRunnerTask(reason, success = true) {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger) return;
 
   const summary = run.currentTaskLogger.finish({
-    success: true,
+    success,
     reason,
     notes: [
       `booking=${run.booking?.slotId ?? 'none'}`,
       `cancelPerformed=${run.cancelPerformedThisTask}`,
+      `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       'measurement=first-input-visible-only',
     ],
   });
@@ -1235,9 +1305,8 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
-      ${conditionId === 'variantB' && !state.completed ? `<a class="skip-link" href="#results-heading" data-action="jump-results" data-focus-id="runner-skip-results">${RUNNER_LABELS.quickJump}</a>` : ''}
       <main class="runner-main" aria-label="예약 캘린더 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
-        <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · ${escapeHtml(VARIANT_META[conditionId].title)}</h1>
+        <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · 예약 캘린더 수행 화면</h1>
         ${renderSimulatedHeader(conditionId)}
         ${conditionId === 'variantB' ? renderBookingPanel(run, true) : ''}
         ${renderFilters(conditionId, run)}
@@ -1246,33 +1315,25 @@ function renderRunnerPage() {
       </main>
       ${state.completed ? '' : `<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="live-status-region">${escapeHtml(run.liveStatus)}</div>`}
       ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
+      ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderModal(run.modal, run, task) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
-          description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인을 누르면 이 탭이 자동으로 닫힙니다.`,
+          description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.`,
         })
         : ''}
     </div>
   `;
 }
 
-
 function renderHomeView() {
-  const availableServices = SERVICE_TYPES.filter((service) => service.available);
-  const studyProgress = getStudyProgress({
-    sessionId: state.sessionId,
-    serviceIds: availableServices.map((service) => service.id),
-  });
-  const finalSurveyUrl = studyProgress.isComplete ? buildStudySurveyUrl({ sessionId: state.sessionId }) : '';
-
   return `
     <header class="hero card">
       <p class="eyebrow">실험 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
       <p>
         먼저 실험할 서비스 유형을 고르십시오. 현재 공개된 서비스는
-        ${availableServices.map((service) => service.label).join(', ')}이며,
-        각 서비스를 끝낼 때마다 짧은 평가를 저장하고 마지막에 한 번만 설문지를 제출하게 됩니다.
+        ${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(', ')} 세 가지입니다.
       </p>
       <div class="hero-grid">
         <section>
@@ -1280,62 +1341,18 @@ function renderHomeView() {
           <ul>
             <li>서비스 유형을 먼저 고르고 해당 서비스 화면에서 과업을 준비합니다.</li>
             <li>과업 내용은 메인 창에서 먼저 읽고, 실제 수행은 새 탭에서 분리해 진행합니다.</li>
-            <li>서비스별 짧은 평가는 즉시 저장하고, 마지막 설문지에서는 전체 응답만 마저 작성합니다.</li>
+            <li>두 화면을 모두 수행한 뒤 마지막에만 결과를 확인합니다.</li>
           </ul>
         </section>
         <section>
           <h2>실험 정보</h2>
           <dl class="meta-list">
             <div><dt>실험 번호</dt><dd><code>${escapeHtml(state.sessionId)}</code></dd></div>
-            <div><dt>비교안 순서</dt><dd>${state.order.map((variantId) => VARIANT_META[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>현재 공개 범위</dt><dd>${availableServices.map((service) => service.label).join(' · ')}</dd></div>
+            <div><dt>현재 공개 범위</dt><dd>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</dd></div>
           </dl>
         </section>
       </div>
     </header>
-
-    <section class="review-grid home-progress-grid" aria-label="실험 진행 상황">
-      <article class="card">
-        <h2>현재 진행 상황</h2>
-        <dl class="meta-list">
-          <div><dt>완료한 서비스</dt><dd>${studyProgress.completedCount} / ${studyProgress.totalCount}</dd></div>
-          <div><dt>아직 남은 서비스</dt><dd>${studyProgress.pendingCount}</dd></div>
-        </dl>
-        <div class="status-box" role="status" aria-live="polite">
-          ${studyProgress.isComplete
-            ? '모든 서비스 평가가 저장되었습니다. 아래 버튼으로 마지막 설문지를 여십시오.'
-            : `아직 ${studyProgress.pendingCount}개 서비스가 남아 있습니다. 각 서비스의 최종 비교 화면에서 짧은 평가를 저장하면 이곳에 누적됩니다.`}
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>서비스별 저장 상태</h2>
-        <ul class="service-status-list">
-          ${availableServices.map((service) => `
-            <li>
-              <strong>${escapeHtml(service.label)}</strong>
-              <span>${studyProgress.completedIds.includes(service.id) ? '평가 저장 완료' : '아직 수행 전 또는 저장 전'}</span>
-            </li>
-          `).join('')}
-        </ul>
-      </article>
-
-      <article class="card">
-        <h2>마지막 설문지 작성</h2>
-        <p>
-          모든 서비스를 끝낸 뒤 아래 버튼을 누르면, 서비스별 비교 평점과 자동 기록이 미리 채워진 Google 설문지가 열립니다.
-          설문지 안에서는 전체 응답 항목만 마저 답하면 됩니다.
-        </p>
-        <p class="muted">직접 답하는 항목은 주 입력 방식, 함께 쓴 보조기술, 가장 부담이 컸던 서비스, 전체적으로 더 쉬운 구조, 자유 의견입니다.</p>
-        <div class="button-row">
-          ${finalSurveyUrl
-            ? `<a class="button button-primary" href="${escapeHtml(finalSurveyUrl)}" target="_blank" rel="noreferrer">마지막 설문지 열기</a>`
-            : '<span class="muted">모든 서비스 평가를 저장하면 마지막 설문지 버튼이 열립니다.</span>'}
-          <button class="button button-secondary" type="button" data-action="reset-study-session">새 실험 번호로 다시 시작</button>
-        </div>
-      </article>
-    </section>
-
     <section class="service-grid" aria-label="서비스 유형 목록">
       ${SERVICE_TYPES.map((service) => renderHomeServiceCard(service)).join('')}
     </section>
@@ -1343,32 +1360,22 @@ function renderHomeView() {
 }
 
 function renderHomeServiceCard(service) {
-  const serviceRecord = service.available
-    ? getStudyServiceRecord({ sessionId: state.sessionId, serviceId: service.id })
-    : null;
-  const statusLabel = service.available
-    ? (serviceRecord ? '평가 저장됨' : '아직 수행 전')
-    : service.statusLabel;
-  const buttonLabel = service.available
-    ? (serviceRecord ? `${service.label} 다시 진행` : formatServiceScreenButtonLabel(service.label))
-    : '준비 중';
-
   return `
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
         <div>
-          <p class="eyebrow">${escapeHtml(statusLabel)}</p>
+          <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
           <h2>${escapeHtml(service.label)}</h2>
         </div>
-        <span class="pill ${service.available && !serviceRecord ? 'pill-warning' : ''}">${escapeHtml(statusLabel)}</span>
+        <span class="pill ${service.available ? '' : 'pill-warning'}">${escapeHtml(service.statusLabel)}</span>
       </div>
       <p>${escapeHtml(service.summary)}</p>
       <ul>
         ${service.points.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
       </ul>
       <div class="button-row">
-        <button class="button ${service.available && !serviceRecord ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
-          ${escapeHtml(buttonLabel)}
+        <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
+          ${service.available ? formatServiceScreenButtonLabel(service.label) : '준비 중'}
         </button>
       </div>
     </article>
@@ -1392,44 +1399,38 @@ function renderLanguageGuideCard() {
 }
 
 function renderTaskPreparationView() {
-  const conditionId = getCurrentConditionId();
-  const run = getCurrentRun();
   const task = getCurrentTask();
-  const benchmark = benchmarkResultsCalendar.variants[conditionId].tasks[task.benchmarkTaskId];
   const activeLaunch = state.activeLaunch;
   const isRunning = state.view === 'taskRunning';
+  const screenIndex = state.currentConditionIndex + 1;
 
   return `
     <section class="card review-hero">
       <div>
-        <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
+        <p class="eyebrow">수행 준비</p>
         <h1 id="task-prep-heading" tabindex="-1">과업 ${state.currentTaskIndex + 1} 준비</h1>
-        <p>${escapeHtml(task.title)}를 시작하기 전에 이 창에서 과업 내용을 먼저 확인하십시오.</p>
+        <p>아래 요청만 확인한 뒤 새 탭에서 예약 캘린더 화면을 사용하십시오.</p>
       </div>
       <div class="pill-group">
         <span class="pill">실험 번호 ${escapeHtml(state.sessionId)}</span>
-        <span class="pill">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)}</span>
+        <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
         <span class="pill">과업 ${state.currentTaskIndex + 1} / ${calendarTasks.length}</span>
       </div>
     </section>
 
     <section class="review-grid">
       <article class="card">
-        <h2>이번 과업</h2>
+        <h2>이번 요청</h2>
         <p class="goal">${escapeHtml(task.goalSummary)}</p>
-        <ol>
-          ${task.instructions.map((instruction) => `<li>${escapeHtml(instruction)}</li>`).join('')}
-        </ol>
-        <dl class="meta-list compact">
-          <div><dt>현재 예약</dt><dd>${escapeHtml(formatBookingSummary(run.booking))}</dd></div>
-          <div><dt>목표 예약 시간</dt><dd>${escapeHtml(formatSlotLabel(getSlotById(task.targetSlotId)))}</dd></div>
-        </dl>
       </article>
 
       <article class="card">
-        <h2>실제 계측 규칙</h2>
+        <h2>진행 방법</h2>
         <ul>
-          ${MEASUREMENT_RULES.map((rule) => `<li>${escapeHtml(rule)}</li>`).join('')}
+          <li>수행 화면은 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
+          <li><strong>과업을 모두 수행했다고 판단하면 수행 탭 하단의 과업 종료 버튼을 누르십시오.</strong></li>
+          <li>수행할 수 없다고 판단해도 과업 종료 버튼을 누르면 다음 단계로 넘어갑니다.</li>
+          <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
         </ul>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
           ${escapeHtml(renderLaunchStatusMessage(activeLaunch, isRunning))}
@@ -1437,24 +1438,11 @@ function renderTaskPreparationView() {
       </article>
 
       <article class="card">
-        <h2>현재 화면의 이동 구조</h2>
-        <ul>
-          ${VARIANT_META[conditionId].improvements.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-        </ul>
-      </article>
-    </section>
-
-    <section class="review-grid">
-      <article class="card">
-        <h2>사전 계산 기준</h2>
-        ${renderProfileBenchmarkTable(benchmark)}
-      </article>
-      <article class="card">
-        <h2>실행 버튼</h2>
-        <p class="muted">새 탭을 열면 실제 조작 기록은 새 탭의 첫 입력부터 시작합니다. 이 창은 과업 내용을 다시 확인하는 용도로 그대로 유지됩니다.</p>
+        <h2>실행</h2>
+        <p class="muted">새 탭에서 첫 조작이 들어간 뒤부터 수행 기록이 시작됩니다.</p>
         <div class="button-row">
           <button class="button button-primary" data-action="launch-runner">
-            ${isRunning ? '수행 탭 다시 열기' : `새 탭에서 비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 열고 과업 시작`}
+            ${isRunning ? '수행 탭 다시 열기' : '새 탭에서 현재 화면 열기'}
           </button>
           ${isRunning
             ? '<button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>'
@@ -1593,6 +1581,7 @@ function renderFinalView() {
   const actualB = aggregateActualCondition(state.runs.variantB);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
+  const surveyUrl = buildSurveyUrl();
 
   return `
     <section class="card review-hero">
@@ -1611,13 +1600,13 @@ function renderFinalView() {
       </label>
       <div class="button-row">
         <a class="button button-secondary" download="reservation-calendar-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
     <section class="comparison-grid">
       ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
     </section>
-    ${renderStudyServiceCompletionCard({ sessionId: state.sessionId, serviceId: 'calendar', serviceLabel: '예약 캘린더' })}
     <section class="card">
       <h2>실제 기록 비교</h2>
       <table class="summary-table">
@@ -1636,16 +1625,17 @@ function renderFinalView() {
           <tr><th>총 초점 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
           <tr><th>목표와 다른 시간 선택</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
           <tr><th>위치 다시 찾기</th><td>${actualA.contextResets}</td><td>${actualB.contextResets}</td><td>${formatSigned(actualB.contextResets - actualA.contextResets)}</td></tr>
+          <tr><th>수행 불가능 기록</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
         </tbody>
       </table>
       <p class="muted">과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</p>
     </section>
     <section class="card">
-      <h2>다음 단계에 바로 쓸 수 있는 포인트</h2>
+      <h2>기록 확인 안내</h2>
       <ul>
-        <li>이번 구현에서 메인 창과 수행 탭을 분리했으므로, 다음 서비스 유형도 같은 운영 방식으로 확장할 수 있습니다.</li>
-        <li>사전 계산 엔진은 과업 그래프만 추가하면 같은 형식으로 결과를 생성할 수 있습니다.</li>
-        <li>docs 폴더의 단계 보고서에 현재 결정 사항과 후속 작업 항목을 기록해 두었습니다.</li>
+        <li>두 화면을 모두 수행한 뒤에만 결과가 표시됩니다.</li>
+        <li>과업 종료 버튼을 너무 일찍 누른 기록은 수행 불가능 기록으로 표시됩니다.</li>
+        <li>결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
@@ -1668,6 +1658,18 @@ function renderSimulatedHeader(conditionId) {
   const links = ['처음 화면', '상담사 소개', '이용권', '이용 후기', '가격 안내', '자주 묻는 질문', '운영 정책', '문의'];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
+      <div class="sim-topbar">
+        <a href="#" class="brand-link" data-focus-id="brand-home" data-inert-link="true">온마음 상담</a>
+        <form class="sim-search" role="search" aria-label="상담 검색" onsubmit="return false">
+          <label class="sr-only" for="calendar-search-input">상담사나 프로그램 검색</label>
+          <input id="calendar-search-input" type="search" value="심리 상담" data-focus-id="calendar-search-input">
+          <button class="button button-ghost" type="button" data-action="site-placeholder" data-focus-id="calendar-search-submit" data-notice="검색 결과 화면은 현재 점검 중입니다. 예약 화면에서 계속 진행하십시오.">검색</button>
+        </form>
+        <div class="sim-actions">
+          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="calendar-notice" data-notice="알림함은 현재 점검 중입니다.">알림</button>
+          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="calendar-my" data-notice="내 상담 메뉴는 현재 점검 중입니다.">내 상담</button>
+        </div>
+      </div>
       <nav aria-label="서비스 보조 내비게이션">
         ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
       </nav>
@@ -1843,6 +1845,20 @@ function renderBookingPanel(run, emphasized) {
 }
 
 function renderModal(modal, run, task) {
+  if (modal.kind === 'task-final') {
+    return `
+      <div class="modal-backdrop">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+          <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
+          <p id="dialog-description">${escapeHtml(modal.description)}</p>
+          <div class="button-row">
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   if (modal.kind === 'cancel-booking') {
     return `
       <div class="modal-backdrop">
@@ -1862,7 +1878,6 @@ function renderModal(modal, run, task) {
 
   const slot = getSlotById(modal.slotId);
   if (!slot) return '';
-  const isTarget = slot.id === task.targetSlotId;
   const actionLabel = run.booking ? '변경 확정' : '예약 확정';
   const modeLabel = modal.dialogMode === 'details' ? '시간 안내' : '예약 확인';
   return `
@@ -1870,7 +1885,6 @@ function renderModal(modal, run, task) {
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
         <h2 id="dialog-title" tabindex="-1">${escapeHtml(modeLabel)} · ${escapeHtml(formatSlotLabel(slot))}</h2>
         <p id="dialog-description">${slot.available ? '예약 가능한 시간입니다.' : '지금은 예약할 수 없는 시간입니다.'}</p>
-        <p class="muted">현재 과업에서 찾아야 하는 예약 시간과 ${isTarget ? '일치합니다' : '일치하지 않습니다'}.</p>
         <div class="button-row">
           <button class="button button-ghost" data-action="dialog-close" data-focus-id="slot-dialog-close">닫기</button>
           ${slot.available ? `
@@ -1885,7 +1899,7 @@ function renderModal(modal, run, task) {
 }
 
 function aggregateActualCondition(run) {
-  return aggregateMetrics(run.taskResults, {
+  const totals = aggregateMetrics(run.taskResults, {
     durationSeconds: 'durationSeconds',
     hiddenDurationSeconds: 'hiddenDurationSeconds',
     totalKeyInputs: 'totalKeyInputs',
@@ -1895,6 +1909,9 @@ function aggregateActualCondition(run) {
     modalEscapes: 'modalEscapes',
     bookingCancels: 'bookingCancels',
   });
+  totals.successCount = run.taskResults.filter((result) => result.success).length;
+  totals.incompleteCount = run.taskResults.length - totals.successCount;
+  return totals;
 }
 
 function aggregateBenchmarkCondition(conditionId) {

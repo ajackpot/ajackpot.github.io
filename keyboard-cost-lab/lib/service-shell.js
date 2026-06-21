@@ -17,29 +17,31 @@ export function renderLanguageGuideCard(glossaryEntries, introText = '이 실험
   `;
 }
 
-export function renderServiceIntroView({ serviceLabel, serviceSummary, introPoints, order, variantMeta, introHeading = '이번에 확인하는 것' }) {
+export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
   return `
     <header class="hero card">
       <p class="eyebrow">선택한 서비스 유형</p>
       <h1 id="service-heading" tabindex="-1">${escapeHtml(serviceLabel)}</h1>
       <p>
         ${escapeHtml(serviceSummary)}
-        이 화면에서 과업 준비 단계로 들어가거나, 다시 서비스 선택 화면으로 돌아갈 수 있습니다.
+        과업 수행은 별도 탭에서 진행하며, 이 창에는 과업 요청이 남아 있습니다.
       </p>
       <div class="hero-grid">
         <section>
-          <h2>${escapeHtml(introHeading)}</h2>
+          <h2>진행 방법</h2>
           <ul>
-            ${introPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
+            <li>두 개의 화면은 자동으로 섞인 순서로 열립니다.</li>
+            <li>각 화면에서 같은 과업 묶음을 수행합니다.</li>
+            <li>수행 탭에서 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누릅니다.</li>
           </ul>
         </section>
         <section>
-          <h2>실험 설정</h2>
-          <dl class="meta-list">
-            <div><dt>비교안 순서</dt><dd>${order.map((variantId) => variantMeta[variantId].shortLabel).join(' → ')}</dd></div>
-            <div><dt>실제 수행 방식</dt><dd>메인 창에서 과업 확인 후 새 탭에서 수행</dd></div>
-            <div><dt>사전 계산 기준</dt><dd>키보드 · 화면낭독 · 스위치</dd></div>
-          </dl>
+          <h2>주의할 점</h2>
+          <ul>
+            <li>과업 요청은 이 창에서 다시 확인할 수 있습니다.</li>
+            <li>수행할 수 없다고 판단해도 수행 탭의 과업 종료 버튼으로 다음 단계로 넘어갑니다.</li>
+            <li>모든 결과는 두 화면을 모두 수행한 뒤 한 번에 표시됩니다.</li>
+          </ul>
         </section>
       </div>
       <div class="button-row">
@@ -102,6 +104,8 @@ export function renderFinalConditionCard({ conditionId, actualTotals, selectedPr
         <div><dt>실제 완료 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
         <div><dt>총 키 입력</dt><dd>${actualTotals.totalKeyInputs}</dd></div>
         <div><dt>총 초점 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
+        <div><dt>수행 완료 기록</dt><dd>${actualTotals.successCount ?? 0}개</dd></div>
+        <div><dt>수행 불가능 기록</dt><dd>${actualTotals.incompleteCount ?? 0}개</dd></div>
         <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
       </dl>
     </article>
