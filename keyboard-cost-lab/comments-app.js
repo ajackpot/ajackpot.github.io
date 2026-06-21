@@ -8,9 +8,11 @@ import {
   escapeHtml,
   deepClone,
   getDefaultConditionOrder,
+  renderRunnerTaskRequestHtml,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
-  renderEndTaskConfirmDialogHtml,
+  renderEndTaskConfirmationDialogHtml,
+  renderTaskRequestVisibilitySwitchHtml,
   renderSiteNoticeHtml,
 } from './lib/utils.js';
 import {
@@ -175,6 +177,7 @@ function createMainState() {
     currentTaskIndex: 0,
     view: 'serviceIntro',
     benchmarkProfileFocus: 'keyboard',
+    runnerTaskRequestVisible: false,
     focusRequest: null,
     activeLaunch: null,
     runs: {
@@ -198,6 +201,7 @@ function createRunnerState() {
       conditionId,
       taskIndex,
       launchId,
+      showTaskRequestInRunner: false,
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
@@ -210,7 +214,7 @@ function createRunnerState() {
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.liveStatus = '';
+  runtime.liveStatus = '정렬 기준과 댓글 범위를 맞춘 뒤 원하는 댓글을 찾으십시오.';
   ensureCurrentCommentVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
@@ -235,6 +239,7 @@ function createRunnerState() {
     conditionId,
     taskIndex,
     launchId,
+    showTaskRequestInRunner: Boolean(launchPayload.runnerTaskRequestVisible),
     focusRequest: null,
     completed: false,
     run: runtime,
@@ -254,14 +259,13 @@ function createConditionRuntime(variantId) {
     currentCommentId: commentsScenario.comments[0]?.id ?? null,
     detailVisitedThisTask: {},
     modal: null,
-    liveStatus: '',
+    liveStatus: '정렬 기준을 바꾸면 댓글 목록이 갱신됩니다.',
     taskResults: [],
     currentTaskLogger: null,
     isApplying: false,
     isWorking: false,
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
-    completionResultMessage: '',
     siteNotice: '',
   };
 }
@@ -301,7 +305,6 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
-  runtime.completionResultMessage = snapshot.completionResultMessage ?? '';
   runtime.siteNotice = snapshot.siteNotice ?? '';
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   ensureCurrentCommentVisible(runtime);
@@ -321,7 +324,6 @@ function serializeRuntimeSnapshot(run) {
     detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
-    completionResultMessage: run.completionResultMessage,
     siteNotice: run.siteNotice,
     liveStatus: run.liveStatus,
   };
@@ -339,7 +341,6 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
-  targetRun.completionResultMessage = hydrated.completionResultMessage;
   targetRun.siteNotice = hydrated.siteNotice;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
@@ -352,6 +353,7 @@ function resetExperimentState() {
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
   state.activeLaunch = null;
+  state.runnerTaskRequestVisible = false;
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
 }
@@ -391,9 +393,8 @@ function prepareCurrentTaskForMain() {
   run.isWorking = false;
   run.detailVisitedThisTask = {};
   run.finalConfirmationAcknowledged = false;
-  run.completionResultMessage = '';
   run.siteNotice = '';
-  run.liveStatus = '';
+  run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   ensureCurrentCommentVisible(run);
   state.activeLaunch = null;
 }
@@ -474,6 +475,7 @@ function launchRunnerTask() {
     taskIndex: state.currentTaskIndex,
     taskId: task.id,
     runSnapshot: serializeRuntimeSnapshot(run),
+    runnerTaskRequestVisible: Boolean(state.runnerTaskRequestVisible),
   };
   saveLaunchSnapshot(launchId, payload);
 
@@ -657,7 +659,7 @@ function handleRootClick(event) {
 
   if (action === 'cancel-end-task') {
     event.preventDefault();
-    closeEndTaskConfirmation();
+    closeModal();
     return;
   }
 
@@ -720,9 +722,15 @@ function handleRootChange(event) {
   if (!(element instanceof HTMLInputElement || element instanceof HTMLSelectElement)) return;
 
   if (APP_MODE === 'main') {
+    if (element.name === 'runner-task-request-visible' && element instanceof HTMLInputElement) {
+      state.runnerTaskRequestVisible = element.checked;
+      return;
+    }
+
     if (element.name === 'benchmark-profile') {
       state.benchmarkProfileFocus = element.value;
       render();
+      return;
     }
     return;
   }
@@ -750,9 +758,7 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    if (run.modal.kind === 'end-confirm') {
-      closeEndTaskConfirmation();
-    } else if (run.modal.kind !== 'service-confirmation') {
+    if (run.modal.kind !== 'task-final') {
       closeModal();
     }
     return;
@@ -792,6 +798,7 @@ function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
   run.siteNotice = message;
+  run.liveStatus = message;
   render();
 }
 
@@ -889,6 +896,7 @@ function applyCommentFilters() {
   if (!run || run.isApplying || run.isWorking) return;
 
   run.isApplying = true;
+  run.liveStatus = '정렬 기준과 댓글 범위를 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
@@ -897,6 +905,7 @@ function applyCommentFilters() {
     run.category = run.categoryDraft;
     ensureCurrentCommentVisible(run);
     const visibleComments = getVisibleComments(run);
+    run.liveStatus = `현재 ${visibleComments.length}개의 댓글이 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
       requestFocus('#comments-heading');
@@ -948,11 +957,11 @@ function openCommentDetail(commentId, triggerFocusId) {
   render();
 }
 
-function openServiceConfirmationModal({ title, description }) {
+function openTaskFinalModal({ title, description }) {
   const run = getCurrentRun();
   if (!run) return;
   run.modal = {
-    kind: 'service-confirmation',
+    kind: 'task-final',
     title,
     description,
     triggerFocusId: 'runner-footer-end',
@@ -972,8 +981,7 @@ function closeModal() {
   const closingModal = run.modal;
   run.modal = null;
 
-  if (closingModal.kind === 'service-confirmation') {
-    run.finalConfirmationAcknowledged = true;
+  if (closingModal.kind === 'task-end-confirm') {
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
@@ -985,7 +993,15 @@ function closeModal() {
     return;
   }
 
-  if (closingModal.kind === 'end-confirm') {
+  if (closingModal.kind === 'task-final') {
+    run.finalConfirmationAcknowledged = true;
+    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
+    run.currentTaskLogger?.setModalState({
+      open: false,
+      containerSelector: null,
+      triggerFocusId: closingModal.triggerFocusId,
+      closedAt: performance.now(),
+    });
     requestFocus('[data-focus-id="runner-footer-end"]');
     render();
     return;
@@ -1028,12 +1044,10 @@ function toggleReplies(commentId, triggerFocusId) {
     expanded: expanding,
   });
 
-  run.finalConfirmationAcknowledged = false;
-  openServiceConfirmationModal({
-    title: expanding ? '답글 표시' : '답글 숨김',
-    description: expanding ? '답글 목록을 표시했습니다. 확인한 뒤 화면을 계속 이용하십시오.' : '답글 목록을 접었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  openTaskFinalModal({
+    title: '처리가 완료되었습니다.',
+    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
   });
-  return;
 }
 
 function markHelpful(commentId, triggerFocusId) {
@@ -1054,12 +1068,10 @@ function markHelpful(commentId, triggerFocusId) {
     alreadyHelpful,
   });
 
-  run.finalConfirmationAcknowledged = false;
-  openServiceConfirmationModal({
-    title: '의견 반영',
-    description: alreadyHelpful ? '이미 반영된 의견입니다. 확인한 뒤 화면을 계속 이용하십시오.' : '의견이 반영되었습니다. 확인한 뒤 화면을 계속 이용하십시오.',
+  openTaskFinalModal({
+    title: '처리가 완료되었습니다.',
+    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
   });
-  return;
 }
 
 function isTaskSatisfied(task, run) {
@@ -1080,23 +1092,52 @@ function isTaskSatisfied(task, run) {
   return false;
 }
 
+function getEndTaskOutcome(task, run) {
+  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
+  if (success) {
+    return {
+      success: true,
+      reason: 'participant-ended-after-final-confirmation',
+      message: '과업 수행에 성공했습니다.',
+    };
+  }
+
+  let message = '요청한 댓글 동작을 완료하지 못했습니다.';
+  if (task.completion === 'expandReplies' && run.expandedCommentId && run.expandedCommentId !== task.targetCommentId) {
+    message = '요청한 댓글과 다른 댓글의 답글을 열었습니다.';
+  } else if (task.completion === 'helpful') {
+    const helpfulIds = Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]);
+    if (helpfulIds.some((commentId) => commentId !== task.targetCommentId)) {
+      message = '요청한 댓글과 다른 댓글에 도움이 돼요를 표시했습니다.';
+    } else if (run.helpfulByCommentId[task.targetCommentId] && task.requiresDetailVisit && !run.detailVisitedThisTask[task.targetCommentId]) {
+      message = '요청한 댓글의 댓글 정보 보기를 확인하지 않았습니다.';
+    }
+  } else if (run.finalConfirmationAcknowledged === false && isTaskSatisfied(task, run)) {
+    message = '최종 확인 대화상자를 확인하지 않았습니다.';
+  }
+
+  return {
+    success: false,
+    reason: 'participant-ended-incomplete-or-unable',
+    message,
+  };
+}
+
 function openEndTaskConfirmation() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
-  if (!run || state.completed || run.modal) return;
+  if (!run || !run.currentTaskLogger || state.completed || run.modal) return;
+
   run.modal = {
-    kind: 'end-confirm',
+    kind: 'task-end-confirm',
     triggerFocusId: 'runner-footer-end',
   };
-  requestFocus('[data-focus-id="end-task-confirm"]');
-  render();
-}
-
-function closeEndTaskConfirmation() {
-  const run = getCurrentRun();
-  if (!run || !run.modal || run.modal.kind !== 'end-confirm') return;
-  run.modal = null;
-  requestFocus('[data-focus-id="runner-footer-end"]');
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId: 'runner-footer-end',
+  });
+  requestFocus('[data-dialog-primary]');
   render();
 }
 
@@ -1104,70 +1145,24 @@ function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
-  if (!run || !task || !run.currentTaskLogger || state.completed) return;
+  if (!run || !task || !run.currentTaskLogger || state.completed || run.modal?.kind !== 'task-end-confirm') return;
 
+  const outcome = getEndTaskOutcome(task, run);
   run.modal = null;
-  const outcome = evaluateTaskOutcome(task, run);
+
   if (!outcome.success) {
     run.currentTaskLogger.note('task-ended-incomplete', {
       taskId: task.id,
       finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
-      outcomeCode: outcome.code,
+      outcomeMessage: outcome.message,
     });
   }
+
   finishRunnerTask(outcome.reason, outcome.success, outcome.message);
 }
 
-function didWorkOnDifferentComment(task, run) {
-  if (run.expandedCommentId && run.expandedCommentId !== task.targetCommentId) return true;
-  return Object.keys(run.helpfulByCommentId).some((commentId) => run.helpfulByCommentId[commentId] && commentId !== task.targetCommentId)
-    || Object.keys(run.detailVisitedThisTask).some((commentId) => run.detailVisitedThisTask[commentId] && commentId !== task.targetCommentId);
-}
-
-function evaluateTaskOutcome(task, run) {
-  const taskSatisfied = isTaskSatisfied(task, run);
-  if (taskSatisfied && run.finalConfirmationAcknowledged) {
-    return {
-      success: true,
-      reason: 'participant-ended-success',
-      code: 'success',
-      message: '과업 수행에 성공했습니다.',
-    };
-  }
-
-  if (didWorkOnDifferentComment(task, run) && run.finalConfirmationAcknowledged) {
-    return {
-      success: false,
-      reason: 'participant-ended-different-comment',
-      code: 'different-comment',
-      message: '요청한 댓글과 다른 댓글에서 작업했습니다.',
-    };
-  }
-
-  if ((task.requiredSort && run.sort !== task.requiredSort) || (task.requiredCategory && run.category !== task.requiredCategory)) {
-    return {
-      success: false,
-      reason: 'participant-ended-filter-mismatch',
-      code: 'filter-mismatch',
-      message: '요청한 댓글 목록 조건을 맞추지 못했습니다.',
-    };
-  }
-
-  if (taskSatisfied && !run.finalConfirmationAcknowledged) {
-    return {
-      success: false,
-      reason: 'participant-ended-without-final-confirmation',
-      code: 'confirmation-missing',
-      message: '댓글 작업 확인 화면을 확인하지 않았습니다.',
-    };
-  }
-
-  return {
-    success: false,
-    reason: 'participant-ended-incomplete-or-unable',
-    code: 'comment-action-not-complete',
-    message: '요청한 댓글 작업을 완료하지 못했습니다.',
-  };
+function endRunnerTask() {
+  openEndTaskConfirmation();
 }
 
 function finishRunnerTask(reason, success = true, outcomeMessage = '') {
@@ -1179,18 +1174,18 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
   const summary = run.currentTaskLogger.finish({
     success,
     reason,
-    outcomeMessage,
     notes: [
       `expandedComment=${run.expandedCommentId ?? 'none'}`,
       `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
+      outcomeMessage ? `outcome=${outcomeMessage}` : '',
       'measurement=first-input-visible-only',
-    ],
+    ].filter(Boolean),
   });
 
   run.currentTaskLogger = null;
   run.lastTaskCompletionNote = reason;
-  run.completionResultMessage = outcomeMessage || '과업 수행 결과를 저장했습니다.';
+  run.lastOutcomeMessage = outcomeMessage;
   run.modal = null;
   state.completed = true;
 
@@ -1200,7 +1195,10 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
     launchId: state.launchId,
     conditionId: state.conditionId,
     taskIndex: state.taskIndex,
-    summary,
+    summary: {
+      ...summary,
+      outcomeMessage,
+    },
     runSnapshot: serializeRuntimeSnapshot(run),
   });
 
@@ -1291,7 +1289,8 @@ function renderRunnerPage() {
   return `
     <div class="runner-shell">
       <main class="runner-main" aria-label="댓글 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
-        <h1 class="sr-only" id="runner-title" tabindex="-1">${escapeHtml(task.title)} · 댓글 목록 수행 화면</h1>
+        <h1 class="sr-only" id="runner-title" tabindex="-1">댓글 목록 수행 화면</h1>
+        ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
         ${renderCommentsHeader(conditionId)}
         ${renderCommentControls(conditionId, run)}
         ${renderCommentsSection(conditionId, run, visibleComments)}
@@ -1301,8 +1300,8 @@ function renderRunnerPage() {
       ${run.modal ? renderCommentModal(run.modal, run) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
-          title: run.completionResultMessage || '과업 수행 결과를 저장했습니다.',
-          description: `${task.title} 기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.`,
+          title: run.lastOutcomeMessage || '과업 결과를 저장했습니다.',
+          description: '기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.',
         })
         : ''}
     </div>
@@ -1359,7 +1358,6 @@ function renderTaskPreparationView() {
         <p>아래 요청만 확인한 뒤 새 탭에서 댓글 목록 화면을 사용하십시오.</p>
       </div>
       <div class="pill-group">
-        <span class="pill">실험 번호 ${escapeHtml(state.sessionId)}</span>
         <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
         <span class="pill">과업 ${state.currentTaskIndex + 1} / ${commentsTasks.length}</span>
       </div>
@@ -1369,6 +1367,7 @@ function renderTaskPreparationView() {
       <article class="card">
         <h2>이번 요청</h2>
         <p class="goal">${escapeHtml(task.goalSummary)}</p>
+        ${renderTaskRequestVisibilitySwitchHtml({ checked: state.runnerTaskRequestVisible })}
       </article>
 
       <article class="card">
@@ -1376,7 +1375,8 @@ function renderTaskPreparationView() {
         <ul>
           <li>수행 화면은 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
           <li><strong>과업을 모두 수행했다고 판단하면 수행 탭 하단의 과업 종료 버튼을 누르십시오.</strong></li>
-          <li>수행할 수 없다고 판단해도 과업 종료 버튼을 누르면 다음 단계로 넘어갑니다.</li>
+          <li>과업 종료 버튼을 누르면 종료 확인 대화상자가 열립니다. 예를 누르면 기록을 저장하고, 아니요를 누르면 계속 진행합니다.</li>
+          <li>수행할 수 없다고 판단해도 과업 종료 절차를 진행하면 다음 단계로 넘어갑니다.</li>
           <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
         </ul>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
@@ -1546,7 +1546,7 @@ function renderFinalView() {
         </select>
       </label>
       <div class="button-row">
-        <a class="button button-secondary" download="comments-list-${escapeHtml(state.sessionId)}.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="comments-list-results.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
@@ -1767,18 +1767,18 @@ function renderReplyList(comment) {
 }
 
 function renderCommentModal(modal, run) {
-  if (modal.kind === 'end-confirm') {
-    return renderEndTaskConfirmDialogHtml();
+  if (modal.kind === 'task-end-confirm') {
+    return renderEndTaskConfirmationDialogHtml();
   }
 
-  if (modal.kind === 'service-confirmation') {
+  if (modal.kind === 'task-final') {
     return `
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
           <p id="dialog-description">${escapeHtml(modal.description)}</p>
           <div class="button-row">
-            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="service-confirmation-confirm">확인</button>
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
           </div>
         </div>
       </div>

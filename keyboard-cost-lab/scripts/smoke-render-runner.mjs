@@ -1,85 +1,204 @@
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 
-class FakeElement {
-  constructor(name='element') { this.name=name; this.innerHTML=''; this.dataset={}; }
-  addEventListener() {}
-  removeEventListener() {}
+const projectDir = process.argv[2] ? path.resolve(process.argv[2]) : process.cwd();
+const services = {
+  calendar: {
+    appFile: 'app.js',
+    pagePath: 'index.html',
+    launchPrefix: 'keyboard-cost-lab-launch',
+    primaryPattern: /예약 가능 시간/,
+    baseSnapshot(condition) {
+      return {
+        variantId: condition,
+        filters: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
+        filtersDraft: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
+        booking: null,
+        currentGridSlotId: null,
+        cancelPerformedThisTask: false,
+        lastTaskCompletionNote: '',
+        finalConfirmationAcknowledged: false,
+        siteNotice: '',
+      };
+    },
+  },
+  comments: {
+    appFile: 'comments-app.js',
+    pagePath: 'comments.html',
+    launchPrefix: 'keyboard-cost-lab-comments-launch',
+    primaryPattern: /댓글 목록/,
+    baseSnapshot(condition) {
+      return {
+        variantId: condition,
+        sort: 'popular',
+        sortDraft: 'popular',
+        category: 'all',
+        categoryDraft: 'all',
+        helpfulByCommentId: {},
+        expandedCommentId: null,
+        currentCommentId: null,
+        detailVisitedThisTask: {},
+        lastTaskCompletionNote: '',
+        finalConfirmationAcknowledged: false,
+        siteNotice: '',
+      };
+    },
+  },
+  search: {
+    appFile: 'search-app.js',
+    pagePath: 'search.html',
+    launchPrefix: 'keyboard-cost-lab-search-launch',
+    primaryPattern: /검색 결과/,
+    baseSnapshot(condition) {
+      return {
+        variantId: condition,
+        sort: 'relevance',
+        sortDraft: 'relevance',
+        type: 'all',
+        typeDraft: 'all',
+        savedByResultId: {},
+        openedResultId: null,
+        currentResultId: null,
+        previewVisitedThisTask: {},
+        lastTaskCompletionNote: '',
+        finalConfirmationAcknowledged: false,
+        siteNotice: '',
+      };
+    },
+  },
+};
+
+class FakeElement {}
+class FakeHTMLElement extends FakeElement {
+  focus() {}
   closest() { return null; }
-  focus() { this.focused = true; }
-  querySelector() { return new FakeElement('child'); }
+  contains() { return false; }
   hasAttribute() { return false; }
 }
-class FakeStorage {
-  constructor() { this.map = new Map(); }
-  getItem(k) { return this.map.has(k) ? this.map.get(k) : null; }
-  setItem(k, v) { this.map.set(k, String(v)); }
-  removeItem(k) { this.map.delete(k); }
+class FakeHTMLInputElement extends FakeHTMLElement {}
+class FakeHTMLSelectElement extends FakeHTMLElement {}
+class FakeHTMLFormElement extends FakeHTMLElement {}
+
+function configureGlobals({ serviceId, conditionId, taskIndex, showRequest }) {
+  const root = {
+    innerHTML: '',
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const storage = new Map();
+  const service = services[serviceId];
+  const launchId = `smoke-${serviceId}-${conditionId}-${taskIndex}-${showRequest ? 'request' : 'plain'}`;
+  const sessionId = 'smoke-session';
+  const storageKey = `${service.launchPrefix}:${launchId}`;
+  storage.set(storageKey, JSON.stringify({
+    launchId,
+    sessionId,
+    serviceId,
+    conditionId,
+    taskIndex,
+    taskId: `task-${taskIndex + 1}`,
+    runSnapshot: service.baseSnapshot(conditionId),
+    runnerTaskRequestVisible: showRequest,
+  }));
+
+  globalThis.Element = FakeElement;
+  globalThis.HTMLElement = FakeHTMLElement;
+  globalThis.HTMLInputElement = FakeHTMLInputElement;
+  globalThis.HTMLSelectElement = FakeHTMLSelectElement;
+  globalThis.HTMLFormElement = FakeHTMLFormElement;
+  globalThis.window = {
+    location: {
+      href: `http://localhost/${service.pagePath}?mode=runner&sessionId=${sessionId}&service=${serviceId}&condition=${conditionId}&taskIndex=${taskIndex}&launchId=${launchId}`,
+    },
+    localStorage: {
+      getItem(key) { return storage.get(key) ?? null; },
+      setItem(key, value) { storage.set(key, String(value)); },
+      removeItem(key) { storage.delete(key); },
+    },
+    addEventListener() {},
+    removeEventListener() {},
+    requestAnimationFrame(callback) { return setTimeout(callback, 0); },
+    setTimeout,
+    clearTimeout,
+    close() { this.closed = true; },
+    closed: false,
+  };
+  globalThis.localStorage = globalThis.window.localStorage;
+  globalThis.document = {
+    title: '',
+    visibilityState: 'visible',
+    activeElement: null,
+    querySelector(selector) {
+      if (selector === '#app') return root;
+      return null;
+    },
+    querySelectorAll() { return []; },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  return root;
 }
-const FakeHTMLElement = FakeElement;
-const prohibitedInitialHints = [
-  '과업 수행에 성공했습니다.',
-  '요청한 상담 예약 시간과 다른 시간을 예약했습니다.',
-  '요청한 댓글과 다른 댓글에서 작업했습니다.',
-  '요청한 자료와 다른 자료에서 작업했습니다.',
-  'keyboard-tip',
-  'live-status-region',
-];
-const services = {
-  calendar: { module: 'app.js', page: 'index.html', prefix: 'keyboard-cost-lab-launch', marker: '예약 가능 시간', serviceId: 'calendar', taskId: 'task-1-book-remote' },
-  comments: { module: 'comments-app.js', page: 'comments.html', prefix: 'keyboard-cost-lab-comments-launch', marker: '댓글 목록', serviceId: 'comments', taskId: 'task-1-newest-review-open-replies' },
-  search: { module: 'search-app.js', page: 'search.html', prefix: 'keyboard-cost-lab-search-launch', marker: '검색 결과', serviceId: 'search', taskId: 'task-1-newest-guide-preview-close' },
-};
-for (const [name, meta] of Object.entries(services)) {
-  for (const conditionId of ['variantA','variantB']) {
-    const root = new FakeElement('root');
-    const storage = new FakeStorage();
-    const launchId = `smoke-${name}-${conditionId}`;
-    storage.setItem(`${meta.prefix}:${launchId}`, JSON.stringify({
-      launchId,
-      sessionId: 'smoke-session',
-      serviceId: meta.serviceId,
-      conditionId,
-      taskIndex: 0,
-      taskId: meta.taskId,
-      runSnapshot: {},
-    }));
-    globalThis.HTMLElement = FakeHTMLElement;
-    globalThis.HTMLInputElement = class {};
-    globalThis.HTMLSelectElement = class {};
-    globalThis.Element = FakeHTMLElement;
-    globalThis.document = {
-      title: '',
-      visibilityState: 'visible',
-      querySelector(selector) { return selector === '#app' ? root : new FakeElement(selector); },
-      querySelectorAll() { return []; },
-      addEventListener() {},
-      removeEventListener() {},
-    };
-    globalThis.window = {
-      location: { href: `https://example.test/${meta.page}?mode=runner&sessionId=smoke-session&service=${meta.serviceId}&condition=${conditionId}&taskIndex=0&launchId=${launchId}` },
-      localStorage: storage,
-      addEventListener() {},
-      setTimeout: globalThis.setTimeout,
-      requestAnimationFrame: (cb) => cb(),
-      close() {},
-      closed: false,
-    };
-    globalThis.localStorage = storage;
-    globalThis.performance = globalThis.performance ?? { now: () => Date.now() };
-    const moduleUrl = pathToFileURL(path.resolve(meta.module)).href + `?smoke=${name}-${conditionId}-${Date.now()}-${Math.random()}`;
-    await import(moduleUrl);
-    const html = root.innerHTML;
-    const hasMarker = html.includes(meta.marker);
-    const hasFooter = html.includes('과업 종료');
-    const hasError = html.includes('수행 창을 준비할 수 없습니다');
-    const hintedTerms = prohibitedInitialHints.filter((term) => html.includes(term));
-    console.log(`${name} ${conditionId}: marker=${hasMarker} footer=${hasFooter} error=${hasError} hints=${hintedTerms.length} length=${html.length}`);
-    if (!hasMarker || !hasFooter || hasError || hintedTerms.length > 0 || html.length < 1000) {
-      if (hintedTerms.length > 0) {
-        console.error(`Initial runner page contains prohibited hint terms: ${hintedTerms.join(', ')}`);
-      }
-      process.exitCode = 1;
+
+async function renderRunner({ serviceId, conditionId, taskIndex, showRequest }) {
+  const root = configureGlobals({ serviceId, conditionId, taskIndex, showRequest });
+  const moduleUrl = pathToFileURL(path.join(projectDir, services[serviceId].appFile)).href
+    + `?smoke=${Date.now()}-${Math.random()}`;
+  await import(moduleUrl);
+  const html = root.innerHTML;
+  const gridButtons = html.match(/<button[^>]*data-grid-slot="true"[^>]*>/g) ?? [];
+  const gridButtonsWithAction = gridButtons.filter((button) => /data-action="slot-open"/.test(button));
+  return {
+    service: serviceId,
+    condition: conditionId,
+    taskIndex,
+    showRequest,
+    htmlLength: html.length,
+    buttonCount: (html.match(/<button\b/g) ?? []).length,
+    linkCount: (html.match(/<a\b/g) ?? []).length,
+    hasRunnerMain: html.includes('runner-main'),
+    hasError: html.includes('수행 창을 준비할 수 없습니다'),
+    hasEndButton: html.includes('data-action="end-task"'),
+    hasPrimaryContent: services[serviceId].primaryPattern.test(html),
+    hasTaskRequestPanel: html.includes('runner-task-request-heading'),
+    leaksSessionId: html.includes('smoke-session'),
+    gridButtonCount: gridButtons.length,
+    gridButtonsWithActionCount: gridButtonsWithAction.length,
+    hasRequiredCalendarActions: serviceId === 'calendar'
+      ? html.includes('data-action="apply-filters"') && html.includes('data-action="slot-open"') && html.includes('data-action="end-task"')
+      : true,
+  };
+}
+
+const reports = [];
+for (const serviceId of Object.keys(services)) {
+  for (const conditionId of ['variantA', 'variantB']) {
+    for (const taskIndex of [0, 1, 2]) {
+      reports.push(await renderRunner({ serviceId, conditionId, taskIndex, showRequest: false }));
     }
   }
+  reports.push(await renderRunner({ serviceId, conditionId: 'variantA', taskIndex: 0, showRequest: true }));
+}
+
+let failed = false;
+for (const report of reports) {
+  const checks = [
+    report.hasRunnerMain,
+    !report.hasError,
+    report.hasEndButton,
+    report.hasPrimaryContent,
+    !report.leaksSessionId,
+    report.showRequest ? report.hasTaskRequestPanel : !report.hasTaskRequestPanel,
+    report.hasRequiredCalendarActions,
+  ];
+  if (report.service === 'calendar' && report.condition === 'variantB') {
+    checks.push(report.gridButtonCount > 0);
+    checks.push(report.gridButtonCount === report.gridButtonsWithActionCount);
+  }
+  report.ok = checks.every(Boolean);
+  if (!report.ok) failed = true;
+  console.log(JSON.stringify(report));
+}
+
+if (failed) {
+  process.exitCode = 1;
 }

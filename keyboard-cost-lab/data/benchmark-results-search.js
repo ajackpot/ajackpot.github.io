@@ -1,5 +1,5 @@
 export const benchmarkResultsSearch = {
-  "generatedAt": "2026-06-21T15:03:49.829Z",
+  "generatedAt": "2026-06-21T16:00:04.751Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",
@@ -1500,7 +1500,8 @@ export const benchmarkResultsSearch = {
   "measurementRules": [
     "실제 계측은 수행 탭에서 첫 조작이 들어갈 때 시작합니다.",
     "수행 탭이 숨겨져 있는 동안의 시간은 실제 완료 시간에서 제외합니다.",
-    "수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다."
+    "수행 탭 맨 아래의 보조 버튼 조작은 실제 지표에서 제외합니다.",
+    "과업 종료 버튼 뒤의 종료 확인 대화상자 조작은 실제 지표에서 제외합니다."
   ],
   "actualMeasurementScope": "과업 설명은 메인 창에서 확인하고, 새 탭의 실제 검색 결과 목록 조작만 기록합니다."
 };

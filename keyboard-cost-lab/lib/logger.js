@@ -232,7 +232,6 @@ export function createTaskLogger({
         totalKeyInputs: Object.values(metrics.keyCounts).reduce((sum, value) => sum + value, 0),
         success: extra.success ?? false,
         completionReason: extra.reason ?? '',
-        outcomeMessage: extra.outcomeMessage ?? '',
         notes: extra.notes ?? [],
         events,
       };

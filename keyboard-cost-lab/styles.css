@@ -235,8 +235,7 @@ select {
   line-height: 1.5;
 }
 
-.muted,
-.keyboard-tip {
+.muted {
   color: var(--muted);
 }
 
@@ -558,6 +557,7 @@ input {
   box-shadow: 0 24px 54px rgba(15, 23, 42, 0.26);
   padding: 24px;
 }
+
 
 .summary-table {
   width: 100%;
@@ -1175,4 +1175,33 @@ input {
   .sim-actions {
     width: 100%;
   }
+}
+
+.task-request-option {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 16px;
+  background: #f8fbff;
+}
+
+.switch-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.switch-field input[type="checkbox"] {
+  width: auto;
+  min-width: 1.25rem;
+  min-height: 1.25rem;
+  accent-color: var(--primary);
+}
+
+.runner-task-request {
+  margin-bottom: 16px;
+  border-color: #bfd4ff;
+  border-style: dashed;
+  background: #f8fbff;
 }
