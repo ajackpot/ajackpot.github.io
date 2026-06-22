@@ -81,6 +81,13 @@ const RUNNER_LABELS = {
   footerJump: '댓글 목록으로 이동',
 };
 
+const REPLY_AUTHOR_NAME_POOL = [
+  '보라', '승민', '민석', '태경', '지원팀', '다은', '윤아', '해솔',
+  '나래', '도윤', '서연', '정우', '가온', '유진', '민재', '하린',
+  '지우', '현우', '수아', '예준', '서진', '다온', '연우', '지민',
+];
+const REPLY_QUESTION_OPTION_COUNT = 5;
+
 const GLOSSARY_ENTRIES = [
   {
     term: '비교안 A/B',
@@ -211,6 +218,7 @@ function createRunnerState() {
 
   const runtime = hydrateConditionRuntime(conditionId, launchPayload.runSnapshot);
   const task = commentsTasks[taskIndex] ?? commentsTasks[0];
+  ensureReplyAuthorAssignmentForTask(runtime, task);
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
@@ -255,10 +263,13 @@ function createConditionRuntime(variantId) {
     category: 'all',
     categoryDraft: 'all',
     helpfulByCommentId: {},
+    featurePanel: null,
+    savedFeatureItems: {},
     expandedCommentId: null,
     replyListVisitedThisTask: {},
     replyAnswerDrafts: {},
     submittedReplyAnswers: {},
+    replyAuthorAssignments: {},
     currentCommentId: commentsScenario.comments[0]?.id ?? null,
     detailVisitedThisTask: {},
     modal: null,
@@ -303,10 +314,13 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.category = snapshot.category ?? runtime.category;
   runtime.categoryDraft = snapshot.categoryDraft ?? runtime.categoryDraft;
   runtime.helpfulByCommentId = deepClone(snapshot.helpfulByCommentId ?? runtime.helpfulByCommentId);
+  runtime.featurePanel = snapshot.featurePanel ? deepClone(snapshot.featurePanel) : null;
+  runtime.savedFeatureItems = deepClone(snapshot.savedFeatureItems ?? runtime.savedFeatureItems);
   runtime.expandedCommentId = snapshot.expandedCommentId ?? null;
   runtime.replyListVisitedThisTask = deepClone(snapshot.replyListVisitedThisTask ?? runtime.replyListVisitedThisTask);
   runtime.replyAnswerDrafts = deepClone(snapshot.replyAnswerDrafts ?? runtime.replyAnswerDrafts);
   runtime.submittedReplyAnswers = deepClone(snapshot.submittedReplyAnswers ?? runtime.submittedReplyAnswers);
+  runtime.replyAuthorAssignments = deepClone(snapshot.replyAuthorAssignments ?? runtime.replyAuthorAssignments);
   runtime.currentCommentId = snapshot.currentCommentId ?? runtime.currentCommentId;
   runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
@@ -325,10 +339,13 @@ function serializeRuntimeSnapshot(run) {
     category: run.category,
     categoryDraft: run.categoryDraft,
     helpfulByCommentId: deepClone(run.helpfulByCommentId),
+    featurePanel: run.featurePanel ? deepClone(run.featurePanel) : null,
+    savedFeatureItems: deepClone(run.savedFeatureItems),
     expandedCommentId: run.expandedCommentId,
     replyListVisitedThisTask: deepClone(run.replyListVisitedThisTask),
     replyAnswerDrafts: deepClone(run.replyAnswerDrafts),
     submittedReplyAnswers: deepClone(run.submittedReplyAnswers),
+    replyAuthorAssignments: deepClone(run.replyAuthorAssignments),
     currentCommentId: run.currentCommentId,
     detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
@@ -345,10 +362,13 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.category = hydrated.category;
   targetRun.categoryDraft = hydrated.categoryDraft;
   targetRun.helpfulByCommentId = hydrated.helpfulByCommentId;
+  targetRun.featurePanel = hydrated.featurePanel;
+  targetRun.savedFeatureItems = hydrated.savedFeatureItems;
   targetRun.expandedCommentId = hydrated.expandedCommentId;
   targetRun.replyListVisitedThisTask = hydrated.replyListVisitedThisTask;
   targetRun.replyAnswerDrafts = hydrated.replyAnswerDrafts;
   targetRun.submittedReplyAnswers = hydrated.submittedReplyAnswers;
+  targetRun.replyAuthorAssignments = hydrated.replyAuthorAssignments;
   targetRun.currentCommentId = hydrated.currentCommentId;
   targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
@@ -404,9 +424,11 @@ function prepareCurrentTaskForMain() {
   run.isApplying = false;
   run.isWorking = false;
   run.detailVisitedThisTask = {};
+  run.featurePanel = null;
   run.replyListVisitedThisTask = {};
   run.replyAnswerDrafts = {};
   run.submittedReplyAnswers = {};
+  ensureReplyAuthorAssignmentForTask(run, task, { avoidCorrectValue: getOtherConditionReplyCorrectValue(task, run.variantId) });
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
@@ -536,6 +558,7 @@ function acceptRunnerTaskCompletion(message) {
     targetCommentId: task.targetCommentId,
     expandedCommentIdAfterTask: run.expandedCommentId,
     submittedReplyAnswersAfterTask: deepClone(run.submittedReplyAnswers),
+    replyAuthorAssignmentsAfterTask: deepClone(run.replyAuthorAssignments),
     helpfulByCommentIdAfterTask: deepClone(run.helpfulByCommentId),
     conditionId,
   });
@@ -661,6 +684,38 @@ function handleRootClick(event) {
     return;
   }
 
+  if (action === 'open-community-panel') {
+    event.preventDefault();
+    openCommunityPanel(actionTarget.dataset.featureId, actionTarget.dataset.focusId, {
+      commentId: actionTarget.dataset.commentId,
+    });
+    return;
+  }
+
+  if (action === 'close-community-panel') {
+    event.preventDefault();
+    closeCommunityPanel();
+    return;
+  }
+
+  if (action === 'community-save') {
+    event.preventDefault();
+    toggleCommunitySavedItem(actionTarget.dataset.itemId, actionTarget.dataset.notice, actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'community-message') {
+    event.preventDefault();
+    const run = getCurrentRun();
+    if (run) {
+      run.siteNotice = actionTarget.dataset.notice || '처리했습니다.';
+      run.liveStatus = run.siteNotice;
+      if (actionTarget.dataset.focusId) requestFocus(`[data-focus-id="${actionTarget.dataset.focusId}"]`);
+      render();
+    }
+    return;
+  }
+
   if (action === 'end-task') {
     event.preventDefault();
     openEndTaskConfirmation();
@@ -700,12 +755,6 @@ function handleRootClick(event) {
   if (action === 'open-comment-detail') {
     event.preventDefault();
     openCommentDetail(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
-    return;
-  }
-
-  if (action === 'submit-reply-answer') {
-    event.preventDefault();
-    submitReplyAnswer(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
     return;
   }
 
@@ -761,6 +810,18 @@ function handleRootChange(event) {
   if (!run) return;
   if (element.name === 'sort') run.sortDraft = element.value;
   if (element.name === 'category') run.categoryDraft = element.value;
+  if (element.name === 'runner-reply-answer') {
+    const task = getCurrentTask();
+    const commentId = task?.targetCommentId;
+    if (commentId) {
+      run.replyAnswerDrafts = {
+        ...run.replyAnswerDrafts,
+        [commentId]: element.value,
+      };
+    }
+    return;
+  }
+
   if (element.name?.startsWith('reply-answer-')) {
     const commentId = element.dataset.commentId;
     if (commentId) {
@@ -823,6 +884,42 @@ function focusElementNow(selector) {
   }
   requestFocus(selector);
   return false;
+}
+
+
+function openCommunityPanel(featureId, triggerFocusId = '', options = {}) {
+  const run = getCurrentRun();
+  if (!run || !featureId) return;
+  run.featurePanel = {
+    featureId,
+    triggerFocusId,
+    commentId: options.commentId || null,
+  };
+  requestFocus('#community-feature-title');
+  render();
+}
+
+function closeCommunityPanel() {
+  const run = getCurrentRun();
+  if (!run || !run.featurePanel) return;
+  const triggerFocusId = run.featurePanel.triggerFocusId;
+  run.featurePanel = null;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
+}
+
+function toggleCommunitySavedItem(itemId, notice, triggerFocusId) {
+  const run = getCurrentRun();
+  if (!run || !itemId) return;
+  const nextValue = !run.savedFeatureItems[itemId];
+  run.savedFeatureItems = {
+    ...run.savedFeatureItems,
+    [itemId]: nextValue,
+  };
+  run.siteNotice = notice || (nextValue ? '보관함에 넣었습니다.' : '보관함에서 뺐습니다.');
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
 }
 
 function showSiteNotice(message) {
@@ -953,7 +1050,7 @@ function noteWrongCommentAction(commentId, actionType) {
   if (!run || !task || !commentId || commentId === task.targetCommentId) return;
   const relevantActions = {
     expandReplies: ['toggle-replies'],
-    replyQuestion: ['toggle-replies', 'submit-reply-answer'],
+    replyQuestion: ['toggle-replies'],
     helpful: ['open-detail', 'mark-helpful'],
   };
   if (!relevantActions[task.completion]?.includes(actionType)) return;
@@ -1097,36 +1194,121 @@ function getReplyQuestionForCurrentTask() {
   return task.replyQuestion ?? null;
 }
 
-function submitReplyAnswer(commentId, triggerFocusId) {
-  const run = getCurrentRun();
-  const task = getCurrentTask();
-  if (!run || !task || run.isWorking || !commentId) return;
-  const value = run.replyAnswerDrafts[commentId] || '';
-  if (!value) {
-    run.siteNotice = '답을 선택한 뒤 제출하십시오.';
-    run.liveStatus = run.siteNotice;
-    if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-    render();
-    return;
+function randomIndex(maxExclusive) {
+  if (maxExclusive <= 0) return 0;
+  if (globalThis.crypto?.getRandomValues) {
+    return globalThis.crypto.getRandomValues(new Uint32Array(1))[0] % maxExclusive;
+  }
+  return Math.floor(Math.random() * maxExclusive);
+}
+
+function shuffledValues(values) {
+  const copy = values.slice();
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1);
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+  return copy;
+}
+
+function uniqueValues(values) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function getAllReplyAuthors() {
+  return uniqueValues(commentsScenario.comments.flatMap((comment) => comment.replies.map((reply) => reply.author)));
+}
+
+function buildReplyAuthorPool(task) {
+  return uniqueValues([
+    ...(task?.replyQuestion?.options ?? []),
+    ...getAllReplyAuthors(),
+    ...REPLY_AUTHOR_NAME_POOL,
+  ]);
+}
+
+function buildReplyAuthorAssignment(task, { avoidCorrectValue = '' } = {}) {
+  if (!task || task.completion !== 'replyQuestion' || !task.replyQuestion) return null;
+  const targetComment = getCommentById(task.targetCommentId);
+  if (!targetComment || targetComment.replies.length === 0) return null;
+  const replyIndex = Math.max(0, Number(task.replyQuestion.replyIndex ?? 1) - 1);
+  const targetReply = targetComment.replies[replyIndex] ?? targetComment.replies[0];
+  const basePool = buildReplyAuthorPool(task);
+  const replyAuthors = {};
+
+  for (const comment of commentsScenario.comments) {
+    if (!comment.replies.length) continue;
+    const assignableNames = shuffledValues(basePool.filter((name) => name !== comment.author));
+    const usedNames = new Set();
+    comment.replies.forEach((reply, index) => {
+      const nextName = assignableNames.find((name) => !usedNames.has(name))
+        ?? assignableNames[index % assignableNames.length]
+        ?? reply.author;
+      replyAuthors[reply.id] = nextName;
+      usedNames.add(nextName);
+    });
   }
 
-  noteWrongCommentAction(commentId, 'submit-reply-answer');
-  run.submittedReplyAnswers = {
-    ...run.submittedReplyAnswers,
-    [commentId]: {
-      taskId: task.id,
-      value,
-      submittedAt: new Date().toISOString(),
-    },
+  if (avoidCorrectValue && replyAuthors[targetReply.id] === avoidCorrectValue) {
+    const targetPool = shuffledValues(basePool.filter((name) => name !== targetComment.author));
+    const replacement = targetPool.find((name) => name !== avoidCorrectValue && !Object.values(replyAuthors).includes(name))
+      ?? targetPool.find((name) => name !== avoidCorrectValue)
+      ?? replyAuthors[targetReply.id];
+    replyAuthors[targetReply.id] = replacement;
+  }
+
+  const correctValue = replyAuthors[targetReply.id] ?? targetReply.author;
+  const distractors = shuffledValues(basePool.filter((name) => name !== correctValue)).slice(0, REPLY_QUESTION_OPTION_COUNT - 1);
+  return {
+    taskId: task.id,
+    commentId: task.targetCommentId,
+    replyIndex: replyIndex + 1,
+    replyAuthors,
+    correctValue,
+    options: shuffledValues(uniqueValues([correctValue, ...distractors])).slice(0, REPLY_QUESTION_OPTION_COUNT),
   };
-  run.currentTaskLogger?.note('submit-reply-answer', {
-    commentId,
-    value,
+}
+
+function ensureReplyAuthorAssignmentForTask(run, task, options = {}) {
+  if (!run || !task || task.completion !== 'replyQuestion') return null;
+  const existing = run.replyAuthorAssignments?.[task.id];
+  if (existing && (!options.avoidCorrectValue || existing.correctValue !== options.avoidCorrectValue)) {
+    return existing;
+  }
+  const assignment = buildReplyAuthorAssignment(task, options);
+  if (!assignment) return null;
+  run.replyAuthorAssignments = {
+    ...(run.replyAuthorAssignments ?? {}),
+    [task.id]: assignment,
+  };
+  return assignment;
+}
+
+function getOtherConditionReplyCorrectValue(task, currentConditionId) {
+  if (APP_MODE === 'runner' || !task || task.completion !== 'replyQuestion') return '';
+  const otherConditionId = ['variantA', 'variantB'].find((conditionId) => conditionId !== currentConditionId);
+  return state.runs[otherConditionId]?.replyAuthorAssignments?.[task.id]?.correctValue ?? '';
+}
+
+function getReplyAuthorAssignmentForTask(run, task) {
+  return ensureReplyAuthorAssignmentForTask(run, task, {
+    avoidCorrectValue: getOtherConditionReplyCorrectValue(task, run?.variantId),
   });
-  run.siteNotice = '답변을 제출했습니다.';
-  run.liveStatus = run.siteNotice;
-  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
-  render();
+}
+
+function getRenderedReplyAuthor(run, comment, reply) {
+  const task = getCurrentTask();
+  if (!task || task.completion !== 'replyQuestion') return reply.author;
+  const assignment = getReplyAuthorAssignmentForTask(run, task);
+  return assignment?.replyAuthors?.[reply.id] ?? reply.author;
+}
+
+function getCurrentReplyQuestionCorrectValue(run, task) {
+  return getReplyAuthorAssignmentForTask(run, task)?.correctValue ?? task?.replyQuestion?.correctValue ?? '';
+}
+
+function getCurrentReplyQuestionOptions(run, task) {
+  return getReplyAuthorAssignmentForTask(run, task)?.options ?? task?.replyQuestion?.options ?? [];
 }
 
 function markHelpful(commentId, triggerFocusId) {
@@ -1163,7 +1345,7 @@ function isTaskSatisfied(task, run) {
     const otherAnswered = Object.keys(run.submittedReplyAnswers).some((commentId) => commentId !== task.targetCommentId);
     return Boolean(run.replyListVisitedThisTask[task.targetCommentId])
       && Boolean(submitted)
-      && submitted.value === task.replyQuestion?.correctValue
+      && submitted.value === getCurrentReplyQuestionCorrectValue(run, task)
       && !otherAnswered;
   }
 
@@ -1198,7 +1380,7 @@ function getEndTaskOutcome(task, run) {
       message = '요청한 댓글의 답글 목록에 진입하지 못했습니다.';
     } else if (!targetAnswer) {
       message = '답글 목록 질문에 답을 제출하지 않았습니다.';
-    } else if (targetAnswer.value !== task.replyQuestion?.correctValue) {
+    } else if (targetAnswer.value !== getCurrentReplyQuestionCorrectValue(run, task)) {
       message = '답글 목록 질문에 요청과 다른 답을 제출했습니다.';
     }
   } else if (task.completion === 'helpful') {
@@ -1235,12 +1417,33 @@ function openEndTaskConfirmation() {
   render();
 }
 
+function captureEndAreaReplyAnswer(task, run) {
+  if (!task || !run || task.completion !== 'replyQuestion') return;
+  const commentId = task.targetCommentId;
+  const value = run.replyAnswerDrafts[commentId] || '';
+  if (!value) return;
+  run.submittedReplyAnswers = {
+    ...run.submittedReplyAnswers,
+    [commentId]: {
+      taskId: task.id,
+      value,
+      submittedAt: new Date().toISOString(),
+      source: 'end-task-area',
+    },
+  };
+  run.currentTaskLogger?.note('submit-reply-answer-at-end', {
+    commentId,
+    value,
+  });
+}
+
 function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger || state.completed || run.modal?.kind !== 'task-end-confirm') return;
 
+  captureEndAreaReplyAnswer(task, run);
   const outcome = getEndTaskOutcome(task, run);
   run.modal = null;
 
@@ -1273,6 +1476,7 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
       `visitedReplies=${Object.keys(run.replyListVisitedThisTask).join(',') || 'none'}`,
       `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
       `replyAnswers=${Object.entries(run.submittedReplyAnswers).map(([commentId, answer]) => `${commentId}:${answer.value}`).join(',') || 'none'}`,
+      task.completion === 'replyQuestion' ? `replyQuestionCorrect=${getCurrentReplyQuestionCorrectValue(run, task) || 'none'}` : '',
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       outcomeMessage ? `outcome=${outcomeMessage}` : '',
       'measurement=first-input-visible-only',
@@ -1388,10 +1592,15 @@ function renderRunnerPage() {
         <h1 class="sr-only" id="runner-title" tabindex="-1">댓글 목록 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
         ${renderCommentsHeader(conditionId)}
+        ${renderCommunityFeaturePanel(run)}
         ${renderCommentControls(conditionId, run)}
         ${renderCommentsSection(conditionId, run, visibleComments)}
       </main>
-      ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
+      ${state.completed ? '' : renderRunnerFooterHtml({
+        jumpLabel: RUNNER_LABELS.footerJump,
+        endLabel: task?.completion === 'replyQuestion' ? '답변 제출하고 과업 종료하기' : '과업 종료',
+        beforeEndHtml: renderEndAreaReplyQuestion(run, task),
+      })}
       ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderCommentModal(run.modal, run) : ''}
       ${state.completed
@@ -1698,24 +1907,249 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
 }
 
 function renderCommentsHeader(conditionId) {
-  const links = ['게시글 목록', '인기 글', '이용 안내', '새 글 쓰기', '알림', '내 댓글', '커뮤니티 규칙', '문의'];
+  const links = [
+    { label: '게시글 목록', featureId: 'post-list' },
+    { label: '인기 글', featureId: 'popular-posts' },
+    { label: '이용 안내', featureId: 'community-guide' },
+    { label: '새 글 쓰기', featureId: 'new-post' },
+    { label: '알림', featureId: 'notifications' },
+    { label: '내 댓글', featureId: 'my-comments' },
+    { label: '커뮤니티 규칙', featureId: 'rules' },
+    { label: '문의', featureId: 'support' },
+  ];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       <div class="sim-topbar">
-        <a href="#" class="brand-link" data-focus-id="community-home" data-inert-link="true">마음돌봄 커뮤니티</a>
+        <a href="#" class="brand-link" data-action="open-community-panel" data-feature-id="home" data-focus-id="community-home">마음돌봄 커뮤니티</a>
         <div class="sim-post-summary" aria-label="현재 게시글">
           <strong>${escapeHtml(commentsScenario.postTitle)}</strong>
           <span class="muted">댓글 ${commentsScenario.comments.length}개 · 조회 1,284</span>
         </div>
         <div class="sim-actions">
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="post-bookmark" data-notice="게시글 보관 기능은 현재 점검 중입니다.">게시글 보관</button>
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="post-report" data-notice="신고 접수 화면은 현재 점검 중입니다.">신고</button>
+          <button class="button button-ghost" data-action="community-save" data-item-id="post-current" data-focus-id="post-bookmark" data-notice="게시글을 보관함에 넣었습니다.">게시글 보관</button>
+          <button class="button button-ghost" data-action="open-community-panel" data-feature-id="report" data-focus-id="post-report">신고</button>
         </div>
       </div>
       <nav aria-label="커뮤니티 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="community-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
+        ${links.map((item, index) => `<a href="#" class="nav-link" data-action="open-community-panel" data-feature-id="${escapeHtml(item.featureId)}" data-focus-id="community-nav-${index + 1}">${escapeHtml(item.label)}</a>`).join('')}
       </nav>
     </header>
+  `;
+}
+
+
+function renderCommunityFeaturePanel(run) {
+  if (!run.featurePanel) return '';
+  return `
+    <section class="card feature-panel" aria-labelledby="community-feature-title" data-feature-panel>
+      ${renderCommunityFeaturePanelContent(run.featurePanel.featureId, run.featurePanel.commentId, run)}
+      <div class="button-row feature-panel-actions">
+        <button class="button button-secondary" data-action="close-community-panel" data-focus-id="community-feature-close">이 영역 닫기</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderCommunityFeaturePanelContent(featureId, commentId, run) {
+  const comment = commentId ? getCommentById(commentId) : null;
+  if (featureId === 'home') return renderCommunityHomePanel();
+  if (featureId === 'post-list') return renderPostListPanel();
+  if (featureId === 'popular-posts') return renderPopularPostsPanel();
+  if (featureId === 'community-guide') return renderCommunityGuidePanel();
+  if (featureId === 'new-post') return renderNewPostPanel();
+  if (featureId === 'notifications') return renderNotificationsPanel(run);
+  if (featureId === 'my-comments') return renderMyCommentsPanel();
+  if (featureId === 'rules') return renderRulesPanel();
+  if (featureId === 'writing-guide') return renderWritingGuidePanel();
+  if (featureId === 'support') return renderSupportPanel();
+  if (featureId === 'report') return renderReportPanel();
+  if (featureId === 'author-profile') return renderAuthorProfilePanel(comment);
+  if (featureId === 'comment-timeline') return renderCommentTimelinePanel(comment, run);
+  return renderCommunityGuidePanel();
+}
+
+function renderCommunityHomePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">커뮤니티 처음 화면</p>
+      <h2 id="community-feature-title" tabindex="-1">마음돌봄 커뮤니티</h2>
+      <p class="muted">상담 예약 경험, 준비 방법, 이용 후기를 나누는 공간입니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card"><h3>인기 주제</h3><p>예약 변경, 비대면 연결, 상담 전 준비가 많이 읽히고 있습니다.</p></article>
+      <article class="mini-card"><h3>최근 안내</h3><p>댓글 알림과 보관함 기능이 일부 개편되었습니다.</p></article>
+    </div>
+  `;
+}
+
+function renderPostListPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">게시글 목록</p>
+      <h2 id="community-feature-title" tabindex="-1">최근 게시글</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>예약 변경이 잘 되었던 경험</h3><p>후기 18개 · 새 댓글 4개</p></article>
+      <article class="mini-card"><h3>상담 전 준비물 정리</h3><p>질문 7개 · 답변 12개</p></article>
+      <article class="mini-card"><h3>비대면 접속 문제 해결</h3><p>질문 11개 · 답변 21개</p></article>
+    </div>
+  `;
+}
+
+function renderPopularPostsPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">인기 글</p>
+      <h2 id="community-feature-title" tabindex="-1">많이 읽은 글</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>취소 수수료를 미리 확인하는 방법</h3><p>조회 2,401 · 보관 82</p></article>
+      <article class="mini-card"><h3>상담 링크가 열리지 않을 때</h3><p>조회 1,976 · 보관 64</p></article>
+    </div>
+  `;
+}
+
+function renderCommunityGuidePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">이용 안내</p>
+      <h2 id="community-feature-title" tabindex="-1">커뮤니티 이용 안내</h2>
+    </div>
+    <ul class="feature-list">
+      <li>상담 예약 번호, 전화번호 같은 개인 정보는 댓글에 남기지 않습니다.</li>
+      <li>후기와 질문은 댓글 범위 선택으로 따로 모아 볼 수 있습니다.</li>
+      <li>보관한 게시글과 내 댓글은 이 화면 안에서 요약으로 확인할 수 있습니다.</li>
+    </ul>
+  `;
+}
+
+function renderNewPostPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">새 글 쓰기</p>
+      <h2 id="community-feature-title" tabindex="-1">새 글 작성</h2>
+      <p class="muted">실험 화면에서는 글을 실제로 저장하지 않고 작성 양식만 보여 줍니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <label><span>글 종류</span><select><option>질문</option><option>후기</option><option>정보 공유</option></select></label>
+        <label><span>제목</span><input type="text" value="상담 예약 관련 질문"></label>
+        <button class="button button-primary" data-action="community-message" data-notice="임시 저장했습니다." data-focus-id="new-post-draft">임시 저장</button>
+      </article>
+    </div>
+  `;
+}
+
+function renderNotificationsPanel(run) {
+  const enabled = Boolean(run.savedFeatureItems['comment-notification']);
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">알림</p>
+      <h2 id="community-feature-title" tabindex="-1">댓글 알림</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card"><h3>최근 알림</h3><p>운영자 안내 댓글에 새 반응이 있습니다.</p><p>민지 댓글의 답글이 2개로 표시됩니다.</p></article>
+      <article class="mini-card"><h3>알림 설정</h3><p>${enabled ? '이 게시글 댓글 알림을 받고 있습니다.' : '이 게시글 댓글 알림이 꺼져 있습니다.'}</p><button class="button button-secondary" data-action="community-save" data-item-id="comment-notification" data-focus-id="comment-notification-toggle" data-notice="댓글 알림 설정을 변경했습니다.">${enabled ? '알림 끄기' : '알림 켜기'}</button></article>
+    </div>
+  `;
+}
+
+function renderMyCommentsPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">내 댓글</p>
+      <h2 id="community-feature-title" tabindex="-1">내 활동 요약</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>최근 작성 댓글</h3><p>예약 확정 문자 관련 질문에 답변을 남겼습니다.</p></article>
+      <article class="mini-card"><h3>보관한 글</h3><p>현재 게시글과 상담 준비 글이 보관되어 있습니다.</p></article>
+    </div>
+  `;
+}
+
+function renderRulesPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">운영 기준</p>
+      <h2 id="community-feature-title" tabindex="-1">댓글 운영 기준</h2>
+    </div>
+    <ul class="feature-list">
+      <li>개인 정보와 예약 번호는 공개 댓글에 쓰지 않습니다.</li>
+      <li>같은 질문을 반복해서 올리기 전에 기존 답글을 확인합니다.</li>
+      <li>신고된 댓글은 운영자가 확인한 뒤 숨김 처리할 수 있습니다.</li>
+    </ul>
+  `;
+}
+
+function renderWritingGuidePanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">작성 안내</p>
+      <h2 id="community-feature-title" tabindex="-1">댓글 작성 안내</h2>
+    </div>
+    <div class="feature-list">
+      <article class="mini-card"><h3>좋은 질문 예시</h3><p>상담 방식, 예약 변경 가능 시간, 준비 서류처럼 확인할 내용을 구체적으로 적습니다.</p></article>
+      <article class="mini-card"><h3>피해야 할 내용</h3><p>연락처, 주민등록번호, 상담 내용 전문은 공개 댓글에 쓰지 않습니다.</p></article>
+    </div>
+  `;
+}
+
+function renderSupportPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">문의</p>
+      <h2 id="community-feature-title" tabindex="-1">커뮤니티 문의</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card"><h3>운영자에게 문의</h3><p>댓글 삭제, 신고 처리, 알림 문제를 문의할 수 있습니다.</p><button class="button button-primary" data-action="community-message" data-notice="문의가 접수되었습니다." data-focus-id="support-send">문의 접수</button></article>
+      <article class="mini-card"><h3>답변 예상 시간</h3><p>평일 기준 보통 하루 안에 답변합니다.</p></article>
+    </div>
+  `;
+}
+
+function renderReportPanel() {
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">신고</p>
+      <h2 id="community-feature-title" tabindex="-1">게시글 신고</h2>
+      <p class="muted">신고 내용을 고르면 운영자가 확인합니다.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card">
+        <label><span>신고 사유</span><select><option>개인 정보 노출</option><option>광고 또는 홍보</option><option>부적절한 표현</option></select></label>
+        <button class="button button-primary" data-action="community-message" data-notice="신고가 접수되었습니다." data-focus-id="report-submit">신고 접수</button>
+      </article>
+    </div>
+  `;
+}
+
+function renderAuthorProfilePanel(comment) {
+  if (!comment) return renderCommunityGuidePanel();
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">작성자 정보</p>
+      <h2 id="community-feature-title" tabindex="-1">${escapeHtml(comment.author)} 작성자 정보</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="mini-card"><h3>활동 요약</h3><p>${escapeHtml(comment.badge)} 댓글을 주로 작성했습니다. 최근 작성 시각은 ${escapeHtml(comment.timeLabel)}입니다.</p></article>
+      <article class="mini-card"><h3>작성자 보관</h3><p>나중에 이 작성자의 댓글을 다시 볼 수 있습니다.</p><button class="button button-secondary" data-action="community-save" data-item-id="author-${escapeHtml(comment.id)}" data-focus-id="author-save-${escapeHtml(comment.id)}" data-notice="작성자를 보관했습니다.">작성자 보관</button></article>
+    </div>
+  `;
+}
+
+function renderCommentTimelinePanel(comment, run) {
+  if (!comment) return renderCommunityGuidePanel();
+  return `
+    <div class="feature-panel-header">
+      <p class="eyebrow">댓글 시각</p>
+      <h2 id="community-feature-title" tabindex="-1">${escapeHtml(comment.author)} 댓글 기록</h2>
+    </div>
+    <dl class="meta-list compact">
+      <div><dt>작성 시각</dt><dd>${escapeHtml(comment.timeLabel)}</dd></div>
+      <div><dt>댓글 종류</dt><dd>${escapeHtml(comment.badge)}</dd></div>
+      <div><dt>답글 수</dt><dd>${comment.replyCount}개</dd></div>
+      <div><dt>도움이 수</dt><dd>${getEffectiveHelpfulCount(comment, run)}개</dd></div>
+    </dl>
   `;
 }
 
@@ -1742,8 +2176,8 @@ function renderCommentControls(conditionId, run) {
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="comment-policy-link" data-inert-link="true">댓글 운영 기준 보기</a>
-        <a href="#" class="inline-link" data-focus-id="comment-help-link" data-inert-link="true">작성 안내 보기</a>
+        <a href="#" class="inline-link" data-action="open-community-panel" data-feature-id="rules" data-focus-id="comment-policy-link">댓글 운영 기준 보기</a>
+        <a href="#" class="inline-link" data-action="open-community-panel" data-feature-id="writing-guide" data-focus-id="comment-help-link">작성 안내 보기</a>
         <button class="button button-primary" data-action="apply-comment-filters" data-focus-id="apply-comment-filters" ${run.isApplying ? 'disabled' : ''}>
           ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>
@@ -1779,11 +2213,11 @@ function renderVariantACommentList(run, visibleComments) {
         <li class="comment-card ${run.expandedCommentId === comment.id ? 'comment-card-expanded' : ''}">
           <div class="comment-card-head">
             <div class="comment-head-links">
-              <a href="#" class="inline-link" data-focus-id="comment-author-${comment.id}" data-inert-link="true">${escapeHtml(comment.author)}</a>
+              <a href="#" class="inline-link" data-action="open-community-panel" data-feature-id="author-profile" data-comment-id="${comment.id}" data-focus-id="comment-author-${comment.id}">${escapeHtml(comment.author)}</a>
               <span class="pill ${comment.category === 'notice' ? 'pill-warning' : ''}">${escapeHtml(comment.badge)}</span>
-              <a href="#" class="inline-link" data-focus-id="comment-time-${comment.id}" data-inert-link="true">${escapeHtml(comment.timeLabel)}</a>
+              <a href="#" class="inline-link" data-action="open-community-panel" data-feature-id="comment-timeline" data-comment-id="${comment.id}" data-focus-id="comment-time-${comment.id}">${escapeHtml(comment.timeLabel)}</a>
             </div>
-            <a href="#" class="inline-link" data-focus-id="comment-share-${comment.id}" data-inert-link="true">공유</a>
+            <a href="#" class="inline-link" data-action="community-message" data-focus-id="comment-share-${comment.id}" data-notice="공유 주소를 복사했습니다.">공유</a>
           </div>
           <p class="comment-summary"><strong>${escapeHtml(comment.summary)}</strong></p>
           <p class="muted">${escapeHtml(comment.body)}</p>
@@ -1851,44 +2285,47 @@ function renderVariantBCommentList(run, visibleComments) {
 }
 
 function renderReplyList(comment, run) {
-  const question = getReplyQuestionForCurrentTask();
-  const draftValue = run.replyAnswerDrafts[comment.id] || '';
-  const submitted = run.submittedReplyAnswers[comment.id]?.value || '';
-  const fieldLabel = question?.field === 'timeLabel' ? '작성 시간' : '작성자';
-
   return `
     <section class="reply-card" aria-label="${escapeHtml(comment.author)} 댓글의 답글 목록">
       <h3 data-focus-id="reply-heading-${comment.id}" tabindex="-1">${escapeHtml(comment.author)} 댓글의 답글 ${comment.replyCount}개</h3>
       <ul class="reply-list">
         ${comment.replies.map((reply, index) => `
           <li>
-            <strong>${escapeHtml(index + 1)}번째 답글</strong> · ${escapeHtml(reply.author)} · ${escapeHtml(reply.timeLabel ?? '작성 시간 정보 없음')}
+            <strong>${escapeHtml(index + 1)}번째 답글</strong> · ${escapeHtml(getRenderedReplyAuthor(run, comment, reply))} · ${escapeHtml(reply.timeLabel ?? '작성 시간 정보 없음')}
             <p>${escapeHtml(reply.text)}</p>
           </li>
         `).join('')}
       </ul>
-      ${question && comment.replies.length >= question.replyIndex ? `
-        <form class="reply-question-form" data-measurement-exempt="false" data-comment-id="${comment.id}">
-          <label for="reply-answer-${comment.id}">
-            <span>${escapeHtml(question.prompt)}</span>
-            <select id="reply-answer-${comment.id}" name="reply-answer-${comment.id}" data-comment-id="${comment.id}" data-focus-id="reply-answer-${comment.id}">
-              <option value="">선택하십시오</option>
-              ${question.options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
-            </select>
-          </label>
-          <div class="button-row">
-            <button type="button" class="button button-primary" data-action="submit-reply-answer" data-comment-id="${comment.id}" data-focus-id="reply-answer-submit-${comment.id}">${submitted ? '답변 다시 제출' : '답변 제출'}</button>
-          </div>
-          <p class="muted">${escapeHtml(question.replyIndex)}번째 답글의 ${escapeHtml(fieldLabel)}를 선택합니다.</p>
-        </form>
-      ` : ''}
+    </section>
+  `;
+}
+
+function renderEndAreaReplyQuestion(run, task) {
+  if (!task || task.completion !== 'replyQuestion' || !task.replyQuestion) return '';
+  const question = task.replyQuestion;
+  const options = getCurrentReplyQuestionOptions(run, task);
+  const draftValue = run.replyAnswerDrafts[task.targetCommentId] || '';
+  return `
+    <section class="runner-end-answer" aria-labelledby="runner-end-answer-heading">
+      <h2 id="runner-end-answer-heading">답변 선택</h2>
+      <p id="runner-end-answer-question">${escapeHtml(question.prompt)}</p>
+      <label for="runner-reply-answer">
+        <span>답변</span>
+        <select id="runner-reply-answer" name="runner-reply-answer" data-focus-id="runner-reply-answer" aria-describedby="runner-end-answer-question">
+          <option value="">선택하십시오</option>
+          ${options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+        </select>
+      </label>
     </section>
   `;
 }
 
 function renderCommentModal(modal, run) {
   if (modal.kind === 'task-end-confirm') {
-    return renderEndTaskConfirmationDialogHtml();
+    const task = getCurrentTask();
+    return renderEndTaskConfirmationDialogHtml({
+      confirmLabel: task?.completion === 'replyQuestion' ? '예, 제출하고 종료합니다' : '예, 종료합니다',
+    });
   }
 
   if (modal.kind === 'task-final') {

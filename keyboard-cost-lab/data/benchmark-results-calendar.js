@@ -1,5 +1,5 @@
 export const benchmarkResultsCalendar = {
-  "generatedAt": "2026-06-22T01:16:44.516Z",
+  "generatedAt": "2026-06-22T03:00:10.445Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",

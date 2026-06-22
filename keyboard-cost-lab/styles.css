@@ -81,8 +81,7 @@ summary:focus-visible {
 .runner-footer {
   position: sticky;
   bottom: 16px;
-  display: flex;
-  justify-content: flex-end;
+  display: grid;
   gap: 12px;
   margin-top: 16px;
   padding: 16px 18px;
@@ -90,6 +89,24 @@ summary:focus-visible {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--shadow);
+}
+
+.runner-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.runner-footer-extra {
+  display: grid;
+  gap: 10px;
+}
+
+.runner-footer-extra label {
+  display: grid;
+  gap: 6px;
+  max-width: 34rem;
 }
 
 .sr-only {
@@ -1271,7 +1288,8 @@ input {
   background: #f4fbf5;
 }
 
-.reply-question-form {
+.reply-question-form,
+.runner-end-answer {
   margin-top: 1rem;
   display: grid;
   gap: 0.75rem;
@@ -1281,7 +1299,13 @@ input {
   background: #ffffff;
 }
 
-.reply-question-form label {
+.reply-question-form label,
+.runner-end-answer label {
   display: grid;
   gap: 0.5rem;
+}
+
+.runner-footer .runner-end-answer {
+  margin-top: 0;
+  background: #f8fbff;
 }

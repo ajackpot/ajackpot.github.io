@@ -38,6 +38,16 @@ for (const [name, token] of calendarActionChecks) {
   assert(`calendar: ${name} 동작 지점 존재`, (files.calendar + files.utils).includes(token));
 }
 
+
+assert('comments: 답글 작성자 무작위 배정 상태 보존', files.comments.includes('replyAuthorAssignments'));
+assert('comments: 다른 비교안의 정답 이름을 피해서 답글 작성자 배정', files.comments.includes('avoidCorrectValue: getOtherConditionReplyCorrectValue'));
+assert('comments: 답변 선택지는 현재 수행 탭의 답글 작성자 배정 기준 사용', files.comments.includes('getCurrentReplyQuestionOptions(run, task)'));
+assert('comments: 최종 성공 판정은 현재 수행 탭의 배정된 정답 기준 사용', files.comments.includes('getCurrentReplyQuestionCorrectValue(run, task)'));
+assert('search: 검색 결과 보조 메뉴를 실제 패널로 표시', files.search.includes('renderSearchFeaturePanel(run)'));
+assert('search: 검색 결과 메뉴 점검 중 안내 제거', !files.search.includes('현재 점검 중'));
+assert('search: 검색 알림 상태 토글 제공', files.search.includes('toggleSearchAlert'));
+assert('search: 보관함과 저장한 자료 패널 제공', files.search.includes("featureId: 'folder'") || files.search.includes('folder: () =>'));
+
 const failures = checks.filter((check) => !check.pass);
 for (const check of checks) {
   console.log(`${check.pass ? 'PASS' : 'FAIL'} ${check.name}`);

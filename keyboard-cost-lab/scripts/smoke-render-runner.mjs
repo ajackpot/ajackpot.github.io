@@ -40,6 +40,7 @@ const services = {
         replyListVisitedThisTask: {},
         replyAnswerDrafts: {},
         submittedReplyAnswers: {},
+        replyAuthorAssignments: {},
         currentCommentId: null,
         detailVisitedThisTask: {},
         lastTaskCompletionNote: '',
@@ -61,6 +62,11 @@ const services = {
         type: 'all',
         typeDraft: 'all',
         savedByResultId: {},
+        savedFeatureItems: {},
+        searchAlertEnabled: false,
+        query: '상담',
+        queryDraft: '상담',
+        featurePanel: null,
         openedResultId: null,
         currentResultId: null,
         previewVisitedThisTask: {},
@@ -173,12 +179,15 @@ async function renderRunner({ serviceId, conditionId, taskIndex, showRequest, sn
     hasCalendarFeatureActions: serviceId === 'calendar'
       ? html.includes('data-action="open-feature-panel"') && html.includes('data-feature-id="providers"') && html.includes('data-feature-id="my-counseling"')
       : true,
-    hasFeaturePanel: html.includes('data-feature-panel') && html.includes('feature-panel-title'),
+    hasSearchFeatureActions: serviceId === 'search'
+      ? html.includes('data-action="open-search-feature"') && html.includes('data-feature-id="help"') && html.includes('data-feature-id="type-help"')
+      : true,
+    hasFeaturePanel: html.includes('data-feature-panel') && (html.includes('feature-panel-title') || html.includes('community-feature-title') || html.includes('search-feature-title')), 
     placeholderTextCount: (html.match(/현재 점검 중/g) ?? []).length,
     hasRequiredCalendarActions: serviceId === 'calendar'
       ? html.includes('data-action="apply-filters"') && html.includes('data-action="slot-open"') && html.includes('data-action="end-task"')
       : true,
-    hasReplyQuestionForm: html.includes('data-action="submit-reply-answer"'),
+    hasReplyQuestionForm: html.includes('runner-end-answer-heading') && html.includes('답변 제출하고 과업 종료하기'),
     hasBookingCompletionPanel: html.includes('booking-completion-heading') && html.includes('예약이 완료되었습니다'),
     hasGenericTaskFinalDialogText: html.includes('처리가 완료되었습니다.'),
   };
@@ -233,6 +242,36 @@ for (const featureId of ['home', 'providers', 'passes', 'reviews', 'pricing', 'f
   }));
 }
 
+
+for (const featureId of ['home', 'post-list', 'popular-posts', 'community-guide', 'new-post', 'notifications', 'my-comments', 'rules', 'writing-guide', 'support', 'report', 'author-profile', 'comment-timeline']) {
+  reports.push(await renderRunner({
+    serviceId: 'comments',
+    conditionId: 'variantA',
+    taskIndex: 0,
+    showRequest: false,
+    snapshotOverrides: {
+      featurePanel: { featureId, triggerFocusId: 'community-nav-1', commentId: 'comment-minji' },
+      savedFeatureItems: {},
+    },
+  }));
+}
+
+for (const featureId of ['home', 'help', 'history', 'saved', 'folder', 'request', 'guide', 'support', 'alert', 'search-run', 'type-help', 'result-history']) {
+  reports.push(await renderRunner({
+    serviceId: 'search',
+    conditionId: 'variantA',
+    taskIndex: 0,
+    showRequest: false,
+    snapshotOverrides: {
+      featurePanel: { featureId, triggerFocusId: 'search-nav-1', resultId: 'result-change-guide', query: '예약 변경' },
+      savedFeatureItems: {},
+      searchAlertEnabled: featureId === 'alert',
+      query: '예약 변경',
+      queryDraft: '예약 변경',
+    },
+  }));
+}
+
 let failed = false;
 for (const report of reports) {
   const checks = [
@@ -252,11 +291,21 @@ for (const report of reports) {
   if (report.service === 'calendar' && report.hasFeaturePanel) {
     checks.push(report.placeholderTextCount <= 1);
   }
+  if (report.service === 'comments' && report.hasFeaturePanel) {
+    checks.push(report.placeholderTextCount === 0);
+  }
   if (report.service === 'comments' && report.condition === 'variantA' && report.taskIndex === 0 && report.htmlLength > 14500) {
     checks.push(report.hasReplyQuestionForm);
     checks.push(!report.hasGenericTaskFinalDialogText);
   }
-  if (report.service === 'calendar' && report.condition === 'variantA' && report.taskIndex === 0 && report.htmlLength > 26000 && !report.hasFeaturePanel) {
+  if (report.service === 'search') {
+    checks.push(report.hasSearchFeatureActions);
+    checks.push(!report.hasGenericTaskFinalDialogText);
+    if (report.hasFeaturePanel) {
+      checks.push(report.placeholderTextCount === 0);
+    }
+  }
+  if (report.service === 'calendar' && !report.showRequest && report.condition === 'variantA' && report.taskIndex === 0 && report.htmlLength > 26000 && !report.hasFeaturePanel) {
     checks.push(report.hasBookingCompletionPanel);
   }
   if (report.service === 'calendar' && !report.showRequest && report.taskIndex === 0 && report.condition === 'variantA' && report.htmlLength > 26000) {

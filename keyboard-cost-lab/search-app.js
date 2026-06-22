@@ -254,6 +254,11 @@ function createConditionRuntime(variantId) {
     sortDraft: 'relevance',
     type: 'all',
     typeDraft: 'all',
+    query: searchScenario.queryLabel,
+    queryDraft: searchScenario.queryLabel,
+    featurePanel: null,
+    savedFeatureItems: {},
+    searchAlertEnabled: false,
     savedByResultId: {},
     openedResultId: null,
     currentResultId: searchScenario.results[0]?.id ?? null,
@@ -299,6 +304,11 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.sortDraft = snapshot.sortDraft ?? runtime.sortDraft;
   runtime.type = snapshot.type ?? runtime.type;
   runtime.typeDraft = snapshot.typeDraft ?? runtime.typeDraft;
+  runtime.query = snapshot.query ?? runtime.query;
+  runtime.queryDraft = snapshot.queryDraft ?? runtime.queryDraft;
+  runtime.featurePanel = snapshot.featurePanel ? deepClone(snapshot.featurePanel) : null;
+  runtime.savedFeatureItems = deepClone(snapshot.savedFeatureItems ?? runtime.savedFeatureItems);
+  runtime.searchAlertEnabled = Boolean(snapshot.searchAlertEnabled ?? runtime.searchAlertEnabled);
   runtime.savedByResultId = deepClone(snapshot.savedByResultId ?? runtime.savedByResultId);
   runtime.openedResultId = snapshot.openedResultId ?? null;
   runtime.currentResultId = snapshot.currentResultId ?? runtime.currentResultId;
@@ -318,6 +328,11 @@ function serializeRuntimeSnapshot(run) {
     sortDraft: run.sortDraft,
     type: run.type,
     typeDraft: run.typeDraft,
+    query: run.query,
+    queryDraft: run.queryDraft,
+    featurePanel: run.featurePanel ? deepClone(run.featurePanel) : null,
+    savedFeatureItems: deepClone(run.savedFeatureItems),
+    searchAlertEnabled: run.searchAlertEnabled,
     savedByResultId: deepClone(run.savedByResultId),
     openedResultId: run.openedResultId,
     currentResultId: run.currentResultId,
@@ -335,6 +350,11 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.sortDraft = hydrated.sortDraft;
   targetRun.type = hydrated.type;
   targetRun.typeDraft = hydrated.typeDraft;
+  targetRun.query = hydrated.query;
+  targetRun.queryDraft = hydrated.queryDraft;
+  targetRun.featurePanel = hydrated.featurePanel;
+  targetRun.savedFeatureItems = hydrated.savedFeatureItems;
+  targetRun.searchAlertEnabled = hydrated.searchAlertEnabled;
   targetRun.savedByResultId = hydrated.savedByResultId;
   targetRun.openedResultId = hydrated.openedResultId;
   targetRun.currentResultId = hydrated.currentResultId;
@@ -393,6 +413,7 @@ function prepareCurrentTaskForMain() {
   run.isWorking = false;
   run.previewVisitedThisTask = {};
   run.openedResultId = null;
+  run.featurePanel = null;
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
@@ -599,7 +620,7 @@ function handleRootSubmit(event) {
   if (APP_MODE !== 'runner') return;
   if (form.matches('[data-simulated-submit="search-query"]')) {
     event.preventDefault();
-    showSiteNotice('새 검색 실행은 현재 점검 중입니다. 표시된 검색 결과에서 계속 진행하십시오.');
+    runSearchQuery();
   }
 }
 
@@ -608,8 +629,8 @@ function handleRootClick(event) {
   if (inertLink) {
     event.preventDefault();
     if (APP_MODE === 'runner') {
-      const label = inertLink.textContent?.trim() || '해당';
-      showSiteNotice(`${label} 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.`);
+      const featureId = inertLink.dataset.featureId || 'home';
+      openSearchFeaturePanel(featureId, inertLink.dataset.focusId);
       return;
     }
   }
@@ -652,9 +673,48 @@ function handleRootClick(event) {
     return;
   }
 
-  if (action === 'site-placeholder') {
+  if (action === 'run-search-query') {
     event.preventDefault();
-    showSiteNotice(actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.');
+    runSearchQuery();
+    return;
+  }
+
+  if (action === 'open-search-feature') {
+    event.preventDefault();
+    openSearchFeaturePanel(actionTarget.dataset.featureId, actionTarget.dataset.focusId, {
+      resultId: actionTarget.dataset.resultId || '',
+    });
+    return;
+  }
+
+  if (action === 'close-search-feature') {
+    event.preventDefault();
+    closeSearchFeaturePanel(actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'search-message') {
+    event.preventDefault();
+    showSiteNotice(actionTarget.dataset.notice || '처리했습니다.');
+    if (actionTarget.dataset.focusId) requestFocus(`[data-focus-id="${actionTarget.dataset.focusId}"]`);
+    return;
+  }
+
+  if (action === 'toggle-search-alert') {
+    event.preventDefault();
+    toggleSearchAlert(actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'save-search-query') {
+    event.preventDefault();
+    saveCurrentSearchQuery(actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'set-search-filter') {
+    event.preventDefault();
+    setSearchFilterFromFeature(actionTarget);
     return;
   }
 
@@ -752,6 +812,7 @@ function handleRootChange(event) {
   if (!run) return;
   if (element.name === 'sort') run.sortDraft = element.value;
   if (element.name === 'type') run.typeDraft = element.value;
+  if (element.name === 'search-query') run.queryDraft = element.value;
 }
 
 function handleRootKeydown(event) {
@@ -771,9 +832,7 @@ function handleRootKeydown(event) {
 
   if (run.modal && event.key === 'Escape') {
     event.preventDefault();
-    if (run.modal.kind !== 'task-final') {
-      closeModal();
-    }
+    closeModal();
     return;
   }
 
@@ -959,6 +1018,7 @@ function openResultPreview(resultId, triggerFocusId) {
   if (!result) return;
 
   noteWrongResultAction(resultId, 'open-preview');
+  run.siteNotice = '';
   run.modal = {
     kind: 'result-preview',
     resultId,
@@ -1016,25 +1076,12 @@ function closeModal() {
     return;
   }
 
-  if (closingModal.kind === 'task-final') {
-    run.finalConfirmationAcknowledged = true;
-    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
-    run.currentTaskLogger?.setModalState({
-      open: false,
-      containerSelector: null,
-      triggerFocusId: closingModal.triggerFocusId,
-      closedAt: performance.now(),
-    });
-    requestFocus('[data-focus-id="runner-footer-end"]');
-    render();
-    return;
-  }
-
   if (closingModal.kind === 'result-preview' && closingModal.resultId) {
     run.previewVisitedThisTask = {
       ...run.previewVisitedThisTask,
       [closingModal.resultId]: true,
     };
+    run.siteNotice = '';
   }
 
   run.currentTaskLogger?.setModalState({
@@ -1049,14 +1096,6 @@ function closeModal() {
   } else {
     run.currentTaskLogger?.note('context-reset', { reason: 'dialog-closed-returned-to-search-heading' });
     requestFocus('#search-heading');
-  }
-
-  if (closingModal.kind === 'result-preview' && closingModal.resultId) {
-    openTaskFinalModal({
-      title: '처리가 완료되었습니다.',
-      description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
-    });
-    return;
   }
 
   render();
@@ -1080,10 +1119,10 @@ function saveResult(resultId, triggerFocusId) {
     alreadySaved,
   });
 
-  openTaskFinalModal({
-    title: '처리가 완료되었습니다.',
-    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
-  });
+  run.siteNotice = alreadySaved ? '이미 저장한 자료입니다.' : '자료를 저장했습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
 }
 
 function openResult(resultId, triggerFocusId) {
@@ -1102,10 +1141,10 @@ function openResult(resultId, triggerFocusId) {
   run.openedResultId = resultId;
   run.currentTaskLogger?.note('open-result', { resultId });
 
-  openTaskFinalModal({
-    title: '처리가 완료되었습니다.',
-    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
-  });
+  run.siteNotice = '자료를 열었습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
 }
 
 function isTaskSatisfied(task, run) {
@@ -1133,11 +1172,11 @@ function isTaskSatisfied(task, run) {
 }
 
 function getEndTaskOutcome(task, run) {
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
+  const success = isTaskSatisfied(task, run);
   if (success) {
     return {
       success: true,
-      reason: 'participant-ended-after-final-confirmation',
+      reason: 'participant-ended-after-service-action',
       message: '과업 수행에 성공했습니다.',
     };
   }
@@ -1165,8 +1204,6 @@ function getEndTaskOutcome(task, run) {
     } else {
       message = '요청한 자료를 열지 못했습니다.';
     }
-  } else if (run.finalConfirmationAcknowledged === false && isTaskSatisfied(task, run)) {
-    message = '최종 확인 대화상자를 확인하지 않았습니다.';
   }
 
   return {
@@ -1345,7 +1382,8 @@ function renderRunnerPage() {
       <main class="runner-main" aria-label="검색 결과 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">검색 결과 목록 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
-        ${renderSearchHeader(conditionId)}
+        ${renderSearchHeader(conditionId, run)}
+        ${renderSearchFeaturePanel(run)}
         ${renderResultControls(conditionId, run)}
         ${renderSearchSection(conditionId, run, visibleSearch)}
       </main>
@@ -1655,28 +1693,265 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
   });
 }
 
-function renderSearchHeader(conditionId) {
-  const links = ['홈', '통합 검색 도움말', '검색 기록', '저장한 자료', '자료 요청', '이용 안내', '문의'];
+function renderSearchHeader(conditionId, run) {
+  const links = [
+    { label: '홈', featureId: 'home' },
+    { label: '통합 검색 도움말', featureId: 'help' },
+    { label: '검색 기록', featureId: 'history' },
+    { label: '저장한 자료', featureId: 'saved' },
+    { label: '자료 요청', featureId: 'request' },
+    { label: '이용 안내', featureId: 'guide' },
+    { label: '문의', featureId: 'support' },
+  ];
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       <div class="sim-topbar">
-        <a href="#" class="brand-link" data-focus-id="search-home" data-inert-link="true">상담 지원 자료실</a>
+        <a href="#" class="brand-link" data-action="open-search-feature" data-feature-id="home" data-focus-id="search-home">상담 지원 자료실</a>
         <form class="sim-search" role="search" aria-label="자료 검색" data-simulated-submit="search-query">
           <label class="sr-only" for="result-search-input">검색어</label>
-          <input id="result-search-input" type="search" value="상담 예약" data-focus-id="result-search-input">
-          <button class="button button-ghost" type="button" data-action="site-placeholder" data-focus-id="result-search-submit" data-notice="새 검색 실행은 현재 점검 중입니다. 표시된 검색 결과에서 계속 진행하십시오.">검색</button>
+          <input id="result-search-input" name="search-query" type="search" value="${escapeHtml(run.queryDraft)}" data-focus-id="result-search-input">
+          <button class="button button-ghost" type="submit" data-action="run-search-query" data-focus-id="result-search-submit">검색</button>
         </form>
         <div class="sim-actions">
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="result-alert" data-notice="검색 알림 설정은 현재 점검 중입니다.">검색 알림</button>
-          <button class="button button-ghost" data-action="site-placeholder" data-focus-id="result-folder" data-notice="보관함 화면은 현재 점검 중입니다.">보관함</button>
+          <button class="button button-ghost" data-action="open-search-feature" data-feature-id="alert" data-focus-id="result-alert">검색 알림</button>
+          <button class="button button-ghost" data-action="open-search-feature" data-feature-id="folder" data-focus-id="result-folder">보관함</button>
         </div>
       </div>
       <nav aria-label="검색 보조 내비게이션">
-        ${links.map((label, index) => `<a href="#" class="nav-link" data-focus-id="search-nav-${index + 1}" data-inert-link="true">${escapeHtml(label)}</a>`).join('')}
+        ${links.map((item, index) => `<a href="#" class="nav-link" data-action="open-search-feature" data-feature-id="${escapeHtml(item.featureId)}" data-focus-id="search-nav-${index + 1}">${escapeHtml(item.label)}</a>`).join('')}
       </nav>
     </header>
   `;
 }
+function runSearchQuery() {
+  const run = getCurrentRun();
+  if (!run) return;
+  const query = (run.queryDraft || '').trim() || searchScenario.queryLabel;
+  run.query = query;
+  run.queryDraft = query;
+  run.featurePanel = {
+    featureId: 'search-run',
+    triggerFocusId: 'result-search-submit',
+    query,
+  };
+  run.siteNotice = `검색어 ${query}로 검색 결과를 새로 고쳤습니다.`;
+  run.liveStatus = run.siteNotice;
+  requestFocus('#search-feature-title');
+  render();
+}
+
+function openSearchFeaturePanel(featureId = 'home', triggerFocusId = '', { resultId = '' } = {}) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.featurePanel = {
+    featureId,
+    triggerFocusId,
+    resultId,
+  };
+  run.siteNotice = '';
+  requestFocus('#search-feature-title');
+  render();
+}
+
+function closeSearchFeaturePanel(fallbackFocusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  const triggerFocusId = fallbackFocusId || run.featurePanel?.triggerFocusId;
+  run.featurePanel = null;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
+}
+
+function toggleSearchAlert(triggerFocusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.searchAlertEnabled = !run.searchAlertEnabled;
+  run.siteNotice = run.searchAlertEnabled ? '검색 알림을 켰습니다.' : '검색 알림을 껐습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
+}
+
+function saveCurrentSearchQuery(triggerFocusId = '') {
+  const run = getCurrentRun();
+  if (!run) return;
+  const key = `query:${run.query}`;
+  const alreadySaved = Boolean(run.savedFeatureItems[key]);
+  run.savedFeatureItems = {
+    ...run.savedFeatureItems,
+    [key]: true,
+  };
+  run.siteNotice = alreadySaved ? '이미 보관한 검색어입니다.' : '검색어를 보관했습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
+}
+
+function setSearchFilterFromFeature(actionTarget) {
+  const run = getCurrentRun();
+  if (!run) return;
+  if (actionTarget.dataset.sort) run.sortDraft = actionTarget.dataset.sort;
+  if (actionTarget.dataset.type) run.typeDraft = actionTarget.dataset.type;
+  run.siteNotice = '조건 선택 영역에 값을 입력했습니다. 조건 적용을 실행하면 목록이 바뀝니다.';
+  run.liveStatus = run.siteNotice;
+  requestFocus('[data-focus-id="apply-result-filters"]');
+  render();
+}
+
+function renderSearchFeaturePanel(run) {
+  if (!run.featurePanel) return '';
+  const featureId = run.featurePanel.featureId;
+  const content = renderSearchFeaturePanelContent(featureId, run);
+  if (!content) return '';
+  return `
+    <section class="card feature-panel" data-feature-panel aria-labelledby="search-feature-title">
+      ${content}
+    </section>
+  `;
+}
+
+function renderSearchFeaturePanelContent(featureId, run) {
+  const savedResults = searchScenario.results.filter((result) => run.savedByResultId[result.id]);
+  const result = run.featurePanel?.resultId ? getResultById(run.featurePanel.resultId) : null;
+  const panels = {
+    home: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">자료실 홈</p>
+          <h2 id="search-feature-title" tabindex="-1">상담 지원 자료실 처음 화면</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>자주 찾는 상담 예약 자료와 최근 갱신 자료를 모아 보여줍니다.</p>
+      <div class="button-row">
+        <button class="button button-secondary" data-action="set-search-filter" data-sort="newest" data-type="guide" data-focus-id="home-newest-guide">최근 안내문 보기</button>
+        <button class="button button-ghost" data-action="set-search-filter" data-sort="title" data-type="faq" data-focus-id="home-faq">질문답변 보기</button>
+      </div>
+    `,
+    help: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">검색 도움말</p>
+          <h2 id="search-feature-title" tabindex="-1">통합 검색 도움말</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <ul>
+        <li>정렬 기준으로 최신 자료, 제목순, 정확도순을 고를 수 있습니다.</li>
+        <li>자료 범위로 안내문, 질문답변, 신청 서식을 좁힐 수 있습니다.</li>
+        <li>저장한 자료는 보관함에서 다시 볼 수 있습니다.</li>
+      </ul>
+    `,
+    history: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">최근 이용</p>
+          <h2 id="search-feature-title" tabindex="-1">검색 기록</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <ul class="plain-list">
+        <li>예약 변경 · 오늘 오전 9:20</li>
+        <li>비대면 상담 · 어제 오후 6:10</li>
+        <li>확정 문자 · 3월 30일 오후 2:45</li>
+      </ul>
+      <button class="button button-secondary" data-action="save-search-query" data-focus-id="history-save-query">현재 검색어 보관</button>
+    `,
+    saved: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">저장한 자료</p>
+          <h2 id="search-feature-title" tabindex="-1">저장한 자료 목록</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      ${savedResults.length ? `<ul>${savedResults.map((item) => `<li>${escapeHtml(item.title)} · ${escapeHtml(item.badge)}</li>`).join('')}</ul>` : '<p>아직 저장한 자료가 없습니다.</p>'}
+      <p class="muted">검색 결과에서 저장을 누르면 이곳에 표시됩니다.</p>
+    `,
+    folder: () => panels.saved(),
+    request: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">자료 요청</p>
+          <h2 id="search-feature-title" tabindex="-1">자료 요청 접수</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>찾는 자료가 없으면 담당 부서에 자료 보완을 요청할 수 있습니다.</p>
+      <button class="button button-secondary" data-action="search-message" data-focus-id="request-submit" data-notice="자료 요청을 접수했습니다.">자료 요청 접수</button>
+    `,
+    guide: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">이용 안내</p>
+          <h2 id="search-feature-title" tabindex="-1">자료실 이용 안내</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>자료는 상담 예약, 변경, 취소, 비대면 연결, 준비 서식 순서로 정리되어 있습니다.</p>
+      <p>신청 서식은 실제 제출 대신 실험용 상태 카드로 열립니다.</p>
+    `,
+    support: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">문의</p>
+          <h2 id="search-feature-title" tabindex="-1">자료실 문의</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>자료 위치, 갱신 요청, 보관함 문제를 문의할 수 있습니다.</p>
+      <button class="button button-secondary" data-action="search-message" data-focus-id="support-submit" data-notice="문의가 접수되었습니다.">문의 접수</button>
+    `,
+    alert: () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">검색 알림</p>
+          <h2 id="search-feature-title" tabindex="-1">검색 알림 설정</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>현재 검색어 ${escapeHtml(run.query)}에 새 자료가 올라오면 알림을 받을 수 있습니다.</p>
+      <button class="button button-secondary" data-action="toggle-search-alert" data-focus-id="alert-toggle">${run.searchAlertEnabled ? '검색 알림 끄기' : '검색 알림 켜기'}</button>
+    `,
+    'search-run': () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">검색 실행</p>
+          <h2 id="search-feature-title" tabindex="-1">검색 결과를 새로 고쳤습니다</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <p>검색어 ${escapeHtml(run.query)} 기준으로 현재 조건에 맞는 자료를 보여줍니다.</p>
+      <button class="button button-secondary" data-action="save-search-query" data-focus-id="search-run-save">검색어 보관</button>
+    `,
+    'type-help': () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">자료 범위 설명</p>
+          <h2 id="search-feature-title" tabindex="-1">자료 범위</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      <dl class="meta-list compact">
+        <div><dt>안내문</dt><dd>예약 절차와 운영 기준을 정리한 자료입니다.</dd></div>
+        <div><dt>질문답변</dt><dd>자주 묻는 질문과 해결 방법을 모은 자료입니다.</dd></div>
+        <div><dt>신청 서식</dt><dd>상담 신청이나 확인에 필요한 양식 자료입니다.</dd></div>
+      </dl>
+    `,
+    'result-history': () => `
+      <div class="feature-panel-header">
+        <div>
+          <p class="eyebrow">자료 정보</p>
+          <h2 id="search-feature-title" tabindex="-1">자료 갱신 정보</h2>
+        </div>
+        <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
+      </div>
+      ${result ? `<p>${escapeHtml(result.title)} 자료는 ${escapeHtml(result.timeLabel)}에 갱신되었습니다.</p><p class="muted">자료 유형: ${escapeHtml(result.badge)}</p>` : '<p>자료 정보를 찾을 수 없습니다.</p>'}
+    `,
+  };
+  return (panels[featureId] || panels.home)();
+}
+
 
 function renderResultControls(conditionId, run) {
   return `
@@ -1701,8 +1976,8 @@ function renderResultControls(conditionId, run) {
         </label>
       </div>
       <div class="button-row">
-        <a href="#" class="inline-link" data-focus-id="result-policy-link" data-inert-link="true">검색 도움말 보기</a>
-        <a href="#" class="inline-link" data-focus-id="result-help-link" data-inert-link="true">자료 범위 설명 보기</a>
+        <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="help" data-focus-id="result-policy-link">검색 도움말 보기</a>
+        <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="type-help" data-focus-id="result-help-link">자료 범위 설명 보기</a>
         <button class="button button-primary" data-action="apply-result-filters" data-focus-id="apply-result-filters" ${run.isApplying ? 'disabled' : ''}>
           ${run.isApplying ? '적용 중…' : '조건 적용'}
         </button>
@@ -1717,7 +1992,7 @@ function renderSearchSection(conditionId, run, visibleSearch) {
       <div class="results-header">
         <div>
           <h2 id="search-heading" tabindex="-1">검색 결과</h2>
-          <p class="muted">검색어 ${escapeHtml(searchScenario.queryLabel)} · 표시된 자료 ${visibleSearch.length}개</p>
+          <p class="muted">검색어 ${escapeHtml(run.query)} · 표시된 자료 ${visibleSearch.length}개</p>
         </div>
       </div>
       ${conditionId === 'variantA'
@@ -1738,11 +2013,11 @@ function renderVariantAResultList(run, visibleSearch) {
         <li class="result-card ${run.openedResultId === result.id ? 'result-card-expanded' : ''}">
           <div class="result-card-head">
             <div class="result-head-links">
-              <a href="#" class="inline-link" data-focus-id="result-title-${result.id}" data-inert-link="true">${escapeHtml(result.title)}</a>
+              <a href="#" class="inline-link" data-action="open-result" data-result-id="${result.id}" data-focus-id="result-title-${result.id}">${escapeHtml(result.title)}</a>
               <span class="pill ${result.type === 'form' ? 'pill-warning' : ''}">${escapeHtml(result.badge)}</span>
-              <a href="#" class="inline-link" data-focus-id="result-time-${result.id}" data-inert-link="true">${escapeHtml(result.timeLabel)}</a>
+              <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="result-history" data-result-id="${result.id}" data-focus-id="result-time-${result.id}">${escapeHtml(result.timeLabel)}</a>
             </div>
-            <a href="#" class="inline-link" data-focus-id="result-share-${result.id}" data-inert-link="true">공유</a>
+            <a href="#" class="inline-link" data-action="search-message" data-focus-id="result-share-${result.id}" data-notice="자료 공유 주소를 복사했습니다.">공유</a>
           </div>
           <p class="result-summary"><strong>${escapeHtml(result.summary)}</strong></p>
           <p class="muted">${escapeHtml(result.body)}</p>
@@ -1831,20 +2106,6 @@ function renderOpenedResultStatus(result) {
 function renderResultModal(modal, run) {
   if (modal.kind === 'task-end-confirm') {
     return renderEndTaskConfirmationDialogHtml();
-  }
-
-  if (modal.kind === 'task-final') {
-    return `
-      <div class="modal-backdrop">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
-          <h2 id="dialog-title" tabindex="-1">${escapeHtml(modal.title)}</h2>
-          <p id="dialog-description">${escapeHtml(modal.description)}</p>
-          <div class="button-row">
-            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="task-final-confirm">확인</button>
-          </div>
-        </div>
-      </div>
-    `;
   }
 
   const result = getResultById(modal.resultId);

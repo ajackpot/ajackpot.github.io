@@ -44,11 +44,14 @@ export function formatServiceScreenButtonLabel(serviceLabel) {
   return `${serviceLabel} 화면으로 이동`;
 }
 
-export function renderRunnerFooterHtml({ jumpLabel, endLabel = '과업 종료' } = {}) {
+export function renderRunnerFooterHtml({ jumpLabel, endLabel = '과업 종료', beforeEndHtml = '' } = {}) {
   return `
     <footer class="runner-footer" data-runner-footer data-measurement-exempt="true">
-      <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">${escapeHtml(jumpLabel)}</button>
-      <button class="button button-primary" data-action="end-task" data-focus-id="runner-footer-end">${escapeHtml(endLabel)}</button>
+      ${beforeEndHtml ? `<div class="runner-footer-extra">${beforeEndHtml}</div>` : ''}
+      <div class="runner-footer-actions">
+        <button class="button button-secondary" data-action="jump-results" data-focus-id="runner-footer-jump">${escapeHtml(jumpLabel)}</button>
+        <button class="button button-primary" data-action="end-task" data-focus-id="runner-footer-end">${escapeHtml(endLabel)}</button>
+      </div>
     </footer>
   `;
 }
