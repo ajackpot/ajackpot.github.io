@@ -1,100 +1,72 @@
 export const calendarBenchmarkGraphs = {
   variantA: {
     label: '비교안 A · 조작 부담이 큰 구조',
-    description: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간마다 여러 번 멈춰야 하며, 대화상자를 닫은 뒤 결과 제목 근처부터 다시 찾아야 하는 구조.',
+    description: '전체 메뉴가 접힌 것처럼 보이지만 메뉴 항목이 계속 순차 탐색되고, 예약 시간과 옵션 선택이 여러 멈춤 지점으로 흩어진 구조.',
     tasks: {
-      task1_book_remote_tuesday: {
-        title: '화요일 오후 비대면 30분 상담 예약',
+      task1_book_remote_tuesday_options: {
+        title: '비대면 상담 예약과 상담 옵션 선택',
         assumptions: [
-          '상단 링크와 보조 링크를 지나 예약 가능 시간 영역에 도달해야 한다.',
-          '예약 시간마다 선택과 자세히 보기 버튼이 분리되어 있다.',
-          '대화상자를 닫으면 방금 보던 예약 시간으로 돌아가지 않고 결과 제목 근처부터 다시 찾아야 한다.',
+          '접힌 전체 메뉴 항목이 계속 초점을 받아 예약 조건 영역에 도달하기 전 탐색 비용이 늘어난다.',
+          '예약 시간을 선택한 뒤 상담 옵션 선택지가 화면상으로는 접힌 것처럼 보이지만 각 선택지가 따로 초점을 받는다.',
+          '상담 옵션을 확인하고 예약 확정까지 여러 번 이동해야 한다.',
         ],
         steps: [
-          { id: 'reach-filters', bucket: 'entry', navMoves: 16, activations: 0, decisions: 2, waits: 0, speechUnits: 6, scanSteps: 18 },
+          { id: 'pass-collapsed-nav', bucket: 'entry', navMoves: 18, activations: 0, decisions: 2, waits: 0, speechUnits: 8, scanSteps: 22 },
           { id: 'set-filters', bucket: 'entry', navMoves: 10, activations: 4, decisions: 4, waits: 1, speechUnits: 6, scanSteps: 12 },
-          { id: 'reach-results', bucket: 'entry', navMoves: 9, activations: 0, decisions: 3, waits: 0, speechUnits: 4, scanSteps: 10 },
-          { id: 'scan-slot-list', bucket: 'repeated', navMoves: 14, activations: 0, decisions: 7, waits: 0, speechUnits: 9, scanSteps: 18 },
-          { id: 'open-slot-detail', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
-          { id: 'confirm-dialog', bucket: 'recovery', navMoves: 6, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
+          { id: 'scan-slot-list', bucket: 'repeated', navMoves: 14, activations: 1, decisions: 7, waits: 0, speechUnits: 9, scanSteps: 18 },
+          { id: 'option-pseudo-combos', bucket: 'repeated', navMoves: 16, activations: 3, decisions: 6, waits: 0, speechUnits: 10, scanSteps: 20 },
+          { id: 'confirm-booking', bucket: 'recovery', navMoves: 5, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
         ],
       },
-      task2_move_earlier_same_day: {
-        title: '같은 날 더 이른 시간대로 변경',
+      task2_cancel_and_rebook_thursday: {
+        title: '기존 예약 취소 뒤 목요일 오전 대면 예약',
         assumptions: [
-          '기존 예약 상태를 확인하는 영역까지 다시 차례대로 이동해야 한다.',
-          '조건은 유지되지만 결과 목록 위치가 기억되지 않아 다시 찾아야 한다.',
-          '변경 확인 대화상자를 닫으면 이전 예약 시간 대신 결과 제목 근처부터 다시 살펴야 한다.',
+          '시작 시 예약 2개가 있어 새 예약을 바로 시도하면 최대 2개 제한 안내를 만나게 된다.',
+          '현재 예약 영역이 결과 뒤에 있어 기존 예약 취소까지 다시 순차 이동해야 한다.',
+          '취소 뒤 조건을 다시 맞추고 목요일 대면 예약 시간을 찾아야 한다.',
         ],
         steps: [
-          { id: 'reorient', bucket: 'entry', navMoves: 20, activations: 0, decisions: 3, waits: 0, speechUnits: 8, scanSteps: 23 },
-          { id: 'scan-earlier-options', bucket: 'repeated', navMoves: 11, activations: 0, decisions: 5, waits: 0, speechUnits: 7, scanSteps: 14 },
-          { id: 'open-target-slot', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
-          { id: 'confirm-change', bucket: 'recovery', navMoves: 7, activations: 1, decisions: 2, waits: 1, speechUnits: 4, contextResets: 1, scanSteps: 8 },
-        ],
-      },
-      task3_cancel_and_rebook_thursday: {
-        title: '취소 후 목요일 오전 대면 예약',
-        assumptions: [
-          '취소 버튼이 결과 목록 뒤에 있어 먼저 다시 찾아야 한다.',
-          '취소 후 조건을 다시 맞춘 다음 목요일 예약 시간을 차례대로 찾아야 한다.',
-          '새 예약을 확정할 때까지 대화상자 진입과 결과 제목으로의 복귀 부담이 겹친다.',
-        ],
-        steps: [
-          { id: 'reach-current-booking', bucket: 'entry', navMoves: 22, activations: 0, decisions: 3, waits: 0, speechUnits: 8, scanSteps: 25 },
-          { id: 'cancel-existing', bucket: 'recovery', navMoves: 4, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 5 },
+          { id: 'encounter-limit', bucket: 'entry', navMoves: 20, activations: 2, decisions: 4, waits: 1, speechUnits: 8, scanSteps: 24 },
+          { id: 'reach-current-bookings', bucket: 'recovery', navMoves: 18, activations: 0, decisions: 3, waits: 0, speechUnits: 7, contextResets: 1, scanSteps: 21 },
+          { id: 'cancel-one-booking', bucket: 'recovery', navMoves: 4, activations: 2, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 6 },
           { id: 'retune-filters', bucket: 'entry', navMoves: 12, activations: 3, decisions: 4, waits: 1, speechUnits: 6, scanSteps: 14 },
-          { id: 'scan-thursday-options', bucket: 'repeated', navMoves: 12, activations: 0, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 15 },
-          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 6, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
+          { id: 'scan-thursday-options', bucket: 'repeated', navMoves: 12, activations: 1, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 15 },
+          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 5, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
         ],
       },
     },
   },
   variantB: {
     label: '비교안 B · 개선 구조',
-    description: '맨 앞의 예약 가능 시간 바로 이동 링크로 처음 진입 부담을 낮추고, 예약 시간표에 한 번만 들어간 뒤 이동하며, 대화상자 초점 이동과 복귀를 보장하는 구조.',
+    description: '접힌 메뉴 항목은 초점 대상에서 제외하고, 예약 가능 시간으로 바로 이동한 뒤 시간표와 옵션을 짧게 조작하는 구조.',
     tasks: {
-      task1_book_remote_tuesday: {
-        title: '화요일 오후 비대면 30분 상담 예약',
+      task1_book_remote_tuesday_options: {
+        title: '비대면 상담 예약과 상담 옵션 선택',
         assumptions: [
-          '맨 앞의 예약 가능 시간 바로 이동 링크로 첫 진입 부담이 낮다.',
-          '예약 시간표가 하나의 묶음으로 제공되어 한 번만 들어간 뒤 이동한다.',
-          '대화상자가 열리면 첫 동작으로 이동하고 닫히면 호출한 예약 시간으로 돌아온다.',
+          '접힌 전체 메뉴 항목은 초점 대상에서 제외되어 첫 진입 비용이 줄어든다.',
+          '예약 가능 시간 바로 이동과 시간표 묶음 이동으로 목표 시간을 찾는 비용을 줄인다.',
+          '상담 옵션은 기본 폼 요소로 묶여 있어 필요한 값만 고르고 예약 확정으로 이어진다.',
         ],
         steps: [
-          { id: 'skip-to-main', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
+          { id: 'skip-to-results', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'set-filters', bucket: 'entry', navMoves: 6, activations: 4, decisions: 4, waits: 1, speechUnits: 4, scanSteps: 8 },
-          { id: 'enter-grid', bucket: 'entry', navMoves: 1, activations: 0, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
-          { id: 'arrow-to-target', bucket: 'repeated', navMoves: 7, activations: 0, decisions: 4, waits: 0, speechUnits: 5, scanSteps: 8 },
-          { id: 'open-and-confirm', bucket: 'recovery', navMoves: 2, activations: 2, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
+          { id: 'move-grid-target', bucket: 'repeated', navMoves: 7, activations: 1, decisions: 4, waits: 0, speechUnits: 5, scanSteps: 8 },
+          { id: 'set-options', bucket: 'repeated', navMoves: 6, activations: 3, decisions: 4, waits: 0, speechUnits: 4, scanSteps: 7 },
+          { id: 'confirm-booking', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
         ],
       },
-      task2_move_earlier_same_day: {
-        title: '같은 날 더 이른 시간대로 변경',
+      task2_cancel_and_rebook_thursday: {
+        title: '기존 예약 취소 뒤 목요일 오전 대면 예약',
         assumptions: [
-          '현재 예약 상태가 같은 영역에 유지되어 다시 파악하는 부담이 적다.',
-          '예약 시간 사이 이동은 방향키 중심이라 짧게 끝난다.',
-          '변경 후 초점이 새 예약 요약으로 이동한다.',
+          '현재 예약 내용이 앞쪽에 있어 예약 개수 제한을 이해한 뒤 취소로 이어지기 쉽다.',
+          '조건 적용 후 결과 제목으로 초점이 이동하고 시간표 안에서 목표 시간까지 이동한다.',
+          '취소와 새 예약 확인 후 초점 복귀가 예측 가능하다.',
         ],
         steps: [
-          { id: 'reenter-grid', bucket: 'entry', navMoves: 3, activations: 0, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
-          { id: 'move-to-earlier-slot', bucket: 'repeated', navMoves: 4, activations: 0, decisions: 3, waits: 0, speechUnits: 3, scanSteps: 5 },
-          { id: 'confirm-change', bucket: 'recovery', navMoves: 2, activations: 2, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
-        ],
-      },
-      task3_cancel_and_rebook_thursday: {
-        title: '취소 후 목요일 오전 대면 예약',
-        assumptions: [
-          '현재 예약 영역이 빠르게 닿을 수 있는 위치에 놓인다.',
-          '조건을 적용한 뒤 결과 제목으로 초점이 이동한다.',
-          '맨 앞의 바로 이동 링크로 새 예약 시간을 고를 때까지 반복되는 상단 영역을 건너뛸 수 있다.',
-        ],
-        steps: [
-          { id: 'cancel-existing', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 2 },
+          { id: 'cancel-one-booking', bucket: 'recovery', navMoves: 3, activations: 2, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 4 },
           { id: 'set-new-filters', bucket: 'entry', navMoves: 6, activations: 3, decisions: 4, waits: 1, speechUnits: 4, scanSteps: 7 },
-          { id: 'enter-grid', bucket: 'entry', navMoves: 1, activations: 0, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
-          { id: 'move-to-thursday-target', bucket: 'repeated', navMoves: 6, activations: 0, decisions: 4, waits: 0, speechUnits: 4, scanSteps: 7 },
-          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 2, activations: 2, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
+          { id: 'move-to-thursday-target', bucket: 'repeated', navMoves: 6, activations: 1, decisions: 4, waits: 0, speechUnits: 4, scanSteps: 7 },
+          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
         ],
       },
     },

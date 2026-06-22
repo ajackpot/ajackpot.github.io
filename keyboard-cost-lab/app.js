@@ -284,6 +284,7 @@ function createConditionRuntime(variantId) {
     filters: defaultFilters(),
     filtersDraft: defaultFilters(),
     booking: null,
+    bookings: [],
     bookingCompletion: null,
     modal: null,
     liveStatus: '필터를 적용하면 결과 수가 갱신됩니다.',
@@ -300,6 +301,9 @@ function createConditionRuntime(variantId) {
     savedFeatureItems: {},
     selectedPass: 'single',
     reminderSettings: { email: true, sms: false },
+    navExpanded: false,
+    bookingOptionDraft: defaultBookingOptions(),
+    bookingOptionsBySlot: {},
   };
 }
 
@@ -309,6 +313,14 @@ function defaultFilters() {
     mode: 'all',
     provider: 'all',
     duration: 'all',
+  };
+}
+
+function defaultBookingOptions() {
+  return {
+    topic: 'relationship',
+    intake: 'none',
+    reminder: 'email',
   };
 }
 
@@ -343,6 +355,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
     ...(snapshot.filtersDraft ?? runtime.filtersDraft),
   };
   runtime.booking = snapshot.booking ? deepClone(snapshot.booking) : null;
+  runtime.bookings = Array.isArray(snapshot.bookings) ? deepClone(snapshot.bookings) : (runtime.booking ? [deepClone(runtime.booking)] : []);
   runtime.bookingCompletion = snapshot.bookingCompletion ? deepClone(snapshot.bookingCompletion) : null;
   runtime.currentGridSlotId = snapshot.currentGridSlotId ?? null;
   runtime.cancelPerformedThisTask = Boolean(snapshot.cancelPerformedThisTask);
@@ -353,6 +366,9 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.savedFeatureItems = snapshot.savedFeatureItems ? deepClone(snapshot.savedFeatureItems) : {};
   runtime.selectedPass = snapshot.selectedPass ?? runtime.selectedPass;
   runtime.reminderSettings = snapshot.reminderSettings ? deepClone(snapshot.reminderSettings) : runtime.reminderSettings;
+  runtime.navExpanded = Boolean(snapshot.navExpanded ?? runtime.navExpanded);
+  runtime.bookingOptionDraft = snapshot.bookingOptionDraft ? deepClone(snapshot.bookingOptionDraft) : runtime.bookingOptionDraft;
+  runtime.bookingOptionsBySlot = snapshot.bookingOptionsBySlot ? deepClone(snapshot.bookingOptionsBySlot) : runtime.bookingOptionsBySlot;
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   return runtime;
 }
@@ -363,6 +379,7 @@ function serializeRuntimeSnapshot(run) {
     filters: deepClone(run.filters),
     filtersDraft: deepClone(run.filtersDraft),
     booking: run.booking ? deepClone(run.booking) : null,
+    bookings: Array.isArray(run.bookings) ? deepClone(run.bookings) : [],
     bookingCompletion: run.bookingCompletion ? deepClone(run.bookingCompletion) : null,
     currentGridSlotId: run.currentGridSlotId,
     cancelPerformedThisTask: run.cancelPerformedThisTask,
@@ -373,6 +390,9 @@ function serializeRuntimeSnapshot(run) {
     savedFeatureItems: deepClone(run.savedFeatureItems),
     selectedPass: run.selectedPass,
     reminderSettings: deepClone(run.reminderSettings),
+    navExpanded: run.navExpanded,
+    bookingOptionDraft: deepClone(run.bookingOptionDraft),
+    bookingOptionsBySlot: deepClone(run.bookingOptionsBySlot),
     liveStatus: run.liveStatus,
   };
 }
@@ -382,6 +402,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.filters = hydrated.filters;
   targetRun.filtersDraft = hydrated.filtersDraft;
   targetRun.booking = hydrated.booking;
+  targetRun.bookings = hydrated.bookings;
   targetRun.bookingCompletion = hydrated.bookingCompletion;
   targetRun.currentGridSlotId = hydrated.currentGridSlotId;
   targetRun.cancelPerformedThisTask = hydrated.cancelPerformedThisTask;
@@ -392,6 +413,9 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.savedFeatureItems = hydrated.savedFeatureItems;
   targetRun.selectedPass = hydrated.selectedPass;
   targetRun.reminderSettings = hydrated.reminderSettings;
+  targetRun.navExpanded = hydrated.navExpanded;
+  targetRun.bookingOptionDraft = hydrated.bookingOptionDraft;
+  targetRun.bookingOptionsBySlot = hydrated.bookingOptionsBySlot;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
   targetRun.isApplying = false;
@@ -460,6 +484,49 @@ function restartExperiment() {
   render();
 }
 
+function makeBooking(slotId, taskId = 'initial') {
+  return {
+    slotId,
+    taskId,
+    at: new Date().toISOString(),
+  };
+}
+
+function applyTaskInitialBookingState(run, task) {
+  if (!run || !task) return;
+  if (Array.isArray(task.initialBookings) && task.initialBookings.length > 0) {
+    run.bookings = task.initialBookings.map((slotId) => makeBooking(slotId, task.id));
+    run.booking = run.bookings[0] ?? null;
+    return;
+  }
+  run.bookings = [];
+  run.booking = null;
+}
+
+function getActiveBookings(run) {
+  if (!run) return [];
+  if (Array.isArray(run.bookings) && run.bookings.length > 0) return run.bookings;
+  return run.booking ? [run.booking] : [];
+}
+
+function getMaxBookingsForCurrentTask() {
+  const task = getCurrentTask();
+  return Number(task?.maxBookingsPerWeek ?? 2);
+}
+
+function hasRequiredBookingOptions(task, run, slotId) {
+  if (!task?.requiresCounselingOptions) return true;
+  const expected = task.expectedOptions ?? {};
+  const selected = run.bookingOptionsBySlot?.[slotId] ?? null;
+  return Boolean(selected)
+    && Object.entries(expected).every(([key, value]) => selected[key] === value);
+}
+
+function shouldCollectBookingOptions(task, slot) {
+  return Boolean(task?.requiresCounselingOptions && slot?.id === task.targetSlotId);
+}
+
+
 function prepareCurrentTaskForMain() {
   const conditionId = getCurrentConditionId();
   const task = getCurrentTask();
@@ -473,6 +540,9 @@ function prepareCurrentTaskForMain() {
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
   run.featurePanel = null;
+  run.bookingOptionDraft = defaultBookingOptions();
+  run.bookingOptionsBySlot = {};
+  applyTaskInitialBookingState(run, task);
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
@@ -763,6 +833,12 @@ function handleRootClick(event) {
     return;
   }
 
+  if (action === 'toggle-nav') {
+    event.preventDefault();
+    toggleGlobalNav();
+    return;
+  }
+
   if (action === 'open-feature-panel') {
     event.preventDefault();
     openFeaturePanel(actionTarget.dataset.featureId, actionTarget.dataset.focusId, {
@@ -786,6 +862,12 @@ function handleRootClick(event) {
   if (action === 'set-mode-filter') {
     event.preventDefault();
     setDraftFilter({ mode: actionTarget.dataset.modeId || 'all' }, '상담 방식 조건을 입력했습니다. 조건 적용을 누르면 예약 가능 시간이 갱신됩니다.');
+    return;
+  }
+
+  if (action === 'set-booking-option') {
+    event.preventDefault();
+    setBookingOption(actionTarget.dataset.optionName, actionTarget.dataset.optionValue, actionTarget.dataset.focusId);
     return;
   }
 
@@ -847,7 +929,7 @@ function handleRootClick(event) {
 
   if (action === 'open-cancel-modal') {
     event.preventDefault();
-    openCancelModal(actionTarget.dataset.focusId);
+    openCancelModal(actionTarget.dataset.focusId, actionTarget.dataset.bookingSlotId);
     return;
   }
 
@@ -860,6 +942,12 @@ function handleRootClick(event) {
   if (action === 'dialog-confirm-slot') {
     event.preventDefault();
     confirmSlotFromModal();
+    return;
+  }
+
+  if (action === 'dialog-confirm-booking-options') {
+    event.preventDefault();
+    confirmBookingOptionsFromModal();
     return;
   }
 
@@ -909,6 +997,13 @@ function handleRootChange(event) {
   if (!run) return;
   if (element.name in run.filtersDraft) {
     run.filtersDraft[element.name] = element.value;
+  }
+  if (element.name?.startsWith('booking-option-')) {
+    const optionName = element.name.replace('booking-option-', '');
+    run.bookingOptionDraft = {
+      ...run.bookingOptionDraft,
+      [optionName]: element.value,
+    };
   }
 }
 
@@ -1049,12 +1144,15 @@ function openSlotModal(slotId, triggerFocusId, dialogMode = 'select') {
   render();
 }
 
-function openCancelModal(triggerFocusId) {
+function openCancelModal(triggerFocusId, bookingSlotId = '') {
   const run = getCurrentRun();
-  if (!run || !run.booking || run.isWorking) return;
+  const bookings = getActiveBookings(run);
+  if (!run || bookings.length === 0 || run.isWorking) return;
+  const targetSlotId = bookingSlotId || bookings[0]?.slotId || '';
   run.modal = {
     kind: 'cancel-booking',
     triggerFocusId,
+    slotId: targetSlotId,
   };
   run.currentTaskLogger?.note('open-cancel-dialog');
   run.currentTaskLogger?.setModalState({
@@ -1068,6 +1166,104 @@ function openCancelModal(triggerFocusId) {
   } else {
     requestFocus('#dialog-title');
   }
+  render();
+}
+
+
+function openBookingLimitModal(slotId, triggerFocusId) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.modal = {
+    kind: 'booking-limit',
+    slotId,
+    triggerFocusId,
+  };
+  run.currentTaskLogger?.note('booking-limit-shown', { slotId });
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId,
+  });
+  requestFocus('[data-dialog-primary]');
+  render();
+}
+
+function openBookingOptionsModal(slotId, triggerFocusId) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.bookingOptionDraft = {
+    ...defaultBookingOptions(),
+    ...(run.bookingOptionsBySlot?.[slotId] ?? {}),
+  };
+  run.modal = {
+    kind: 'booking-options',
+    slotId,
+    triggerFocusId,
+  };
+  run.currentTaskLogger?.note('booking-options-opened', { slotId });
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId,
+  });
+  requestFocus('[data-dialog-primary]');
+  render();
+}
+
+function setBookingOption(name, value, focusId = '') {
+  const run = getCurrentRun();
+  if (!run || !name) return;
+  run.bookingOptionDraft = {
+    ...run.bookingOptionDraft,
+    [name]: value,
+  };
+  run.currentTaskLogger?.note('set-booking-option', { name, value });
+  if (focusId) requestFocus(`[data-focus-id="${focusId}"]`);
+  render();
+}
+
+function finalizeBookingForSlot(slotId, triggerFocusId = '') {
+  const run = getCurrentRun();
+  const task = getCurrentTask();
+  if (!run || !task) return;
+  const slot = getSlotById(slotId);
+  if (!slot || !slot.available) return;
+
+  const wasCorrect = slot.id === task.targetSlotId;
+  if (!wasCorrect) {
+    run.currentTaskLogger?.note('wrong-selection', {
+      pickedSlotId: slot.id,
+      targetSlotId: task.targetSlotId,
+    });
+  }
+
+  const booking = {
+    slotId: slot.id,
+    taskId: task.id,
+    at: new Date().toISOString(),
+  };
+  const existingBookings = getActiveBookings(run).filter((item) => item.slotId !== slot.id);
+  run.bookings = [...existingBookings, booking];
+  run.booking = booking;
+  run.bookingCompletion = {
+    slotId: slot.id,
+    completedAt: new Date().toISOString(),
+  };
+  run.isWorking = false;
+  run.modal = null;
+  run.liveStatus = '예약이 완료되었습니다.';
+  run.currentTaskLogger?.note('booking-confirmed', {
+    slotId: slot.id,
+    correct: wasCorrect,
+    options: run.bookingOptionsBySlot?.[slot.id] ?? null,
+  });
+  run.currentTaskLogger?.setModalState({
+    open: false,
+    containerSelector: null,
+    triggerFocusId,
+    closedAt: performance.now(),
+  });
+  requestFocus('#booking-completion-heading');
   render();
 }
 
@@ -1149,43 +1345,44 @@ function confirmSlotFromModal() {
     return;
   }
 
+  const currentBookings = getActiveBookings(run);
+  const maxBookings = getMaxBookingsForCurrentTask();
+  const alreadyBooked = currentBookings.some((booking) => booking.slotId === slot.id);
+  if (!alreadyBooked && currentBookings.length >= maxBookings) {
+    openBookingLimitModal(slot.id, closingModal.triggerFocusId);
+    return;
+  }
+
+  if (shouldCollectBookingOptions(task, slot)) {
+    openBookingOptionsModal(slot.id, closingModal.triggerFocusId);
+    return;
+  }
+
   run.isWorking = true;
   render();
 
   window.setTimeout(() => {
-    const wasCorrect = slot.id === task.targetSlotId;
-    if (!wasCorrect) {
-      run.currentTaskLogger?.note('wrong-selection', {
-        pickedSlotId: slot.id,
-        targetSlotId: task.targetSlotId,
-      });
-    }
+    finalizeBookingForSlot(slot.id, closingModal.triggerFocusId);
+  }, 360);
+}
 
-    run.booking = {
-      slotId: slot.id,
-      taskId: task.id,
-      at: new Date().toISOString(),
-    };
-    run.bookingCompletion = {
-      slotId: slot.id,
-      completedAt: new Date().toISOString(),
-    };
-    run.isWorking = false;
-    run.modal = null;
-    run.liveStatus = '예약이 완료되었습니다.';
-    run.currentTaskLogger?.note('booking-confirmed', {
-      slotId: slot.id,
-      correct: wasCorrect,
-    });
-    run.currentTaskLogger?.setModalState({
-      open: false,
-      containerSelector: null,
-      triggerFocusId: closingModal.triggerFocusId ?? null,
-      closedAt: performance.now(),
-    });
-
-    requestFocus('#booking-completion-heading');
-    render();
+function confirmBookingOptionsFromModal() {
+  const run = getCurrentRun();
+  if (!run || !run.modal || run.modal.kind !== 'booking-options' || run.isWorking) return;
+  const closingModal = { ...run.modal };
+  const selectedOptions = deepClone(run.bookingOptionDraft);
+  run.bookingOptionsBySlot = {
+    ...run.bookingOptionsBySlot,
+    [closingModal.slotId]: selectedOptions,
+  };
+  run.currentTaskLogger?.note('booking-options-confirmed', {
+    slotId: closingModal.slotId,
+    selectedOptions,
+  });
+  run.isWorking = true;
+  render();
+  window.setTimeout(() => {
+    finalizeBookingForSlot(closingModal.slotId, closingModal.triggerFocusId);
   }, 360);
 }
 
@@ -1199,12 +1396,14 @@ function confirmCancelFromModal() {
   render();
 
   window.setTimeout(() => {
-    run.booking = null;
+    const cancelledSlotId = closingModal.slotId || getActiveBookings(run)[0]?.slotId || '';
+    run.bookings = getActiveBookings(run).filter((booking) => booking.slotId !== cancelledSlotId);
+    run.booking = run.bookings.at(-1) ?? null;
     run.bookingCompletion = null;
     run.cancelPerformedThisTask = true;
     run.isWorking = false;
     run.modal = null;
-    run.currentTaskLogger?.note('cancel-booking', { taskId: task?.id });
+    run.currentTaskLogger?.note('cancel-booking', { taskId: task?.id, cancelledSlotId });
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
@@ -1225,12 +1424,14 @@ function confirmCancelFromModal() {
 }
 
 function isTaskSatisfied(task, run) {
-  const bookingMatches = run.booking?.slotId === task.targetSlotId;
-  const completionScreenReached = run.bookingCompletion?.slotId === run.booking?.slotId;
+  const activeBookings = getActiveBookings(run);
+  const bookingMatches = activeBookings.some((booking) => booking.slotId === task.targetSlotId);
+  const completionScreenReached = run.bookingCompletion?.slotId === task.targetSlotId;
+  const optionsOk = hasRequiredBookingOptions(task, run, task.targetSlotId);
   if (task.requiresCancellation) {
-    return bookingMatches && completionScreenReached && run.cancelPerformedThisTask;
+    return bookingMatches && completionScreenReached && run.cancelPerformedThisTask && optionsOk;
   }
-  return bookingMatches && completionScreenReached;
+  return bookingMatches && completionScreenReached && optionsOk;
 }
 
 function getEndTaskOutcome(task, run) {
@@ -1244,11 +1445,16 @@ function getEndTaskOutcome(task, run) {
   }
 
   let message = '예약 확정 화면에 진입하지 못했습니다.';
-  if (run.booking?.slotId && run.booking.slotId !== task.targetSlotId) {
+  const activeBookings = getActiveBookings(run);
+  const hasTargetBooking = activeBookings.some((booking) => booking.slotId === task.targetSlotId);
+  const hasOtherNewBooking = run.booking?.slotId && run.booking.slotId !== task.targetSlotId;
+  if (hasOtherNewBooking) {
     message = '요청한 상담 예약 시간과 다른 시간을 예약했습니다.';
-  } else if (run.booking?.slotId === task.targetSlotId && task.requiresCancellation && !run.cancelPerformedThisTask) {
+  } else if (hasTargetBooking && task.requiresCancellation && !run.cancelPerformedThisTask) {
     message = '기존 예약 취소가 완료되지 않았습니다.';
-  } else if (run.booking?.slotId === task.targetSlotId && run.bookingCompletion?.slotId !== run.booking.slotId) {
+  } else if (hasTargetBooking && !hasRequiredBookingOptions(task, run, task.targetSlotId)) {
+    message = '요청한 상담 옵션을 맞추지 못했습니다.';
+  } else if (hasTargetBooking && run.bookingCompletion?.slotId !== task.targetSlotId) {
     message = '예약 확정 화면에 진입하지 못했습니다.';
   }
 
@@ -1312,6 +1518,8 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
     reason,
     notes: [
       `booking=${run.booking?.slotId ?? 'none'}`,
+      `bookings=${getActiveBookings(run).map((booking) => booking.slotId).join(',') || 'none'}`,
+      `bookingOptions=${JSON.stringify(run.bookingOptionsBySlot ?? {})}`,
       `cancelPerformed=${run.cancelPerformedThisTask}`,
       `bookingCompletion=${run.bookingCompletion?.slotId ?? 'none'}`,
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
@@ -1845,6 +2053,15 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
   });
 }
 
+function toggleGlobalNav() {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.navExpanded = !run.navExpanded;
+  run.liveStatus = run.navExpanded ? '전체 메뉴를 펼쳤습니다.' : '전체 메뉴를 접었습니다.';
+  requestFocus('[data-focus-id="global-nav-toggle"]');
+  render();
+}
+
 function renderSimulatedHeader(conditionId, run) {
   const links = [
     { label: '처음 화면', featureId: 'home' },
@@ -1856,6 +2073,14 @@ function renderSimulatedHeader(conditionId, run) {
     { label: '운영 정책', featureId: 'policy' },
     { label: '문의', featureId: 'support' },
   ];
+  const navId = 'calendar-global-nav';
+  const navCollapsed = !run.navExpanded;
+  const navClass = conditionId === 'variantA' && navCollapsed
+    ? 'sim-nav sim-nav-collapsed-bad'
+    : 'sim-nav';
+  const navAttrs = conditionId === 'variantB' && navCollapsed
+    ? 'hidden'
+    : '';
   return `
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       <div class="sim-topbar">
@@ -1870,7 +2095,10 @@ function renderSimulatedHeader(conditionId, run) {
           <button class="button button-ghost" data-action="open-feature-panel" data-feature-id="my-counseling" data-focus-id="calendar-my">내 상담</button>
         </div>
       </div>
-      <nav aria-label="서비스 보조 내비게이션">
+      <button class="button button-secondary nav-toggle" data-action="toggle-nav" data-focus-id="global-nav-toggle" aria-expanded="${run.navExpanded ? 'true' : 'false'}" aria-controls="${navId}">
+        전체 메뉴 ${run.navExpanded ? '접기' : '펼치기'}
+      </button>
+      <nav id="${navId}" class="${navClass}" aria-label="서비스 보조 내비게이션" ${navAttrs}>
         ${links.map((item, index) => `<a href="#" class="nav-link" data-action="open-feature-panel" data-feature-id="${escapeHtml(item.featureId)}" data-focus-id="nav-${index + 1}">${escapeHtml(item.label)}</a>`).join('')}
       </nav>
     </header>
@@ -2451,16 +2679,136 @@ function renderBookingCompletionCard(run) {
 }
 
 function renderBookingPanel(run, emphasized) {
+  const bookings = getActiveBookings(run);
   return `
     <section class="card booking-card ${emphasized ? 'booking-card-emphasized' : ''}">
       <h2 id="booking-summary" tabindex="-1">현재 예약 내용</h2>
-      <p>${escapeHtml(formatBookingSummary(run.booking))}</p>
-      <div class="button-row">
-        ${run.booking ? `
-          <button class="button button-secondary" data-action="open-cancel-modal" data-focus-id="current-booking-cancel">현재 예약 취소</button>
-        ` : '<span class="muted">아직 취소할 예약이 없습니다.</span>'}
-      </div>
+      ${bookings.length > 0 ? `
+        <ul class="booking-list">
+          ${bookings.map((booking, index) => `
+            <li class="booking-list-item">
+              <span>${escapeHtml(formatBookingSummary(booking))}</span>
+              <button
+                class="button button-secondary"
+                data-action="open-cancel-modal"
+                data-booking-slot-id="${escapeHtml(booking.slotId)}"
+                data-focus-id="current-booking-cancel-${index + 1}"
+              >이 예약 취소</button>
+            </li>
+          `).join('')}
+        </ul>
+      ` : '<p class="muted">아직 취소할 예약이 없습니다.</p>'}
     </section>
+  `;
+}
+
+function getOptionLabel(kind, value) {
+  const labels = {
+    topic: {
+      relationship: '관계 상담',
+      'work-stress': '직장 스트레스',
+      sleep: '수면과 생활 리듬',
+      family: '가족 상담',
+    },
+    intake: {
+      none: '작성하지 않음',
+      short: '간단히 작성',
+      detailed: '자세히 작성',
+    },
+    reminder: {
+      email: '이메일 알림',
+      sms: '문자 알림',
+      both: '문자와 이메일 알림',
+    },
+  };
+  return labels[kind]?.[value] ?? value;
+}
+
+function renderPseudoOptionGroup({ name, label, options, selected }) {
+  return `
+    <div class="pseudo-combo pseudo-combo-a" role="group" aria-label="${escapeHtml(label)}">
+      <p class="pseudo-combo-label">${escapeHtml(label)}</p>
+      <button class="button button-secondary pseudo-combo-selected" type="button" data-action="site-placeholder" data-notice="아래 선택지에서 값을 고르십시오." data-focus-id="booking-option-${escapeHtml(name)}-selected">
+        선택됨: ${escapeHtml(getOptionLabel(name, selected))}
+      </button>
+      <div class="pseudo-combo-options visually-collapsed-options">
+        ${options.map((option) => `
+          <button
+            class="button ${selected === option.value ? 'button-primary' : 'button-ghost'}"
+            type="button"
+            data-action="set-booking-option"
+            data-option-name="${escapeHtml(name)}"
+            data-option-value="${escapeHtml(option.value)}"
+            data-focus-id="booking-option-${escapeHtml(name)}-${escapeHtml(option.value)}"
+          >${escapeHtml(option.label)}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderNativeOptionField({ name, label, options, selected }) {
+  return `
+    <label>
+      <span>${escapeHtml(label)}</span>
+      <select name="booking-option-${escapeHtml(name)}" data-focus-id="booking-option-${escapeHtml(name)}">
+        ${options.map((option) => `<option value="${escapeHtml(option.value)}" ${selected === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+      </select>
+    </label>
+  `;
+}
+
+function renderBookingOptionsDialog(modal, run) {
+  const slot = getSlotById(modal.slotId);
+  const options = [
+    {
+      name: 'topic',
+      label: '상담 주제',
+      options: [
+        { value: 'relationship', label: '관계 상담' },
+        { value: 'work-stress', label: '직장 스트레스' },
+        { value: 'sleep', label: '수면과 생활 리듬' },
+        { value: 'family', label: '가족 상담' },
+      ],
+    },
+    {
+      name: 'intake',
+      label: '사전 작성',
+      options: [
+        { value: 'none', label: '작성하지 않음' },
+        { value: 'short', label: '간단히 작성' },
+        { value: 'detailed', label: '자세히 작성' },
+      ],
+    },
+    {
+      name: 'reminder',
+      label: '알림 방법',
+      options: [
+        { value: 'email', label: '이메일 알림' },
+        { value: 'sms', label: '문자 알림' },
+        { value: 'both', label: '문자와 이메일 알림' },
+      ],
+    },
+  ];
+  return `
+    <div class="modal-backdrop">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+        <h2 id="dialog-title" tabindex="-1">상담 옵션 선택</h2>
+        <p id="dialog-description">${slot ? escapeHtml(formatSlotLabel(slot)) : '선택한 예약 시간'}에 적용할 상담 옵션입니다.</p>
+        <div class="filters-grid booking-options-grid ${state.conditionId === 'variantA' ? 'booking-options-a' : 'booking-options-b'}">
+          ${options.map((field) => state.conditionId === 'variantA'
+            ? renderPseudoOptionGroup({ ...field, selected: run.bookingOptionDraft[field.name] })
+            : renderNativeOptionField({ ...field, selected: run.bookingOptionDraft[field.name] })
+          ).join('')}
+        </div>
+        <div class="button-row">
+          <button class="button button-ghost" data-action="dialog-close" data-focus-id="booking-options-close">닫기</button>
+          <button class="button button-primary" data-action="dialog-confirm-booking-options" data-dialog-primary data-focus-id="booking-options-confirm" ${run.isWorking ? 'disabled' : ''}>
+            ${run.isWorking ? '저장 중…' : '옵션 저장하고 예약 확정'}
+          </button>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -2488,7 +2836,7 @@ function renderModal(modal, run, task) {
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">현재 예약을 취소하시겠습니까?</h2>
-          <p id="dialog-description">${escapeHtml(formatBookingSummary(run.booking))}</p>
+          <p id="dialog-description">${escapeHtml(formatBookingSummary(getActiveBookings(run).find((booking) => booking.slotId === modal.slotId) ?? run.booking))}</p>
           <div class="button-row">
             <button class="button button-ghost" data-action="dialog-close" data-focus-id="cancel-dialog-close">닫기</button>
             <button class="button button-primary" data-action="dialog-confirm-cancel" data-dialog-primary data-focus-id="cancel-dialog-confirm">
@@ -2500,9 +2848,27 @@ function renderModal(modal, run, task) {
     `;
   }
 
+  if (modal.kind === 'booking-limit') {
+    return `
+      <div class="modal-backdrop">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+          <h2 id="dialog-title" tabindex="-1">이번 주 예약 가능 개수를 넘었습니다</h2>
+          <p id="dialog-description">한 주에는 최대 2개까지 예약할 수 있습니다. 새 시간을 예약하려면 현재 예약 내용에서 기존 예약을 먼저 취소하십시오.</p>
+          <div class="button-row">
+            <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="booking-limit-close">확인</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (modal.kind === 'booking-options') {
+    return renderBookingOptionsDialog(modal, run);
+  }
+
   const slot = getSlotById(modal.slotId);
   if (!slot) return '';
-  const actionLabel = run.booking ? '변경 확정' : '예약 확정';
+  const actionLabel = task?.requiresCancellation ? '새 예약 확정' : '예약 확정';
   const modeLabel = modal.dialogMode === 'details' ? '시간 안내' : '예약 확인';
   return `
     <div class="modal-backdrop">

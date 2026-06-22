@@ -724,6 +724,12 @@ function handleRootClick(event) {
     return;
   }
 
+  if (action === 'set-comment-draft') {
+    event.preventDefault();
+    setCommentDraft(actionTarget.dataset.fieldName, actionTarget.dataset.fieldValue, actionTarget.dataset.focusId);
+    return;
+  }
+
   if (action === 'end-task') {
     event.preventDefault();
     openEndTaskConfirmation();
@@ -1025,6 +1031,50 @@ function selectComment(commentId) {
   run.currentCommentId = commentId;
   requestFocus(buildCommentSelector(commentId));
   render();
+}
+
+function setCommentDraft(fieldName, fieldValue, focusId = '') {
+  const run = getCurrentRun();
+  if (!run || !fieldName) return;
+  if (fieldName === 'sort') run.sortDraft = fieldValue;
+  if (fieldName === 'category') run.categoryDraft = fieldValue;
+  if (focusId) requestFocus(`[data-focus-id="${focusId}"]`);
+  render();
+}
+
+function renderPseudoCommentCombo({ fieldName, label, options, selected }) {
+  const selectedLabel = options.find((option) => option.id === selected)?.label ?? '선택 안 됨';
+  return `
+    <div class="pseudo-combo pseudo-combo-a" role="group" aria-label="${escapeHtml(label)}">
+      <p class="pseudo-combo-label">${escapeHtml(label)}</p>
+      <button class="button button-secondary pseudo-combo-selected" type="button" data-action="community-message" data-notice="아래 선택지에서 값을 고르십시오." data-focus-id="comment-${escapeHtml(fieldName)}-selected">
+        선택됨: ${escapeHtml(selectedLabel)}
+      </button>
+      <div class="pseudo-combo-options visually-collapsed-options">
+        ${options.map((option) => `
+          <button
+            class="button ${selected === option.id ? 'button-primary' : 'button-ghost'}"
+            type="button"
+            data-action="set-comment-draft"
+            data-field-name="${escapeHtml(fieldName)}"
+            data-field-value="${escapeHtml(option.id)}"
+            data-focus-id="comment-${escapeHtml(fieldName)}-${escapeHtml(option.id)}"
+          >${escapeHtml(option.label)}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderNativeCommentSelect({ fieldName, label, options, selected }) {
+  return `
+    <label>
+      <span>${escapeHtml(label)}</span>
+      <select name="${escapeHtml(fieldName)}" data-focus-id="comment-${escapeHtml(fieldName)}">
+        ${options.map((option) => `<option value="${option.id}" ${selected === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+      </select>
+    </label>
+  `;
 }
 
 function applyCommentFilters() {
@@ -2162,6 +2212,10 @@ function renderCommentTimelinePanel(comment, run) {
 }
 
 function renderCommentControls(conditionId, run) {
+  const controlFields = [
+    { fieldName: 'sort', label: '정렬 기준', options: commentsScenario.sortOptions, selected: run.sortDraft },
+    { fieldName: 'category', label: '댓글 범위', options: commentsScenario.categoryOptions, selected: run.categoryDraft },
+  ];
   return `
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
       <div class="filters-header">
@@ -2170,18 +2224,10 @@ function renderCommentControls(conditionId, run) {
         </div>
       </div>
       <div class="filters-grid">
-        <label>
-          <span>정렬 기준</span>
-          <select name="sort" data-focus-id="comment-sort">
-            ${commentsScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
-          </select>
-        </label>
-        <label>
-          <span>댓글 범위</span>
-          <select name="category" data-focus-id="comment-category">
-            ${commentsScenario.categoryOptions.map((option) => `<option value="${option.id}" ${run.categoryDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
-          </select>
-        </label>
+        ${controlFields.map((field) => conditionId === 'variantA'
+          ? renderPseudoCommentCombo(field)
+          : renderNativeCommentSelect(field)
+        ).join('')}
       </div>
       <div class="button-row">
         <a href="#" class="inline-link" data-action="open-community-panel" data-feature-id="rules" data-focus-id="comment-policy-link">댓글 운영 기준 보기</a>

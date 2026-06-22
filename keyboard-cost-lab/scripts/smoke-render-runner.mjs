@@ -14,6 +14,7 @@ const services = {
         filters: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
         filtersDraft: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
         booking: null,
+        bookings: [],
         bookingCompletion: null,
         currentGridSlotId: null,
         cancelPerformedThisTask: false,
@@ -62,6 +63,10 @@ const services = {
         type: 'all',
         typeDraft: 'all',
         savedByResultId: {},
+        saveOptionsByResultId: {},
+        saveOptionDraft: { folder: 'general', include: 'summary', format: 'web' },
+        previewAnswerDrafts: {},
+        submittedPreviewAnswers: {},
         savedFeatureItems: {},
         searchAlertEnabled: false,
         query: '상담',
@@ -196,7 +201,7 @@ async function renderRunner({ serviceId, conditionId, taskIndex, showRequest, sn
 const reports = [];
 for (const serviceId of Object.keys(services)) {
   for (const conditionId of ['variantA', 'variantB']) {
-    for (const taskIndex of [0, 1, 2]) {
+    for (const taskIndex of [0, 1]) {
       reports.push(await renderRunner({ serviceId, conditionId, taskIndex, showRequest: false }));
     }
   }

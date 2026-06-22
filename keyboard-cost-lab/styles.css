@@ -1314,3 +1314,90 @@ input {
   margin-top: 0;
   background: #f8fbff;
 }
+
+.nav-toggle {
+  margin-top: 0.75rem;
+}
+
+.sim-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.sim-nav-collapsed-bad {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sim-nav-collapsed-bad a:focus {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  z-index: 1000;
+  background: var(--surface);
+}
+
+.pseudo-combo {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pseudo-combo-label {
+  margin: 0;
+  font-weight: 700;
+}
+
+.pseudo-combo-options {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.visually-collapsed-options {
+  border: 1px dashed var(--border);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  max-height: 2.4rem;
+  overflow: hidden;
+  background: #fbfcff;
+}
+
+.booking-options-grid,
+.save-options-grid {
+  margin-block: 1rem;
+}
+
+.booking-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.booking-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.skip-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}

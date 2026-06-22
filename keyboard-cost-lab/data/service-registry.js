@@ -6,7 +6,7 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: null,
-    taskCount: 3,
+    taskCount: 2,
     conditionCount: 2,
   },
   {
@@ -16,7 +16,7 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: './comments.html',
-    taskCount: 3,
+    taskCount: 2,
     conditionCount: 2,
   },
   {
@@ -26,7 +26,7 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: './search.html',
-    taskCount: 3,
+    taskCount: 2,
     conditionCount: 2,
   },
 ];

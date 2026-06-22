@@ -267,6 +267,10 @@ function createConditionRuntime(variantId) {
     savedFeatureItems: {},
     searchAlertEnabled: false,
     savedByResultId: {},
+    saveOptionsByResultId: {},
+    saveOptionDraft: defaultSaveOptions(),
+    previewAnswerDrafts: {},
+    submittedPreviewAnswers: {},
     openedResultId: null,
     currentResultId: searchScenario.results[0]?.id ?? null,
     previewVisitedThisTask: {},
@@ -279,6 +283,14 @@ function createConditionRuntime(variantId) {
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
     siteNotice: '',
+  };
+}
+
+function defaultSaveOptions() {
+  return {
+    folder: 'general',
+    include: 'summary',
+    format: 'web',
   };
 }
 
@@ -317,6 +329,10 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.savedFeatureItems = deepClone(snapshot.savedFeatureItems ?? runtime.savedFeatureItems);
   runtime.searchAlertEnabled = Boolean(snapshot.searchAlertEnabled ?? runtime.searchAlertEnabled);
   runtime.savedByResultId = deepClone(snapshot.savedByResultId ?? runtime.savedByResultId);
+  runtime.saveOptionsByResultId = deepClone(snapshot.saveOptionsByResultId ?? runtime.saveOptionsByResultId);
+  runtime.saveOptionDraft = snapshot.saveOptionDraft ? deepClone(snapshot.saveOptionDraft) : runtime.saveOptionDraft;
+  runtime.previewAnswerDrafts = deepClone(snapshot.previewAnswerDrafts ?? runtime.previewAnswerDrafts);
+  runtime.submittedPreviewAnswers = deepClone(snapshot.submittedPreviewAnswers ?? runtime.submittedPreviewAnswers);
   runtime.openedResultId = snapshot.openedResultId ?? null;
   runtime.currentResultId = snapshot.currentResultId ?? runtime.currentResultId;
   runtime.previewVisitedThisTask = deepClone(snapshot.previewVisitedThisTask ?? runtime.previewVisitedThisTask);
@@ -341,6 +357,10 @@ function serializeRuntimeSnapshot(run) {
     savedFeatureItems: deepClone(run.savedFeatureItems),
     searchAlertEnabled: run.searchAlertEnabled,
     savedByResultId: deepClone(run.savedByResultId),
+    saveOptionsByResultId: deepClone(run.saveOptionsByResultId),
+    saveOptionDraft: deepClone(run.saveOptionDraft),
+    previewAnswerDrafts: deepClone(run.previewAnswerDrafts),
+    submittedPreviewAnswers: deepClone(run.submittedPreviewAnswers),
     openedResultId: run.openedResultId,
     currentResultId: run.currentResultId,
     previewVisitedThisTask: deepClone(run.previewVisitedThisTask),
@@ -363,6 +383,10 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.savedFeatureItems = hydrated.savedFeatureItems;
   targetRun.searchAlertEnabled = hydrated.searchAlertEnabled;
   targetRun.savedByResultId = hydrated.savedByResultId;
+  targetRun.saveOptionsByResultId = hydrated.saveOptionsByResultId;
+  targetRun.saveOptionDraft = hydrated.saveOptionDraft;
+  targetRun.previewAnswerDrafts = hydrated.previewAnswerDrafts;
+  targetRun.submittedPreviewAnswers = hydrated.submittedPreviewAnswers;
   targetRun.openedResultId = hydrated.openedResultId;
   targetRun.currentResultId = hydrated.currentResultId;
   targetRun.previewVisitedThisTask = hydrated.previewVisitedThisTask;
@@ -419,6 +443,10 @@ function prepareCurrentTaskForMain() {
   run.isApplying = false;
   run.isWorking = false;
   run.previewVisitedThisTask = {};
+  run.previewAnswerDrafts = {};
+  run.submittedPreviewAnswers = {};
+  run.saveOptionDraft = defaultSaveOptions();
+  run.saveOptionsByResultId = {};
   run.openedResultId = null;
   run.featurePanel = null;
   run.finalConfirmationAcknowledged = false;
@@ -767,6 +795,18 @@ function handleRootClick(event) {
     saveResult(actionTarget.dataset.resultId, actionTarget.dataset.focusId);
     return;
   }
+  if (action === 'set-save-option') {
+    event.preventDefault();
+    setSaveOption(actionTarget.dataset.optionName, actionTarget.dataset.optionValue, actionTarget.dataset.focusId);
+    return;
+  }
+
+  if (action === 'confirm-save-options') {
+    event.preventDefault();
+    confirmSaveOptionsFromModal();
+    return;
+  }
+
 
   if (action === 'open-result') {
     event.preventDefault();
@@ -783,6 +823,12 @@ function handleRootClick(event) {
   if (action === 'jump-results') {
     event.preventDefault();
     focusElementNow('#search-heading');
+    return;
+  }
+
+  if (action === 'jump-filters') {
+    event.preventDefault();
+    focusElementNow('#filters-heading');
     return;
   }
 
@@ -821,6 +867,19 @@ function handleRootChange(event) {
   if (element.name === 'sort') run.sortDraft = element.value;
   if (element.name === 'type') run.typeDraft = element.value;
   if (element.name === 'search-query') run.queryDraft = element.value;
+  if (element.name === 'runner-preview-answer') {
+    const task = getCurrentTask();
+    if (task?.completion === 'previewQuestion') {
+      run.previewAnswerDrafts[task.targetResultId] = element.value;
+    }
+  }
+  if (element.name?.startsWith('save-option-')) {
+    const optionName = element.name.replace('save-option-', '');
+    run.saveOptionDraft = {
+      ...run.saveOptionDraft,
+      [optionName]: element.value,
+    };
+  }
 }
 
 function handleRootKeydown(event) {
@@ -1002,7 +1061,9 @@ function noteWrongResultAction(resultId, actionType, extra = {}) {
 
   const relevantActions = {
     closePreview: ['open-preview'],
+    previewQuestion: ['open-preview'],
     save: ['save-result'],
+    saveWithOptions: ['save-result'],
     open: ['open-preview', 'open-result'],
   };
 
@@ -1109,6 +1170,18 @@ function closeModal() {
   render();
 }
 
+function setSaveOption(name, value, focusId = '') {
+  const run = getCurrentRun();
+  if (!run || !name) return;
+  run.saveOptionDraft = {
+    ...run.saveOptionDraft,
+    [name]: value,
+  };
+  run.currentTaskLogger?.note('set-save-option', { name, value });
+  if (focusId) requestFocus(`[data-focus-id="${focusId}"]`);
+  render();
+}
+
 function saveResult(resultId, triggerFocusId) {
   const run = getCurrentRun();
   const task = getCurrentTask();
@@ -1117,19 +1190,59 @@ function saveResult(resultId, triggerFocusId) {
   if (!result) return;
 
   noteWrongResultAction(resultId, 'save-result');
-  const alreadySaved = Boolean(run.savedByResultId[resultId]);
+  run.saveOptionDraft = {
+    ...defaultSaveOptions(),
+    ...(run.saveOptionsByResultId[resultId] ?? {}),
+  };
+  run.modal = {
+    kind: 'save-options',
+    resultId,
+    triggerFocusId,
+  };
+  run.currentTaskLogger?.note('open-save-options', { resultId });
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId,
+  });
+  requestFocus('[data-dialog-primary]');
+  render();
+}
+
+function confirmSaveOptionsFromModal() {
+  const run = getCurrentRun();
+  if (!run || run.modal?.kind !== 'save-options' || run.isWorking) return;
+  const closingModal = { ...run.modal };
+  const result = getResultById(closingModal.resultId);
+  if (!result) return;
+  const alreadySaved = Boolean(run.savedByResultId[closingModal.resultId]);
+  run.saveOptionsByResultId = {
+    ...run.saveOptionsByResultId,
+    [closingModal.resultId]: deepClone(run.saveOptionDraft),
+  };
   run.savedByResultId = {
     ...run.savedByResultId,
-    [resultId]: true,
+    [closingModal.resultId]: true,
   };
+  run.modal = null;
   run.currentTaskLogger?.note('save-result', {
-    resultId,
+    resultId: closingModal.resultId,
     alreadySaved,
+    saveOptions: run.saveOptionsByResultId[closingModal.resultId],
   });
-
+  run.currentTaskLogger?.setModalState({
+    open: false,
+    containerSelector: null,
+    triggerFocusId: closingModal.triggerFocusId,
+    closedAt: performance.now(),
+  });
   run.siteNotice = alreadySaved ? '이미 저장한 자료입니다.' : '자료를 저장했습니다.';
   run.liveStatus = run.siteNotice;
-  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  if (state.conditionId === 'variantB' && closingModal.triggerFocusId) {
+    requestFocus(`[data-focus-id="${closingModal.triggerFocusId}"]`);
+  } else {
+    requestFocus('#search-heading');
+  }
   render();
 }
 
@@ -1164,7 +1277,43 @@ function isTaskSatisfied(task, run) {
     ? Boolean(run.previewVisitedThisTask[task.targetResultId])
     : true;
 
-  if (task.completion === 'closePreview') {
+  if (task.completion === 'previewQuestion') {
+    const submitted = run.submittedPreviewAnswers[task.targetResultId];
+    const otherAnswered = Object.keys(run.submittedPreviewAnswers).some((resultId) => resultId !== task.targetResultId);
+    return previewDone
+      && Boolean(submitted)
+      && submitted.value === task.previewQuestion?.correctValue
+      && !otherAnswered;
+  }
+
+  if (task.completion === 'saveWithOptions') {
+    return previewDone
+      && Boolean(run.savedByResultId[task.targetResultId])
+      && hasRequiredSaveOptions(task, run, task.targetResultId);
+  }
+
+  if (task.completion === 'previewQuestion') {
+    const targetAnswer = run.submittedPreviewAnswers[task.targetResultId];
+    const previewIds = Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]);
+    if (previewIds.some((resultId) => resultId !== task.targetResultId)) {
+      message = '요청한 자료와 다른 자료의 미리보기를 확인했습니다.';
+    } else if (!run.previewVisitedThisTask[task.targetResultId]) {
+      message = '요청한 자료의 미리보기를 확인하지 못했습니다.';
+    } else if (!targetAnswer) {
+      message = '미리보기 질문에 답을 제출하지 않았습니다.';
+    } else if (targetAnswer.value !== task.previewQuestion?.correctValue) {
+      message = '미리보기 질문에 요청과 다른 답을 제출했습니다.';
+    }
+  } else if (task.completion === 'saveWithOptions') {
+    const savedIds = Object.keys(run.savedByResultId).filter((resultId) => run.savedByResultId[resultId]);
+    if (savedIds.some((resultId) => resultId !== task.targetResultId)) {
+      message = '요청한 자료와 다른 자료를 저장했습니다.';
+    } else if (!run.savedByResultId[task.targetResultId]) {
+      message = '요청한 자료를 저장하지 못했습니다.';
+    } else if (!hasRequiredSaveOptions(task, run, task.targetResultId)) {
+      message = '요청한 저장 옵션을 맞추지 못했습니다.';
+    }
+  } else if (task.completion === 'closePreview') {
     return previewDone;
   }
 
@@ -1190,7 +1339,28 @@ function getEndTaskOutcome(task, run) {
   }
 
   let message = '요청한 자료 동작을 완료하지 못했습니다.';
-  if (task.completion === 'closePreview') {
+  if (task.completion === 'previewQuestion') {
+    const targetAnswer = run.submittedPreviewAnswers[task.targetResultId];
+    const previewIds = Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]);
+    if (previewIds.some((resultId) => resultId !== task.targetResultId)) {
+      message = '요청한 자료와 다른 자료의 미리보기를 확인했습니다.';
+    } else if (!run.previewVisitedThisTask[task.targetResultId]) {
+      message = '요청한 자료의 미리보기를 확인하지 못했습니다.';
+    } else if (!targetAnswer) {
+      message = '미리보기 질문에 답을 제출하지 않았습니다.';
+    } else if (targetAnswer.value !== task.previewQuestion?.correctValue) {
+      message = '미리보기 질문에 요청과 다른 답을 제출했습니다.';
+    }
+  } else if (task.completion === 'saveWithOptions') {
+    const savedIds = Object.keys(run.savedByResultId).filter((resultId) => run.savedByResultId[resultId]);
+    if (savedIds.some((resultId) => resultId !== task.targetResultId)) {
+      message = '요청한 자료와 다른 자료를 저장했습니다.';
+    } else if (!run.savedByResultId[task.targetResultId]) {
+      message = '요청한 자료를 저장하지 못했습니다.';
+    } else if (!hasRequiredSaveOptions(task, run, task.targetResultId)) {
+      message = '요청한 저장 옵션을 맞추지 못했습니다.';
+    }
+  } else if (task.completion === 'closePreview') {
     const previewIds = Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]);
     if (previewIds.some((resultId) => resultId !== task.targetResultId)) {
       message = '요청한 자료와 다른 자료의 미리보기를 확인했습니다.';
@@ -1239,12 +1409,37 @@ function openEndTaskConfirmation() {
   render();
 }
 
+function captureEndAreaPreviewAnswer(task, run) {
+  if (!task || !run || task.completion !== 'previewQuestion') return;
+  const resultId = task.targetResultId;
+  const value = run.previewAnswerDrafts[resultId] || '';
+  if (!value) return;
+  run.submittedPreviewAnswers = {
+    ...run.submittedPreviewAnswers,
+    [resultId]: {
+      taskId: task.id,
+      value,
+      submittedAt: new Date().toISOString(),
+      source: 'end-task-area',
+    },
+  };
+  run.currentTaskLogger?.note('submit-preview-answer-at-end', { resultId, value });
+}
+
+function hasRequiredSaveOptions(task, run, resultId) {
+  if (!task?.expectedSaveOptions) return true;
+  const selected = run.saveOptionsByResultId?.[resultId] ?? null;
+  return Boolean(selected)
+    && Object.entries(task.expectedSaveOptions).every(([key, value]) => selected[key] === value);
+}
+
 function confirmEndRunnerTask() {
   if (APP_MODE !== 'runner') return;
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!run || !task || !run.currentTaskLogger || state.completed || run.modal?.kind !== 'task-end-confirm') return;
 
+  captureEndAreaPreviewAnswer(task, run);
   const outcome = getEndTaskOutcome(task, run);
   run.modal = null;
 
@@ -1275,6 +1470,8 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
     notes: [
       `openedResult=${run.openedResultId ?? 'none'}`,
       `saved=${Object.keys(run.savedByResultId).filter((resultId) => run.savedByResultId[resultId]).join(',') || 'none'}`,
+      `saveOptions=${JSON.stringify(run.saveOptionsByResultId ?? {})}`,
+      `previewAnswers=${Object.entries(run.submittedPreviewAnswers).map(([resultId, answer]) => `${resultId}:${answer.value}`).join(',') || 'none'}`,
       `previewVisited=${Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]).join(',') || 'none'}`,
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       outcomeMessage ? `outcome=${outcomeMessage}` : '',
@@ -1391,11 +1588,12 @@ function renderRunnerPage() {
         <h1 class="sr-only" id="runner-title" tabindex="-1">검색 결과 목록 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
         ${renderSearchHeader(conditionId, run)}
+        ${conditionId === 'variantB' ? renderTopSkipLinks() : ''}
         ${renderSearchFeaturePanel(run)}
         ${renderResultControls(conditionId, run)}
         ${renderSearchSection(conditionId, run, visibleSearch)}
       </main>
-      ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump })}
+      ${state.completed ? '' : renderRunnerFooterHtml({ jumpLabel: RUNNER_LABELS.footerJump, endLabel: task?.completion === 'previewQuestion' ? '답변 제출하고 과업 종료하기' : '과업 종료', beforeEndHtml: renderEndAreaPreviewQuestion(run, task) })}
       ${state.completed ? '' : renderSiteNoticeHtml(run.siteNotice)}
       ${run.modal ? renderResultModal(run.modal, run) : ''}
       ${state.completed
@@ -1699,6 +1897,34 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
     benchmarkResults: benchmarkResultsSearch,
     variantMeta: VARIANT_META,
   });
+}
+
+function renderTopSkipLinks() {
+  return `
+    <nav class="skip-nav card" aria-label="화면 안 바로가기">
+      <a href="#search-heading" data-action="jump-results">검색 결과 영역으로 바로가기</a>
+      <a href="#filters-heading" data-action="jump-filters">검색 조건 설정으로 바로가기</a>
+    </nav>
+  `;
+}
+
+function renderEndAreaPreviewQuestion(run, task) {
+  if (!task || task.completion !== 'previewQuestion' || !task.previewQuestion) return '';
+  const question = task.previewQuestion;
+  const draftValue = run.previewAnswerDrafts[task.targetResultId] || '';
+  return `
+    <section class="runner-end-answer" aria-labelledby="runner-end-answer-heading">
+      <h2 id="runner-end-answer-heading">답변 선택</h2>
+      <p id="runner-end-answer-question">${escapeHtml(question.prompt)}</p>
+      <label for="runner-preview-answer">
+        <span>답변</span>
+        <select id="runner-preview-answer" name="runner-preview-answer" data-focus-id="runner-preview-answer" aria-describedby="runner-end-answer-question">
+          <option value="">선택하십시오</option>
+          ${question.options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+        </select>
+      </label>
+    </section>
+  `;
 }
 
 function renderSearchHeader(conditionId, run) {
@@ -2111,9 +2337,111 @@ function renderOpenedResultStatus(result) {
   `;
 }
 
+function getSaveOptionLabel(kind, value) {
+  const labels = {
+    folder: { general: '기본 보관함', personal: '개인 보관함', shared: '공유 보관함' },
+    include: { summary: '요약만 포함', checklist: '상담 전 점검 항목 포함', all: '전체 내용 포함' },
+    format: { web: '웹에서 보기', pdf: 'PDF로 보관', text: '텍스트로 보관' },
+  };
+  return labels[kind]?.[value] ?? value;
+}
+
+function renderPseudoSaveOptionGroup({ name, label, options, selected }) {
+  return `
+    <div class="pseudo-combo pseudo-combo-a" role="group" aria-label="${escapeHtml(label)}">
+      <p class="pseudo-combo-label">${escapeHtml(label)}</p>
+      <button class="button button-secondary pseudo-combo-selected" type="button" data-action="search-message" data-notice="아래 선택지에서 값을 고르십시오." data-focus-id="save-option-${escapeHtml(name)}-selected">
+        선택됨: ${escapeHtml(getSaveOptionLabel(name, selected))}
+      </button>
+      <div class="pseudo-combo-options visually-collapsed-options">
+        ${options.map((option) => `
+          <button
+            class="button ${selected === option.value ? 'button-primary' : 'button-ghost'}"
+            type="button"
+            data-action="set-save-option"
+            data-option-name="${escapeHtml(name)}"
+            data-option-value="${escapeHtml(option.value)}"
+            data-focus-id="save-option-${escapeHtml(name)}-${escapeHtml(option.value)}"
+          >${escapeHtml(option.label)}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderNativeSaveOptionField({ name, label, options, selected }) {
+  return `
+    <label>
+      <span>${escapeHtml(label)}</span>
+      <select name="save-option-${escapeHtml(name)}" data-focus-id="save-option-${escapeHtml(name)}">
+        ${options.map((option) => `<option value="${escapeHtml(option.value)}" ${selected === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+      </select>
+    </label>
+  `;
+}
+
+function renderSaveOptionsDialog(modal, run) {
+  const result = getResultById(modal.resultId);
+  if (!result) return '';
+  const fields = [
+    {
+      name: 'folder',
+      label: '저장 위치',
+      options: [
+        { value: 'general', label: '기본 보관함' },
+        { value: 'personal', label: '개인 보관함' },
+        { value: 'shared', label: '공유 보관함' },
+      ],
+    },
+    {
+      name: 'include',
+      label: '포함할 내용',
+      options: [
+        { value: 'summary', label: '요약만 포함' },
+        { value: 'checklist', label: '상담 전 점검 항목 포함' },
+        { value: 'all', label: '전체 내용 포함' },
+      ],
+    },
+    {
+      name: 'format',
+      label: '저장 형식',
+      options: [
+        { value: 'web', label: '웹에서 보기' },
+        { value: 'pdf', label: 'PDF로 보관' },
+        { value: 'text', label: '텍스트로 보관' },
+      ],
+    },
+  ];
+  return `
+    <div class="modal-backdrop">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+        <h2 id="dialog-title" tabindex="-1">자료 저장 옵션</h2>
+        <p id="dialog-description">${escapeHtml(result.title)} 자료를 저장할 때 적용할 옵션입니다.</p>
+        <div class="filters-grid save-options-grid ${state.conditionId === 'variantA' ? 'save-options-a' : 'save-options-b'}">
+          ${fields.map((field) => state.conditionId === 'variantA'
+            ? renderPseudoSaveOptionGroup({ ...field, selected: run.saveOptionDraft[field.name] })
+            : renderNativeSaveOptionField({ ...field, selected: run.saveOptionDraft[field.name] })
+          ).join('')}
+        </div>
+        <div class="button-row">
+          <button class="button button-ghost" data-action="dialog-close" data-focus-id="save-options-close">닫기</button>
+          <button class="button button-primary" data-action="confirm-save-options" data-dialog-primary data-focus-id="save-options-confirm">저장</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderResultModal(modal, run) {
   if (modal.kind === 'task-end-confirm') {
-    return renderEndTaskConfirmationDialogHtml();
+    const task = getCurrentTask();
+    return renderEndTaskConfirmationDialogHtml({
+      confirmLabel: task?.completion === 'previewQuestion' ? '예, 제출하고 종료합니다' : '예, 종료합니다',
+    });
+  }
+
+  if (modal.kind === 'save-options') {
+    return renderSaveOptionsDialog(modal, run);
   }
 
   const result = getResultById(modal.resultId);
