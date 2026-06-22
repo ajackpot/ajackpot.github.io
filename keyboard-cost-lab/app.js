@@ -277,6 +277,7 @@ function createConditionRuntime(variantId) {
     filters: defaultFilters(),
     filtersDraft: defaultFilters(),
     booking: null,
+    bookingCompletion: null,
     modal: null,
     liveStatus: '필터를 적용하면 결과 수가 갱신됩니다.',
     taskResults: [],
@@ -335,6 +336,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
     ...(snapshot.filtersDraft ?? runtime.filtersDraft),
   };
   runtime.booking = snapshot.booking ? deepClone(snapshot.booking) : null;
+  runtime.bookingCompletion = snapshot.bookingCompletion ? deepClone(snapshot.bookingCompletion) : null;
   runtime.currentGridSlotId = snapshot.currentGridSlotId ?? null;
   runtime.cancelPerformedThisTask = Boolean(snapshot.cancelPerformedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
@@ -354,6 +356,7 @@ function serializeRuntimeSnapshot(run) {
     filters: deepClone(run.filters),
     filtersDraft: deepClone(run.filtersDraft),
     booking: run.booking ? deepClone(run.booking) : null,
+    bookingCompletion: run.bookingCompletion ? deepClone(run.bookingCompletion) : null,
     currentGridSlotId: run.currentGridSlotId,
     cancelPerformedThisTask: run.cancelPerformedThisTask,
     lastTaskCompletionNote: run.lastTaskCompletionNote,
@@ -372,6 +375,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.filters = hydrated.filters;
   targetRun.filtersDraft = hydrated.filtersDraft;
   targetRun.booking = hydrated.booking;
+  targetRun.bookingCompletion = hydrated.bookingCompletion;
   targetRun.currentGridSlotId = hydrated.currentGridSlotId;
   targetRun.cancelPerformedThisTask = hydrated.cancelPerformedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
@@ -458,6 +462,7 @@ function prepareCurrentTaskForMain() {
   run.isApplying = false;
   run.isWorking = false;
   run.cancelPerformedThisTask = false;
+  run.bookingCompletion = null;
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
   run.featurePanel = null;
@@ -1153,8 +1158,13 @@ function confirmSlotFromModal() {
       taskId: task.id,
       at: new Date().toISOString(),
     };
+    run.bookingCompletion = {
+      slotId: slot.id,
+      completedAt: new Date().toISOString(),
+    };
     run.isWorking = false;
     run.modal = null;
+    run.liveStatus = '예약이 완료되었습니다.';
     run.currentTaskLogger?.note('booking-confirmed', {
       slotId: slot.id,
       correct: wasCorrect,
@@ -1166,10 +1176,8 @@ function confirmSlotFromModal() {
       closedAt: performance.now(),
     });
 
-    openTaskFinalModal({
-      title: '처리가 완료되었습니다.',
-      description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
-    });
+    requestFocus('#booking-completion-heading');
+    render();
   }, 360);
 }
 
@@ -1184,6 +1192,7 @@ function confirmCancelFromModal() {
 
   window.setTimeout(() => {
     run.booking = null;
+    run.bookingCompletion = null;
     run.cancelPerformedThisTask = true;
     run.isWorking = false;
     run.modal = null;
@@ -1209,18 +1218,19 @@ function confirmCancelFromModal() {
 
 function isTaskSatisfied(task, run) {
   const bookingMatches = run.booking?.slotId === task.targetSlotId;
+  const completionScreenReached = run.bookingCompletion?.slotId === run.booking?.slotId;
   if (task.requiresCancellation) {
-    return bookingMatches && run.cancelPerformedThisTask;
+    return bookingMatches && completionScreenReached && run.cancelPerformedThisTask;
   }
-  return bookingMatches;
+  return bookingMatches && completionScreenReached;
 }
 
 function getEndTaskOutcome(task, run) {
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
+  const success = isTaskSatisfied(task, run);
   if (success) {
     return {
       success: true,
-      reason: 'participant-ended-after-final-confirmation',
+      reason: 'participant-ended-after-service-action',
       message: '과업 수행에 성공했습니다.',
     };
   }
@@ -1230,8 +1240,8 @@ function getEndTaskOutcome(task, run) {
     message = '요청한 상담 예약 시간과 다른 시간을 예약했습니다.';
   } else if (run.booking?.slotId === task.targetSlotId && task.requiresCancellation && !run.cancelPerformedThisTask) {
     message = '기존 예약 취소가 완료되지 않았습니다.';
-  } else if (run.booking?.slotId === task.targetSlotId && !run.finalConfirmationAcknowledged) {
-    message = '예약 확정 뒤 최종 확인 대화상자를 확인하지 않았습니다.';
+  } else if (run.booking?.slotId === task.targetSlotId && run.bookingCompletion?.slotId !== run.booking.slotId) {
+    message = '예약 확정 화면에 진입하지 못했습니다.';
   }
 
   return {
@@ -1295,6 +1305,7 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
     notes: [
       `booking=${run.booking?.slotId ?? 'none'}`,
       `cancelPerformed=${run.cancelPerformedThisTask}`,
+      `bookingCompletion=${run.bookingCompletion?.slotId ?? 'none'}`,
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       outcomeMessage ? `outcome=${outcomeMessage}` : '',
       'measurement=first-input-visible-only',
@@ -1477,6 +1488,7 @@ function renderRunnerPage() {
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
         ${renderSimulatedHeader(conditionId, run)}
         ${renderFeaturePanel(run)}
+        ${renderBookingCompletionCard(run)}
         ${conditionId === 'variantB' ? renderBookingPanel(run, true) : ''}
         ${renderFilters(conditionId, run)}
         ${renderResults(conditionId, run, availableSlots, unavailableSlots)}
@@ -1598,7 +1610,7 @@ function renderTaskPreparationView() {
           <li>수행 화면은 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
           <li><strong>과업을 모두 수행했다고 판단하면 수행 탭 하단의 과업 종료 버튼을 누르십시오.</strong></li>
           <li>과업 종료 버튼을 누르면 종료 확인 대화상자가 열립니다. 예를 누르면 기록을 저장하고, 아니요를 누르면 계속 진행합니다.</li>
-          <li>수행할 수 없다고 판단해도 과업 종료 절차를 진행하면 다음 단계로 넘어갑니다.</li>
+          <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
           <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
         </ul>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
@@ -1767,6 +1779,7 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
+      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
       <div class="button-row">
         <a class="button button-secondary" download="reservation-calendar-results.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
@@ -1797,14 +1810,12 @@ function renderFinalView() {
           <tr><th>수행 불가능 기록</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
         </tbody>
       </table>
-      <p class="muted">과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</p>
     </section>
     <section class="card">
       <h2>기록 확인 안내</h2>
       <ul>
-        <li>두 화면을 모두 수행한 뒤에만 결과가 표시됩니다.</li>
+        <li>과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</li>
         <li>과업 종료 버튼을 너무 일찍 누른 기록은 수행 불가능 기록으로 표시됩니다.</li>
-        <li>결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
@@ -2411,6 +2422,20 @@ function renderVariantBResults(run, availableSlots, unavailableSlots) {
         </ul>
       </section>
     ` : ''}
+  `;
+}
+
+function renderBookingCompletionCard(run) {
+  if (!run.bookingCompletion?.slotId) return '';
+  const slot = getSlotById(run.bookingCompletion.slotId);
+  if (!slot) return '';
+  return `
+    <section class="card booking-completion-card" aria-labelledby="booking-completion-heading">
+      <p class="eyebrow">예약 완료</p>
+      <h2 id="booking-completion-heading" tabindex="-1">예약이 완료되었습니다</h2>
+      <p class="goal">${escapeHtml(formatSlotLabel(slot))}</p>
+      <p class="muted">예약 내용은 현재 예약 내용 영역에서 확인할 수 있으며, 필요한 경우 그 영역에서 취소할 수 있습니다.</p>
+    </section>
   `;
 }
 

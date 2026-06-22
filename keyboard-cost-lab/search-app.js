@@ -1381,7 +1381,7 @@ function renderServiceIntroView() {
           <h2>주의할 점</h2>
           <ul>
             <li>과업 요청은 이 창에서 다시 확인할 수 있습니다.</li>
-            <li>수행할 수 없다고 판단해도 수행 탭의 과업 종료 버튼으로 다음 단계로 넘어갑니다.</li>
+            <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
             <li>모든 결과는 두 화면을 모두 수행한 뒤 한 번에 표시됩니다.</li>
           </ul>
         </section>
@@ -1430,7 +1430,7 @@ function renderTaskPreparationView() {
           <li>수행 화면은 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
           <li><strong>과업을 모두 수행했다고 판단하면 수행 탭 하단의 과업 종료 버튼을 누르십시오.</strong></li>
           <li>과업 종료 버튼을 누르면 종료 확인 대화상자가 열립니다. 예를 누르면 기록을 저장하고, 아니요를 누르면 계속 진행합니다.</li>
-          <li>수행할 수 없다고 판단해도 과업 종료 절차를 진행하면 다음 단계로 넘어갑니다.</li>
+          <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
           <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
         </ul>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
@@ -1599,6 +1599,7 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
+      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
       <div class="button-row">
         <a class="button button-secondary" download="search-results-record.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
@@ -1629,14 +1630,12 @@ function renderFinalView() {
           <tr><th>수행 불가능 기록</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
         </tbody>
       </table>
-      <p class="muted">과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</p>
     </section>
     <section class="card">
       <h2>기록 확인 안내</h2>
       <ul>
-        <li>검색 결과 목록도 메인 창과 수행 탭을 분리해 같은 운영 방식으로 확장했습니다.</li>
-        <li>서비스별 사전 계산 그래프와 결과 파일을 별도로 둬 후속 서비스 유형을 독립적으로 추가할 수 있습니다.</li>
-        <li>수동 점검표 문서를 함께 두어 브라우저 자동화가 어려운 부분을 배포 전 점검으로 보완할 수 있습니다.</li>
+        <li>과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</li>
+        <li>과업 종료 버튼을 너무 일찍 누른 기록은 수행 불가능 기록으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>

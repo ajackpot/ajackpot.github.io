@@ -39,7 +39,7 @@ export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
           <h2>주의할 점</h2>
           <ul>
             <li>과업 요청은 이 창에서 다시 확인할 수 있습니다.</li>
-            <li>수행할 수 없다고 판단해도 수행 탭의 과업 종료 버튼으로 다음 단계로 넘어갑니다.</li>
+            <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
             <li>모든 결과는 두 화면을 모두 수행한 뒤 한 번에 표시됩니다.</li>
           </ul>
         </section>

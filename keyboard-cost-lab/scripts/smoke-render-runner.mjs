@@ -14,6 +14,7 @@ const services = {
         filters: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
         filtersDraft: { serviceType: 'counseling', mode: 'all', provider: 'all', duration: 'all' },
         booking: null,
+        bookingCompletion: null,
         currentGridSlotId: null,
         cancelPerformedThisTask: false,
         lastTaskCompletionNote: '',
@@ -36,6 +37,9 @@ const services = {
         categoryDraft: 'all',
         helpfulByCommentId: {},
         expandedCommentId: null,
+        replyListVisitedThisTask: {},
+        replyAnswerDrafts: {},
+        submittedReplyAnswers: {},
         currentCommentId: null,
         detailVisitedThisTask: {},
         lastTaskCompletionNote: '',
@@ -174,6 +178,9 @@ async function renderRunner({ serviceId, conditionId, taskIndex, showRequest, sn
     hasRequiredCalendarActions: serviceId === 'calendar'
       ? html.includes('data-action="apply-filters"') && html.includes('data-action="slot-open"') && html.includes('data-action="end-task"')
       : true,
+    hasReplyQuestionForm: html.includes('data-action="submit-reply-answer"'),
+    hasBookingCompletionPanel: html.includes('booking-completion-heading') && html.includes('예약이 완료되었습니다'),
+    hasGenericTaskFinalDialogText: html.includes('처리가 완료되었습니다.'),
   };
 }
 
@@ -186,6 +193,30 @@ for (const serviceId of Object.keys(services)) {
   }
   reports.push(await renderRunner({ serviceId, conditionId: 'variantA', taskIndex: 0, showRequest: true }));
 }
+
+
+reports.push(await renderRunner({
+  serviceId: 'comments',
+  conditionId: 'variantA',
+  taskIndex: 0,
+  showRequest: false,
+  snapshotOverrides: {
+    expandedCommentId: 'comment-minji',
+    replyListVisitedThisTask: { 'comment-minji': true },
+    replyAnswerDrafts: { 'comment-minji': '승민' },
+  },
+}));
+
+reports.push(await renderRunner({
+  serviceId: 'calendar',
+  conditionId: 'variantA',
+  taskIndex: 0,
+  showRequest: false,
+  snapshotOverrides: {
+    booking: { slotId: 'kim-tue-1430-remote-30', taskId: 'task-1-book-remote', at: '2026-06-22T00:00:00.000Z' },
+    bookingCompletion: { slotId: 'kim-tue-1430-remote-30', completedAt: '2026-06-22T00:00:00.000Z' },
+  },
+}));
 
 for (const featureId of ['home', 'providers', 'passes', 'reviews', 'pricing', 'faq', 'policy', 'support', 'notifications', 'my-counseling', 'usage-guide', 'search']) {
   reports.push(await renderRunner({
@@ -221,8 +252,15 @@ for (const report of reports) {
   if (report.service === 'calendar' && report.hasFeaturePanel) {
     checks.push(report.placeholderTextCount <= 1);
   }
+  if (report.service === 'comments' && report.condition === 'variantA' && report.taskIndex === 0 && report.htmlLength > 14500) {
+    checks.push(report.hasReplyQuestionForm);
+    checks.push(!report.hasGenericTaskFinalDialogText);
+  }
+  if (report.service === 'calendar' && report.condition === 'variantA' && report.taskIndex === 0 && report.htmlLength > 26000 && !report.hasFeaturePanel) {
+    checks.push(report.hasBookingCompletionPanel);
+  }
   if (report.service === 'calendar' && !report.showRequest && report.taskIndex === 0 && report.condition === 'variantA' && report.htmlLength > 26000) {
-    checks.push(report.hasFeaturePanel);
+    checks.push(report.hasFeaturePanel || report.hasBookingCompletionPanel);
   }
   report.ok = checks.every(Boolean);
   if (!report.ok) failed = true;

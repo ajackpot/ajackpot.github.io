@@ -25,7 +25,7 @@ export const commentsScenario = {
       summary: '예약 확정 문자는 예약 10분 전에 다시 발송됩니다.',
       body: '예약 확정 문자와 안내 메일은 실험용 예시로 구성했습니다. 실제 서비스에서는 예약 10분 전 재안내, 예약 변경 링크, 취소 가능 시각이 함께 표시됩니다.',
       replies: [
-        { id: 'reply-admin-1', author: '지원팀', text: '문자가 오지 않으면 내 예약 내역 화면에서 다시 확인할 수 있습니다.' },
+        { id: 'reply-admin-1', author: '지원팀', timeLabel: '3월 25일 오전 9:12', text: '문자가 오지 않으면 내 예약 내역 화면에서 다시 확인할 수 있습니다.' },
       ],
     },
     {
@@ -40,8 +40,8 @@ export const commentsScenario = {
       summary: '모바일에서도 예약 변경이 잘 됩니다.',
       body: '전화 대신 비대면 상담으로 바꾸는 과정은 쉬웠지만, 키보드만으로는 같은 위치를 다시 찾는 데 시간이 조금 더 걸렸습니다.',
       replies: [
-        { id: 'reply-minji-1', author: '보라', text: '모바일 화면에서도 버튼 이름이 분명해서 이해하기 쉬웠습니다.' },
-        { id: 'reply-minji-2', author: '승민', text: '대화상자에서 닫기를 누른 뒤 같은 댓글로 돌아오면 더 편했습니다.' },
+        { id: 'reply-minji-1', author: '보라', timeLabel: '3월 31일 오전 9:24', text: '모바일 화면에서도 버튼 이름이 분명해서 이해하기 쉬웠습니다.' },
+        { id: 'reply-minji-2', author: '승민', timeLabel: '3월 31일 오전 9:37', text: '대화상자에서 닫기를 누른 뒤 같은 댓글로 돌아오면 더 편했습니다.' },
       ],
     },
     {
@@ -56,9 +56,9 @@ export const commentsScenario = {
       summary: '키보드만으로 댓글 답글 찾기가 조금 길었습니다.',
       body: '답글 수가 많아질수록 같은 버튼을 여러 번 지나야 해서 시간이 길어졌습니다. 결과 위치로 바로 이동하거나 선택 목록에서 바로 움직일 수 있으면 더 편할 것 같습니다.',
       replies: [
-        { id: 'reply-juno-1', author: '다은', text: '정렬 기준을 바꾸면 원하는 댓글을 조금 더 빨리 찾을 수 있었습니다.' },
-        { id: 'reply-juno-2', author: '태경', text: '답글 보기를 한 번 열면 다음 댓글로 넘어가기 전에 현재 위치를 기억하기가 어려웠습니다.' },
-        { id: 'reply-juno-3', author: '윤아', text: '선택한 댓글 작업이 한곳에 모이면 이동 횟수가 줄었습니다.' },
+        { id: 'reply-juno-1', author: '다은', timeLabel: '3월 30일 오후 4:28', text: '정렬 기준을 바꾸면 원하는 댓글을 조금 더 빨리 찾을 수 있었습니다.' },
+        { id: 'reply-juno-2', author: '태경', timeLabel: '3월 30일 오후 4:35', text: '답글 보기를 한 번 열면 다음 댓글로 넘어가기 전에 현재 위치를 기억하기가 어려웠습니다.' },
+        { id: 'reply-juno-3', author: '윤아', timeLabel: '3월 30일 오후 4:41', text: '선택한 댓글 작업이 한곳에 모이면 이동 횟수가 줄었습니다.' },
       ],
     },
     {
@@ -73,7 +73,7 @@ export const commentsScenario = {
       summary: '초점이 눈에 잘 보여서 현재 위치를 잃지 않았습니다.',
       body: '실험용 화면이라도 초점 표시가 분명하면 현재 선택 위치를 놓치지 않아 좋았습니다.',
       replies: [
-        { id: 'reply-haeun-1', author: '민석', text: '초점 표시가 약하면 같은 영역을 다시 찾는 시간이 길어집니다.' },
+        { id: 'reply-haeun-1', author: '민석', timeLabel: '3월 27일 오전 11:55', text: '초점 표시가 약하면 같은 영역을 다시 찾는 시간이 길어집니다.' },
       ],
     },
     {
@@ -101,7 +101,7 @@ export const commentsScenario = {
       summary: '정렬 기준을 바꾸면 이미 열어 둔 답글은 유지되나요?',
       body: '정렬 기준을 바꿨을 때 열려 있던 답글 영역을 유지할지 초기화할지에 따라 다시 찾는 부담이 달라질 수 있습니다.',
       replies: [
-        { id: 'reply-daehan-1', author: '운영자', text: '실험에서는 비교안마다 다른 복귀 흐름을 보기 위해 상태를 일부 유지합니다.' },
+        { id: 'reply-daehan-1', author: '운영자', timeLabel: '3월 28일 오후 7:02', text: '실험에서는 비교안마다 다른 복귀 흐름을 보기 위해 상태를 일부 유지합니다.' },
       ],
     },
     {

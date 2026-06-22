@@ -1265,3 +1265,23 @@ input {
 .compact-table td {
   white-space: nowrap;
 }
+
+.booking-completion-card {
+  border-color: #b9d8c2;
+  background: #f4fbf5;
+}
+
+.reply-question-form {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.reply-question-form label {
+  display: grid;
+  gap: 0.5rem;
+}

@@ -256,6 +256,9 @@ function createConditionRuntime(variantId) {
     categoryDraft: 'all',
     helpfulByCommentId: {},
     expandedCommentId: null,
+    replyListVisitedThisTask: {},
+    replyAnswerDrafts: {},
+    submittedReplyAnswers: {},
     currentCommentId: commentsScenario.comments[0]?.id ?? null,
     detailVisitedThisTask: {},
     modal: null,
@@ -301,6 +304,9 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.categoryDraft = snapshot.categoryDraft ?? runtime.categoryDraft;
   runtime.helpfulByCommentId = deepClone(snapshot.helpfulByCommentId ?? runtime.helpfulByCommentId);
   runtime.expandedCommentId = snapshot.expandedCommentId ?? null;
+  runtime.replyListVisitedThisTask = deepClone(snapshot.replyListVisitedThisTask ?? runtime.replyListVisitedThisTask);
+  runtime.replyAnswerDrafts = deepClone(snapshot.replyAnswerDrafts ?? runtime.replyAnswerDrafts);
+  runtime.submittedReplyAnswers = deepClone(snapshot.submittedReplyAnswers ?? runtime.submittedReplyAnswers);
   runtime.currentCommentId = snapshot.currentCommentId ?? runtime.currentCommentId;
   runtime.detailVisitedThisTask = deepClone(snapshot.detailVisitedThisTask ?? runtime.detailVisitedThisTask);
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
@@ -320,6 +326,9 @@ function serializeRuntimeSnapshot(run) {
     categoryDraft: run.categoryDraft,
     helpfulByCommentId: deepClone(run.helpfulByCommentId),
     expandedCommentId: run.expandedCommentId,
+    replyListVisitedThisTask: deepClone(run.replyListVisitedThisTask),
+    replyAnswerDrafts: deepClone(run.replyAnswerDrafts),
+    submittedReplyAnswers: deepClone(run.submittedReplyAnswers),
     currentCommentId: run.currentCommentId,
     detailVisitedThisTask: deepClone(run.detailVisitedThisTask),
     lastTaskCompletionNote: run.lastTaskCompletionNote,
@@ -337,6 +346,9 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.categoryDraft = hydrated.categoryDraft;
   targetRun.helpfulByCommentId = hydrated.helpfulByCommentId;
   targetRun.expandedCommentId = hydrated.expandedCommentId;
+  targetRun.replyListVisitedThisTask = hydrated.replyListVisitedThisTask;
+  targetRun.replyAnswerDrafts = hydrated.replyAnswerDrafts;
+  targetRun.submittedReplyAnswers = hydrated.submittedReplyAnswers;
   targetRun.currentCommentId = hydrated.currentCommentId;
   targetRun.detailVisitedThisTask = hydrated.detailVisitedThisTask;
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
@@ -392,6 +404,9 @@ function prepareCurrentTaskForMain() {
   run.isApplying = false;
   run.isWorking = false;
   run.detailVisitedThisTask = {};
+  run.replyListVisitedThisTask = {};
+  run.replyAnswerDrafts = {};
+  run.submittedReplyAnswers = {};
   run.finalConfirmationAcknowledged = false;
   run.siteNotice = '';
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
@@ -520,6 +535,7 @@ function acceptRunnerTaskCompletion(message) {
     benchmarkTaskId: task.benchmarkTaskId,
     targetCommentId: task.targetCommentId,
     expandedCommentIdAfterTask: run.expandedCommentId,
+    submittedReplyAnswersAfterTask: deepClone(run.submittedReplyAnswers),
     helpfulByCommentIdAfterTask: deepClone(run.helpfulByCommentId),
     conditionId,
   });
@@ -687,6 +703,12 @@ function handleRootClick(event) {
     return;
   }
 
+  if (action === 'submit-reply-answer') {
+    event.preventDefault();
+    submitReplyAnswer(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
+    return;
+  }
+
   if (action === 'mark-helpful') {
     event.preventDefault();
     markHelpful(actionTarget.dataset.commentId, actionTarget.dataset.focusId);
@@ -739,6 +761,15 @@ function handleRootChange(event) {
   if (!run) return;
   if (element.name === 'sort') run.sortDraft = element.value;
   if (element.name === 'category') run.categoryDraft = element.value;
+  if (element.name?.startsWith('reply-answer-')) {
+    const commentId = element.dataset.commentId;
+    if (commentId) {
+      run.replyAnswerDrafts = {
+        ...run.replyAnswerDrafts,
+        [commentId]: element.value,
+      };
+    }
+  }
 }
 
 function handleRootKeydown(event) {
@@ -922,6 +953,7 @@ function noteWrongCommentAction(commentId, actionType) {
   if (!run || !task || !commentId || commentId === task.targetCommentId) return;
   const relevantActions = {
     expandReplies: ['toggle-replies'],
+    replyQuestion: ['toggle-replies', 'submit-reply-answer'],
     helpful: ['open-detail', 'mark-helpful'],
   };
   if (!relevantActions[task.completion]?.includes(actionType)) return;
@@ -1039,15 +1071,62 @@ function toggleReplies(commentId, triggerFocusId) {
 
   const expanding = run.expandedCommentId !== commentId;
   run.expandedCommentId = expanding ? commentId : null;
+  if (expanding) {
+    run.replyListVisitedThisTask = {
+      ...run.replyListVisitedThisTask,
+      [commentId]: true,
+    };
+  }
   run.currentTaskLogger?.note('toggle-replies', {
     commentId,
     expanded: expanding,
   });
 
-  openTaskFinalModal({
-    title: '처리가 완료되었습니다.',
-    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
+  run.liveStatus = expanding ? '답글 목록이 표시되었습니다.' : '답글 목록을 닫았습니다.';
+  if (expanding) {
+    requestFocus(`[data-focus-id="reply-heading-${commentId}"]`);
+  } else if (triggerFocusId) {
+    requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  }
+  render();
+}
+
+function getReplyQuestionForCurrentTask() {
+  const task = getCurrentTask();
+  if (!task || task.completion !== 'replyQuestion') return null;
+  return task.replyQuestion ?? null;
+}
+
+function submitReplyAnswer(commentId, triggerFocusId) {
+  const run = getCurrentRun();
+  const task = getCurrentTask();
+  if (!run || !task || run.isWorking || !commentId) return;
+  const value = run.replyAnswerDrafts[commentId] || '';
+  if (!value) {
+    run.siteNotice = '답을 선택한 뒤 제출하십시오.';
+    run.liveStatus = run.siteNotice;
+    if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+    render();
+    return;
+  }
+
+  noteWrongCommentAction(commentId, 'submit-reply-answer');
+  run.submittedReplyAnswers = {
+    ...run.submittedReplyAnswers,
+    [commentId]: {
+      taskId: task.id,
+      value,
+      submittedAt: new Date().toISOString(),
+    },
+  };
+  run.currentTaskLogger?.note('submit-reply-answer', {
+    commentId,
+    value,
   });
+  run.siteNotice = '답변을 제출했습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
 }
 
 function markHelpful(commentId, triggerFocusId) {
@@ -1068,10 +1147,10 @@ function markHelpful(commentId, triggerFocusId) {
     alreadyHelpful,
   });
 
-  openTaskFinalModal({
-    title: '처리가 완료되었습니다.',
-    description: '처리 결과를 확인했습니다. 화면을 계속 이용할 수 있습니다.',
-  });
+  run.siteNotice = alreadyHelpful ? '이미 도움이 돼요가 표시되어 있습니다.' : '도움이 돼요를 표시했습니다.';
+  run.liveStatus = run.siteNotice;
+  if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
+  render();
 }
 
 function isTaskSatisfied(task, run) {
@@ -1079,8 +1158,13 @@ function isTaskSatisfied(task, run) {
   if (task.requiredSort && run.sort !== task.requiredSort) return false;
   if (task.requiredCategory && run.category !== task.requiredCategory) return false;
 
-  if (task.completion === 'expandReplies') {
-    return run.expandedCommentId === task.targetCommentId;
+  if (task.completion === 'replyQuestion') {
+    const submitted = run.submittedReplyAnswers[task.targetCommentId];
+    const otherAnswered = Object.keys(run.submittedReplyAnswers).some((commentId) => commentId !== task.targetCommentId);
+    return Boolean(run.replyListVisitedThisTask[task.targetCommentId])
+      && Boolean(submitted)
+      && submitted.value === task.replyQuestion?.correctValue
+      && !otherAnswered;
   }
 
   if (task.completion === 'helpful') {
@@ -1093,18 +1177,30 @@ function isTaskSatisfied(task, run) {
 }
 
 function getEndTaskOutcome(task, run) {
-  const success = isTaskSatisfied(task, run) && run.finalConfirmationAcknowledged;
+  const success = isTaskSatisfied(task, run);
   if (success) {
     return {
       success: true,
-      reason: 'participant-ended-after-final-confirmation',
+      reason: 'participant-ended-after-service-action',
       message: '과업 수행에 성공했습니다.',
     };
   }
 
   let message = '요청한 댓글 동작을 완료하지 못했습니다.';
-  if (task.completion === 'expandReplies' && run.expandedCommentId && run.expandedCommentId !== task.targetCommentId) {
-    message = '요청한 댓글과 다른 댓글의 답글을 열었습니다.';
+  if (task.completion === 'replyQuestion') {
+    const targetAnswer = run.submittedReplyAnswers[task.targetCommentId];
+    const otherAnswered = Object.keys(run.submittedReplyAnswers).some((commentId) => commentId !== task.targetCommentId);
+    if (otherAnswered) {
+      message = '요청한 댓글과 다른 댓글의 답글 질문에 답을 제출했습니다.';
+    } else if (run.expandedCommentId && run.expandedCommentId !== task.targetCommentId && !run.replyListVisitedThisTask[task.targetCommentId]) {
+      message = '요청한 댓글과 다른 댓글의 답글 목록에 진입했습니다.';
+    } else if (!run.replyListVisitedThisTask[task.targetCommentId]) {
+      message = '요청한 댓글의 답글 목록에 진입하지 못했습니다.';
+    } else if (!targetAnswer) {
+      message = '답글 목록 질문에 답을 제출하지 않았습니다.';
+    } else if (targetAnswer.value !== task.replyQuestion?.correctValue) {
+      message = '답글 목록 질문에 요청과 다른 답을 제출했습니다.';
+    }
   } else if (task.completion === 'helpful') {
     const helpfulIds = Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]);
     if (helpfulIds.some((commentId) => commentId !== task.targetCommentId)) {
@@ -1112,8 +1208,6 @@ function getEndTaskOutcome(task, run) {
     } else if (run.helpfulByCommentId[task.targetCommentId] && task.requiresDetailVisit && !run.detailVisitedThisTask[task.targetCommentId]) {
       message = '요청한 댓글의 댓글 정보 보기를 확인하지 않았습니다.';
     }
-  } else if (run.finalConfirmationAcknowledged === false && isTaskSatisfied(task, run)) {
-    message = '최종 확인 대화상자를 확인하지 않았습니다.';
   }
 
   return {
@@ -1176,7 +1270,9 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
     reason,
     notes: [
       `expandedComment=${run.expandedCommentId ?? 'none'}`,
+      `visitedReplies=${Object.keys(run.replyListVisitedThisTask).join(',') || 'none'}`,
       `helpful=${Object.keys(run.helpfulByCommentId).filter((commentId) => run.helpfulByCommentId[commentId]).join(',') || 'none'}`,
+      `replyAnswers=${Object.entries(run.submittedReplyAnswers).map(([commentId, answer]) => `${commentId}:${answer.value}`).join(',') || 'none'}`,
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       outcomeMessage ? `outcome=${outcomeMessage}` : '',
       'measurement=first-input-visible-only',
@@ -1327,7 +1423,7 @@ function renderServiceIntroView() {
           <h2>주의할 점</h2>
           <ul>
             <li>과업 요청은 이 창에서 다시 확인할 수 있습니다.</li>
-            <li>수행할 수 없다고 판단해도 수행 탭의 과업 종료 버튼으로 다음 단계로 넘어갑니다.</li>
+            <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
             <li>모든 결과는 두 화면을 모두 수행한 뒤 한 번에 표시됩니다.</li>
           </ul>
         </section>
@@ -1376,7 +1472,7 @@ function renderTaskPreparationView() {
           <li>수행 화면은 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
           <li><strong>과업을 모두 수행했다고 판단하면 수행 탭 하단의 과업 종료 버튼을 누르십시오.</strong></li>
           <li>과업 종료 버튼을 누르면 종료 확인 대화상자가 열립니다. 예를 누르면 기록을 저장하고, 아니요를 누르면 계속 진행합니다.</li>
-          <li>수행할 수 없다고 판단해도 과업 종료 절차를 진행하면 다음 단계로 넘어갑니다.</li>
+          <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
           <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
         </ul>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
@@ -1545,6 +1641,7 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
+      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
       <div class="button-row">
         <a class="button button-secondary" download="comments-list-results.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
         ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
@@ -1575,14 +1672,12 @@ function renderFinalView() {
           <tr><th>수행 불가능 기록</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
         </tbody>
       </table>
-      <p class="muted">과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</p>
     </section>
     <section class="card">
       <h2>기록 확인 안내</h2>
       <ul>
-        <li>댓글 목록도 메인 창과 수행 탭을 분리해 같은 운영 방식으로 확장했습니다.</li>
-        <li>서비스별 사전 계산 그래프와 결과 파일을 별도로 둬 후속 서비스 유형을 독립적으로 추가할 수 있습니다.</li>
-        <li>수동 점검표 문서를 함께 두어 브라우저 자동화가 어려운 부분을 배포 전 점검으로 보완할 수 있습니다.</li>
+        <li>과업 내용 확인 시간은 메인 창에서 분리되며, 수행 탭이 숨겨진 동안의 시간은 실제 완료 시간에서 뺍니다.</li>
+        <li>과업 종료 버튼을 너무 일찍 누른 기록은 수행 불가능 기록으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
@@ -1698,7 +1793,7 @@ function renderVariantACommentList(run, visibleComments) {
             <button class="button button-ghost" data-action="toggle-replies" data-comment-id="${comment.id}" data-focus-id="comment-replies-${comment.id}">${run.expandedCommentId === comment.id ? `답글 ${comment.replyCount}개 닫기` : `답글 ${comment.replyCount}개 보기`}</button>
             <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${comment.id}" data-focus-id="comment-detail-${comment.id}">댓글 정보 보기</button>
           </div>
-          ${run.expandedCommentId === comment.id ? renderReplyList(comment) : ''}
+          ${run.expandedCommentId === comment.id ? renderReplyList(comment, run) : ''}
         </li>
       `).join('')}
     </ul>
@@ -1751,17 +1846,42 @@ function renderVariantBCommentList(run, visibleComments) {
         ` : '<p class="muted">선택된 댓글이 없습니다.</p>'}
       </section>
     </div>
-    ${expandedComment ? renderReplyList(expandedComment) : ''}
+    ${expandedComment ? renderReplyList(expandedComment, run) : ''}
   `;
 }
 
-function renderReplyList(comment) {
+function renderReplyList(comment, run) {
+  const question = getReplyQuestionForCurrentTask();
+  const draftValue = run.replyAnswerDrafts[comment.id] || '';
+  const submitted = run.submittedReplyAnswers[comment.id]?.value || '';
+  const fieldLabel = question?.field === 'timeLabel' ? '작성 시간' : '작성자';
+
   return `
     <section class="reply-card" aria-label="${escapeHtml(comment.author)} 댓글의 답글 목록">
-      <h3>${escapeHtml(comment.author)} 댓글의 답글 ${comment.replyCount}개</h3>
+      <h3 data-focus-id="reply-heading-${comment.id}" tabindex="-1">${escapeHtml(comment.author)} 댓글의 답글 ${comment.replyCount}개</h3>
       <ul class="reply-list">
-        ${comment.replies.map((reply) => `<li><strong>${escapeHtml(reply.author)}</strong> · ${escapeHtml(reply.text)}</li>`).join('')}
+        ${comment.replies.map((reply, index) => `
+          <li>
+            <strong>${escapeHtml(index + 1)}번째 답글</strong> · ${escapeHtml(reply.author)} · ${escapeHtml(reply.timeLabel ?? '작성 시간 정보 없음')}
+            <p>${escapeHtml(reply.text)}</p>
+          </li>
+        `).join('')}
       </ul>
+      ${question && comment.replies.length >= question.replyIndex ? `
+        <form class="reply-question-form" data-measurement-exempt="false" data-comment-id="${comment.id}">
+          <label for="reply-answer-${comment.id}">
+            <span>${escapeHtml(question.prompt)}</span>
+            <select id="reply-answer-${comment.id}" name="reply-answer-${comment.id}" data-comment-id="${comment.id}" data-focus-id="reply-answer-${comment.id}">
+              <option value="">선택하십시오</option>
+              ${question.options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+            </select>
+          </label>
+          <div class="button-row">
+            <button type="button" class="button button-primary" data-action="submit-reply-answer" data-comment-id="${comment.id}" data-focus-id="reply-answer-submit-${comment.id}">${submitted ? '답변 다시 제출' : '답변 제출'}</button>
+          </div>
+          <p class="muted">${escapeHtml(question.replyIndex)}번째 답글의 ${escapeHtml(fieldLabel)}를 선택합니다.</p>
+        </form>
+      ` : ''}
     </section>
   `;
 }
