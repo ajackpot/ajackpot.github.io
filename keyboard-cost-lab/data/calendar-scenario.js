@@ -1,0 +1,56 @@
+export const calendarScenario = {
+  id: 'counseling-demo-week-2026-04-13',
+  title: '심리상담 예약 데모',
+  weekLabel: '2026년 4월 13일 주',
+  serviceTypes: [
+    { id: 'counseling', label: '상담 예약' },
+    { id: 'coaching', label: '코칭 예약' },
+  ],
+  modes: [
+    { id: 'remote', label: '비대면' },
+    { id: 'clinic', label: '대면' },
+  ],
+  durations: [30, 45],
+  providers: [
+    { id: 'kim', label: '김민아 상담사' },
+    { id: 'lee', label: '이서준 상담사' },
+    { id: 'park', label: '박하늘 상담사' },
+  ],
+  slots: [
+    { id: 'kim-mon-0900-remote-30', day: 'mon', dayLabel: '월 4/13', start: '09:00', provider: 'kim', mode: 'remote', duration: 30, available: true },
+    { id: 'lee-mon-1000-clinic-30', day: 'mon', dayLabel: '월 4/13', start: '10:00', provider: 'lee', mode: 'clinic', duration: 30, available: true },
+    { id: 'park-mon-1100-remote-45', day: 'mon', dayLabel: '월 4/13', start: '11:00', provider: 'park', mode: 'remote', duration: 45, available: true },
+    { id: 'kim-mon-1330-remote-30', day: 'mon', dayLabel: '월 4/13', start: '13:30', provider: 'kim', mode: 'remote', duration: 30, available: false },
+    { id: 'lee-mon-1400-remote-30', day: 'mon', dayLabel: '월 4/13', start: '14:00', provider: 'lee', mode: 'remote', duration: 30, available: true },
+    { id: 'park-mon-1500-clinic-45', day: 'mon', dayLabel: '월 4/13', start: '15:00', provider: 'park', mode: 'clinic', duration: 45, available: true },
+
+    { id: 'lee-tue-0900-remote-30', day: 'tue', dayLabel: '화 4/14', start: '09:00', provider: 'lee', mode: 'remote', duration: 30, available: true },
+    { id: 'kim-tue-1000-clinic-30', day: 'tue', dayLabel: '화 4/14', start: '10:00', provider: 'kim', mode: 'clinic', duration: 30, available: true },
+    { id: 'kim-tue-1300-remote-30', day: 'tue', dayLabel: '화 4/14', start: '13:00', provider: 'kim', mode: 'remote', duration: 30, available: true },
+    { id: 'kim-tue-1330-remote-30', day: 'tue', dayLabel: '화 4/14', start: '13:30', provider: 'kim', mode: 'remote', duration: 30, available: true },
+    { id: 'lee-tue-1400-remote-45', day: 'tue', dayLabel: '화 4/14', start: '14:00', provider: 'lee', mode: 'remote', duration: 45, available: true },
+    { id: 'kim-tue-1430-remote-30', day: 'tue', dayLabel: '화 4/14', start: '14:30', provider: 'kim', mode: 'remote', duration: 30, available: true },
+    { id: 'park-tue-1500-clinic-30', day: 'tue', dayLabel: '화 4/14', start: '15:00', provider: 'park', mode: 'clinic', duration: 30, available: true },
+
+    { id: 'park-wed-0900-clinic-30', day: 'wed', dayLabel: '수 4/15', start: '09:00', provider: 'park', mode: 'clinic', duration: 30, available: true },
+    { id: 'kim-wed-1000-remote-45', day: 'wed', dayLabel: '수 4/15', start: '10:00', provider: 'kim', mode: 'remote', duration: 45, available: true },
+    { id: 'lee-wed-1100-remote-30', day: 'wed', dayLabel: '수 4/15', start: '11:00', provider: 'lee', mode: 'remote', duration: 30, available: false },
+    { id: 'kim-wed-1330-remote-30', day: 'wed', dayLabel: '수 4/15', start: '13:30', provider: 'kim', mode: 'remote', duration: 30, available: true },
+    { id: 'park-wed-1400-clinic-45', day: 'wed', dayLabel: '수 4/15', start: '14:00', provider: 'park', mode: 'clinic', duration: 45, available: true },
+    { id: 'lee-wed-1500-clinic-30', day: 'wed', dayLabel: '수 4/15', start: '15:00', provider: 'lee', mode: 'clinic', duration: 30, available: true },
+
+    { id: 'park-thu-0900-clinic-30', day: 'thu', dayLabel: '목 4/16', start: '09:00', provider: 'park', mode: 'clinic', duration: 30, available: true },
+    { id: 'park-thu-1000-clinic-30', day: 'thu', dayLabel: '목 4/16', start: '10:00', provider: 'park', mode: 'clinic', duration: 30, available: true },
+    { id: 'kim-thu-1100-remote-30', day: 'thu', dayLabel: '목 4/16', start: '11:00', provider: 'kim', mode: 'remote', duration: 30, available: false },
+    { id: 'lee-thu-1330-remote-30', day: 'thu', dayLabel: '목 4/16', start: '13:30', provider: 'lee', mode: 'remote', duration: 30, available: true },
+    { id: 'park-thu-1400-clinic-45', day: 'thu', dayLabel: '목 4/16', start: '14:00', provider: 'park', mode: 'clinic', duration: 45, available: false },
+    { id: 'kim-thu-1500-remote-30', day: 'thu', dayLabel: '목 4/16', start: '15:00', provider: 'kim', mode: 'remote', duration: 30, available: true },
+
+    { id: 'lee-fri-0900-remote-30', day: 'fri', dayLabel: '금 4/17', start: '09:00', provider: 'lee', mode: 'remote', duration: 30, available: true },
+    { id: 'kim-fri-1000-clinic-30', day: 'fri', dayLabel: '금 4/17', start: '10:00', provider: 'kim', mode: 'clinic', duration: 30, available: true },
+    { id: 'park-fri-1100-remote-45', day: 'fri', dayLabel: '금 4/17', start: '11:00', provider: 'park', mode: 'remote', duration: 45, available: true },
+    { id: 'lee-fri-1330-clinic-30', day: 'fri', dayLabel: '금 4/17', start: '13:30', provider: 'lee', mode: 'clinic', duration: 30, available: true },
+    { id: 'kim-fri-1400-remote-30', day: 'fri', dayLabel: '금 4/17', start: '14:00', provider: 'kim', mode: 'remote', duration: 30, available: false },
+    { id: 'park-fri-1500-clinic-30', day: 'fri', dayLabel: '금 4/17', start: '15:00', provider: 'park', mode: 'clinic', duration: 30, available: true },
+  ],
+};

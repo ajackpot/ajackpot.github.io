@@ -1,0 +1,11 @@
+{
+  "name": "keyboard-cost-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "benchmark": "node scripts/run-benchmark.mjs",
+    "smoke": "node scripts/static-quality-check.mjs && node scripts/smoke-static-ui.mjs && node scripts/smoke-contract.mjs && node scripts/check-static-contracts.mjs && node scripts/check-comments-randomized-replies.mjs && node scripts/smoke-render-runner.mjs",
+    "serve": "python -m http.server 4173",
+    "check": "node scripts/static-quality-check.mjs && node scripts/smoke-static-ui.mjs && node scripts/smoke-contract.mjs && node scripts/check-static-contracts.mjs && node scripts/check-comments-randomized-replies.mjs && node scripts/smoke-render-runner.mjs"
+  }
+}
