@@ -21,7 +21,7 @@ export const searchBenchmarkGraphs = {
       task2_title_faq_save_options: {
         title: '제목순 질문답변에서 비대면 상담 연결 방법 저장',
         assumptions: [
-          '저장 버튼을 누른 뒤 저장 위치, 포함 내용, 형식 선택지가 각각 초점을 받아 추가 탐색이 발생한다.',
+          '저장 버튼을 누른 뒤 저장 위치와 포함할 내용 선택지가 각각 초점을 받아 추가 탐색이 발생한다.',
           '결과 카드 안의 여러 링크와 버튼 때문에 목표 자료의 저장 버튼까지 순차 이동이 길다.',
           '저장 옵션 확인 뒤 다시 결과 영역으로 돌아오며 위치 확인 비용이 생긴다.',
         ],
@@ -30,7 +30,7 @@ export const searchBenchmarkGraphs = {
           { id: 'set-title-faq', bucket: 'entry', navMoves: 8, activations: 2, decisions: 3, waits: 1, speechUnits: 5, scanSteps: 10 },
           { id: 'scan-faq-results', bucket: 'repeated', navMoves: 11, activations: 0, decisions: 4, waits: 0, speechUnits: 7, scanSteps: 13 },
           { id: 'open-save-options', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
-          { id: 'pseudo-save-options', bucket: 'repeated', navMoves: 14, activations: 2, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 17 },
+          { id: 'pseudo-save-options', bucket: 'repeated', navMoves: 10, activations: 2, decisions: 4, waits: 0, speechUnits: 6, scanSteps: 13 },
           { id: 'confirm-save-reset', bucket: 'recovery', navMoves: 4, activations: 1, decisions: 2, waits: 0, speechUnits: 2, contextResets: 1, scanSteps: 5 },
         ],
       },
@@ -67,7 +67,7 @@ export const searchBenchmarkGraphs = {
           { id: 'set-title-faq', bucket: 'entry', navMoves: 5, activations: 2, decisions: 3, waits: 1, speechUnits: 4, scanSteps: 7 },
           { id: 'move-to-target', bucket: 'repeated', navMoves: 2, activations: 0, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'open-save-options', bucket: 'repeated', navMoves: 1, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 2 },
-          { id: 'set-save-options', bucket: 'repeated', navMoves: 6, activations: 2, decisions: 4, waits: 0, speechUnits: 4, scanSteps: 7 },
+          { id: 'set-save-options', bucket: 'repeated', navMoves: 4, activations: 2, decisions: 3, waits: 0, speechUnits: 3, scanSteps: 5 },
           { id: 'confirm-save', bucket: 'recovery', navMoves: 1, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
         ],
       },

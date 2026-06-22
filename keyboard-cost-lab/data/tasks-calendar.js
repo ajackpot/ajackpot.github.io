@@ -3,7 +3,7 @@ export const calendarTasks = [
     id: 'task-1-book-remote-with-options',
     benchmarkTaskId: 'task1_book_remote_tuesday_options',
     title: '과업 1. 비대면 상담 예약과 상담 옵션 선택',
-    goalSummary: '김민아 상담사의 화요일 14:30 비대면 30분 시간으로 예약하고, 상담 주제는 직장 스트레스, 사전 작성란은 비워 두며, 문자 알림은 받는 것으로 선택하십시오.',
+    goalSummary: '김민아 상담사의 화요일 14:30 비대면 30분 시간으로 예약하고, 상담 주제는 직장 스트레스, 알림 방법은 문자 알림으로 선택하고, 사전 작성란은 비워두십시오.',
     targetSlotId: 'kim-tue-1430-remote-30',
     requiresCounselingOptions: true,
     expectedOptions: {

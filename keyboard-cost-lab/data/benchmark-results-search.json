@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-22T07:46:01.118Z",
+  "generatedAt": "2026-06-22T09:00:37.099Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",
@@ -244,18 +244,18 @@
         "task2_title_faq_save_options": {
           "title": "제목순 질문답변에서 비대면 상담 연결 방법 저장",
           "assumptions": [
-            "저장 버튼을 누른 뒤 저장 위치, 포함 내용, 형식 선택지가 각각 초점을 받아 추가 탐색이 발생한다.",
+            "저장 버튼을 누른 뒤 저장 위치와 포함할 내용 선택지가 각각 초점을 받아 추가 탐색이 발생한다.",
             "결과 카드 안의 여러 링크와 버튼 때문에 목표 자료의 저장 버튼까지 순차 이동이 길다.",
             "저장 옵션 확인 뒤 다시 결과 영역으로 돌아오며 위치 확인 비용이 생긴다."
           ],
           "structural": {
             "totals": {
-              "navMoves": 51,
+              "navMoves": 47,
               "activations": 6,
-              "decisions": 17,
+              "decisions": 16,
               "waits": 1,
-              "speechUnits": 28,
-              "scanSteps": 62,
+              "speechUnits": 26,
+              "scanSteps": 58,
               "contextResets": 1
             },
             "byBucket": {
@@ -269,12 +269,12 @@
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 27,
+                "navMoves": 23,
                 "activations": 3,
-                "decisions": 10,
+                "decisions": 9,
                 "waits": 0,
-                "speechUnits": 17,
-                "scanSteps": 33,
+                "speechUnits": 15,
+                "scanSteps": 29,
                 "contextResets": 0
               },
               "recovery": {
@@ -294,16 +294,16 @@
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 31816,
-                  "seconds": 31.8
+                  "milliseconds": 29596,
+                  "seconds": 29.6
                 },
                 "expected": {
-                  "milliseconds": 47395,
-                  "seconds": 47.4
+                  "milliseconds": 44145,
+                  "seconds": 44.1
                 },
                 "upper": {
-                  "milliseconds": 67748,
-                  "seconds": 67.7
+                  "milliseconds": 63198,
+                  "seconds": 63.2
                 }
               },
               "bucketRanges": {
@@ -313,8 +313,8 @@
                     "seconds": 11.7
                   },
                   "repeated": {
-                    "milliseconds": 17010,
-                    "seconds": 17
+                    "milliseconds": 14790,
+                    "seconds": 14.8
                   },
                   "recovery": {
                     "milliseconds": 3146,
@@ -327,8 +327,8 @@
                     "seconds": 17.1
                   },
                   "repeated": {
-                    "milliseconds": 25010,
-                    "seconds": 25
+                    "milliseconds": 21760,
+                    "seconds": 21.8
                   },
                   "recovery": {
                     "milliseconds": 5275,
@@ -341,8 +341,8 @@
                     "seconds": 24
                   },
                   "repeated": {
-                    "milliseconds": 35150,
-                    "seconds": 35.1
+                    "milliseconds": 30600,
+                    "seconds": 30.6
                   },
                   "recovery": {
                     "milliseconds": 8628,
@@ -356,16 +356,16 @@
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 55796,
-                  "seconds": 55.8
+                  "milliseconds": 51976,
+                  "seconds": 52
                 },
                 "expected": {
-                  "milliseconds": 81281,
-                  "seconds": 81.3
+                  "milliseconds": 75881,
+                  "seconds": 75.9
                 },
                 "upper": {
-                  "milliseconds": 116680,
-                  "seconds": 116.7
+                  "milliseconds": 109150,
+                  "seconds": 109.2
                 }
               },
               "bucketRanges": {
@@ -375,8 +375,8 @@
                     "seconds": 19.6
                   },
                   "repeated": {
-                    "milliseconds": 29400,
-                    "seconds": 29.4
+                    "milliseconds": 25580,
+                    "seconds": 25.6
                   },
                   "recovery": {
                     "milliseconds": 6816,
@@ -389,8 +389,8 @@
                     "seconds": 27.7
                   },
                   "repeated": {
-                    "milliseconds": 41680,
-                    "seconds": 41.7
+                    "milliseconds": 36280,
+                    "seconds": 36.3
                   },
                   "recovery": {
                     "milliseconds": 11861,
@@ -403,8 +403,8 @@
                     "seconds": 38.7
                   },
                   "repeated": {
-                    "milliseconds": 58290,
-                    "seconds": 58.3
+                    "milliseconds": 50760,
+                    "seconds": 50.8
                   },
                   "recovery": {
                     "milliseconds": 19720,
@@ -418,16 +418,16 @@
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 75415,
-                  "seconds": 75.4
+                  "milliseconds": 71015,
+                  "seconds": 71
                 },
                 "expected": {
-                  "milliseconds": 114557,
-                  "seconds": 114.6
+                  "milliseconds": 108057,
+                  "seconds": 108.1
                 },
                 "upper": {
-                  "milliseconds": 177220,
-                  "seconds": 177.2
+                  "milliseconds": 167470,
+                  "seconds": 167.5
                 }
               },
               "bucketRanges": {
@@ -437,8 +437,8 @@
                     "seconds": 27.3
                   },
                   "repeated": {
-                    "milliseconds": 39450,
-                    "seconds": 39.5
+                    "milliseconds": 35050,
+                    "seconds": 35
                   },
                   "recovery": {
                     "milliseconds": 8645,
@@ -451,8 +451,8 @@
                     "seconds": 40.3
                   },
                   "repeated": {
-                    "milliseconds": 58140,
-                    "seconds": 58.1
+                    "milliseconds": 51640,
+                    "seconds": 51.6
                   },
                   "recovery": {
                     "milliseconds": 16137,
@@ -465,8 +465,8 @@
                     "seconds": 60.1
                   },
                   "repeated": {
-                    "milliseconds": 86700,
-                    "seconds": 86.7
+                    "milliseconds": 76950,
+                    "seconds": 77
                   },
                   "recovery": {
                     "milliseconds": 30450,
@@ -728,12 +728,12 @@
           ],
           "structural": {
             "totals": {
-              "navMoves": 17,
+              "navMoves": 15,
               "activations": 7,
-              "decisions": 12,
+              "decisions": 11,
               "waits": 1,
-              "speechUnits": 14,
-              "scanSteps": 23,
+              "speechUnits": 13,
+              "scanSteps": 21,
               "contextResets": 0
             },
             "byBucket": {
@@ -747,12 +747,12 @@
                 "contextResets": 0
               },
               "repeated": {
-                "navMoves": 9,
+                "navMoves": 7,
                 "activations": 3,
-                "decisions": 7,
+                "decisions": 6,
                 "waits": 0,
-                "speechUnits": 7,
-                "scanSteps": 12,
+                "speechUnits": 6,
+                "scanSteps": 10,
                 "contextResets": 0
               },
               "recovery": {
@@ -772,16 +772,16 @@
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 14459,
-                  "seconds": 14.5
+                  "milliseconds": 13139,
+                  "seconds": 13.1
                 },
                 "expected": {
-                  "milliseconds": 21715,
-                  "seconds": 21.7
+                  "milliseconds": 19765,
+                  "seconds": 19.8
                 },
                 "upper": {
-                  "milliseconds": 31205,
-                  "seconds": 31.2
+                  "milliseconds": 28455,
+                  "seconds": 28.5
                 }
               },
               "bucketRanges": {
@@ -791,8 +791,8 @@
                     "seconds": 5.6
                   },
                   "repeated": {
-                    "milliseconds": 7650,
-                    "seconds": 7.7
+                    "milliseconds": 6330,
+                    "seconds": 6.3
                   },
                   "recovery": {
                     "milliseconds": 1199,
@@ -805,8 +805,8 @@
                     "seconds": 8.3
                   },
                   "repeated": {
-                    "milliseconds": 11360,
-                    "seconds": 11.4
+                    "milliseconds": 9410,
+                    "seconds": 9.4
                   },
                   "recovery": {
                     "milliseconds": 2025,
@@ -819,8 +819,8 @@
                     "seconds": 11.8
                   },
                   "repeated": {
-                    "milliseconds": 16100,
-                    "seconds": 16.1
+                    "milliseconds": 13350,
+                    "seconds": 13.3
                   },
                   "recovery": {
                     "milliseconds": 3335,
@@ -834,16 +834,16 @@
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 24844,
-                  "seconds": 24.8
+                  "milliseconds": 22584,
+                  "seconds": 22.6
                 },
                 "expected": {
-                  "milliseconds": 36070,
-                  "seconds": 36.1
+                  "milliseconds": 32870,
+                  "seconds": 32.9
                 },
                 "upper": {
-                  "milliseconds": 51632,
-                  "seconds": 51.6
+                  "milliseconds": 47142,
+                  "seconds": 47.1
                 }
               },
               "bucketRanges": {
@@ -853,8 +853,8 @@
                     "seconds": 9.6
                   },
                   "repeated": {
-                    "milliseconds": 13100,
-                    "seconds": 13.1
+                    "milliseconds": 10840,
+                    "seconds": 10.8
                   },
                   "recovery": {
                     "milliseconds": 2184,
@@ -867,8 +867,8 @@
                     "seconds": 13.7
                   },
                   "repeated": {
-                    "milliseconds": 18640,
-                    "seconds": 18.6
+                    "milliseconds": 15440,
+                    "seconds": 15.4
                   },
                   "recovery": {
                     "milliseconds": 3770,
@@ -881,8 +881,8 @@
                     "seconds": 19.2
                   },
                   "repeated": {
-                    "milliseconds": 26240,
-                    "seconds": 26.2
+                    "milliseconds": 21750,
+                    "seconds": 21.8
                   },
                   "recovery": {
                     "milliseconds": 6222,
@@ -896,16 +896,16 @@
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 34745,
-                  "seconds": 34.7
+                  "milliseconds": 32245,
+                  "seconds": 32.2
                 },
                 "expected": {
-                  "milliseconds": 52212,
-                  "seconds": 52.2
+                  "milliseconds": 48512,
+                  "seconds": 48.5
                 },
                 "upper": {
-                  "milliseconds": 79145,
-                  "seconds": 79.1
+                  "milliseconds": 73595,
+                  "seconds": 73.6
                 }
               },
               "bucketRanges": {
@@ -915,8 +915,8 @@
                     "seconds": 14.1
                   },
                   "repeated": {
-                    "milliseconds": 17700,
-                    "seconds": 17.7
+                    "milliseconds": 15200,
+                    "seconds": 15.2
                   },
                   "recovery": {
                     "milliseconds": 2925,
@@ -929,8 +929,8 @@
                     "seconds": 20.8
                   },
                   "repeated": {
-                    "milliseconds": 26040,
-                    "seconds": 26
+                    "milliseconds": 22340,
+                    "seconds": 22.3
                   },
                   "recovery": {
                     "milliseconds": 5412,
@@ -943,8 +943,8 @@
                     "seconds": 30.6
                   },
                   "repeated": {
-                    "milliseconds": 38550,
-                    "seconds": 38.5
+                    "milliseconds": 33000,
+                    "seconds": 33
                   },
                   "recovery": {
                     "milliseconds": 9975,
@@ -975,40 +975,40 @@
     },
     "task2_title_faq_save_options": {
       "keyboard": {
-        "expectedReductionSeconds": 25.7,
-        "expectedReductionPercent": 54.2
+        "expectedReductionSeconds": 24.3,
+        "expectedReductionPercent": 55.1
       },
       "screenReader": {
-        "expectedReductionSeconds": 45.2,
-        "expectedReductionPercent": 55.6
+        "expectedReductionSeconds": 43,
+        "expectedReductionPercent": 56.7
       },
       "switch": {
-        "expectedReductionSeconds": 62.4,
-        "expectedReductionPercent": 54.5
+        "expectedReductionSeconds": 59.6,
+        "expectedReductionPercent": 55.1
       }
     }
   },
   "overall": {
     "keyboard": {
       "label": "키보드 사용자",
-      "variantAExpectedSeconds": 80.5,
-      "variantBExpectedSeconds": 36.7,
-      "expectedReductionSeconds": 43.8,
-      "expectedReductionPercent": 54.4
+      "variantAExpectedSeconds": 77.2,
+      "variantBExpectedSeconds": 34.8,
+      "expectedReductionSeconds": 42.4,
+      "expectedReductionPercent": 54.9
     },
     "screenReader": {
       "label": "화면낭독 사용자",
-      "variantAExpectedSeconds": 139,
-      "variantBExpectedSeconds": 61.7,
-      "expectedReductionSeconds": 77.3,
-      "expectedReductionPercent": 55.6
+      "variantAExpectedSeconds": 133.6,
+      "variantBExpectedSeconds": 58.5,
+      "expectedReductionSeconds": 75.1,
+      "expectedReductionPercent": 56.2
     },
     "switch": {
       "label": "스위치 사용자",
-      "variantAExpectedSeconds": 196.6,
-      "variantBExpectedSeconds": 90.7,
-      "expectedReductionSeconds": 105.9,
-      "expectedReductionPercent": 53.9
+      "variantAExpectedSeconds": 190.1,
+      "variantBExpectedSeconds": 87,
+      "expectedReductionSeconds": 103.1,
+      "expectedReductionPercent": 54.2
     }
   },
   "measurementRules": [

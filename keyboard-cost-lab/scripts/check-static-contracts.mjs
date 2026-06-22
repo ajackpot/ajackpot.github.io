@@ -36,10 +36,15 @@ assert('utils: 과업 요청 표시 스위치 라벨 제공', files.utils.includ
 assert('utils: 과업 수행 페이지 과업 요청 카드 제공', files.utils.includes('export function renderRunnerTaskRequestHtml'));
 assert('calendar: 비교안 B 시간표 클릭 실행 연결', files.calendar.includes('event.target.closest(\'[data-grid-slot="true"]\')'));
 
+assert('calendar: 최종 예약 확인 대화상자 제공', files.calendar.includes("kind: 'booking-final-confirm'") && files.calendar.includes('data-action="dialog-finalize-booking"'));
+assert('search: 저장 형식 독립 선택 제거', !files.search.includes("name: 'format'") && !files.search.includes('저장 형식'));
+assert('search: 저장 위치 선택지에 파일 내보내기 포함', files.search.includes('PDF 파일로 내보내기') && files.search.includes('텍스트 파일로 내보내기'));
+assert('search: 바로가기 링크를 검색 헤더보다 먼저 렌더링', files.search.indexOf('renderTopSkipLinks()') > -1 && files.search.indexOf('renderTopSkipLinks()') < files.search.indexOf('renderSearchHeader(conditionId, run)'));
+
 const calendarActionChecks = [
   ['조건 적용', 'data-action="apply-filters"'],
   ['비교안 A 예약 시간 열기', 'data-action="slot-open"'],
-  ['예약 확정', 'data-action="dialog-confirm-slot"'],
+  ['예약하기', 'data-action="dialog-confirm-slot"'],
   ['예약 취소 열기', 'data-action="open-cancel-modal"'],
   ['예약 취소 확정', 'data-action="dialog-confirm-cancel"'],
   ['점검 중 안내', 'data-action="site-placeholder"'],

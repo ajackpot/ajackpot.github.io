@@ -8,14 +8,14 @@ export const calendarBenchmarkGraphs = {
         assumptions: [
           '접힌 전체 메뉴 항목이 계속 초점을 받아 예약 조건 영역에 도달하기 전 탐색 비용이 늘어난다.',
           '예약 시간을 선택한 뒤 상담 주제와 알림 선택지가 화면상으로는 접힌 것처럼 보이지만 각 선택지가 따로 초점을 받는다.',
-          '사전 작성란은 편집창으로 제공되며, 옵션을 확인하고 예약 확정까지 여러 번 이동해야 한다.',
+          '사전 작성란은 편집창으로 제공되며, 옵션을 확인한 뒤 최종 예약 확인을 한 번 더 거쳐야 한다.',
         ],
         steps: [
           { id: 'pass-collapsed-nav', bucket: 'entry', navMoves: 18, activations: 0, decisions: 2, waits: 0, speechUnits: 8, scanSteps: 22 },
           { id: 'set-filters', bucket: 'entry', navMoves: 10, activations: 4, decisions: 4, waits: 1, speechUnits: 6, scanSteps: 12 },
           { id: 'scan-slot-list', bucket: 'repeated', navMoves: 14, activations: 1, decisions: 7, waits: 0, speechUnits: 9, scanSteps: 18 },
           { id: 'option-pseudo-combos-and-note-field', bucket: 'repeated', navMoves: 13, activations: 2, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 16 },
-          { id: 'confirm-booking', bucket: 'recovery', navMoves: 5, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
+          { id: 'confirm-booking', bucket: 'recovery', navMoves: 6, activations: 2, decisions: 3, waits: 1, speechUnits: 4, contextResets: 1, scanSteps: 8 },
         ],
       },
       task2_cancel_and_rebook_thursday: {
@@ -31,7 +31,7 @@ export const calendarBenchmarkGraphs = {
           { id: 'cancel-one-booking', bucket: 'recovery', navMoves: 4, activations: 2, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 6 },
           { id: 'retune-filters', bucket: 'entry', navMoves: 12, activations: 3, decisions: 4, waits: 1, speechUnits: 6, scanSteps: 14 },
           { id: 'scan-thursday-options', bucket: 'repeated', navMoves: 12, activations: 1, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 15 },
-          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 5, activations: 1, decisions: 2, waits: 1, speechUnits: 3, contextResets: 1, scanSteps: 7 },
+          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 6, activations: 2, decisions: 3, waits: 1, speechUnits: 4, contextResets: 1, scanSteps: 8 },
         ],
       },
     },
@@ -45,14 +45,14 @@ export const calendarBenchmarkGraphs = {
         assumptions: [
           '접힌 전체 메뉴 항목은 초점 대상에서 제외되어 첫 진입 비용이 줄어든다.',
           '예약 가능 시간 바로 이동과 시간표 묶음 이동으로 목표 시간을 찾는 비용을 줄인다.',
-          '상담 옵션은 기본 폼 요소와 사전 작성란으로 묶여 있어 필요한 값만 고르고 예약 확정으로 이어진다.',
+          '상담 옵션은 기본 폼 요소와 사전 작성란으로 묶여 있어 필요한 값만 고른 뒤 최종 예약 확인으로 이어진다.',
         ],
         steps: [
           { id: 'skip-to-results', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'set-filters', bucket: 'entry', navMoves: 6, activations: 4, decisions: 4, waits: 1, speechUnits: 4, scanSteps: 8 },
           { id: 'move-grid-target', bucket: 'repeated', navMoves: 7, activations: 1, decisions: 4, waits: 0, speechUnits: 5, scanSteps: 8 },
           { id: 'set-options', bucket: 'repeated', navMoves: 5, activations: 2, decisions: 3, waits: 0, speechUnits: 4, scanSteps: 6 },
-          { id: 'confirm-booking', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
+          { id: 'confirm-booking', bucket: 'recovery', navMoves: 3, activations: 2, decisions: 3, waits: 1, speechUnits: 3, scanSteps: 4 },
         ],
       },
       task2_cancel_and_rebook_thursday: {
@@ -66,7 +66,7 @@ export const calendarBenchmarkGraphs = {
           { id: 'cancel-one-booking', bucket: 'recovery', navMoves: 3, activations: 2, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 4 },
           { id: 'set-new-filters', bucket: 'entry', navMoves: 6, activations: 3, decisions: 4, waits: 1, speechUnits: 4, scanSteps: 7 },
           { id: 'move-to-thursday-target', bucket: 'repeated', navMoves: 6, activations: 1, decisions: 4, waits: 0, speechUnits: 4, scanSteps: 7 },
-          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 2, activations: 1, decisions: 2, waits: 1, speechUnits: 2, scanSteps: 3 },
+          { id: 'confirm-new-booking', bucket: 'recovery', navMoves: 3, activations: 2, decisions: 3, waits: 1, speechUnits: 3, scanSteps: 4 },
         ],
       },
     },

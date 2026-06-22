@@ -64,7 +64,7 @@ const services = {
         typeDraft: 'all',
         savedByResultId: {},
         saveOptionsByResultId: {},
-        saveOptionDraft: { folder: 'general', include: 'summary', format: 'web' },
+        saveOptionDraft: { folder: 'personal', include: 'summary' },
         previewAnswerDrafts: {},
         submittedPreviewAnswers: {},
         savedFeatureItems: {},

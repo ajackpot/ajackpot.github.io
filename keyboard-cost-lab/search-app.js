@@ -288,9 +288,8 @@ function createConditionRuntime(variantId) {
 
 function defaultSaveOptions() {
   return {
-    folder: 'general',
+    folder: 'personal',
     include: 'summary',
-    format: 'web',
   };
 }
 
@@ -1587,8 +1586,8 @@ function renderRunnerPage() {
       <main class="runner-main" aria-label="검색 결과 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">검색 결과 목록 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
-        ${renderSearchHeader(conditionId, run)}
         ${conditionId === 'variantB' ? renderTopSkipLinks() : ''}
+        ${renderSearchHeader(conditionId, run)}
         ${renderSearchFeaturePanel(run)}
         ${renderResultControls(conditionId, run)}
         ${renderSearchSection(conditionId, run, visibleSearch)}
@@ -2339,9 +2338,13 @@ function renderOpenedResultStatus(result) {
 
 function getSaveOptionLabel(kind, value) {
   const labels = {
-    folder: { general: '기본 보관함', personal: '개인 보관함', shared: '공유 보관함' },
+    folder: {
+      personal: '개인 보관함에 저장',
+      shared: '공유 보관함에 저장',
+      pdf: 'PDF 파일로 내보내기',
+      text: '텍스트 파일로 내보내기',
+    },
     include: { summary: '요약만 포함', checklist: '상담 전 점검 항목 포함', all: '전체 내용 포함' },
-    format: { web: '웹에서 보기', pdf: 'PDF로 보관', text: '텍스트로 보관' },
   };
   return labels[kind]?.[value] ?? value;
 }
@@ -2388,9 +2391,10 @@ function renderSaveOptionsDialog(modal, run) {
       name: 'folder',
       label: '저장 위치',
       options: [
-        { value: 'general', label: '기본 보관함' },
-        { value: 'personal', label: '개인 보관함' },
-        { value: 'shared', label: '공유 보관함' },
+        { value: 'personal', label: '개인 보관함에 저장' },
+        { value: 'shared', label: '공유 보관함에 저장' },
+        { value: 'pdf', label: 'PDF 파일로 내보내기' },
+        { value: 'text', label: '텍스트 파일로 내보내기' },
       ],
     },
     {
@@ -2402,21 +2406,12 @@ function renderSaveOptionsDialog(modal, run) {
         { value: 'all', label: '전체 내용 포함' },
       ],
     },
-    {
-      name: 'format',
-      label: '저장 형식',
-      options: [
-        { value: 'web', label: '웹에서 보기' },
-        { value: 'pdf', label: 'PDF로 보관' },
-        { value: 'text', label: '텍스트로 보관' },
-      ],
-    },
   ];
   return `
     <div class="modal-backdrop">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
         <h2 id="dialog-title" tabindex="-1">자료 저장 옵션</h2>
-        <p id="dialog-description">${escapeHtml(result.title)} 자료를 저장할 때 적용할 옵션입니다.</p>
+        <p id="dialog-description">${escapeHtml(result.title)} 자료를 저장하거나 내보낼 때 적용할 옵션입니다.</p>
         <div class="filters-grid save-options-grid ${state.conditionId === 'variantA' ? 'save-options-a' : 'save-options-b'}">
           ${fields.map((field) => state.conditionId === 'variantA'
             ? renderPseudoSaveOptionGroup({ ...field, selected: run.saveOptionDraft[field.name] })

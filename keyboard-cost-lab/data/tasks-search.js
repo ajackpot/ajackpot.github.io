@@ -27,7 +27,6 @@ export const searchTasks = [
     expectedSaveOptions: {
       folder: 'personal',
       include: 'checklist',
-      format: 'web',
     },
   },
 ];

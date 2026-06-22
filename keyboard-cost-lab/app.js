@@ -951,6 +951,12 @@ function handleRootClick(event) {
     return;
   }
 
+  if (action === 'dialog-finalize-booking') {
+    event.preventDefault();
+    confirmBookingFinalFromModal();
+    return;
+  }
+
   if (action === 'dialog-confirm-cancel') {
     event.preventDefault();
     confirmCancelFromModal();
@@ -1210,6 +1216,24 @@ function openBookingOptionsModal(slotId, triggerFocusId) {
   render();
 }
 
+function openBookingFinalConfirmModal(slotId, triggerFocusId) {
+  const run = getCurrentRun();
+  if (!run) return;
+  run.modal = {
+    kind: 'booking-final-confirm',
+    slotId,
+    triggerFocusId,
+  };
+  run.currentTaskLogger?.note('booking-final-confirm-opened', { slotId });
+  run.currentTaskLogger?.setModalState({
+    open: true,
+    containerSelector: '[data-modal-dialog]',
+    triggerFocusId,
+  });
+  requestFocus('[data-dialog-primary]');
+  render();
+}
+
 function setBookingOption(name, value, focusId = '') {
   const run = getCurrentRun();
   if (!run || !name) return;
@@ -1358,12 +1382,7 @@ function confirmSlotFromModal() {
     return;
   }
 
-  run.isWorking = true;
-  render();
-
-  window.setTimeout(() => {
-    finalizeBookingForSlot(slot.id, closingModal.triggerFocusId);
-  }, 360);
+  openBookingFinalConfirmModal(slot.id, closingModal.triggerFocusId);
 }
 
 function confirmBookingOptionsFromModal() {
@@ -1379,10 +1398,24 @@ function confirmBookingOptionsFromModal() {
     slotId: closingModal.slotId,
     selectedOptions,
   });
+  openBookingFinalConfirmModal(closingModal.slotId, closingModal.triggerFocusId);
+}
+
+function confirmBookingFinalFromModal() {
+  const run = getCurrentRun();
+  if (!run || !run.modal || run.modal.kind !== 'booking-final-confirm' || run.isWorking) return;
+  const closingModal = { ...run.modal };
+  const slot = getSlotById(closingModal.slotId);
+  if (!slot || !slot.available) {
+    closeModal();
+    return;
+  }
+
   run.isWorking = true;
   render();
+
   window.setTimeout(() => {
-    finalizeBookingForSlot(closingModal.slotId, closingModal.triggerFocusId);
+    finalizeBookingForSlot(slot.id, closingModal.triggerFocusId);
   }, 360);
 }
 
@@ -1444,7 +1477,7 @@ function getEndTaskOutcome(task, run) {
     };
   }
 
-  let message = '예약 확정 화면에 진입하지 못했습니다.';
+  let message = '예약 완료 화면에 진입하지 못했습니다.';
   const activeBookings = getActiveBookings(run);
   const hasTargetBooking = activeBookings.some((booking) => booking.slotId === task.targetSlotId);
   const hasOtherNewBooking = run.booking?.slotId && run.booking.slotId !== task.targetSlotId;
@@ -1455,7 +1488,7 @@ function getEndTaskOutcome(task, run) {
   } else if (hasTargetBooking && !hasRequiredBookingOptions(task, run, task.targetSlotId)) {
     message = '요청한 상담 옵션을 맞추지 못했습니다.';
   } else if (hasTargetBooking && run.bookingCompletion?.slotId !== task.targetSlotId) {
-    message = '예약 확정 화면에 진입하지 못했습니다.';
+    message = '예약 완료 화면에 진입하지 못했습니다.';
   }
 
   return {
@@ -2331,7 +2364,7 @@ function renderPricingFeaturePanel() {
     <div class="feature-panel-header">
       <p class="eyebrow">가격 안내</p>
       <h2 id="feature-panel-title" tabindex="-1">상담 비용</h2>
-      <p class="muted">실제 결제는 예약 확정 뒤 안내됩니다.</p>
+      <p class="muted">실제 결제는 예약 완료 뒤 안내됩니다.</p>
     </div>
     <table class="summary-table compact-table">
       <thead><tr><th>구분</th><th>30분</th><th>45분</th></tr></thead>
@@ -2353,7 +2386,7 @@ function renderFaqFeaturePanel() {
     <div class="feature-list">
       <details class="mini-card"><summary>비대면 상담은 어떻게 들어가나요?</summary><p>예약 시간 10분 전부터 내 상담 메뉴에서 입장 버튼이 표시됩니다.</p></details>
       <details class="mini-card"><summary>예약 변경은 언제까지 가능한가요?</summary><p>상담 시작 6시간 전까지 직접 변경할 수 있습니다.</p></details>
-      <details class="mini-card"><summary>상담사에게 남길 말을 미리 적을 수 있나요?</summary><p>예약 확정 뒤 내 상담 메뉴에서 상담 전 메모를 남길 수 있습니다.</p></details>
+      <details class="mini-card"><summary>상담사에게 남길 말을 미리 적을 수 있나요?</summary><p>예약 완료 뒤 내 상담 메뉴에서 상담 전 메모를 남길 수 있습니다.</p></details>
     </div>
   `;
 }
@@ -2797,7 +2830,7 @@ function renderBookingOptionsDialog(modal, run) {
     <div class="modal-backdrop">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
         <h2 id="dialog-title" tabindex="-1">상담 옵션 선택</h2>
-        <p id="dialog-description">${slot ? escapeHtml(formatSlotLabel(slot)) : '선택한 예약 시간'}에 적용할 상담 옵션입니다.</p>
+        <p id="dialog-description">${slot ? escapeHtml(formatSlotLabel(slot)) : '선택한 예약 시간'}에 적용할 상담 옵션입니다. 선택을 마치면 다음 화면에서 예약 여부를 다시 확인합니다.</p>
         <div class="filters-grid booking-options-grid ${state.conditionId === 'variantA' ? 'booking-options-a' : 'booking-options-b'}">
           ${options.map((field) => state.conditionId === 'variantA'
             ? renderPseudoOptionGroup({ ...field, selected: run.bookingOptionDraft[field.name] })
@@ -2808,7 +2841,7 @@ function renderBookingOptionsDialog(modal, run) {
         <div class="button-row">
           <button class="button button-ghost" data-action="dialog-close" data-focus-id="booking-options-close">닫기</button>
           <button class="button button-primary" data-action="dialog-confirm-booking-options" data-dialog-primary data-focus-id="booking-options-confirm" ${run.isWorking ? 'disabled' : ''}>
-            ${run.isWorking ? '저장 중…' : '옵션 저장하고 예약 확정'}
+            ${run.isWorking ? '저장 중…' : '선택 완료하고 예약하기'}
           </button>
         </div>
       </div>
@@ -2870,9 +2903,28 @@ function renderModal(modal, run, task) {
     return renderBookingOptionsDialog(modal, run);
   }
 
+  if (modal.kind === 'booking-final-confirm') {
+    const slot = getSlotById(modal.slotId);
+    if (!slot) return '';
+    return `
+      <div class="modal-backdrop">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
+          <h2 id="dialog-title" tabindex="-1">예약하시겠습니까?</h2>
+          <p id="dialog-description">${escapeHtml(formatSlotLabel(slot))}으로 예약합니다.</p>
+          <div class="button-row">
+            <button class="button button-ghost" data-action="dialog-close" data-focus-id="booking-final-close">닫기</button>
+            <button class="button button-primary" data-action="dialog-finalize-booking" data-dialog-primary data-focus-id="booking-final-confirm" ${run.isWorking ? 'disabled' : ''}>
+              ${run.isWorking ? '저장 중…' : '예약하기'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   const slot = getSlotById(modal.slotId);
   if (!slot) return '';
-  const actionLabel = task?.requiresCancellation ? '새 예약 확정' : '예약 확정';
+  const actionLabel = '예약하기';
   const modeLabel = modal.dialogMode === 'details' ? '시간 안내' : '예약 확인';
   return `
     <div class="modal-backdrop">
