@@ -41,6 +41,10 @@ import {
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
+import {
+  readStoredExperimentResults,
+  saveServiceRunSnapshot,
+} from './lib/experiment-store.js';
 
 const APP_MODE = getAppMode();
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-search-session-id';
@@ -52,6 +56,9 @@ const SURVEY_CONFIG = {
 };
 
 const MEASUREMENT_RULES = commonMeasurementRules;
+
+const SERVICE_ID = 'search';
+const SERVICE_LABEL = '검색 결과 목록';
 
 const VARIANT_META = {
   variantA: {
@@ -545,6 +552,7 @@ function acceptRunnerTaskCompletion(message) {
     savedByResultIdAfterTask: deepClone(run.savedByResultId),
     conditionId,
   });
+  persistCurrentServiceProgress();
 
   if (state.activeLaunch) {
     state.activeLaunch.status = 'completed';
@@ -1567,7 +1575,7 @@ function renderConditionReviewView() {
     <section class="card review-hero">
       <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 완료</p>
       <h1 id="condition-review-heading" tabindex="-1">현재 서비스 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}에서 3개 과업을 모두 마쳤습니다.</p>
+      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업을 모두 마쳤습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
@@ -2152,6 +2160,25 @@ function aggregateBenchmarkCondition(conditionId) {
   });
 }
 
+function persistCurrentServiceProgress() {
+  if (APP_MODE !== 'main') return null;
+  return saveServiceRunSnapshot({
+    serviceId: SERVICE_ID,
+    serviceLabel: SERVICE_LABEL,
+    sessionId: state.sessionId,
+    order: state.order,
+    taskCount: searchTasks.length,
+    conditionCount: state.order.length,
+    measurementRules: MEASUREMENT_RULES,
+    actualRuns: {
+      variantA: state.runs.variantA.taskResults,
+      variantB: state.runs.variantB.taskResults,
+    },
+    benchmarkResults: benchmarkResultsSearch,
+    aggregateActualCondition,
+  });
+}
+
 function buildExportPayload() {
   return buildSharedExportPayload({
     serviceId: 'search',
@@ -2163,6 +2190,7 @@ function buildExportPayload() {
       variantB: state.runs.variantB.taskResults,
     },
     benchmarkResults: benchmarkResultsSearch,
+    storedServices: readStoredExperimentResults().services,
   });
 }
 

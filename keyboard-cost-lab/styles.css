@@ -363,6 +363,11 @@ select {
   color: var(--warning);
 }
 
+.pill-success {
+  background: #e5f7ed;
+  color: #166534;
+}
+
 .status-box {
   border: 1px solid #c7dafd;
   background: #f5f9ff;

@@ -5,6 +5,9 @@ const files = {
   comments: readFileSync('comments-app.js', 'utf8'),
   search: readFileSync('search-app.js', 'utf8'),
   utils: readFileSync('lib/utils.js', 'utf8'),
+  serviceRegistry: readFileSync('data/service-registry.js', 'utf8'),
+  serviceShell: readFileSync('lib/service-shell.js', 'utf8'),
+  experimentStore: readFileSync('lib/experiment-store.js', 'utf8'),
 };
 
 const checks = [];
@@ -12,12 +15,21 @@ function assert(name, condition) {
   checks.push({ name, pass: Boolean(condition) });
 }
 
-for (const [service, source] of Object.entries(files).filter(([key]) => key !== 'utils')) {
+for (const [service, source] of Object.entries(files).filter(([key]) => ['calendar', 'comments', 'search'].includes(key))) {
   assert(`${service}: 실험 번호가 화면 문자열에 남아 있지 않음`, !source.includes('실험 번호'));
   assert(`${service}: 내려받기 파일명에 세션 식별자를 노출하지 않음`, !/download="[^"]*\$\{escapeHtml\(state\.sessionId\)\}/.test(source));
   assert(`${service}: 과업 요청 표시 스위치 상태를 시작 정보에 저장`, source.includes('runnerTaskRequestVisible: Boolean(state.runnerTaskRequestVisible)'));
   assert(`${service}: 수행 탭에서 선택 시 과업 요청 표시`, source.includes('state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml'));
   assert(`${service}: 준비 화면에 과업 요청 표시 스위치 제공`, source.includes('renderTaskRequestVisibilitySwitchHtml({ checked: state.runnerTaskRequestVisible })'));
+}
+
+
+assert('home: 서비스 카드 반복 안내 문구 제거', !files.calendar.includes('service.points') && !files.serviceRegistry.includes('points:'));
+assert('home: 서비스별 진행 상태 표시', files.calendar.includes('getServiceProgress(service.id') && files.calendar.includes('진행 상태'));
+assert('store: 서비스 진행 상태 저장소 제공', files.experimentStore.includes('keyboard-cost-lab-results-v1') && files.experimentStore.includes('saveServiceRunSnapshot'));
+assert('export: 결과 파일에 전체 서비스 저장값 포함', files.serviceShell.includes('storedServices'));
+for (const [service, source] of Object.entries(files).filter(([key]) => ['calendar', 'comments', 'search'].includes(key))) {
+  assert(`${service}: 과업 기록을 공통 저장소에 보존`, source.includes('saveServiceRunSnapshot'));
 }
 
 assert('utils: 과업 요청 표시 스위치 라벨 제공', files.utils.includes('과업 요청 사항을 수행 탭에서도 보기'));

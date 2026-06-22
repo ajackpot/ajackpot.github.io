@@ -127,7 +127,7 @@ export function aggregateBenchmarkCondition({ benchmarkResults, conditionId }) {
   return totals;
 }
 
-export function buildExportPayload({ serviceId, sessionId, order, measurementRules, actualRuns, benchmarkResults }) {
+export function buildExportPayload({ serviceId, sessionId, order, measurementRules, actualRuns, benchmarkResults, storedServices = null }) {
   return {
     exportedAt: new Date().toISOString(),
     serviceId,
@@ -136,6 +136,7 @@ export function buildExportPayload({ serviceId, sessionId, order, measurementRul
     measurementRules,
     actual: actualRuns,
     benchmark: benchmarkResults,
+    storedServices,
   };
 }
 

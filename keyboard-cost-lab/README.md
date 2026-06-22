@@ -8,6 +8,7 @@
 
 - 홈 화면에서 서비스 유형을 먼저 선택합니다.
 - 현재 공개 서비스는 `예약 캘린더`, `댓글 목록`, `검색 결과 목록` 3개입니다.
+- 홈 화면의 서비스 카드에는 반복 안내 문구 대신 서비스별 진행 상태가 `수행 전`, `진행 중`, `수행 완료`로 표시됩니다.
 - 서비스 카드 버튼은 `예약 캘린더 화면으로 이동`처럼 서비스 이름을 포함해 서로 구분됩니다.
 - A/B 화면 순서는 고정하지 않고, 실험 시작 시 `A → B` 또는 `B → A` 중 하나로 섞입니다.
 - 각 서비스에서 두 화면을 모두 수행한 뒤에만 최종 결과를 한 번에 표시합니다.
@@ -23,6 +24,7 @@
 - 수행 중에는 성공·실패를 암시하는 힌트나 정답 판정 메시지를 보여 주지 않습니다. 최종 과업 결과는 `예, 종료합니다`를 누른 뒤 기록 저장 대화상자에서만 표시됩니다.
 - 목표 과업을 실제로 완료했더라도 자동으로 끝나지 않습니다. 예약 완료 화면, 답글 목록 확인, 도움이 돼요 토스트, 자료 저장·열기 토스트처럼 실제 서비스 피드백을 확인한 뒤 `과업 종료` 버튼을 눌러 기록합니다.
 - 수행 탭의 첫 조작부터 기록을 시작하고, 숨겨진 탭 시간과 하단 보조 버튼 조작은 실제 지표에서 제외합니다.
+- 서비스별 과업 기록은 브라우저 저장소에 보존됩니다. 나중에 설문지 연동을 붙일 때 여러 서비스 결과를 한 번에 전달할 수 있도록 결과 파일에도 전체 서비스 저장값을 포함합니다.
 - 공통 메시지 연결, 시작 정보 저장, 결과 내보내기, 최종 비교 요약, 서비스 목록, 벤치마크 생성 목록은 공통 모듈과 데이터 파일로 관리합니다.
 
 ## 서비스 유형
@@ -71,9 +73,10 @@ python -m http.server 4173
 - `lib/logger.js`: 실제 수행 기록 수집기
 - `lib/experiment-bridge.js`: 메인 창·수행 탭 메시지 연결, 시작 정보 저장, 초점 가두기
 - `lib/service-shell.js`: 공통 비교 요약, 결과 내보내기, 설문 링크 생성
+- `lib/experiment-store.js`: 서비스별 과업 진행 상태와 저장된 실제 수행 기록을 브라우저 저장소에 보존
 - `lib/utils.js`: 공통 유틸리티와 수행 탭 하단/완료/과업 종료 확인 대화상자 렌더링
 - `scripts/run-benchmark.mjs`: 서비스별 사전 계산 결과 생성 스크립트
-- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/check-comments-randomized-replies.mjs`, `scripts/smoke-render-runner.mjs`: 내부 식별값 비노출, 수행 탭 과업 요청 표시 옵션, 주요 실행 버튼 연결, 댓글 답글 작성자 무작위화, 보조 기능 패널, 수행 화면 렌더링을 확인하는 점검 스크립트
+- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/check-comments-randomized-replies.mjs`, `scripts/smoke-render-runner.mjs`: 내부 식별값 비노출, 수행 탭 과업 요청 표시 옵션, 주요 실행 버튼 연결, 서비스별 진행 상태 저장, 댓글 답글 작성자 무작위화, 보조 기능 패널, 수행 화면 렌더링을 확인하는 점검 스크립트
 - `docs/`: 단계별 구현 보고서, 용어 가이드, 수동 점검표
 
 ## 설문지 연동
@@ -96,5 +99,6 @@ python -m http.server 4173
 - `docs/step-18-result-copy-comments-and-calendar-feedback-report.md`: 18단계 결과 화면 문구, 댓글 답글 질문, 예약 완료 화면 정비 보고서
 - `docs/step-19-footer-answer-search-toast-and-comments-features-report.md`: 19단계 댓글 답변 종료 영역 통합, 검색 결과 토스트화, 댓글 보조 기능 강화 보고서
 - `docs/step-20-random-reply-authors-and-search-features-report.md`: 20단계 댓글 답글 작성자 무작위화와 검색 결과 목록 현실감 강화 보고서
+- `docs/step-21-merge-and-service-progress-report.md`: 21단계 19/20단계 병합 확인, 홈 화면 반복 문구 제거, 서비스별 진행 상태 저장 보고서
 
-이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 공개 범위와 운영 규칙은 이 README, 수동 점검표, 20단계 보고서를 기준으로 확인합니다.
+이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 공개 범위와 운영 규칙은 이 README, 수동 점검표, 21단계 보고서를 기준으로 확인합니다.

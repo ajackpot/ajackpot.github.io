@@ -44,6 +44,11 @@ import {
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
+import {
+  getServiceProgress,
+  readStoredExperimentResults,
+  saveServiceRunSnapshot,
+} from './lib/experiment-store.js';
 
 const APP_MODE = getAppMode();
 const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
@@ -64,6 +69,8 @@ const DAY_ORDER = {
 
 const MEASUREMENT_RULES = commonMeasurementRules;
 
+const SERVICE_ID = 'calendar';
+const SERVICE_LABEL = '예약 캘린더';
 const SERVICE_TYPES = serviceRegistry;
 
 const SERVICE_INTRO_POINTS = [
@@ -599,6 +606,7 @@ function acceptRunnerTaskCompletion(message) {
     cancellationPerformed: run.cancelPerformedThisTask,
     conditionId,
   });
+  persistCurrentServiceProgress();
 
   if (state.activeLaunch) {
     state.activeLaunch.status = 'completed';
@@ -1513,23 +1521,16 @@ function renderHomeView() {
       <p class="eyebrow">실험 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
       <p>
-        먼저 실험할 서비스 유형을 고르십시오. 현재 공개된 서비스는
-        ${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(', ')} 세 가지입니다.
+        먼저 실험할 서비스 유형을 고르십시오. 서비스별 진행 상태는 각 카드에서 확인할 수 있습니다.
       </p>
       <div class="hero-grid">
         <section>
-          <h2>이번 단계 목표</h2>
-          <ul>
-            <li>서비스 유형을 먼저 고르고 해당 서비스 화면에서 과업을 준비합니다.</li>
-            <li>과업 내용은 메인 창에서 먼저 읽고, 실제 수행은 새 탭에서 분리해 진행합니다.</li>
-            <li>두 화면을 모두 수행한 뒤 마지막에만 결과를 확인합니다.</li>
-          </ul>
+          <h2>현재 공개 범위</h2>
+          <p>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</p>
         </section>
         <section>
-          <h2>실험 정보</h2>
-          <dl class="meta-list">
-            <div><dt>현재 공개 범위</dt><dd>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</dd></div>
-          </dl>
+          <h2>진행 상태 안내</h2>
+          <p class="muted">과업 기록은 브라우저에 보존되며, 나중에 설문지 연결 시 한 번에 전달할 수 있도록 서비스별로 저장됩니다.</p>
         </section>
       </div>
     </header>
@@ -1540,6 +1541,15 @@ function renderHomeView() {
 }
 
 function renderHomeServiceCard(service) {
+  const progress = getServiceProgress(service.id, {
+    taskCount: service.taskCount,
+    conditionCount: service.conditionCount,
+  });
+  const progressDetail = progress.status === 'completed'
+    ? '모든 과업 기록이 저장되었습니다.'
+    : progress.status === 'in-progress'
+      ? `${progress.completedTaskCount}개 기록이 저장되었습니다.`
+      : '저장된 과업 기록이 없습니다.';
   return `
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
@@ -1547,12 +1557,13 @@ function renderHomeServiceCard(service) {
           <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
           <h2>${escapeHtml(service.label)}</h2>
         </div>
-        <span class="pill ${service.available ? '' : 'pill-warning'}">${escapeHtml(service.statusLabel)}</span>
+        <span class="pill ${progress.status === 'completed' ? 'pill-success' : ''}">${escapeHtml(progress.label)}</span>
       </div>
       <p>${escapeHtml(service.summary)}</p>
-      <ul>
-        ${service.points.map((point) => `<li>${escapeHtml(point)}</li>`).join('')}
-      </ul>
+      <dl class="meta-list compact service-progress-list">
+        <div><dt>진행 상태</dt><dd>${escapeHtml(progress.label)}</dd></div>
+        <div><dt>저장 상태</dt><dd>${escapeHtml(progressDetail)}</dd></div>
+      </dl>
       <div class="button-row">
         <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
           ${service.available ? formatServiceScreenButtonLabel(service.label) : '준비 중'}
@@ -1709,7 +1720,7 @@ function renderConditionReviewView() {
     <section class="card review-hero">
       <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 완료</p>
       <h1 id="condition-review-heading" tabindex="-1">현재 서비스 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}에서 3개 과업을 모두 마쳤습니다.</p>
+      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업을 모두 마쳤습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
@@ -2534,6 +2545,25 @@ function aggregateBenchmarkCondition(conditionId) {
   });
 }
 
+function persistCurrentServiceProgress() {
+  if (APP_MODE !== 'main') return null;
+  return saveServiceRunSnapshot({
+    serviceId: SERVICE_ID,
+    serviceLabel: SERVICE_LABEL,
+    sessionId: state.sessionId,
+    order: state.order,
+    taskCount: calendarTasks.length,
+    conditionCount: state.order.length,
+    measurementRules: MEASUREMENT_RULES,
+    actualRuns: {
+      variantA: state.runs.variantA.taskResults,
+      variantB: state.runs.variantB.taskResults,
+    },
+    benchmarkResults: benchmarkResultsCalendar,
+    aggregateActualCondition,
+  });
+}
+
 function buildExportPayload() {
   return buildSharedExportPayload({
     serviceId: 'calendar',
@@ -2545,6 +2575,7 @@ function buildExportPayload() {
       variantB: state.runs.variantB.taskResults,
     },
     benchmarkResults: benchmarkResultsCalendar,
+    storedServices: readStoredExperimentResults().services,
   });
 }
 

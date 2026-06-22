@@ -6,7 +6,8 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: null,
-    points: ['3개 과업', '비교 화면 2개', '수행 뒤 한 번에 결과 확인'],
+    taskCount: 3,
+    conditionCount: 2,
   },
   {
     id: 'comments',
@@ -15,7 +16,8 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: './comments.html',
-    points: ['3개 과업', '비교 화면 2개', '수행 뒤 한 번에 결과 확인'],
+    taskCount: 3,
+    conditionCount: 2,
   },
   {
     id: 'search',
@@ -24,7 +26,8 @@ export const serviceRegistry = [
     statusLabel: '구현 완료',
     available: true,
     path: './search.html',
-    points: ['3개 과업', '비교 화면 2개', '수행 뒤 한 번에 결과 확인'],
+    taskCount: 3,
+    conditionCount: 2,
   },
 ];
 
