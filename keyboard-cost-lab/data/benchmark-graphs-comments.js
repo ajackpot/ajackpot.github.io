@@ -14,7 +14,7 @@ export const commentsBenchmarkGraphs = {
           { id: 'reach-controls', bucket: 'entry', navMoves: 14, activations: 0, decisions: 2, waits: 0, speechUnits: 5, scanSteps: 16 },
           { id: 'pseudo-sort-category', bucket: 'entry', navMoves: 14, activations: 2, decisions: 4, waits: 1, speechUnits: 8, scanSteps: 17 },
           { id: 'reach-comments', bucket: 'entry', navMoves: 7, activations: 0, decisions: 2, waits: 0, speechUnits: 3, scanSteps: 8 },
-          { id: 'scan-review-comments', bucket: 'repeated', navMoves: 13, activations: 0, decisions: 5, waits: 0, speechUnits: 8, scanSteps: 16 },
+          { id: 'scan-review-comments', bucket: 'repeated', navMoves: 31, activations: 0, decisions: 8, waits: 0, speechUnits: 16, scanSteps: 36 },
           { id: 'open-target-replies', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
         ],
       },
@@ -27,9 +27,9 @@ export const commentsBenchmarkGraphs = {
         ],
         steps: [
           { id: 'reorient-and-set-popular', bucket: 'entry', navMoves: 18, activations: 1, decisions: 3, waits: 1, speechUnits: 7, scanSteps: 20 },
-          { id: 'find-admin-detail', bucket: 'repeated', navMoves: 8, activations: 1, decisions: 3, waits: 0, speechUnits: 5, scanSteps: 10 },
+          { id: 'find-admin-detail', bucket: 'repeated', navMoves: 21, activations: 1, decisions: 5, waits: 0, speechUnits: 11, scanSteps: 24 },
           { id: 'close-detail-and-reset', bucket: 'recovery', navMoves: 5, activations: 1, decisions: 2, waits: 0, speechUnits: 3, contextResets: 1, scanSteps: 6 },
-          { id: 'find-helpful-again', bucket: 'recovery', navMoves: 9, activations: 1, decisions: 3, waits: 0, speechUnits: 5, contextResets: 1, scanSteps: 11 },
+          { id: 'find-helpful-again', bucket: 'recovery', navMoves: 22, activations: 1, decisions: 5, waits: 0, speechUnits: 11, contextResets: 1, scanSteps: 25 },
         ],
       },
     },
@@ -48,7 +48,7 @@ export const commentsBenchmarkGraphs = {
         steps: [
           { id: 'skip-to-comments', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'set-sort-and-category', bucket: 'entry', navMoves: 5, activations: 2, decisions: 3, waits: 1, speechUnits: 4, scanSteps: 7 },
-          { id: 'move-to-target-comment', bucket: 'repeated', navMoves: 2, activations: 0, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 3 },
+          { id: 'move-to-target-comment', bucket: 'repeated', navMoves: 4, activations: 0, decisions: 3, waits: 0, speechUnits: 3, scanSteps: 5 },
           { id: 'open-target-replies', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 2 },
         ],
       },
@@ -61,7 +61,7 @@ export const commentsBenchmarkGraphs = {
         ],
         steps: [
           { id: 'set-popular', bucket: 'entry', navMoves: 4, activations: 1, decisions: 2, waits: 1, speechUnits: 3, scanSteps: 5 },
-          { id: 'select-admin-comment', bucket: 'repeated', navMoves: 1, activations: 0, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
+          { id: 'select-admin-comment', bucket: 'repeated', navMoves: 3, activations: 0, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 4 },
           { id: 'open-and-close-detail', bucket: 'recovery', navMoves: 2, activations: 2, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'mark-helpful', bucket: 'repeated', navMoves: 1, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 2 },
         ],

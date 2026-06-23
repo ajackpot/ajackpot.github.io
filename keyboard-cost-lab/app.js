@@ -829,7 +829,10 @@ function handleRootClick(event) {
 
   if (action === 'site-placeholder') {
     event.preventDefault();
-    showSiteNotice(actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.');
+    showSiteNotice(
+      actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.',
+      actionTarget.dataset.focusId || ''
+    );
     return;
   }
 
@@ -1066,11 +1069,12 @@ function focusElementNow(selector) {
   return false;
 }
 
-function showSiteNotice(message) {
+function showSiteNotice(message, focusId = '') {
   const run = getCurrentRun();
   if (!run) return;
   run.siteNotice = message;
   run.liveStatus = message;
+  if (focusId) requestFocus(`[data-focus-id="${focusId}"]`);
   render();
 }
 
@@ -2913,6 +2917,7 @@ function renderModal(modal, run, task) {
           <p id="dialog-description">${escapeHtml(formatSlotLabel(slot))}으로 예약합니다.</p>
           <div class="button-row">
             <button class="button button-ghost" data-action="dialog-close" data-focus-id="booking-final-close">닫기</button>
+            <button class="button button-secondary" data-action="site-placeholder" data-notice="선택한 예약 정보를 공유할 수 있는 주소를 복사했습니다." data-focus-id="booking-final-share">공유하기</button>
             <button class="button button-primary" data-action="dialog-finalize-booking" data-dialog-primary data-focus-id="booking-final-confirm" ${run.isWorking ? 'disabled' : ''}>
               ${run.isWorking ? '저장 중…' : '예약하기'}
             </button>
@@ -2933,6 +2938,7 @@ function renderModal(modal, run, task) {
         <p id="dialog-description">${slot.available ? '예약 가능한 시간입니다.' : '지금은 예약할 수 없는 시간입니다.'}</p>
         <div class="button-row">
           <button class="button button-ghost" data-action="dialog-close" data-focus-id="slot-dialog-close">닫기</button>
+          <button class="button button-secondary" data-action="site-placeholder" data-notice="선택한 예약 시간을 공유할 수 있는 주소를 복사했습니다." data-focus-id="slot-dialog-share">공유하기</button>
           ${slot.available ? `
             <button class="button button-primary" data-action="dialog-confirm-slot" data-dialog-primary data-focus-id="slot-dialog-confirm" ${run.isWorking ? 'disabled' : ''}>
               ${run.isWorking ? '저장 중…' : escapeHtml(actionLabel)}

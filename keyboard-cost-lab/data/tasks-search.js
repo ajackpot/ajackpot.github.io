@@ -12,7 +12,8 @@ export const searchTasks = [
     previewQuestion: {
       prompt: '예약 일시를 몇 시간 전까지 변경할 수 있습니까?',
       correctValue: '6시간 전까지',
-      options: ['2시간 전까지', '4시간 전까지', '6시간 전까지', '12시간 전까지'],
+      optionCount: 4,
+      options: ['4시간 전까지', '6시간 전까지', '8시간 전까지', '12시간 전까지'],
     },
   },
   {

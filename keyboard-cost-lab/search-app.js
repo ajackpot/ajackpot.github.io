@@ -88,6 +88,13 @@ const RUNNER_LABELS = {
   footerJump: '검색 결과로 이동',
 };
 
+const PREVIEW_DEADLINE_FACTS = [
+  { value: '4시간 전까지', hours: 4 },
+  { value: '6시간 전까지', hours: 6 },
+  { value: '8시간 전까지', hours: 8 },
+  { value: '12시간 전까지', hours: 12 },
+];
+
 const GLOSSARY_ENTRIES = [
   {
     term: '비교안 A/B',
@@ -271,6 +278,7 @@ function createConditionRuntime(variantId) {
     saveOptionDraft: defaultSaveOptions(),
     previewAnswerDrafts: {},
     submittedPreviewAnswers: {},
+    previewQuestionAssignments: {},
     openedResultId: null,
     currentResultId: searchScenario.results[0]?.id ?? null,
     previewVisitedThisTask: {},
@@ -332,6 +340,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.saveOptionDraft = snapshot.saveOptionDraft ? deepClone(snapshot.saveOptionDraft) : runtime.saveOptionDraft;
   runtime.previewAnswerDrafts = deepClone(snapshot.previewAnswerDrafts ?? runtime.previewAnswerDrafts);
   runtime.submittedPreviewAnswers = deepClone(snapshot.submittedPreviewAnswers ?? runtime.submittedPreviewAnswers);
+  runtime.previewQuestionAssignments = deepClone(snapshot.previewQuestionAssignments ?? runtime.previewQuestionAssignments);
   runtime.openedResultId = snapshot.openedResultId ?? null;
   runtime.currentResultId = snapshot.currentResultId ?? runtime.currentResultId;
   runtime.previewVisitedThisTask = deepClone(snapshot.previewVisitedThisTask ?? runtime.previewVisitedThisTask);
@@ -360,6 +369,7 @@ function serializeRuntimeSnapshot(run) {
     saveOptionDraft: deepClone(run.saveOptionDraft),
     previewAnswerDrafts: deepClone(run.previewAnswerDrafts),
     submittedPreviewAnswers: deepClone(run.submittedPreviewAnswers),
+    previewQuestionAssignments: deepClone(run.previewQuestionAssignments),
     openedResultId: run.openedResultId,
     currentResultId: run.currentResultId,
     previewVisitedThisTask: deepClone(run.previewVisitedThisTask),
@@ -386,6 +396,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.saveOptionDraft = hydrated.saveOptionDraft;
   targetRun.previewAnswerDrafts = hydrated.previewAnswerDrafts;
   targetRun.submittedPreviewAnswers = hydrated.submittedPreviewAnswers;
+  targetRun.previewQuestionAssignments = hydrated.previewQuestionAssignments;
   targetRun.openedResultId = hydrated.openedResultId;
   targetRun.currentResultId = hydrated.currentResultId;
   targetRun.previewVisitedThisTask = hydrated.previewVisitedThisTask;
@@ -522,6 +533,10 @@ function launchRunnerTask() {
   const run = getCurrentRun();
   const task = getCurrentTask();
   if (!conditionId || !run || !task) return;
+
+  ensurePreviewQuestionAssignmentForTask(run, task, {
+    avoidCorrectValue: getOtherConditionPreviewCorrectValue(task, conditionId),
+  });
 
   const launchId = uniqueId('search-launch');
   const payload = {
@@ -968,6 +983,10 @@ function getEffectiveSaveCount(result, run) {
   return result.saveCount + (run.savedByResultId[result.id] ? 1 : 0);
 }
 
+function formatQueryLabel(query) {
+  return query ? query : '검색어 없음';
+}
+
 function getVisibleSearch(run) {
   const filtered = searchScenario.results.filter((result) => {
     if (run.type === 'all') return true;
@@ -1040,6 +1059,7 @@ function applyResultFilters() {
     run.isApplying = false;
     run.sort = run.sortDraft;
     run.type = run.typeDraft;
+    run.currentResultId = null;
     ensureCurrentResultVisible(run);
     const visibleSearch = getVisibleSearch(run);
     run.liveStatus = `현재 ${visibleSearch.length}개의 자료가 표시되었습니다.`;
@@ -1077,6 +1097,84 @@ function noteWrongResultAction(resultId, actionType, extra = {}) {
     targetResultId: task.targetResultId,
     ...extra,
   });
+}
+
+
+function randomIndex(maxExclusive) {
+  if (maxExclusive <= 0) return 0;
+  if (globalThis.crypto?.getRandomValues) {
+    return globalThis.crypto.getRandomValues(new Uint32Array(1))[0] % maxExclusive;
+  }
+  return Math.floor(Math.random() * maxExclusive);
+}
+
+function shuffledValues(values) {
+  const copy = values.slice();
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1);
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+  return copy;
+}
+
+function buildPreviewQuestionAssignment(task, { avoidCorrectValue = '' } = {}) {
+  if (!task || task.completion !== 'previewQuestion' || !task.previewQuestion) return null;
+  const candidates = PREVIEW_DEADLINE_FACTS.filter((fact) => fact.value !== avoidCorrectValue);
+  const fact = shuffledValues(candidates.length ? candidates : PREVIEW_DEADLINE_FACTS)[0] ?? PREVIEW_DEADLINE_FACTS[0];
+  const distractors = shuffledValues(PREVIEW_DEADLINE_FACTS.filter((item) => item.value !== fact.value))
+    .slice(0, Math.max(0, (task.previewQuestion.optionCount ?? 4) - 1))
+    .map((item) => item.value);
+  return {
+    taskId: task.id,
+    resultId: task.targetResultId,
+    hours: fact.hours,
+    correctValue: fact.value,
+    options: shuffledValues([fact.value, ...distractors]),
+  };
+}
+
+function ensurePreviewQuestionAssignmentForTask(run, task, options = {}) {
+  if (!run || !task || task.completion !== 'previewQuestion') return null;
+  const existing = run.previewQuestionAssignments?.[task.id];
+  if (existing && (!options.avoidCorrectValue || existing.correctValue !== options.avoidCorrectValue)) {
+    return existing;
+  }
+  const assignment = buildPreviewQuestionAssignment(task, options);
+  if (!assignment) return null;
+  run.previewQuestionAssignments = {
+    ...(run.previewQuestionAssignments ?? {}),
+    [task.id]: assignment,
+  };
+  return assignment;
+}
+
+function getOtherConditionPreviewCorrectValue(task, currentConditionId) {
+  if (APP_MODE === 'runner' || !task || task.completion !== 'previewQuestion') return '';
+  const otherConditionId = ['variantA', 'variantB'].find((conditionId) => conditionId !== currentConditionId);
+  return state.runs[otherConditionId]?.previewQuestionAssignments?.[task.id]?.correctValue ?? '';
+}
+
+function getCurrentPreviewQuestionAssignment(run, task) {
+  return ensurePreviewQuestionAssignmentForTask(run, task, {
+    avoidCorrectValue: getOtherConditionPreviewCorrectValue(task, run?.variantId),
+  });
+}
+
+function getCurrentPreviewQuestionCorrectValue(run, task) {
+  return getCurrentPreviewQuestionAssignment(run, task)?.correctValue ?? task?.previewQuestion?.correctValue ?? '';
+}
+
+function getCurrentPreviewQuestionOptions(run, task) {
+  return getCurrentPreviewQuestionAssignment(run, task)?.options ?? task?.previewQuestion?.options ?? [];
+}
+
+function getResultPreviewBody(result, run, task) {
+  if (result?.dynamicPreview === 'change-deadline') {
+    const assignment = getCurrentPreviewQuestionAssignment(run, task);
+    const hours = assignment?.hours ?? 6;
+    return `예약 일시는 상담 시작 ${hours}시간 전까지 바꿀 수 있습니다. 변경하면 새 확정 문자와 메일이 발송되며, ${hours}시간이 지나면 고객센터를 통해 대체 절차를 확인해야 합니다.`;
+  }
+  return result?.body ?? '';
 }
 
 function openResultPreview(resultId, triggerFocusId) {
@@ -1281,7 +1379,7 @@ function isTaskSatisfied(task, run) {
     const otherAnswered = Object.keys(run.submittedPreviewAnswers).some((resultId) => resultId !== task.targetResultId);
     return previewDone
       && Boolean(submitted)
-      && submitted.value === task.previewQuestion?.correctValue
+      && submitted.value === getCurrentPreviewQuestionCorrectValue(run, task)
       && !otherAnswered;
   }
 
@@ -1300,7 +1398,7 @@ function isTaskSatisfied(task, run) {
       message = '요청한 자료의 미리보기를 확인하지 못했습니다.';
     } else if (!targetAnswer) {
       message = '미리보기 질문에 답을 제출하지 않았습니다.';
-    } else if (targetAnswer.value !== task.previewQuestion?.correctValue) {
+    } else if (targetAnswer.value !== getCurrentPreviewQuestionCorrectValue(run, task)) {
       message = '미리보기 질문에 요청과 다른 답을 제출했습니다.';
     }
   } else if (task.completion === 'saveWithOptions') {
@@ -1347,7 +1445,7 @@ function getEndTaskOutcome(task, run) {
       message = '요청한 자료의 미리보기를 확인하지 못했습니다.';
     } else if (!targetAnswer) {
       message = '미리보기 질문에 답을 제출하지 않았습니다.';
-    } else if (targetAnswer.value !== task.previewQuestion?.correctValue) {
+    } else if (targetAnswer.value !== getCurrentPreviewQuestionCorrectValue(run, task)) {
       message = '미리보기 질문에 요청과 다른 답을 제출했습니다.';
     }
   } else if (task.completion === 'saveWithOptions') {
@@ -1472,6 +1570,7 @@ function finishRunnerTask(reason, success = true, outcomeMessage = '') {
       `saveOptions=${JSON.stringify(run.saveOptionsByResultId ?? {})}`,
       `previewAnswers=${Object.entries(run.submittedPreviewAnswers).map(([resultId, answer]) => `${resultId}:${answer.value}`).join(',') || 'none'}`,
       `previewVisited=${Object.keys(run.previewVisitedThisTask).filter((resultId) => run.previewVisitedThisTask[resultId]).join(',') || 'none'}`,
+      task.completion === 'previewQuestion' ? `previewQuestionCorrect=${getCurrentPreviewQuestionCorrectValue(run, task) || 'none'}` : '',
       `finalConfirmationAcknowledged=${run.finalConfirmationAcknowledged}`,
       outcomeMessage ? `outcome=${outcomeMessage}` : '',
       'measurement=first-input-visible-only',
@@ -1910,6 +2009,7 @@ function renderTopSkipLinks() {
 function renderEndAreaPreviewQuestion(run, task) {
   if (!task || task.completion !== 'previewQuestion' || !task.previewQuestion) return '';
   const question = task.previewQuestion;
+  const options = getCurrentPreviewQuestionOptions(run, task);
   const draftValue = run.previewAnswerDrafts[task.targetResultId] || '';
   return `
     <section class="runner-end-answer" aria-labelledby="runner-end-answer-heading">
@@ -1919,7 +2019,7 @@ function renderEndAreaPreviewQuestion(run, task) {
         <span>답변</span>
         <select id="runner-preview-answer" name="runner-preview-answer" data-focus-id="runner-preview-answer" aria-describedby="runner-end-answer-question">
           <option value="">선택하십시오</option>
-          ${question.options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+          ${options.map((option) => `<option value="${escapeHtml(option)}" ${draftValue === option ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
         </select>
       </label>
     </section>
@@ -1959,7 +2059,7 @@ function renderSearchHeader(conditionId, run) {
 function runSearchQuery() {
   const run = getCurrentRun();
   if (!run) return;
-  const query = (run.queryDraft || '').trim() || searchScenario.queryLabel;
+  const query = (run.queryDraft || '').trim();
   run.query = query;
   run.queryDraft = query;
   run.featurePanel = {
@@ -1967,7 +2067,7 @@ function runSearchQuery() {
     triggerFocusId: 'result-search-submit',
     query,
   };
-  run.siteNotice = `검색어 ${query}로 검색 결과를 새로 고쳤습니다.`;
+  run.siteNotice = query ? `검색어 ${query}로 검색 결과를 새로 고쳤습니다.` : '검색어 없이 전체 자료를 새로 고쳤습니다.';
   run.liveStatus = run.siteNotice;
   requestFocus('#search-feature-title');
   render();
@@ -2225,7 +2325,7 @@ function renderSearchSection(conditionId, run, visibleSearch) {
       <div class="results-header">
         <div>
           <h2 id="search-heading" tabindex="-1">검색 결과</h2>
-          <p class="muted">검색어 ${escapeHtml(run.query)} · 표시된 자료 ${visibleSearch.length}개</p>
+          <p class="muted">${escapeHtml(formatQueryLabel(run.query))} · 표시된 자료 ${visibleSearch.length}개</p>
         </div>
       </div>
       ${conditionId === 'variantA'
@@ -2452,7 +2552,7 @@ function renderResultModal(modal, run) {
           <div><dt>저장 수</dt><dd>${getEffectiveSaveCount(result, run)}</dd></div>
           <div><dt>관련 낱말</dt><dd>${escapeHtml(result.keywords.join(', '))}</dd></div>
         </dl>
-        <p class="muted">${escapeHtml(result.body)}</p>
+        <p class="muted">${escapeHtml(getResultPreviewBody(result, run, getCurrentTask()))}</p>
         <div class="button-row">
           <button class="button button-primary" data-action="dialog-close" data-dialog-close data-focus-id="result-dialog-close">닫기</button>
         </div>

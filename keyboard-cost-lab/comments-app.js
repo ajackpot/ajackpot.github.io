@@ -1089,6 +1089,7 @@ function applyCommentFilters() {
     run.isApplying = false;
     run.sort = run.sortDraft;
     run.category = run.categoryDraft;
+    run.currentCommentId = null;
     ensureCurrentCommentVisible(run);
     const visibleComments = getVisibleComments(run);
     run.liveStatus = `현재 ${visibleComments.length}개의 댓글이 표시되었습니다.`;

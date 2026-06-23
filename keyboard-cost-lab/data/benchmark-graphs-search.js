@@ -13,7 +13,7 @@ export const searchBenchmarkGraphs = {
         steps: [
           { id: 'reach-controls', bucket: 'entry', navMoves: 13, activations: 0, decisions: 2, waits: 0, speechUnits: 5, scanSteps: 15 },
           { id: 'set-newest-guide', bucket: 'entry', navMoves: 8, activations: 2, decisions: 3, waits: 1, speechUnits: 5, scanSteps: 10 },
-          { id: 'scan-guide-results', bucket: 'repeated', navMoves: 8, activations: 0, decisions: 3, waits: 0, speechUnits: 5, scanSteps: 10 },
+          { id: 'scan-guide-results', bucket: 'repeated', navMoves: 23, activations: 0, decisions: 6, waits: 0, speechUnits: 12, scanSteps: 27 },
           { id: 'open-preview', bucket: 'repeated', navMoves: 3, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 4 },
           { id: 'close-preview-reset', bucket: 'recovery', navMoves: 4, activations: 1, decisions: 2, waits: 0, speechUnits: 2, contextResets: 1, scanSteps: 5 },
         ],
@@ -28,7 +28,7 @@ export const searchBenchmarkGraphs = {
         steps: [
           { id: 'reach-controls-again', bucket: 'entry', navMoves: 12, activations: 0, decisions: 2, waits: 0, speechUnits: 4, scanSteps: 14 },
           { id: 'set-title-faq', bucket: 'entry', navMoves: 8, activations: 2, decisions: 3, waits: 1, speechUnits: 5, scanSteps: 10 },
-          { id: 'scan-faq-results', bucket: 'repeated', navMoves: 11, activations: 0, decisions: 4, waits: 0, speechUnits: 7, scanSteps: 13 },
+          { id: 'scan-faq-results', bucket: 'repeated', navMoves: 26, activations: 0, decisions: 7, waits: 0, speechUnits: 14, scanSteps: 30 },
           { id: 'open-save-options', bucket: 'repeated', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'pseudo-save-options', bucket: 'repeated', navMoves: 10, activations: 2, decisions: 4, waits: 0, speechUnits: 6, scanSteps: 13 },
           { id: 'confirm-save-reset', bucket: 'recovery', navMoves: 4, activations: 1, decisions: 2, waits: 0, speechUnits: 2, contextResets: 1, scanSteps: 5 },
@@ -51,7 +51,7 @@ export const searchBenchmarkGraphs = {
           { id: 'skip-to-filters', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'set-newest-guide', bucket: 'entry', navMoves: 5, activations: 2, decisions: 3, waits: 1, speechUnits: 4, scanSteps: 7 },
           { id: 'enter-result-list', bucket: 'entry', navMoves: 1, activations: 0, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
-          { id: 'move-to-target', bucket: 'repeated', navMoves: 1, activations: 0, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },
+          { id: 'move-to-target', bucket: 'repeated', navMoves: 3, activations: 0, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 4 },
           { id: 'open-and-close-preview', bucket: 'recovery', navMoves: 2, activations: 2, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 3 },
         ],
       },
@@ -65,7 +65,7 @@ export const searchBenchmarkGraphs = {
         steps: [
           { id: 'skip-to-filters', bucket: 'entry', navMoves: 2, activations: 1, decisions: 1, waits: 0, speechUnits: 2, scanSteps: 3 },
           { id: 'set-title-faq', bucket: 'entry', navMoves: 5, activations: 2, decisions: 3, waits: 1, speechUnits: 4, scanSteps: 7 },
-          { id: 'move-to-target', bucket: 'repeated', navMoves: 2, activations: 0, decisions: 2, waits: 0, speechUnits: 2, scanSteps: 3 },
+          { id: 'move-to-target', bucket: 'repeated', navMoves: 4, activations: 0, decisions: 3, waits: 0, speechUnits: 3, scanSteps: 5 },
           { id: 'open-save-options', bucket: 'repeated', navMoves: 1, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 2 },
           { id: 'set-save-options', bucket: 'repeated', navMoves: 4, activations: 2, decisions: 3, waits: 0, speechUnits: 3, scanSteps: 5 },
           { id: 'confirm-save', bucket: 'recovery', navMoves: 1, activations: 1, decisions: 1, waits: 0, speechUnits: 1, scanSteps: 1 },

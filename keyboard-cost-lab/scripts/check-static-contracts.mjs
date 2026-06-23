@@ -41,6 +41,13 @@ assert('search: 저장 형식 독립 선택 제거', !files.search.includes("nam
 assert('search: 저장 위치 선택지에 파일 내보내기 포함', files.search.includes('PDF 파일로 내보내기') && files.search.includes('텍스트 파일로 내보내기'));
 assert('search: 바로가기 링크를 검색 헤더보다 먼저 렌더링', files.search.indexOf('renderTopSkipLinks()') > -1 && files.search.indexOf('renderTopSkipLinks()') < files.search.indexOf('renderSearchHeader(conditionId, run)'));
 
+assert('calendar: 예약 확인 흐름에 공유하기 버튼 제공', files.calendar.includes('data-focus-id="slot-dialog-share"') && files.calendar.includes('data-focus-id="booking-final-share"'));
+assert('search: 검색어 입력란 기본값 제거', files.search.includes('query: searchScenario.queryLabel') && readFileSync('data/search-scenario.js', 'utf8').includes("queryLabel: ''"));
+assert('search: 미리보기 답변 무작위 배정 상태 보존', files.search.includes('previewQuestionAssignments') && files.search.includes('getCurrentPreviewQuestionCorrectValue'));
+assert('search: 미리보기 본문 숫자와 답변 선택지 연동', files.search.includes('getResultPreviewBody') && files.search.includes('PREVIEW_DEADLINE_FACTS'));
+assert('comments: 누적 후기 댓글로 목표 댓글이 첫 번째가 되지 않음', files.comments.includes('comment-yeri') || readFileSync('data/comments-scenario.js', 'utf8').includes('comment-yeri'));
+assert('search: 누적 자료로 목표 자료가 첫 번째가 되지 않음', readFileSync('data/search-scenario.js', 'utf8').includes('result-previsit-guide') && readFileSync('data/search-scenario.js', 'utf8').includes('result-audio-faq'));
+
 const calendarActionChecks = [
   ['조건 적용', 'data-action="apply-filters"'],
   ['비교안 A 예약 시간 열기', 'data-action="slot-open"'],

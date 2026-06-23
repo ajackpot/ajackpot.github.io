@@ -69,8 +69,8 @@ const services = {
         submittedPreviewAnswers: {},
         savedFeatureItems: {},
         searchAlertEnabled: false,
-        query: '상담',
-        queryDraft: '상담',
+        query: '',
+        queryDraft: '',
         featurePanel: null,
         openedResultId: null,
         currentResultId: null,
@@ -273,11 +273,11 @@ for (const featureId of ['home', 'help', 'history', 'saved', 'folder', 'request'
     taskIndex: 0,
     showRequest: false,
     snapshotOverrides: {
-      featurePanel: { featureId, triggerFocusId: 'search-nav-1', resultId: 'result-change-guide', query: '예약 변경' },
+      featurePanel: { featureId, triggerFocusId: 'search-nav-1', resultId: 'result-change-guide', query: '' },
       savedFeatureItems: {},
       searchAlertEnabled: featureId === 'alert',
-      query: '예약 변경',
-      queryDraft: '예약 변경',
+      query: '',
+      queryDraft: '',
     },
   }));
 }

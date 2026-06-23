@@ -1,5 +1,5 @@
 export const benchmarkResultsCalendar = {
-  "generatedAt": "2026-06-22T09:00:37.077Z",
+  "generatedAt": "2026-06-23T00:16:17.050Z",
   "variants": {
     "variantA": {
       "label": "비교안 A · 조작 부담이 큰 구조",
@@ -14,12 +14,12 @@ export const benchmarkResultsCalendar = {
           ],
           "structural": {
             "totals": {
-              "navMoves": 61,
+              "navMoves": 62,
               "activations": 9,
               "decisions": 21,
               "waits": 2,
-              "speechUnits": 35,
-              "scanSteps": 76,
+              "speechUnits": 36,
+              "scanSteps": 77,
               "contextResets": 1
             },
             "byBucket": {
@@ -42,12 +42,12 @@ export const benchmarkResultsCalendar = {
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 6,
+                "navMoves": 7,
                 "activations": 2,
                 "decisions": 3,
                 "waits": 1,
-                "speechUnits": 4,
-                "scanSteps": 8,
+                "speechUnits": 5,
+                "scanSteps": 9,
                 "contextResets": 1
               }
             }
@@ -58,16 +58,16 @@ export const benchmarkResultsCalendar = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 38942,
-                  "seconds": 38.9
+                  "milliseconds": 39437,
+                  "seconds": 39.4
                 },
                 "expected": {
-                  "milliseconds": 58298,
-                  "seconds": 58.3
+                  "milliseconds": 59110,
+                  "seconds": 59.1
                 },
                 "upper": {
-                  "milliseconds": 83802,
-                  "seconds": 83.8
+                  "milliseconds": 85107,
+                  "seconds": 85.1
                 }
               },
               "bucketRanges": {
@@ -81,8 +81,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 17.9
                   },
                   "recovery": {
-                    "milliseconds": 4972,
-                    "seconds": 5
+                    "milliseconds": 5467,
+                    "seconds": 5.5
                   }
                 },
                 "expected": {
@@ -95,8 +95,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 26.3
                   },
                   "recovery": {
-                    "milliseconds": 8388,
-                    "seconds": 8.4
+                    "milliseconds": 9200,
+                    "seconds": 9.2
                   }
                 },
                 "upper": {
@@ -109,8 +109,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 37
                   },
                   "recovery": {
-                    "milliseconds": 13732,
-                    "seconds": 13.7
+                    "milliseconds": 15037,
+                    "seconds": 15
                   }
                 }
               }
@@ -120,16 +120,16 @@ export const benchmarkResultsCalendar = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 68176,
-                  "seconds": 68.2
+                  "milliseconds": 69208,
+                  "seconds": 69.2
                 },
                 "expected": {
-                  "milliseconds": 99939,
-                  "seconds": 99.9
+                  "milliseconds": 101708,
+                  "seconds": 101.7
                 },
                 "upper": {
-                  "milliseconds": 144209,
-                  "seconds": 144.2
+                  "milliseconds": 147082,
+                  "seconds": 147.1
                 }
               },
               "bucketRanges": {
@@ -143,8 +143,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 30.8
                   },
                   "recovery": {
-                    "milliseconds": 10176,
-                    "seconds": 10.2
+                    "milliseconds": 11208,
+                    "seconds": 11.2
                   }
                 },
                 "expected": {
@@ -157,8 +157,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 43.7
                   },
                   "recovery": {
-                    "milliseconds": 17719,
-                    "seconds": 17.7
+                    "milliseconds": 19488,
+                    "seconds": 19.5
                   }
                 },
                 "upper": {
@@ -171,8 +171,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 61.2
                   },
                   "recovery": {
-                    "milliseconds": 29359,
-                    "seconds": 29.4
+                    "milliseconds": 32232,
+                    "seconds": 32.2
                   }
                 }
               }
@@ -182,16 +182,16 @@ export const benchmarkResultsCalendar = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 94616,
-                  "seconds": 94.6
+                  "milliseconds": 95851,
+                  "seconds": 95.9
                 },
                 "expected": {
-                  "milliseconds": 145012,
-                  "seconds": 145
+                  "milliseconds": 147322,
+                  "seconds": 147.3
                 },
                 "upper": {
-                  "milliseconds": 226437,
-                  "seconds": 226.4
+                  "milliseconds": 230847,
+                  "seconds": 230.8
                 }
               },
               "bucketRanges": {
@@ -205,8 +205,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 41.6
                   },
                   "recovery": {
-                    "milliseconds": 14196,
-                    "seconds": 14.2
+                    "milliseconds": 15431,
+                    "seconds": 15.4
                   }
                 },
                 "expected": {
@@ -219,8 +219,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 61.3
                   },
                   "recovery": {
-                    "milliseconds": 26532,
-                    "seconds": 26.5
+                    "milliseconds": 28842,
+                    "seconds": 28.8
                   }
                 },
                 "upper": {
@@ -233,8 +233,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 91.5
                   },
                   "recovery": {
-                    "milliseconds": 49917,
-                    "seconds": 49.9
+                    "milliseconds": 54327,
+                    "seconds": 54.3
                   }
                 }
               }
@@ -250,12 +250,12 @@ export const benchmarkResultsCalendar = {
           ],
           "structural": {
             "totals": {
-              "navMoves": 72,
+              "navMoves": 73,
               "activations": 10,
               "decisions": 21,
               "waits": 4,
-              "speechUnits": 36,
-              "scanSteps": 88,
+              "speechUnits": 37,
+              "scanSteps": 89,
               "contextResets": 3
             },
             "byBucket": {
@@ -278,12 +278,12 @@ export const benchmarkResultsCalendar = {
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 28,
+                "navMoves": 29,
                 "activations": 4,
                 "decisions": 8,
                 "waits": 2,
-                "speechUnits": 14,
-                "scanSteps": 35,
+                "speechUnits": 15,
+                "scanSteps": 36,
                 "contextResets": 3
               }
             }
@@ -294,16 +294,16 @@ export const benchmarkResultsCalendar = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 45608,
-                  "seconds": 45.6
+                  "milliseconds": 46103,
+                  "seconds": 46.1
                 },
                 "expected": {
-                  "milliseconds": 70811,
-                  "seconds": 70.8
+                  "milliseconds": 71623,
+                  "seconds": 71.6
                 },
                 "upper": {
-                  "milliseconds": 106389,
-                  "seconds": 106.4
+                  "milliseconds": 107694,
+                  "seconds": 107.7
                 }
               },
               "bucketRanges": {
@@ -317,8 +317,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 7.7
                   },
                   "recovery": {
-                    "milliseconds": 18788,
-                    "seconds": 18.8
+                    "milliseconds": 19283,
+                    "seconds": 19.3
                   }
                 },
                 "expected": {
@@ -331,8 +331,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 11.4
                   },
                   "recovery": {
-                    "milliseconds": 31401,
-                    "seconds": 31.4
+                    "milliseconds": 32213,
+                    "seconds": 32.2
                   }
                 },
                 "upper": {
@@ -345,8 +345,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 16
                   },
                   "recovery": {
-                    "milliseconds": 51099,
-                    "seconds": 51.1
+                    "milliseconds": 52404,
+                    "seconds": 52.4
                   }
                 }
               }
@@ -356,16 +356,16 @@ export const benchmarkResultsCalendar = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 82924,
-                  "seconds": 82.9
+                  "milliseconds": 83956,
+                  "seconds": 84
                 },
                 "expected": {
-                  "milliseconds": 129312,
-                  "seconds": 129.3
+                  "milliseconds": 131081,
+                  "seconds": 131.1
                 },
                 "upper": {
-                  "milliseconds": 196896,
-                  "seconds": 196.9
+                  "milliseconds": 199769,
+                  "seconds": 199.8
                 }
               },
               "bucketRanges": {
@@ -379,8 +379,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 13.4
                   },
                   "recovery": {
-                    "milliseconds": 37704,
-                    "seconds": 37.7
+                    "milliseconds": 38736,
+                    "seconds": 38.7
                   }
                 },
                 "expected": {
@@ -393,8 +393,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 19.1
                   },
                   "recovery": {
-                    "milliseconds": 65192,
-                    "seconds": 65.2
+                    "milliseconds": 66961,
+                    "seconds": 67
                   }
                 },
                 "upper": {
@@ -407,8 +407,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 26.7
                   },
                   "recovery": {
-                    "milliseconds": 107406,
-                    "seconds": 107.4
+                    "milliseconds": 110279,
+                    "seconds": 110.3
                   }
                 }
               }
@@ -418,16 +418,16 @@ export const benchmarkResultsCalendar = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 116007,
-                  "seconds": 116
+                  "milliseconds": 117242,
+                  "seconds": 117.2
                 },
                 "expected": {
-                  "milliseconds": 192144,
-                  "seconds": 192.1
+                  "milliseconds": 194454,
+                  "seconds": 194.5
                 },
                 "upper": {
-                  "milliseconds": 326584,
-                  "seconds": 326.6
+                  "milliseconds": 330994,
+                  "seconds": 331
                 }
               },
               "bucketRanges": {
@@ -441,8 +441,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 17.9
                   },
                   "recovery": {
-                    "milliseconds": 53417,
-                    "seconds": 53.4
+                    "milliseconds": 54652,
+                    "seconds": 54.7
                   }
                 },
                 "expected": {
@@ -455,8 +455,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 26.5
                   },
                   "recovery": {
-                    "milliseconds": 99924,
-                    "seconds": 99.9
+                    "milliseconds": 102234,
+                    "seconds": 102.2
                   }
                 },
                 "upper": {
@@ -469,8 +469,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 39.5
                   },
                   "recovery": {
-                    "milliseconds": 189294,
-                    "seconds": 189.3
+                    "milliseconds": 193704,
+                    "seconds": 193.7
                   }
                 }
               }
@@ -492,12 +492,12 @@ export const benchmarkResultsCalendar = {
           ],
           "structural": {
             "totals": {
-              "navMoves": 23,
+              "navMoves": 24,
               "activations": 10,
               "decisions": 15,
               "waits": 2,
-              "speechUnits": 18,
-              "scanSteps": 29,
+              "speechUnits": 19,
+              "scanSteps": 30,
               "contextResets": 0
             },
             "byBucket": {
@@ -520,12 +520,12 @@ export const benchmarkResultsCalendar = {
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 3,
+                "navMoves": 4,
                 "activations": 2,
                 "decisions": 3,
                 "waits": 1,
-                "speechUnits": 3,
-                "scanSteps": 4,
+                "speechUnits": 4,
+                "scanSteps": 5,
                 "contextResets": 0
               }
             }
@@ -536,16 +536,16 @@ export const benchmarkResultsCalendar = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 19407,
-                  "seconds": 19.4
+                  "milliseconds": 19902,
+                  "seconds": 19.9
                 },
                 "expected": {
-                  "milliseconds": 29530,
-                  "seconds": 29.5
+                  "milliseconds": 30343,
+                  "seconds": 30.3
                 },
                 "upper": {
-                  "milliseconds": 43137,
-                  "seconds": 43.1
+                  "milliseconds": 44442,
+                  "seconds": 44.4
                 }
               },
               "bucketRanges": {
@@ -559,8 +559,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 9
                   },
                   "recovery": {
-                    "milliseconds": 3487,
-                    "seconds": 3.5
+                    "milliseconds": 3982,
+                    "seconds": 4
                   }
                 },
                 "expected": {
@@ -573,8 +573,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 13.3
                   },
                   "recovery": {
-                    "milliseconds": 5950,
-                    "seconds": 6
+                    "milliseconds": 6763,
+                    "seconds": 6.8
                   }
                 },
                 "upper": {
@@ -587,8 +587,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 18.8
                   },
                   "recovery": {
-                    "milliseconds": 9817,
-                    "seconds": 9.8
+                    "milliseconds": 11122,
+                    "seconds": 11.1
                   }
                 }
               }
@@ -598,16 +598,16 @@ export const benchmarkResultsCalendar = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 33384,
-                  "seconds": 33.4
+                  "milliseconds": 34416,
+                  "seconds": 34.4
                 },
                 "expected": {
-                  "milliseconds": 49538,
-                  "seconds": 49.5
+                  "milliseconds": 51307,
+                  "seconds": 51.3
                 },
                 "upper": {
-                  "milliseconds": 72306,
-                  "seconds": 72.3
+                  "milliseconds": 75179,
+                  "seconds": 75.2
                 }
               },
               "bucketRanges": {
@@ -621,8 +621,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 15.5
                   },
                   "recovery": {
-                    "milliseconds": 6384,
-                    "seconds": 6.4
+                    "milliseconds": 7416,
+                    "seconds": 7.4
                   }
                 },
                 "expected": {
@@ -635,8 +635,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 22.1
                   },
                   "recovery": {
-                    "milliseconds": 11078,
-                    "seconds": 11.1
+                    "milliseconds": 12847,
+                    "seconds": 12.8
                   }
                 },
                 "upper": {
@@ -649,8 +649,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 31
                   },
                   "recovery": {
-                    "milliseconds": 18326,
-                    "seconds": 18.3
+                    "milliseconds": 21199,
+                    "seconds": 21.2
                   }
                 }
               }
@@ -660,16 +660,16 @@ export const benchmarkResultsCalendar = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 45926,
-                  "seconds": 45.9
+                  "milliseconds": 47161,
+                  "seconds": 47.2
                 },
                 "expected": {
-                  "milliseconds": 71152,
-                  "seconds": 71.2
+                  "milliseconds": 73462,
+                  "seconds": 73.5
                 },
                 "upper": {
-                  "milliseconds": 111697,
-                  "seconds": 111.7
+                  "milliseconds": 116107,
+                  "seconds": 116.1
                 }
               },
               "bucketRanges": {
@@ -683,8 +683,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 19.6
                   },
                   "recovery": {
-                    "milliseconds": 9256,
-                    "seconds": 9.3
+                    "milliseconds": 10491,
+                    "seconds": 10.5
                   }
                 },
                 "expected": {
@@ -697,8 +697,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 28.8
                   },
                   "recovery": {
-                    "milliseconds": 17292,
-                    "seconds": 17.3
+                    "milliseconds": 19602,
+                    "seconds": 19.6
                   }
                 },
                 "upper": {
@@ -711,8 +711,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 42.8
                   },
                   "recovery": {
-                    "milliseconds": 32277,
-                    "seconds": 32.3
+                    "milliseconds": 36687,
+                    "seconds": 36.7
                   }
                 }
               }
@@ -728,12 +728,12 @@ export const benchmarkResultsCalendar = {
           ],
           "structural": {
             "totals": {
-              "navMoves": 18,
+              "navMoves": 19,
               "activations": 8,
               "decisions": 13,
               "waits": 3,
-              "speechUnits": 13,
-              "scanSteps": 22,
+              "speechUnits": 14,
+              "scanSteps": 23,
               "contextResets": 0
             },
             "byBucket": {
@@ -756,12 +756,12 @@ export const benchmarkResultsCalendar = {
                 "contextResets": 0
               },
               "recovery": {
-                "navMoves": 6,
+                "navMoves": 7,
                 "activations": 4,
                 "decisions": 5,
                 "waits": 2,
-                "speechUnits": 5,
-                "scanSteps": 8,
+                "speechUnits": 6,
+                "scanSteps": 9,
                 "contextResets": 0
               }
             }
@@ -772,16 +772,16 @@ export const benchmarkResultsCalendar = {
               "description": "숙련 키보드 사용자를 가정한 낙관적~보수적 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 16272,
-                  "seconds": 16.3
+                  "milliseconds": 16767,
+                  "seconds": 16.8
                 },
                 "expected": {
-                  "milliseconds": 25588,
-                  "seconds": 25.6
+                  "milliseconds": 26401,
+                  "seconds": 26.4
                 },
                 "upper": {
-                  "milliseconds": 38776,
-                  "seconds": 38.8
+                  "milliseconds": 40081,
+                  "seconds": 40.1
                 }
               },
               "bucketRanges": {
@@ -795,8 +795,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 4.6
                   },
                   "recovery": {
-                    "milliseconds": 6512,
-                    "seconds": 6.5
+                    "milliseconds": 7007,
+                    "seconds": 7
                   }
                 },
                 "expected": {
@@ -809,8 +809,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 6.8
                   },
                   "recovery": {
-                    "milliseconds": 11088,
-                    "seconds": 11.1
+                    "milliseconds": 11901,
+                    "seconds": 11.9
                   }
                 },
                 "upper": {
@@ -823,8 +823,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 9.7
                   },
                   "recovery": {
-                    "milliseconds": 18256,
-                    "seconds": 18.3
+                    "milliseconds": 19561,
+                    "seconds": 19.6
                   }
                 }
               }
@@ -834,16 +834,16 @@ export const benchmarkResultsCalendar = {
               "description": "키보드 비용에 발화 청취와 문맥 재구축 비용을 더한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 28176,
-                  "seconds": 28.2
+                  "milliseconds": 29208,
+                  "seconds": 29.2
                 },
                 "expected": {
-                  "milliseconds": 43778,
-                  "seconds": 43.8
+                  "milliseconds": 45547,
+                  "seconds": 45.5
                 },
                 "upper": {
-                  "milliseconds": 66529,
-                  "seconds": 66.5
+                  "milliseconds": 69402,
+                  "seconds": 69.4
                 }
               },
               "bucketRanges": {
@@ -857,8 +857,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 7.9
                   },
                   "recovery": {
-                    "milliseconds": 11736,
-                    "seconds": 11.7
+                    "milliseconds": 12768,
+                    "seconds": 12.8
                   }
                 },
                 "expected": {
@@ -871,8 +871,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 11.2
                   },
                   "recovery": {
-                    "milliseconds": 20358,
-                    "seconds": 20.4
+                    "milliseconds": 22127,
+                    "seconds": 22.1
                   }
                 },
                 "upper": {
@@ -885,8 +885,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 15.8
                   },
                   "recovery": {
-                    "milliseconds": 33609,
-                    "seconds": 33.6
+                    "milliseconds": 36482,
+                    "seconds": 36.5
                   }
                 }
               }
@@ -896,16 +896,16 @@ export const benchmarkResultsCalendar = {
               "description": "자동 스캔 기반 순차 입력을 가정한 범위.",
               "ranges": {
                 "lower": {
-                  "milliseconds": 38752,
-                  "seconds": 38.8
+                  "milliseconds": 39987,
+                  "seconds": 40
                 },
                 "expected": {
-                  "milliseconds": 64039,
-                  "seconds": 64
+                  "milliseconds": 66349,
+                  "seconds": 66.3
                 },
                 "upper": {
-                  "milliseconds": 107439,
-                  "seconds": 107.4
+                  "milliseconds": 111849,
+                  "seconds": 111.8
                 }
               },
               "bucketRanges": {
@@ -919,8 +919,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 9.8
                   },
                   "recovery": {
-                    "milliseconds": 17732,
-                    "seconds": 17.7
+                    "milliseconds": 18967,
+                    "seconds": 19
                   }
                 },
                 "expected": {
@@ -933,8 +933,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 14.4
                   },
                   "recovery": {
-                    "milliseconds": 33099,
-                    "seconds": 33.1
+                    "milliseconds": 35409,
+                    "seconds": 35.4
                   }
                 },
                 "upper": {
@@ -947,8 +947,8 @@ export const benchmarkResultsCalendar = {
                     "seconds": 21.4
                   },
                   "recovery": {
-                    "milliseconds": 61719,
-                    "seconds": 61.7
+                    "milliseconds": 66129,
+                    "seconds": 66.1
                   }
                 }
               }
@@ -962,53 +962,53 @@ export const benchmarkResultsCalendar = {
     "task1_book_remote_tuesday_options": {
       "keyboard": {
         "expectedReductionSeconds": 28.8,
-        "expectedReductionPercent": 49.4
+        "expectedReductionPercent": 48.7
       },
       "screenReader": {
         "expectedReductionSeconds": 50.4,
-        "expectedReductionPercent": 50.5
+        "expectedReductionPercent": 49.6
       },
       "switch": {
         "expectedReductionSeconds": 73.8,
-        "expectedReductionPercent": 50.9
+        "expectedReductionPercent": 50.1
       }
     },
     "task2_cancel_and_rebook_thursday": {
       "keyboard": {
         "expectedReductionSeconds": 45.2,
-        "expectedReductionPercent": 63.8
+        "expectedReductionPercent": 63.1
       },
       "screenReader": {
-        "expectedReductionSeconds": 85.5,
-        "expectedReductionPercent": 66.1
+        "expectedReductionSeconds": 85.6,
+        "expectedReductionPercent": 65.3
       },
       "switch": {
-        "expectedReductionSeconds": 128.1,
-        "expectedReductionPercent": 66.7
+        "expectedReductionSeconds": 128.2,
+        "expectedReductionPercent": 65.9
       }
     }
   },
   "overall": {
     "keyboard": {
       "label": "키보드 사용자",
-      "variantAExpectedSeconds": 129.1,
-      "variantBExpectedSeconds": 55.1,
+      "variantAExpectedSeconds": 130.7,
+      "variantBExpectedSeconds": 56.7,
       "expectedReductionSeconds": 74,
-      "expectedReductionPercent": 57.3
+      "expectedReductionPercent": 56.6
     },
     "screenReader": {
       "label": "화면낭독 사용자",
-      "variantAExpectedSeconds": 229.2,
-      "variantBExpectedSeconds": 93.3,
-      "expectedReductionSeconds": 135.9,
-      "expectedReductionPercent": 59.3
+      "variantAExpectedSeconds": 232.8,
+      "variantBExpectedSeconds": 96.8,
+      "expectedReductionSeconds": 136,
+      "expectedReductionPercent": 58.4
     },
     "switch": {
       "label": "스위치 사용자",
-      "variantAExpectedSeconds": 337.1,
-      "variantBExpectedSeconds": 135.2,
-      "expectedReductionSeconds": 201.9,
-      "expectedReductionPercent": 59.9
+      "variantAExpectedSeconds": 341.8,
+      "variantBExpectedSeconds": 139.8,
+      "expectedReductionSeconds": 202,
+      "expectedReductionPercent": 59.1
     }
   },
   "measurementRules": [
