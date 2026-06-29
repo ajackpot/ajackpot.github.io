@@ -37,7 +37,6 @@ import {
   aggregateBenchmarkCondition as aggregateSharedBenchmarkCondition,
   buildExportPayload as buildSharedExportPayload,
   buildExportDataUrl as buildSharedExportDataUrl,
-  buildSurveyUrl as buildSharedSurveyUrl,
   formatSigned as formatSharedSigned,
   aggregateMetrics,
 } from './lib/service-shell.js';
@@ -45,16 +44,15 @@ import {
   readStoredExperimentResults,
   saveServiceRunSnapshot,
 } from './lib/experiment-store.js';
+import {
+  renderSurveyTransferPanel,
+} from './lib/survey-link.js';
 
 const APP_MODE = getAppMode();
-const STORAGE_KEY_SESSION = 'keyboard-cost-lab-search-session-id';
+const STORAGE_KEY_SESSION = 'keyboard-cost-lab-session-id';
 const LAUNCH_STORAGE_PREFIX = 'keyboard-cost-lab-search-launch';
 const CHANNEL_PREFIX = 'keyboard-cost-lab-search-channel';
 const CHANNEL_FALLBACK_STORAGE_PREFIX = 'keyboard-cost-lab-search-channel-fallback';
-const SURVEY_CONFIG = {
-  baseUrl: '',
-};
-
 const MEASUREMENT_RULES = commonMeasurementRules;
 
 const SERVICE_ID = 'search';
@@ -304,7 +302,7 @@ function defaultSaveOptions() {
 function getOrCreateSessionId() {
   return getSharedSessionId({
     storageKey: STORAGE_KEY_SESSION,
-    idPrefix: 'search-session',
+    idPrefix: 'session',
   });
 }
 
@@ -1924,8 +1922,6 @@ function renderFinalView() {
   const actualB = aggregateActualCondition(state.runs.variantB);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
-  const surveyUrl = buildSurveyUrl();
-
   return `
     <section class="card review-hero">
       <p class="eyebrow">검색 결과 목록 실험 완료</p>
@@ -1944,9 +1940,9 @@ function renderFinalView() {
       <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
       <div class="button-row">
         <a class="button button-secondary" download="search-results-record.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
-        ${surveyUrl ? `<a class="button button-primary" href="${surveyUrl}" target="_blank" rel="noreferrer">설문지로 결과 전달</a>` : '<span class="muted">설문지 주소를 설정하면 전달 링크가 나타납니다.</span>'}
       </div>
     </section>
+    ${renderStudySurveyTransferPanel()}
     <section class="comparison-grid">
       ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
@@ -1985,6 +1981,13 @@ function renderFinalView() {
       </div>
     </section>
   `;
+}
+
+function renderStudySurveyTransferPanel() {
+  return renderSurveyTransferPanel({
+    store: readStoredExperimentResults(),
+    requireAllServices: true,
+  });
 }
 
 function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) {
@@ -2621,16 +2624,6 @@ function buildExportDataUrl() {
   return buildSharedExportDataUrl(buildExportPayload());
 }
 
-function buildSurveyUrl() {
-  return buildSharedSurveyUrl({
-    baseUrl: SURVEY_CONFIG.baseUrl,
-    sessionId: state.sessionId,
-    serviceId: 'search',
-    order: state.order,
-    actualA: aggregateActualCondition(state.runs.variantA),
-    actualB: aggregateActualCondition(state.runs.variantB),
-  });
-}
 
 function formatSigned(value, suffix = '') {
   return formatSharedSigned(value, suffix);
