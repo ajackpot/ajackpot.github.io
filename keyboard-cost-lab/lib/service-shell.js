@@ -1,22 +1,5 @@
 import { escapeHtml, formatSeconds, toQueryString } from './utils.js';
 
-export function renderLanguageGuideCard(glossaryEntries, introText = '이 실험은 사용자가 낯선 영어 표현을 학습하지 않아도 이해할 수 있도록 자주 쓰는 한국어를 우선 사용합니다.') {
-  return `
-    <details class="card glossary-card">
-      <summary>용어 설명 보기</summary>
-      <p class="muted">${escapeHtml(introText)}</p>
-      <dl class="glossary-list">
-        ${glossaryEntries.map((entry) => `
-          <div>
-            <dt>${escapeHtml(entry.term)}</dt>
-            <dd>${escapeHtml(entry.description)}</dd>
-          </div>
-        `).join('')}
-      </dl>
-    </details>
-  `;
-}
-
 export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
   return `
     <header class="hero card">
@@ -30,7 +13,7 @@ export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
         <section>
           <h2>진행 방법</h2>
           <ul>
-            <li>두 개의 화면은 자동으로 섞인 순서로 열립니다.</li>
+            <li>내용이 동일하고 이동 방식이 다른 두 개의 화면을 무작위 순서로 테스트 및 비교합니다.</li>
             <li>각 화면에서 같은 과업 묶음을 수행합니다.</li>
             <li>과업 수행 페이지에서 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누릅니다.</li>
           </ul>

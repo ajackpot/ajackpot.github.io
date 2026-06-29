@@ -205,10 +205,7 @@ export function renderSurveyTransferPanel({ store, services = serviceRegistry, r
         </div>
         <span class="pill ${progress.allComplete ? 'pill-success' : ''}">${escapeHtml(statusLabel)}</span>
       </div>
-      <p class="muted">
-        서비스별 비교안 A/B 수행 기록은 설문지의 자동 응답 영역에 입력됩니다.
-        서비스별 평가와 전체 의견은 설문지에서 직접 작성하십시오.
-      </p>
+      <p class="muted">3개 서비스 과업을 모두 완료하면 설문지로 이동하여 수행 기록을 자동으로 입력할 수 있습니다.</p>
       <dl class="meta-list compact service-progress-list">
         <div><dt>완료한 서비스</dt><dd>${escapeHtml(completedLabels)}</dd></div>
         <div><dt>남은 서비스</dt><dd>${escapeHtml(remainingLabels)}</dd></div>
@@ -216,7 +213,7 @@ export function renderSurveyTransferPanel({ store, services = serviceRegistry, r
       <div class="button-row">
         ${surveyUrl
           ? `<a class="button button-primary" href="${escapeHtml(surveyUrl)}" target="_blank" rel="noreferrer">구글 설문지로 이동</a>`
-          : '<span class="muted">3개 서비스 과업을 모두 완료하면 설문지 이동 버튼이 나타납니다.</span>'}
+          : '<span class="muted">아직 완료하지 않은 서비스가 있습니다.</span>'}
       </div>
     </section>
   `;

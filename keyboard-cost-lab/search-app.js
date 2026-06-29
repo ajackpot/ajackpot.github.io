@@ -30,7 +30,6 @@ import {
 } from './lib/experiment-bridge.js';
 import { commonMeasurementRules } from './data/measurement-rules.js';
 import {
-  renderLanguageGuideCard as renderSharedLanguageGuideCard,
   renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
   renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
   renderFinalConditionCard as renderSharedFinalConditionCard,
@@ -91,25 +90,6 @@ const PREVIEW_DEADLINE_FACTS = [
   { value: '6시간 전까지', hours: 6 },
   { value: '8시간 전까지', hours: 8 },
   { value: '12시간 전까지', hours: 12 },
-];
-
-const GLOSSARY_ENTRIES = [
-  {
-    term: '비교안 A/B',
-    description: '같은 과업을 두 가지 다른 화면 구조로 비교하기 위한 화면입니다. 자료 내용은 같고 이동 방식만 다릅니다.',
-  },
-  {
-    term: '검색 결과',
-    description: '검색어에 맞아 화면에 표시된 자료 목록입니다.',
-  },
-  {
-    term: '미리보기',
-    description: '자료를 바로 열기 전에 핵심 내용만 잠깐 확인하는 작은 창입니다.',
-  },
-  {
-    term: '저장',
-    description: '나중에 다시 보려고 자료를 보관 목록에 넣는 기능입니다.',
-  },
 ];
 
 const root = document.querySelector('#app');
@@ -217,7 +197,7 @@ function createRunnerState() {
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
-      error: '수행에 필요한 시작 정보가 없습니다. 원래 실험 창에서 과업을 다시 여십시오.',
+      error: '수행에 필요한 시작 정보가 없습니다. 원래 테스트 창에서 과업을 다시 여십시오.',
     };
   }
 
@@ -1631,7 +1611,6 @@ function render() {
     root.innerHTML = `
       <div class="page-shell">
         ${renderMainPage()}
-        ${renderLanguageGuideCard()}
       </div>
     `;
   }
@@ -1712,7 +1691,7 @@ function renderServiceIntroView() {
         <section>
           <h2>진행 방법</h2>
           <ul>
-            <li>두 개의 화면은 자동으로 섞인 순서로 열립니다.</li>
+            <li>내용이 동일하고 이동 방식이 다른 두 개의 화면을 무작위 순서로 테스트 및 비교합니다.</li>
             <li>각 화면에서 같은 과업 묶음을 수행합니다.</li>
             <li>과업 수행 페이지에서 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누릅니다.</li>
           </ul>
@@ -1734,9 +1713,6 @@ function renderServiceIntroView() {
   `;
 }
 
-function renderLanguageGuideCard() {
-  return renderSharedLanguageGuideCard(GLOSSARY_ENTRIES);
-}
 
 function renderTaskPreparationView() {
   const task = getCurrentTask();
@@ -1749,7 +1725,7 @@ function renderTaskPreparationView() {
       <div>
         <p class="eyebrow">수행 준비</p>
         <h1 id="task-prep-heading" tabindex="-1">과업 ${state.currentTaskIndex + 1} 준비</h1>
-        <p>아래 요청만 확인한 뒤 새 탭에서 검색 결과 목록 화면을 사용하십시오.</p>
+        <p>아래의 요청을 확인하고 검색 결과 목록 과업 수행 페이지를 여십시오.</p>
       </div>
       <div class="pill-group">
         <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
@@ -1924,9 +1900,9 @@ function renderFinalView() {
   const exportUrl = buildExportDataUrl();
   return `
     <section class="card review-hero">
-      <p class="eyebrow">검색 결과 목록 실험 완료</p>
+      <p class="eyebrow">검색 결과 목록 테스트 완료</p>
       <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
-      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 점검 기준을 마련했습니다.</p>
+      <p>실제 기록과 사전 예상 기준을 비교하며 결과를 확인할 수 있습니다. 테스트 결과는 서비스 탐색 점검 방법 및 개선 기준 마련 용도로 활용됩니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
@@ -1937,9 +1913,9 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
-      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
+      <p class="muted">테스트 중 문제가 있었다면 결과 파일을 내려받아 담당자에게 문제 내용과 함께 보내주십시오. 파일 형식은 JSON이며, 테스트 기록이 텍스트 형식으로 저장되어 있습니다.</p>
       <div class="button-row">
-        <a class="button button-secondary" download="search-results-record.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="search-results-record.json" href="${exportUrl}">결과 파일 내려받기</a>
       </div>
     </section>
     ${renderStudySurveyTransferPanel()}
@@ -2225,7 +2201,7 @@ function renderSearchFeaturePanelContent(featureId, run) {
         <button class="button button-ghost" data-action="close-search-feature" data-focus-id="search-feature-close">닫기</button>
       </div>
       <p>자료는 상담 예약, 변경, 취소, 비대면 연결, 준비 서식 순서로 정리되어 있습니다.</p>
-      <p>신청 서식은 실제 제출 대신 실험용 상태 카드로 열립니다.</p>
+      <p>신청 서식은 실제 제출 대신 테스트용 상태 카드로 열립니다.</p>
     `,
     support: () => `
       <div class="feature-panel-header">
@@ -2434,7 +2410,7 @@ function renderOpenedResultStatus(result) {
   return `
     <section class="result-status-card" aria-label="${escapeHtml(result.title)} 자료 상태">
       <h3>${escapeHtml(result.title)} 자료를 바로 열었습니다.</h3>
-      <p class="muted">실험용 화면에서는 실제 새 페이지로 이동하지 않고, 이 자료를 열었다는 상태만 표시합니다.</p>
+      <p class="muted">테스트용 화면에서는 실제 새 페이지로 이동하지 않고, 이 자료를 열었다는 상태만 표시합니다.</p>
     </section>
   `;
 }

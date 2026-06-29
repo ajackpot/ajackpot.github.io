@@ -16,7 +16,7 @@ function assert(name, condition) {
 }
 
 for (const [service, source] of Object.entries(files).filter(([key]) => ['calendar', 'comments', 'search'].includes(key))) {
-  assert(`${service}: 실험 번호가 화면 문자열에 남아 있지 않음`, !source.includes('실험 번호'));
+  assert(`${service}: 테스트 번호가 화면 문자열에 남아 있지 않음`, !source.includes('테스트 번호'));
   assert(`${service}: 내려받기 파일명에 세션 식별자를 노출하지 않음`, !/download="[^"]*\$\{escapeHtml\(state\.sessionId\)\}/.test(source));
   assert(`${service}: 과업 요청 표시 스위치 상태를 시작 정보에 저장`, source.includes('runnerTaskRequestVisible: Boolean(state.runnerTaskRequestVisible)'));
   assert(`${service}: 과업 수행 페이지에서 선택 시 과업 요청 표시`, source.includes('state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml'));

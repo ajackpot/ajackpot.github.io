@@ -11,7 +11,7 @@ function assert(condition, message) {
 
 for (const file of appFiles) {
   const text = fs.readFileSync(file, 'utf8');
-  assert(!text.includes('실험 번호'), `${file}: 사용자 화면에 실험 번호 문구가 남아 있습니다.`);
+  assert(!text.includes('테스트 번호'), `${file}: 사용자 화면에 테스트 번호 문구가 남아 있습니다.`);
   assert(text.includes('renderTaskRequestVisibilitySwitchHtml'), `${file}: 과업 요청 표시 스위치가 연결되지 않았습니다.`);
   assert(text.includes('renderRunnerTaskRequestHtml'), `${file}: 과업 수행 페이지 과업 요청 표시 영역이 연결되지 않았습니다.`);
   assert(text.includes('runnerTaskRequestVisible'), `${file}: 과업 요청 표시 옵션 상태가 보존되지 않습니다.`);

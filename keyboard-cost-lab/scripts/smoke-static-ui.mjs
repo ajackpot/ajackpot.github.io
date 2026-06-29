@@ -18,7 +18,7 @@ for (const file of appFiles) {
   const handledActions = new Set([...source.matchAll(/action === '([^']+)'/g)].map((match) => match[1]));
   const unhandled = [...actionValues].filter((action) => !handledActions.has(action));
   assert(unhandled.length === 0, `${file}: 모든 data-action 값이 click 처리 분기에 연결됨${unhandled.length ? ` (${unhandled.join(', ')})` : ''}`);
-  assert(!source.includes('실험 번호'), `${file}: 화면 출력 문자열에 실험 번호가 없음`);
+  assert(!source.includes('테스트 번호'), `${file}: 화면 출력 문자열에 테스트 번호가 없음`);
   assert(!/outcome:\s*getEndTaskOutcome/.test(source), `${file}: 과업 종료 확인 대화상자 생성 시 결과를 미리 계산하지 않음`);
   assert(!/resultMessage:\s*modal\.outcome/.test(source), `${file}: 종료 확인 대화상자에 결과 메시지를 전달하지 않음`);
   assert(source.includes('runnerTaskRequestVisible: Boolean(state.runnerTaskRequestVisible)'), `${file}: 과업 수행 페이지 과업 요청 표시 옵션을 시작 정보에 저장함`);

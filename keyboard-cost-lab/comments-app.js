@@ -30,7 +30,6 @@ import {
 } from './lib/experiment-bridge.js';
 import { commonMeasurementRules } from './data/measurement-rules.js';
 import {
-  renderLanguageGuideCard as renderSharedLanguageGuideCard,
   renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
   renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
   renderFinalConditionCard as renderSharedFinalConditionCard,
@@ -92,25 +91,6 @@ const REPLY_AUTHOR_NAME_POOL = [
   '지우', '현우', '수아', '예준', '서진', '다온', '연우', '지민',
 ];
 const REPLY_QUESTION_OPTION_COUNT = 5;
-
-const GLOSSARY_ENTRIES = [
-  {
-    term: '비교안 A/B',
-    description: '같은 과업을 두 가지 다른 화면 구조로 비교하기 위한 화면입니다. 댓글 내용은 같고 이동 방식만 다릅니다.',
-  },
-  {
-    term: '초점',
-    description: '키보드로 현재 선택되어 있는 위치입니다. 탭 키를 누를 때 초점이 다음 요소로 이동합니다.',
-  },
-  {
-    term: '대화상자',
-    description: '댓글 정보 확인처럼 잠깐 열리는 작은 창입니다.',
-  },
-  {
-    term: '답글',
-    description: '기존 댓글 아래에 이어지는 댓글입니다. 댓글 아래쪽에 묶여서 표시됩니다.',
-  },
-];
 
 const root = document.querySelector('#app');
 if (!root) {
@@ -217,7 +197,7 @@ function createRunnerState() {
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
-      error: '수행에 필요한 시작 정보가 없습니다. 원래 실험 창에서 과업을 다시 여십시오.',
+      error: '수행에 필요한 시작 정보가 없습니다. 원래 테스트 창에서 과업을 다시 여십시오.',
     };
   }
 
@@ -1596,7 +1576,6 @@ function render() {
     root.innerHTML = `
       <div class="page-shell">
         ${renderMainPage()}
-        ${renderLanguageGuideCard()}
       </div>
     `;
   }
@@ -1680,7 +1659,7 @@ function renderServiceIntroView() {
         <section>
           <h2>진행 방법</h2>
           <ul>
-            <li>두 개의 화면은 자동으로 섞인 순서로 열립니다.</li>
+            <li>내용이 동일하고 이동 방식이 다른 두 개의 화면을 무작위 순서로 테스트 및 비교합니다.</li>
             <li>각 화면에서 같은 과업 묶음을 수행합니다.</li>
             <li>과업 수행 페이지에서 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누릅니다.</li>
           </ul>
@@ -1702,9 +1681,6 @@ function renderServiceIntroView() {
   `;
 }
 
-function renderLanguageGuideCard() {
-  return renderSharedLanguageGuideCard(GLOSSARY_ENTRIES);
-}
 
 function renderTaskPreparationView() {
   const task = getCurrentTask();
@@ -1717,7 +1693,7 @@ function renderTaskPreparationView() {
       <div>
         <p class="eyebrow">수행 준비</p>
         <h1 id="task-prep-heading" tabindex="-1">과업 ${state.currentTaskIndex + 1} 준비</h1>
-        <p>아래 요청만 확인한 뒤 새 탭에서 댓글 목록 화면을 사용하십시오.</p>
+        <p>아래의 요청을 확인하고 댓글 목록 과업 수행 페이지를 여십시오.</p>
       </div>
       <div class="pill-group">
         <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
@@ -1892,9 +1868,9 @@ function renderFinalView() {
   const exportUrl = buildExportDataUrl();
   return `
     <section class="card review-hero">
-      <p class="eyebrow">댓글 목록 실험 완료</p>
+      <p class="eyebrow">댓글 목록 테스트 완료</p>
       <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
-      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 점검 기준을 마련했습니다.</p>
+      <p>실제 기록과 사전 예상 기준을 비교하며 결과를 확인할 수 있습니다. 테스트 결과는 서비스 탐색 점검 방법 및 개선 기준 마련 용도로 활용됩니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
@@ -1905,9 +1881,9 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
-      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
+      <p class="muted">테스트 중 문제가 있었다면 결과 파일을 내려받아 담당자에게 문제 내용과 함께 보내주십시오. 파일 형식은 JSON이며, 테스트 기록이 텍스트 형식으로 저장되어 있습니다.</p>
       <div class="button-row">
-        <a class="button button-secondary" download="comments-list-results.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="comments-list-results.json" href="${exportUrl}">결과 파일 내려받기</a>
       </div>
     </section>
     ${renderStudySurveyTransferPanel()}
@@ -2090,7 +2066,7 @@ function renderNewPostPanel() {
     <div class="feature-panel-header">
       <p class="eyebrow">새 글 쓰기</p>
       <h2 id="community-feature-title" tabindex="-1">새 글 작성</h2>
-      <p class="muted">실험 화면에서는 글을 실제로 저장하지 않고 작성 양식만 보여 줍니다.</p>
+      <p class="muted">테스트 화면에서는 글을 실제로 저장하지 않고 작성 양식만 보여 줍니다.</p>
     </div>
     <div class="feature-grid">
       <article class="mini-card">

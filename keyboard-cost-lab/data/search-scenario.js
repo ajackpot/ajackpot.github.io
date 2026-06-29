@@ -1,6 +1,6 @@
 export const searchScenario = {
   queryLabel: '',
-  pageSummary: '실험용으로 구성한 통합 검색 화면입니다. 같은 자료 내용을 두 가지 다른 이동 구조로 비교합니다.',
+  pageSummary: '테스트용으로 구성한 통합 검색 화면입니다. 같은 자료 내용을 두 가지 다른 이동 구조로 비교합니다.',
   sortOptions: [
     { id: 'relevance', label: '정확도순' },
     { id: 'newest', label: '최신 자료 순' },
@@ -128,7 +128,7 @@ export const searchScenario = {
       timeLabel: '3월 29일 오후 2:10',
       saveCount: 11,
       summary: '예약 취소 시점에 따른 수수료 기준을 설명합니다.',
-      body: '상담 전날과 당일 취소 기준, 수수료 면제 예외, 다시 예약할 때 확인할 내용을 실험용 예시로 담았습니다.',
+      body: '상담 전날과 당일 취소 기준, 수수료 면제 예외, 다시 예약할 때 확인할 내용을 테스트용 예시로 담았습니다.',
       keywords: ['취소', '수수료', '예약 변경'],
     },
     {
@@ -154,7 +154,7 @@ export const searchScenario = {
       timeLabel: '3월 27일 오전 11:40',
       saveCount: 9,
       summary: '상담 전에 준비할 항목을 확인하는 서식입니다.',
-      body: '개인 정보, 상담 목적, 준비 서류, 접속 장비 점검 항목이 포함된 실험용 서식입니다.',
+      body: '개인 정보, 상담 목적, 준비 서류, 접속 장비 점검 항목이 포함된 테스트용 서식입니다.',
       keywords: ['상담 준비', '체크 목록', '서식'],
     },
     {
@@ -167,7 +167,7 @@ export const searchScenario = {
       timeLabel: '3월 26일 오후 4:10',
       saveCount: 4,
       summary: '예약 확인서 발급 요청에 사용하는 양식입니다.',
-      body: '예약 번호와 발급 사유를 적고 제출하는 실험용 서식입니다.',
+      body: '예약 번호와 발급 사유를 적고 제출하는 테스트용 서식입니다.',
       keywords: ['확인서', '양식', '발급 요청'],
     },
     {
@@ -180,7 +180,7 @@ export const searchScenario = {
       timeLabel: '3월 25일 오후 1:00',
       saveCount: 3,
       summary: '상담 결제 영수증을 다시 받기 위한 신청 서식입니다.',
-      body: '결제 일자, 발급 받을 이메일 주소, 요청 사유를 입력하는 실험용 서식입니다.',
+      body: '결제 일자, 발급 받을 이메일 주소, 요청 사유를 입력하는 테스트용 서식입니다.',
       keywords: ['영수증', '재발급', '결제'],
     },
     {

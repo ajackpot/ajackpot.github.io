@@ -32,7 +32,6 @@ import {
   getAppMode,
 } from './lib/experiment-bridge.js';
 import {
-  renderLanguageGuideCard as renderSharedLanguageGuideCard,
   renderServiceIntroView as renderSharedServiceIntroView,
   renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
   renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
@@ -74,7 +73,7 @@ const SERVICE_TYPES = serviceRegistry;
 const SERVICE_INTRO_POINTS = [
   '예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지',
   '실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지',
-  '같은 실험 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지',
+  '같은 테스트 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지',
 ];
 const VARIANT_META = {
   variantA: {
@@ -103,25 +102,6 @@ const RUNNER_LABELS = {
   quickJump: '예약 가능 시간으로 바로 이동',
   footerJump: '예약 가능 시간으로 이동',
 };
-
-const GLOSSARY_ENTRIES = [
-  {
-    term: '비교안 A/B',
-    description: '같은 과업을 두 가지 화면 구조로 비교하기 위한 화면입니다. 내용은 같고 이동 방식만 다릅니다.',
-  },
-  {
-    term: '초점',
-    description: '키보드로 현재 선택되어 있는 위치입니다. 탭 키를 누를 때 초점이 다음 요소로 이동합니다.',
-  },
-  {
-    term: '대화상자',
-    description: '예약 확인이나 취소 확인을 위해 잠깐 열리는 작은 창입니다.',
-  },
-  {
-    term: '결과 파일(JSON)',
-    description: '실험 기록을 텍스트 형태로 저장하는 파일입니다. JSON은 파일 형식 이름입니다.',
-  },
-];
 
 const root = document.querySelector('#app');
 if (!root) {
@@ -231,7 +211,7 @@ function createRunnerState() {
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
-      error: '수행에 필요한 시작 정보가 없습니다. 원래 실험 창에서 과업을 다시 여십시오.',
+      error: '수행에 필요한 시작 정보가 없습니다. 원래 테스트 창에서 과업을 다시 여십시오.',
     };
   }
 
@@ -1681,7 +1661,6 @@ function render() {
     root.innerHTML = `
       <div class="page-shell">
         ${renderMainPage()}
-        ${renderLanguageGuideCard()}
       </div>
     `;
   }
@@ -1693,7 +1672,7 @@ function getDocumentTitle() {
     const task = getCurrentTask();
     return `수행 화면 · ${task?.title ?? '예약 캘린더'}`;
   }
-  if (state.view === 'home') return '과도한 키보드 조작 실험';
+  if (state.view === 'home') return '과도한 키보드 조작 테스트';
   if (state.view === 'serviceIntro') return '예약 캘린더 서비스 화면';
   if (state.view === 'taskPrep' || state.view === 'taskRunning') return `과업 준비 · ${getCurrentTask()?.title ?? '예약 캘린더'}`;
   if (state.view === 'taskReview') return '과업 결과 요약';
@@ -1761,21 +1740,9 @@ function renderRunnerPage() {
 function renderHomeView() {
   return `
     <header class="hero card">
-      <p class="eyebrow">실험 시작 준비</p>
+      <p class="eyebrow">테스트 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
-      <p>
-        먼저 실험할 서비스 유형을 고르십시오. 서비스별 진행 상태는 각 카드에서 확인할 수 있습니다.
-      </p>
-      <div class="hero-grid">
-        <section>
-          <h2>현재 공개 범위</h2>
-          <p>${SERVICE_TYPES.filter((service) => service.available).map((service) => service.label).join(' · ')}</p>
-        </section>
-        <section>
-          <h2>진행 상태 안내</h2>
-          <p class="muted">과업 기록은 브라우저에 보존되며, 나중에 설문지 연결 시 한 번에 전달할 수 있도록 서비스별로 저장됩니다.</p>
-        </section>
-      </div>
+      <p>테스트할 서비스 유형을 고르십시오. 서비스별 진행 상태는 각 카드에서 확인할 수 있습니다.</p>
     </header>
     ${renderStudySurveyTransferPanel()}
     <section class="service-grid" aria-label="서비스 유형 목록">
@@ -1798,7 +1765,6 @@ function renderHomeServiceCard(service) {
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
         <div>
-          <p class="eyebrow">${escapeHtml(service.statusLabel)}</p>
           <h2>${escapeHtml(service.label)}</h2>
         </div>
         <span class="pill ${progress.status === 'completed' ? 'pill-success' : ''}">${escapeHtml(progress.label)}</span>
@@ -1829,9 +1795,6 @@ function renderServiceIntroView() {
   });
 }
 
-function renderLanguageGuideCard() {
-  return renderSharedLanguageGuideCard(GLOSSARY_ENTRIES);
-}
 
 function renderTaskPreparationView() {
   const task = getCurrentTask();
@@ -1844,7 +1807,7 @@ function renderTaskPreparationView() {
       <div>
         <p class="eyebrow">수행 준비</p>
         <h1 id="task-prep-heading" tabindex="-1">과업 ${state.currentTaskIndex + 1} 준비</h1>
-        <p>아래 요청만 확인한 뒤 새 탭에서 예약 캘린더 화면을 사용하십시오.</p>
+        <p>아래의 요청을 확인하고 예약 캘린더 과업 수행 페이지를 여십시오.</p>
       </div>
       <div class="pill-group">
         <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
@@ -2019,9 +1982,9 @@ function renderFinalView() {
   const exportUrl = buildExportDataUrl();
   return `
     <section class="card review-hero">
-      <p class="eyebrow">예약 캘린더 실험 완료</p>
+      <p class="eyebrow">예약 캘린더 테스트 완료</p>
       <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
-      <p>실제 기록과 사전 계산 기준을 함께 보면서, 다음 서비스 유형으로 확장할 때 다시 쓸 기준점과 키보드 점검 기준을 마련했습니다.</p>
+      <p>실제 기록과 사전 예상 기준을 비교하며 결과를 확인할 수 있습니다. 테스트 결과는 서비스 탐색 점검 방법 및 개선 기준 마련 용도로 활용됩니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
@@ -2032,9 +1995,9 @@ function renderFinalView() {
           `).join('')}
         </select>
       </label>
-      <p class="muted">결과 파일(JSON)을 내려받아 설문 응답과 함께 보관할 수 있습니다.</p>
+      <p class="muted">테스트 중 문제가 있었다면 결과 파일을 내려받아 담당자에게 문제 내용과 함께 보내주십시오. 파일 형식은 JSON이며, 테스트 기록이 텍스트 형식으로 저장되어 있습니다.</p>
       <div class="button-row">
-        <a class="button button-secondary" download="reservation-calendar-results.json" href="${exportUrl}">결과 파일(JSON) 내려받기</a>
+        <a class="button button-secondary" download="reservation-calendar-results.json" href="${exportUrl}">결과 파일 내려받기</a>
       </div>
     </section>
     ${renderStudySurveyTransferPanel()}

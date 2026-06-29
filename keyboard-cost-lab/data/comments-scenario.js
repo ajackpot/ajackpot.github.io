@@ -1,6 +1,6 @@
 export const commentsScenario = {
   postTitle: '원격 상담 예약 경험을 공유해 주세요',
-  postSummary: '실험용으로 구성한 게시글입니다. 같은 댓글 내용을 두 가지 다른 이동 구조로 비교합니다.',
+  postSummary: '테스트용으로 구성한 게시글입니다. 같은 댓글 내용을 두 가지 다른 이동 구조로 비교합니다.',
   sortOptions: [
     { id: 'popular', label: '도움이 많은 순' },
     { id: 'newest', label: '최신순' },
@@ -83,7 +83,7 @@ export const commentsScenario = {
       helpfulCount: 12,
       replyCount: 1,
       summary: '예약 확정 문자는 예약 10분 전에 다시 발송됩니다.',
-      body: '예약 확정 문자와 안내 메일은 실험용 예시로 구성했습니다. 실제 서비스에서는 예약 10분 전 재안내, 예약 변경 링크, 취소 가능 시각이 함께 표시됩니다.',
+      body: '예약 확정 문자와 안내 메일은 테스트용 예시로 구성했습니다. 실제 서비스에서는 예약 10분 전 재안내, 예약 변경 링크, 취소 가능 시각이 함께 표시됩니다.',
       replies: [
         { id: 'reply-admin-1', author: '지원팀', timeLabel: '3월 25일 오전 9:12', text: '문자가 오지 않으면 내 예약 내역 화면에서 다시 확인할 수 있습니다.' },
       ],
@@ -161,7 +161,7 @@ export const commentsScenario = {
       summary: '정렬 기준을 바꾸면 이미 열어 둔 답글은 유지되나요?',
       body: '정렬 기준을 바꿨을 때 열려 있던 답글 영역을 유지할지 초기화할지에 따라 다시 찾는 부담이 달라질 수 있습니다.',
       replies: [
-        { id: 'reply-daehan-1', author: '운영자', timeLabel: '3월 28일 오후 7:02', text: '실험에서는 비교안마다 다른 복귀 흐름을 보기 위해 상태를 일부 유지합니다.' },
+        { id: 'reply-daehan-1', author: '운영자', timeLabel: '3월 28일 오후 7:02', text: '테스트에서는 비교안마다 다른 복귀 흐름을 보기 위해 상태를 일부 유지합니다.' },
       ],
     },
     {
@@ -174,7 +174,7 @@ export const commentsScenario = {
       helpfulCount: 7,
       replyCount: 1,
       summary: '초점이 눈에 잘 보여서 현재 위치를 잃지 않았습니다.',
-      body: '실험용 화면이라도 초점 표시가 분명하면 현재 선택 위치를 놓치지 않아 좋았습니다.',
+      body: '테스트용 화면이라도 초점 표시가 분명하면 현재 선택 위치를 놓치지 않아 좋았습니다.',
       replies: [
         { id: 'reply-haeun-1', author: '민석', timeLabel: '3월 27일 오전 11:55', text: '초점 표시가 약하면 같은 영역을 다시 찾는 시간이 길어집니다.' },
       ],

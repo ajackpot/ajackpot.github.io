@@ -19,7 +19,7 @@ const sources = Object.fromEntries(await Promise.all(appFiles.map(async (file) =
 const utils = await read('lib/utils.js');
 
 for (const [file, source] of Object.entries(sources)) {
-  assert(!source.includes('실험 번호'), `${file}: 화면 템플릿에 실험 번호 문구가 남아 있습니다.`);
+  assert(!source.includes('테스트 번호'), `${file}: 화면 템플릿에 테스트 번호 문구가 남아 있습니다.`);
   assert(source.includes('renderTaskRequestVisibilitySwitchHtml({ checked: state.runnerTaskRequestVisible })'), `${file}: 과업 수행 페이지 과업 요청 표시 스위치가 없습니다.`);
   assert(source.includes('renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary })'), `${file}: 과업 수행 페이지 과업 요청 표시 영역이 없습니다.`);
   assert(!source.includes('${escapeHtml(task.title)} ·'), `${file}: 과업 수행 페이지 숨김 제목에 과업명이 남아 있습니다.`);
