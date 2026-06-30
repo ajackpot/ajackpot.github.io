@@ -15,6 +15,9 @@ import {
   renderEndTaskConfirmationDialogHtml,
   renderTaskRequestVisibilitySwitchHtml,
   renderSiteNoticeHtml,
+  setRunSiteNotice,
+  clearRunSiteNotice,
+  announceStatusMessage,
 } from './lib/utils.js';
 import { serviceRegistry, getServiceById } from './data/service-registry.js';
 import { commonMeasurementRules } from './data/measurement-rules.js';
@@ -110,6 +113,7 @@ if (!root) {
 
 const state = APP_MODE === 'runner' ? createRunnerState() : createMainState();
 const bridge = createMessageBridge(state.sessionId);
+let lastAnnouncedSiteNoticeSequence = 0;
 wireEvents();
 if (APP_MODE === 'runner') {
   postBridgeMessage({
@@ -275,6 +279,7 @@ function createConditionRuntime(variantId) {
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
     siteNotice: '',
+    siteNoticeSequence: 0,
     featurePanel: null,
     savedFeatureItems: {},
     selectedPass: 'single',
@@ -340,6 +345,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
   runtime.siteNotice = snapshot.siteNotice ?? '';
+  runtime.siteNoticeSequence = Number.isFinite(snapshot.siteNoticeSequence) ? snapshot.siteNoticeSequence : 0;
   runtime.featurePanel = snapshot.featurePanel ? deepClone(snapshot.featurePanel) : null;
   runtime.savedFeatureItems = snapshot.savedFeatureItems ? deepClone(snapshot.savedFeatureItems) : {};
   runtime.selectedPass = snapshot.selectedPass ?? runtime.selectedPass;
@@ -364,6 +370,7 @@ function serializeRuntimeSnapshot(run) {
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
     siteNotice: run.siteNotice,
+    siteNoticeSequence: run.siteNoticeSequence,
     featurePanel: run.featurePanel ? deepClone(run.featurePanel) : null,
     savedFeatureItems: deepClone(run.savedFeatureItems),
     selectedPass: run.selectedPass,
@@ -387,6 +394,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
   targetRun.siteNotice = hydrated.siteNotice;
+  targetRun.siteNoticeSequence = hydrated.siteNoticeSequence;
   targetRun.featurePanel = hydrated.featurePanel;
   targetRun.savedFeatureItems = hydrated.savedFeatureItems;
   targetRun.selectedPass = hydrated.selectedPass;
@@ -516,7 +524,7 @@ function prepareCurrentTaskForMain() {
   run.cancelPerformedThisTask = false;
   run.bookingCompletion = null;
   run.finalConfirmationAcknowledged = false;
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   run.featurePanel = null;
   run.bookingOptionDraft = defaultBookingOptions();
   run.bookingOptionsBySlot = {};
@@ -1050,10 +1058,23 @@ function focusElementNow(selector) {
 function showSiteNotice(message, focusId = '') {
   const run = getCurrentRun();
   if (!run) return;
-  run.siteNotice = message;
-  run.liveStatus = message;
+  setRunSiteNotice(run, message);
   if (focusId) requestFocus(`[data-focus-id="${focusId}"]`);
   render();
+}
+
+function announcePendingSiteNotice() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run) return;
+  const sequence = Number.isFinite(run.siteNoticeSequence) ? run.siteNoticeSequence : 0;
+  if (!run.siteNotice) {
+    lastAnnouncedSiteNoticeSequence = sequence;
+    return;
+  }
+  if (sequence === lastAnnouncedSiteNoticeSequence) return;
+  lastAnnouncedSiteNoticeSequence = sequence;
+  announceStatusMessage(run.siteNotice);
 }
 
 function applyPendingFocus() {
@@ -1664,6 +1685,7 @@ function render() {
       </div>
     `;
   }
+  announcePendingSiteNotice();
   applyPendingFocus();
 }
 
@@ -2125,7 +2147,7 @@ function openFeaturePanel(featureId, triggerFocusId = '', options = {}) {
     triggerFocusId,
     query: options.query || run.featurePanel?.query || '심리 상담',
   };
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   requestFocus('#feature-panel-title');
   render();
 }
@@ -2148,8 +2170,7 @@ function setDraftFilter(partialFilters, message) {
     ...run.filtersDraft,
     ...partialFilters,
   };
-  run.siteNotice = message;
-  run.liveStatus = message;
+  setRunSiteNotice(run, message);
   requestFocus('[data-focus-id="apply-criteria"]');
   render();
 }
@@ -2157,8 +2178,7 @@ function setDraftFilter(partialFilters, message) {
 function showFeatureActionNotice(message, focusId = '') {
   const run = getCurrentRun();
   if (!run) return;
-  run.siteNotice = message;
-  run.liveStatus = message;
+  setRunSiteNotice(run, message);
   if (focusId) {
     requestFocus(`[data-focus-id="${focusId}"]`);
   }

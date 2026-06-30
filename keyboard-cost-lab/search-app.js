@@ -14,6 +14,9 @@ import {
   renderEndTaskConfirmationDialogHtml,
   renderTaskRequestVisibilitySwitchHtml,
   renderSiteNoticeHtml,
+  setRunSiteNotice,
+  clearRunSiteNotice,
+  announceStatusMessage,
 } from './lib/utils.js';
 import {
   createMessageBridge as createSharedMessageBridge,
@@ -99,6 +102,7 @@ if (!root) {
 
 const state = APP_MODE === 'runner' ? createRunnerState() : createMainState();
 const bridge = createMessageBridge(state.sessionId);
+let lastAnnouncedSiteNoticeSequence = 0;
 wireEvents();
 if (APP_MODE === 'runner') {
   postBridgeMessage({
@@ -206,7 +210,7 @@ function createRunnerState() {
   runtime.modal = null;
   runtime.isApplying = false;
   runtime.isWorking = false;
-  runtime.liveStatus = '정렬 기준과 자료 범위를 맞춘 뒤 원하는 자료를 찾으십시오.';
+  runtime.liveStatus = '검색 조건을 맞춘 뒤 원하는 자료를 찾으십시오.';
   ensureCurrentResultVisible(runtime);
   runtime.currentTaskLogger = createTaskLogger({
     sessionId,
@@ -261,7 +265,7 @@ function createConditionRuntime(variantId) {
     currentResultId: searchScenario.results[0]?.id ?? null,
     previewVisitedThisTask: {},
     modal: null,
-    liveStatus: '정렬 기준을 바꾸면 검색 결과 목록이 갱신됩니다.',
+    liveStatus: '검색 조건을 바꾸면 검색 결과 목록이 갱신됩니다.',
     taskResults: [],
     currentTaskLogger: null,
     isApplying: false,
@@ -269,6 +273,7 @@ function createConditionRuntime(variantId) {
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
     siteNotice: '',
+    siteNoticeSequence: 0,
   };
 }
 
@@ -325,6 +330,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
   runtime.siteNotice = snapshot.siteNotice ?? '';
+  runtime.siteNoticeSequence = Number.isFinite(snapshot.siteNoticeSequence) ? snapshot.siteNoticeSequence : 0;
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   ensureCurrentResultVisible(runtime);
   return runtime;
@@ -354,6 +360,7 @@ function serializeRuntimeSnapshot(run) {
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
     siteNotice: run.siteNotice,
+    siteNoticeSequence: run.siteNoticeSequence,
     liveStatus: run.liveStatus,
   };
 }
@@ -381,6 +388,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
   targetRun.siteNotice = hydrated.siteNotice;
+  targetRun.siteNoticeSequence = hydrated.siteNoticeSequence;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
   targetRun.isApplying = false;
@@ -438,7 +446,7 @@ function prepareCurrentTaskForMain() {
   run.openedResultId = null;
   run.featurePanel = null;
   run.finalConfirmationAcknowledged = false;
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   ensureCurrentResultVisible(run);
   state.activeLaunch = null;
@@ -626,6 +634,7 @@ function closeRunnerWindow() {
 function wireEvents() {
   root.addEventListener('click', handleRootClick);
   root.addEventListener('change', handleRootChange);
+  root.addEventListener('input', handleRootInput);
   root.addEventListener('keydown', handleRootKeydown);
   root.addEventListener('submit', handleRootSubmit);
 
@@ -646,9 +655,9 @@ function handleRootSubmit(event) {
   const form = event.target;
   if (!(form instanceof HTMLFormElement)) return;
   if (APP_MODE !== 'runner') return;
-  if (form.matches('[data-simulated-submit="search-query"]')) {
+  if (form.matches('[data-simulated-submit="result-filters"]')) {
     event.preventDefault();
-    runSearchQuery();
+    applyResultFilters();
   }
 }
 
@@ -698,12 +707,6 @@ function handleRootClick(event) {
       continueAfterCondition();
       return;
     }
-    return;
-  }
-
-  if (action === 'run-search-query') {
-    event.preventDefault();
-    runSearchQuery();
     return;
   }
 
@@ -836,6 +839,18 @@ function handleRootClick(event) {
   }
 }
 
+function handleRootInput(event) {
+  const element = event.target;
+  if (!(element instanceof HTMLInputElement)) return;
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run) return;
+
+  if (element.name === 'search-query') {
+    run.queryDraft = element.value;
+  }
+}
+
 function handleRootChange(event) {
   const element = event.target;
   if (!(element instanceof HTMLInputElement || element instanceof HTMLSelectElement)) return;
@@ -928,9 +943,22 @@ function focusElementNow(selector) {
 function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
-  run.siteNotice = message;
-  run.liveStatus = message;
+  setRunSiteNotice(run, message);
   render();
+}
+
+function announcePendingSiteNotice() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run) return;
+  const sequence = Number.isFinite(run.siteNoticeSequence) ? run.siteNoticeSequence : 0;
+  if (!run.siteNotice) {
+    lastAnnouncedSiteNoticeSequence = sequence;
+    return;
+  }
+  if (sequence === lastAnnouncedSiteNoticeSequence) return;
+  lastAnnouncedSiteNoticeSequence = sequence;
+  announceStatusMessage(run.siteNotice);
 }
 
 function applyPendingFocus() {
@@ -965,10 +993,29 @@ function formatQueryLabel(query) {
   return query ? query : '검색어 없음';
 }
 
+function normalizeSearchText(value) {
+  return String(value ?? '').trim().toLocaleLowerCase('ko');
+}
+
+function resultMatchesQuery(result, query) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return true;
+  const terms = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+  const haystack = normalizeSearchText([
+    result.title,
+    result.badge,
+    result.summary,
+    result.body,
+    ...(result.keywords || []),
+  ].join(' '));
+  return terms.every((term) => haystack.includes(term));
+}
+
 function getVisibleSearch(run) {
   const filtered = searchScenario.results.filter((result) => {
-    if (run.type === 'all') return true;
-    return result.type === run.type;
+    const typeMatches = run.type === 'all' || result.type === run.type;
+    return typeMatches && resultMatchesQuery(result, run.query);
   });
 
   const sorted = filtered.slice().sort((left, right) => {
@@ -1008,6 +1055,7 @@ function formatRunStateSummary(run) {
   return [
     `정렬 기준 ${getSortLabel(run.sort)}`,
     `자료 범위 ${getTypeLabel(run.type)}`,
+    `검색어 ${formatQueryLabel(run.query)}`,
     openedResult ? `최근 바로 열기 ${openedResult.title}` : '최근 바로 열기 없음',
     savedResults.length > 0 ? `저장한 자료 ${savedResults.join(', ')}` : '저장한 자료 없음',
   ].join(' / ');
@@ -1029,18 +1077,26 @@ function applyResultFilters() {
   const run = getCurrentRun();
   if (!run || run.isApplying || run.isWorking) return;
 
+  const searchInput = document.querySelector('[name="search-query"]');
+  if (searchInput instanceof HTMLInputElement) {
+    run.queryDraft = searchInput.value;
+  }
+
   run.isApplying = true;
-  run.liveStatus = '정렬 기준과 자료 범위를 적용하는 중입니다…';
+  run.liveStatus = '검색 조건을 적용하는 중입니다…';
   render();
 
   window.setTimeout(() => {
     run.isApplying = false;
     run.sort = run.sortDraft;
     run.type = run.typeDraft;
+    run.query = (run.queryDraft || '').trim();
+    run.queryDraft = run.query;
     run.currentResultId = null;
     ensureCurrentResultVisible(run);
     const visibleSearch = getVisibleSearch(run);
-    run.liveStatus = `현재 ${visibleSearch.length}개의 자료가 표시되었습니다.`;
+    const queryPart = run.query ? `검색어 ${run.query}, ` : '';
+    run.liveStatus = `현재 ${queryPart}${visibleSearch.length}개의 자료가 표시되었습니다.`;
 
     if (state.conditionId === 'variantB') {
       requestFocus('#search-heading');
@@ -1162,7 +1218,7 @@ function openResultPreview(resultId, triggerFocusId) {
   if (!result) return;
 
   noteWrongResultAction(resultId, 'open-preview');
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   run.modal = {
     kind: 'result-preview',
     resultId,
@@ -1225,7 +1281,7 @@ function closeModal() {
       ...run.previewVisitedThisTask,
       [closingModal.resultId]: true,
     };
-    run.siteNotice = '';
+    clearRunSiteNotice(run);
   }
 
   run.currentTaskLogger?.setModalState({
@@ -1311,8 +1367,7 @@ function confirmSaveOptionsFromModal() {
     triggerFocusId: closingModal.triggerFocusId,
     closedAt: performance.now(),
   });
-  run.siteNotice = alreadySaved ? '이미 저장한 자료입니다.' : '자료를 저장했습니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, alreadySaved ? '이미 저장한 자료입니다.' : '자료를 저장했습니다.');
   if (state.conditionId === 'variantB' && closingModal.triggerFocusId) {
     requestFocus(`[data-focus-id="${closingModal.triggerFocusId}"]`);
   } else {
@@ -1337,8 +1392,7 @@ function openResult(resultId, triggerFocusId) {
   run.openedResultId = resultId;
   run.currentTaskLogger?.note('open-result', { resultId });
 
-  run.siteNotice = '자료를 열었습니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, '자료를 열었습니다.');
   if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   render();
 }
@@ -1614,6 +1668,7 @@ function render() {
       </div>
     `;
   }
+  announcePendingSiteNotice();
   applyPendingFocus();
 }
 
@@ -1980,7 +2035,7 @@ function renderTopSkipLinks() {
   return `
     <nav class="skip-nav card" aria-label="화면 안 바로가기">
       <a href="#search-heading" data-action="jump-results">검색 결과 영역으로 바로가기</a>
-      <a href="#filters-heading" data-action="jump-filters">검색 조건 설정으로 바로가기</a>
+      <a href="#filters-heading" data-action="jump-filters">검색 조건 선택으로 바로가기</a>
     </nav>
   `;
 }
@@ -2019,11 +2074,6 @@ function renderSearchHeader(conditionId, run) {
     <header class="sim-header ${conditionId === 'variantA' ? 'sim-header-a' : 'sim-header-b'}">
       <div class="sim-topbar">
         <a href="#" class="brand-link" data-action="open-search-feature" data-feature-id="home" data-focus-id="search-home">상담 지원 자료실</a>
-        <form class="sim-search" role="search" aria-label="자료 검색" data-simulated-submit="search-query">
-          <label class="sr-only" for="result-search-input">검색어</label>
-          <input id="result-search-input" name="search-query" type="search" value="${escapeHtml(run.queryDraft)}" data-focus-id="result-search-input">
-          <button class="button button-ghost" type="submit" data-action="run-search-query" data-focus-id="result-search-submit">검색</button>
-        </form>
         <div class="sim-actions">
           <button class="button button-ghost" data-action="open-search-feature" data-feature-id="alert" data-focus-id="result-alert">검색 알림</button>
           <button class="button button-ghost" data-action="open-search-feature" data-feature-id="folder" data-focus-id="result-folder">보관함</button>
@@ -2035,23 +2085,6 @@ function renderSearchHeader(conditionId, run) {
     </header>
   `;
 }
-function runSearchQuery() {
-  const run = getCurrentRun();
-  if (!run) return;
-  const query = (run.queryDraft || '').trim();
-  run.query = query;
-  run.queryDraft = query;
-  run.featurePanel = {
-    featureId: 'search-run',
-    triggerFocusId: 'result-search-submit',
-    query,
-  };
-  run.siteNotice = query ? `검색어 ${query}로 검색 결과를 새로 고쳤습니다.` : '검색어 없이 전체 자료를 새로 고쳤습니다.';
-  run.liveStatus = run.siteNotice;
-  requestFocus('#search-feature-title');
-  render();
-}
-
 function openSearchFeaturePanel(featureId = 'home', triggerFocusId = '', { resultId = '' } = {}) {
   const run = getCurrentRun();
   if (!run) return;
@@ -2060,7 +2093,7 @@ function openSearchFeaturePanel(featureId = 'home', triggerFocusId = '', { resul
     triggerFocusId,
     resultId,
   };
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   requestFocus('#search-feature-title');
   render();
 }
@@ -2078,8 +2111,7 @@ function toggleSearchAlert(triggerFocusId = '') {
   const run = getCurrentRun();
   if (!run) return;
   run.searchAlertEnabled = !run.searchAlertEnabled;
-  run.siteNotice = run.searchAlertEnabled ? '검색 알림을 켰습니다.' : '검색 알림을 껐습니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, run.searchAlertEnabled ? '검색 알림을 켰습니다.' : '검색 알림을 껐습니다.');
   if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   render();
 }
@@ -2093,8 +2125,7 @@ function saveCurrentSearchQuery(triggerFocusId = '') {
     ...run.savedFeatureItems,
     [key]: true,
   };
-  run.siteNotice = alreadySaved ? '이미 보관한 검색어입니다.' : '검색어를 보관했습니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, alreadySaved ? '이미 보관한 검색어입니다.' : '검색어를 보관했습니다.');
   if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   render();
 }
@@ -2104,8 +2135,7 @@ function setSearchFilterFromFeature(actionTarget) {
   if (!run) return;
   if (actionTarget.dataset.sort) run.sortDraft = actionTarget.dataset.sort;
   if (actionTarget.dataset.type) run.typeDraft = actionTarget.dataset.type;
-  run.siteNotice = '조건 선택 영역에 값을 입력했습니다. 조건 적용을 실행하면 목록이 바뀝니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, '조건 선택 영역에 값을 입력했습니다. 조건 적용을 실행하면 목록이 바뀝니다.');
   requestFocus('[data-focus-id="apply-result-filters"]');
   render();
 }
@@ -2268,32 +2298,38 @@ function renderSearchFeaturePanelContent(featureId, run) {
 function renderResultControls(conditionId, run) {
   return `
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
-      <div class="filters-header">
-        <div>
-          <h2 id="filters-heading">정렬과 자료 범위 선택</h2>
+      <form class="filters-form" role="search" aria-labelledby="filters-heading" data-simulated-submit="result-filters">
+        <div class="filters-header">
+          <div>
+            <h2 id="filters-heading">검색 조건 선택</h2>
+          </div>
         </div>
-      </div>
-      <div class="filters-grid">
-        <label>
-          <span>정렬 기준</span>
-          <select name="sort" data-focus-id="result-sort">
-            ${searchScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
-          </select>
-        </label>
-        <label>
-          <span>자료 범위</span>
-          <select name="type" data-focus-id="result-type">
-            ${searchScenario.typeOptions.map((option) => `<option value="${option.id}" ${run.typeDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
-          </select>
-        </label>
-      </div>
-      <div class="button-row">
-        <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="help" data-focus-id="result-policy-link">검색 도움말 보기</a>
-        <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="type-help" data-focus-id="result-help-link">자료 범위 설명 보기</a>
-        <button class="button button-primary" data-action="apply-result-filters" data-focus-id="apply-result-filters" ${run.isApplying ? 'disabled' : ''}>
-          ${run.isApplying ? '적용 중…' : '조건 적용'}
-        </button>
-      </div>
+        <div class="filters-grid">
+          <label>
+            <span>정렬 기준</span>
+            <select name="sort" data-focus-id="result-sort">
+              ${searchScenario.sortOptions.map((option) => `<option value="${option.id}" ${run.sortDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+            </select>
+          </label>
+          <label>
+            <span>자료 범위</span>
+            <select name="type" data-focus-id="result-type">
+              ${searchScenario.typeOptions.map((option) => `<option value="${option.id}" ${run.typeDraft === option.id ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+            </select>
+          </label>
+          <label>
+            <span>검색어</span>
+            <input id="result-search-input" name="search-query" type="search" value="${escapeHtml(run.queryDraft)}" data-focus-id="result-search-input" autocomplete="off">
+          </label>
+        </div>
+        <div class="button-row">
+          <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="help" data-focus-id="result-policy-link">검색 도움말 보기</a>
+          <a href="#" class="inline-link" data-action="open-search-feature" data-feature-id="type-help" data-focus-id="result-help-link">자료 범위 설명 보기</a>
+          <button class="button button-primary" type="submit" data-action="apply-result-filters" data-focus-id="apply-result-filters" ${run.isApplying ? 'disabled' : ''}>
+            ${run.isApplying ? '적용 중…' : '조건 적용'}
+          </button>
+        </div>
+      </form>
     </section>
   `;
 }

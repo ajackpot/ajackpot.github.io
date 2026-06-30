@@ -14,6 +14,9 @@ import {
   renderEndTaskConfirmationDialogHtml,
   renderTaskRequestVisibilitySwitchHtml,
   renderSiteNoticeHtml,
+  setRunSiteNotice,
+  clearRunSiteNotice,
+  announceStatusMessage,
 } from './lib/utils.js';
 import {
   createMessageBridge as createSharedMessageBridge,
@@ -99,6 +102,7 @@ if (!root) {
 
 const state = APP_MODE === 'runner' ? createRunnerState() : createMainState();
 const bridge = createMessageBridge(state.sessionId);
+let lastAnnouncedSiteNoticeSequence = 0;
 wireEvents();
 if (APP_MODE === 'runner') {
   postBridgeMessage({
@@ -266,6 +270,7 @@ function createConditionRuntime(variantId) {
     lastTaskCompletionNote: '',
     finalConfirmationAcknowledged: false,
     siteNotice: '',
+    siteNoticeSequence: 0,
   };
 }
 
@@ -311,6 +316,7 @@ function hydrateConditionRuntime(variantId, snapshot = {}) {
   runtime.lastTaskCompletionNote = snapshot.lastTaskCompletionNote ?? '';
   runtime.finalConfirmationAcknowledged = Boolean(snapshot.finalConfirmationAcknowledged);
   runtime.siteNotice = snapshot.siteNotice ?? '';
+  runtime.siteNoticeSequence = Number.isFinite(snapshot.siteNoticeSequence) ? snapshot.siteNoticeSequence : 0;
   runtime.liveStatus = snapshot.liveStatus ?? runtime.liveStatus;
   ensureCurrentCommentVisible(runtime);
   return runtime;
@@ -336,6 +342,7 @@ function serializeRuntimeSnapshot(run) {
     lastTaskCompletionNote: run.lastTaskCompletionNote,
     finalConfirmationAcknowledged: run.finalConfirmationAcknowledged,
     siteNotice: run.siteNotice,
+    siteNoticeSequence: run.siteNoticeSequence,
     liveStatus: run.liveStatus,
   };
 }
@@ -359,6 +366,7 @@ function applyRuntimeSnapshot(targetRun, snapshot) {
   targetRun.lastTaskCompletionNote = hydrated.lastTaskCompletionNote;
   targetRun.finalConfirmationAcknowledged = hydrated.finalConfirmationAcknowledged;
   targetRun.siteNotice = hydrated.siteNotice;
+  targetRun.siteNoticeSequence = hydrated.siteNoticeSequence;
   targetRun.liveStatus = hydrated.liveStatus;
   targetRun.modal = null;
   targetRun.isApplying = false;
@@ -415,7 +423,7 @@ function prepareCurrentTaskForMain() {
   run.submittedReplyAnswers = {};
   ensureReplyAuthorAssignmentForTask(run, task, { avoidCorrectValue: getOtherConditionReplyCorrectValue(task, run.variantId) });
   run.finalConfirmationAcknowledged = false;
-  run.siteNotice = '';
+  clearRunSiteNotice(run);
   run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
   ensureCurrentCommentVisible(run);
   state.activeLaunch = null;
@@ -694,8 +702,7 @@ function handleRootClick(event) {
     event.preventDefault();
     const run = getCurrentRun();
     if (run) {
-      run.siteNotice = actionTarget.dataset.notice || '처리했습니다.';
-      run.liveStatus = run.siteNotice;
+      setRunSiteNotice(run, actionTarget.dataset.notice || '처리했습니다.');
       if (actionTarget.dataset.focusId) requestFocus(`[data-focus-id="${actionTarget.dataset.focusId}"]`);
       render();
     }
@@ -908,8 +915,7 @@ function toggleCommunitySavedItem(itemId, notice, triggerFocusId) {
     ...run.savedFeatureItems,
     [itemId]: nextValue,
   };
-  run.siteNotice = notice || (nextValue ? '보관함에 넣었습니다.' : '보관함에서 뺐습니다.');
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, notice || (nextValue ? '보관함에 넣었습니다.' : '보관함에서 뺐습니다.'));
   if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   render();
 }
@@ -917,9 +923,22 @@ function toggleCommunitySavedItem(itemId, notice, triggerFocusId) {
 function showSiteNotice(message) {
   const run = getCurrentRun();
   if (!run) return;
-  run.siteNotice = message;
-  run.liveStatus = message;
+  setRunSiteNotice(run, message);
   render();
+}
+
+function announcePendingSiteNotice() {
+  if (APP_MODE !== 'runner') return;
+  const run = getCurrentRun();
+  if (!run) return;
+  const sequence = Number.isFinite(run.siteNoticeSequence) ? run.siteNoticeSequence : 0;
+  if (!run.siteNotice) {
+    lastAnnouncedSiteNoticeSequence = sequence;
+    return;
+  }
+  if (sequence === lastAnnouncedSiteNoticeSequence) return;
+  lastAnnouncedSiteNoticeSequence = sequence;
+  announceStatusMessage(run.siteNotice);
 }
 
 function applyPendingFocus() {
@@ -1366,8 +1385,7 @@ function markHelpful(commentId, triggerFocusId) {
     alreadyHelpful,
   });
 
-  run.siteNotice = alreadyHelpful ? '이미 도움이 돼요가 표시되어 있습니다.' : '도움이 돼요를 표시했습니다.';
-  run.liveStatus = run.siteNotice;
+  setRunSiteNotice(run, alreadyHelpful ? '이미 도움이 돼요가 표시되어 있습니다.' : '도움이 돼요를 표시했습니다.');
   if (triggerFocusId) requestFocus(`[data-focus-id="${triggerFocusId}"]`);
   render();
 }
@@ -1579,6 +1597,7 @@ function render() {
       </div>
     `;
   }
+  announcePendingSiteNotice();
   applyPendingFocus();
 }
 

@@ -142,10 +142,46 @@ export function renderRunnerTaskRequestHtml({ goalSummary, title = '과업 요�
 }
 
 
+export function setRunSiteNotice(run, message) {
+  if (!run) return;
+  const normalized = String(message ?? '');
+  run.siteNotice = normalized;
+  run.liveStatus = normalized;
+  run.siteNoticeSequence = (Number.isFinite(run.siteNoticeSequence) ? run.siteNoticeSequence : 0) + 1;
+}
+
+export function clearRunSiteNotice(run) {
+  if (!run) return;
+  run.siteNotice = '';
+  run.siteNoticeSequence = (Number.isFinite(run.siteNoticeSequence) ? run.siteNoticeSequence : 0) + 1;
+}
+
+export function announceStatusMessage(message) {
+  if (!message || typeof document === 'undefined') return;
+  const regionId = 'keyboard-cost-lab-live-announcer';
+  let region = document.getElementById(regionId);
+  if (!(region instanceof HTMLElement)) {
+    region = document.createElement('div');
+    region.id = regionId;
+    region.className = 'sr-only';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    region.setAttribute('aria-relevant', 'text');
+    region.setAttribute('data-measurement-exempt', 'true');
+    document.body.appendChild(region);
+  }
+
+  region.textContent = '';
+  window.setTimeout(() => {
+    region.textContent = String(message);
+  }, 30);
+}
+
 export function renderSiteNoticeHtml(message) {
   if (!message) return '';
   return `
-    <div class="site-notice" role="status" aria-live="polite" data-measurement-exempt="true">
+    <div class="site-notice" data-measurement-exempt="true">
       ${escapeHtml(message)}
     </div>
   `;
