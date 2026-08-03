@@ -7,29 +7,29 @@ export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
       <h1 id="service-heading" tabindex="-1">${escapeHtml(serviceLabel)}</h1>
       <p>
         ${escapeHtml(serviceSummary)}
-        과업 수행은 별도 페이지에서 진행하며, 이 창에는 과업 요청이 남아 있습니다.
+        과업은 새 탭에서 진행합니다.
       </p>
       <div class="hero-grid">
         <section>
-          <h2>진행 방법</h2>
-          <ul>
-            <li>내용이 동일하고 이동 방식이 다른 두 개의 화면을 무작위 순서로 테스트 및 비교합니다.</li>
-            <li>각 화면에서 같은 과업 묶음을 수행합니다.</li>
-            <li>과업 수행 페이지에서 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누릅니다.</li>
-          </ul>
+          <h2>진행 순서</h2>
+          <ol>
+            <li>내용은 같고 이동 방식이 다른 두 화면을 무작위 순서로 테스트합니다.</li>
+            <li>두 화면에서 같은 과업을 수행합니다.</li>
+            <li>과업을 마쳤다고 판단하면 수행 페이지 맨 아래의 ‘과업 종료’를 누릅니다.</li>
+          </ol>
         </section>
         <section>
-          <h2>주의할 점</h2>
+          <h2>알아두세요</h2>
           <ul>
-            <li>과업 요청은 이 창에서 다시 확인할 수 있습니다.</li>
-            <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
-            <li>모든 결과는 두 화면을 모두 수행한 뒤 한 번에 표시됩니다.</li>
+            <li>과업 요청은 이 창에서 언제든 다시 확인할 수 있습니다.</li>
+            <li>과업을 완료하기 어렵더라도 ‘과업 종료’를 누르면 현재 상태를 저장하고 다음 단계로 이동할 수 있습니다.</li>
+            <li>두 화면을 모두 마치면 결과를 한 번에 확인할 수 있습니다.</li>
           </ul>
         </section>
       </div>
       <div class="button-row">
-        <button class="button button-primary" data-action="start-experiment">과업 준비로 이동</button>
-        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
+        <button class="button button-primary" data-action="start-experiment">첫 과업 준비하기</button>
+        <button class="button button-secondary" data-action="go-home">다른 서비스 고르기</button>
       </div>
     </header>
   `;
@@ -62,7 +62,7 @@ export function renderProfileBenchmarkTable(benchmark) {
 
 export function renderLaunchStatusMessage(activeLaunch, isRunning) {
   if (!activeLaunch) {
-    return '아직 과업 수행 페이지를 열지 않았습니다. 과업 내용을 충분히 읽은 뒤 시작하십시오.';
+    return '아직 과업 수행 페이지를 열지 않았습니다. 이번 요청을 확인한 뒤 시작해 주세요.';
   }
   if (activeLaunch.status === 'blocked') return activeLaunch.lastMessage;
   if (activeLaunch.status === 'opening') return activeLaunch.lastMessage;
@@ -70,7 +70,7 @@ export function renderLaunchStatusMessage(activeLaunch, isRunning) {
   if (activeLaunch.status === 'started') return activeLaunch.lastMessage;
   if (activeLaunch.status === 'closed') return activeLaunch.lastMessage;
   if (activeLaunch.status === 'completed') return activeLaunch.lastMessage;
-  return isRunning ? '과업 수행 페이지가 열려 있습니다.' : '과업 준비가 완료되었습니다.';
+  return isRunning ? '과업 수행 페이지가 새 탭에 열려 있습니다.' : '과업을 시작할 준비가 되었습니다.';
 }
 
 export function renderFinalConditionCard({ conditionId, actualTotals, selectedProfileId, benchmarkResults, variantMeta }) {
@@ -84,11 +84,11 @@ export function renderFinalConditionCard({ conditionId, actualTotals, selectedPr
       <h2>${escapeHtml(variantMeta[conditionId].title)}</h2>
       <p class="muted">${escapeHtml(variantMeta[conditionId].subtitle)}</p>
       <dl class="meta-list compact">
-        <div><dt>실제 완료 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
+        <div><dt>실제 수행 시간</dt><dd>${formatSeconds(actualTotals.durationSeconds)}</dd></div>
         <div><dt>총 키 입력</dt><dd>${actualTotals.totalKeyInputs}</dd></div>
         <div><dt>총 초점 이동</dt><dd>${actualTotals.focusChanges}</dd></div>
-        <div><dt>수행 완료 기록</dt><dd>${actualTotals.successCount ?? 0}개</dd></div>
-        <div><dt>수행 불가능 기록</dt><dd>${actualTotals.incompleteCount ?? 0}개</dd></div>
+        <div><dt>완료한 과업</dt><dd>${actualTotals.successCount ?? 0}개</dd></div>
+        <div><dt>완료하지 못한 과업</dt><dd>${actualTotals.incompleteCount ?? 0}개</dd></div>
         <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
       </dl>
     </article>

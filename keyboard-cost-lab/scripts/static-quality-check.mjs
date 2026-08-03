@@ -25,7 +25,7 @@ for (const [file, source] of Object.entries(sources)) {
   assert(!source.includes('${escapeHtml(task.title)} ·'), `${file}: 과업 수행 페이지 숨김 제목에 과업명이 남아 있습니다.`);
 }
 
-assert(utils.includes('과업 요청 사항을 수행 페이지에서도 보기'), 'lib/utils.js: 요청한 스위치 이름이 없습니다.');
+assert(utils.includes('과업 요청을 수행 페이지에도 표시'), 'lib/utils.js: 요청한 스위치 이름이 없습니다.');
 assert(!utils.includes('task-outcome-message'), 'lib/utils.js: 종료 확인 대화상자에 최종 판정 메시지를 노출하는 코드가 남아 있습니다.');
 
 const calendarGridButtonMatch = sources['app.js'].match(/class="slot-grid-button[\s\S]*?aria-label="\$\{escapeHtml\(formatSlotLabel\(slot\)\)\}"/);

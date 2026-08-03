@@ -116,7 +116,7 @@ function getConditionTotals(record, conditionId) {
 }
 
 function formatTaskLine(result, index) {
-  const status = result.success ? '완료' : '수행 불가능';
+  const status = result.success ? '완료' : '완료하지 못함';
   const parts = [
     `${index + 1}번 ${status}`,
     formatSeconds(asNumber(result.durationSeconds)),
@@ -139,14 +139,14 @@ export function formatServiceConditionRecord(record, service, conditionId) {
 
   const totals = getConditionTotals(record, conditionId);
   const summaryParts = [
-    `합계: 완료 시간 ${formatSeconds(asNumber(totals.durationSeconds))}`,
+    `합계: 수행 시간 ${formatSeconds(asNumber(totals.durationSeconds))}`,
     `키 입력 ${formatCount(totals.totalKeyInputs)}`,
     `초점 이동 ${formatCount(totals.focusChanges)}`,
     `목표와 다른 선택 ${formatCount(totals.wrongSelections)}`,
     `위치 다시 찾기 ${formatCount(totals.contextResets)}`,
     formatOptionalMetric('대화상자 밖 초점 이탈', totals.modalEscapes),
-    `수행 완료 ${formatCount(totals.successCount, '개')}`,
-    `수행 불가능 ${formatCount(totals.incompleteCount, '개')}`,
+    `완료한 과업 ${formatCount(totals.successCount, '개')}`,
+    `완료하지 못한 과업 ${formatCount(totals.incompleteCount, '개')}`,
   ].filter(Boolean);
 
   const taskLines = taskResults.map(formatTaskLine);
@@ -194,26 +194,26 @@ export function renderSurveyTransferPanel({ store, services = serviceRegistry, r
   const surveyUrl = buildStudySurveyUrl(store, { services, requireAllServices });
   const completedLabels = progress.completedServices.map((service) => service.label).join(', ') || '아직 없음';
   const remainingLabels = progress.remainingServices.map((service) => service.label).join(', ') || '없음';
-  const statusLabel = `${progress.completedCount} / ${progress.totalCount}개 서비스 완료`;
+  const statusLabel = `${progress.totalCount}개 중 ${progress.completedCount}개 서비스 완료`;
 
   return `
     <section class="card survey-transfer-card">
       <div class="service-card-header">
         <div>
-          <p class="eyebrow">설문지 제출 준비</p>
-          <h2>구글 설문지로 수행 기록 전달</h2>
+          <p class="eyebrow">테스트 마무리</p>
+          <h2>테스트를 마치고 설문 작성하기</h2>
         </div>
         <span class="pill ${progress.allComplete ? 'pill-success' : ''}">${escapeHtml(statusLabel)}</span>
       </div>
-      <p class="muted">3개 서비스 과업을 모두 완료하면 설문지로 이동하여 수행 기록을 자동으로 입력할 수 있습니다.</p>
+      <p class="muted">세 가지 서비스의 과업을 모두 마치면 수행 기록이 자동으로 입력된 설문으로 이동할 수 있습니다.</p>
       <dl class="meta-list compact service-progress-list">
         <div><dt>완료한 서비스</dt><dd>${escapeHtml(completedLabels)}</dd></div>
         <div><dt>남은 서비스</dt><dd>${escapeHtml(remainingLabels)}</dd></div>
       </dl>
       <div class="button-row">
         ${surveyUrl
-          ? `<a class="button button-primary" href="${escapeHtml(surveyUrl)}" target="_blank" rel="noreferrer">구글 설문지로 이동</a>`
-          : '<span class="muted">아직 완료하지 않은 서비스가 있습니다.</span>'}
+          ? `<a class="button button-primary" href="${escapeHtml(surveyUrl)}" target="_blank" rel="noreferrer">설문 작성하기(새 탭)</a>`
+          : '<span class="muted">남은 서비스를 모두 마치면 설문 버튼이 나타납니다.</span>'}
       </div>
     </section>
   `;

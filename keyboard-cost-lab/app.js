@@ -75,7 +75,7 @@ const SERVICE_TYPES = serviceRegistry;
 
 const SERVICE_INTRO_POINTS = [
   '예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지',
-  '실제 수행 기록과 사전 계산 기준이 비슷한 방향으로 움직이는지',
+  '수행 기록과 사전 예상 기준이 비슷한 흐름을 보이는지',
   '같은 테스트 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지',
 ];
 const VARIANT_META = {
@@ -148,14 +148,14 @@ function handleBridgeMessage(message) {
 
   if (message.type === 'runner-ready') {
     state.activeLaunch.status = 'ready';
-    state.activeLaunch.lastMessage = '과업 수행 페이지가 열렸습니다. 이 창에 과업 안내가 그대로 남아 있습니다.';
+    state.activeLaunch.lastMessage = '과업 수행 페이지가 새 탭에 열렸습니다. 과업 요청은 이 창에서 언제든 다시 확인할 수 있습니다.';
     render();
     return;
   }
 
   if (message.type === 'runner-started') {
     state.activeLaunch.status = 'started';
-    state.activeLaunch.lastMessage = '과업 수행 페이지에서 첫 조작이 들어가 실제 계측이 시작되었습니다.';
+    state.activeLaunch.lastMessage = '첫 조작을 확인했습니다. 수행 기록을 시작했습니다.';
     render();
     return;
   }
@@ -168,7 +168,7 @@ function handleBridgeMessage(message) {
   if (message.type === 'runner-closed') {
     if (state.activeLaunch?.status !== 'completed') {
       state.activeLaunch.status = 'closed';
-      state.activeLaunch.lastMessage = '과업 수행 페이지가 닫혔습니다. 필요하면 새 탭을 다시 열 수 있습니다.';
+      state.activeLaunch.lastMessage = '과업 수행 페이지가 닫혔습니다. 계속하려면 아래 버튼으로 다시 열어 주세요.';
       render();
     }
   }
@@ -215,7 +215,7 @@ function createRunnerState() {
       focusRequest: null,
       completed: false,
       run: createConditionRuntime(conditionId),
-      error: '수행에 필요한 시작 정보가 없습니다. 원래 테스트 창에서 과업을 다시 여십시오.',
+      error: '과업을 시작하는 데 필요한 정보를 찾지 못했습니다. 이 탭을 닫고, 과업 요청이 있는 창에서 다시 열어 주세요.',
     };
   }
 
@@ -225,7 +225,7 @@ function createRunnerState() {
   runtime.isApplying = false;
   runtime.isWorking = false;
   runtime.cancelPerformedThisTask = false;
-  runtime.liveStatus = '조건을 적용한 뒤 원하는 예약 시간을 여십시오.';
+  runtime.liveStatus = '조건을 정한 뒤 원하는 예약 시간을 찾아보세요.';
   const visibleAvailableSlots = getAvailableVisibleSlots(runtime);
   runtime.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === runtime.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
   runtime.currentTaskLogger = createTaskLogger({
@@ -529,7 +529,7 @@ function prepareCurrentTaskForMain() {
   run.bookingOptionDraft = defaultBookingOptions();
   run.bookingOptionsBySlot = {};
   applyTaskInitialBookingState(run, task);
-  run.liveStatus = '과업 내용은 이 창에서 확인하고, 실제 수행은 새 탭에서 진행합니다.';
+  run.liveStatus = '과업 요청은 이 창에서 확인할 수 있습니다. 실제 과업은 새 탭에서 진행합니다.';
   const visibleAvailableSlots = getAvailableVisibleSlots(run);
   run.currentGridSlotId = visibleAvailableSlots.find((slot) => slot.id === run.currentGridSlotId)?.id ?? visibleAvailableSlots[0]?.id ?? null;
   state.activeLaunch = null;
@@ -620,7 +620,7 @@ function launchRunnerTask() {
   state.activeLaunch = {
     launchId,
     status: 'opening',
-    lastMessage: '새 탭을 열고 있습니다. 열리지 않으면 브라우저의 팝업 차단 설정을 확인하십시오.',
+    lastMessage: '새 탭을 여는 중입니다. 열리지 않으면 브라우저에서 이 사이트의 팝업을 허용해 주세요.',
   };
 
   const runnerWindow = window.open(
@@ -636,7 +636,7 @@ function launchRunnerTask() {
 
   if (!runnerWindow) {
     state.activeLaunch.status = 'blocked';
-    state.activeLaunch.lastMessage = '새 탭을 열지 못했습니다. 팝업 차단을 해제한 뒤 다시 시도하십시오.';
+    state.activeLaunch.lastMessage = '새 탭이 열리지 않았습니다. 브라우저에서 이 사이트의 팝업을 허용한 뒤 다시 열어 주세요.';
     state.view = 'taskPrep';
     render();
     return;
@@ -749,7 +749,7 @@ function handleRootClick(event) {
     event.preventDefault();
     if (APP_MODE === 'runner') {
       const label = inertLink.textContent?.trim() || '해당';
-      showSiteNotice(`${label} 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.`);
+      showSiteNotice(`${label} 기능은 현재 준비 중입니다. 다른 기능은 이 화면에서 계속 이용할 수 있습니다.`);
       return;
     }
   }
@@ -816,7 +816,7 @@ function handleRootClick(event) {
   if (action === 'site-placeholder') {
     event.preventDefault();
     showSiteNotice(
-      actionTarget.dataset.notice || '해당 기능은 현재 점검 중입니다. 이 화면 안에서 계속 진행하십시오.',
+      actionTarget.dataset.notice || '이 기능은 현재 준비 중입니다. 다른 기능은 이 화면에서 계속 이용할 수 있습니다.',
       actionTarget.dataset.focusId || ''
     );
     return;
@@ -1332,7 +1332,7 @@ function closeModal() {
 
   if (closingModal.kind === 'task-final') {
     run.finalConfirmationAcknowledged = true;
-    run.liveStatus = '완료 확인 창을 닫았습니다. 과업이 끝났다고 판단하면 하단의 과업 종료 버튼을 누르십시오.';
+    run.liveStatus = '예약 확인을 마쳤습니다. 과업을 마쳤다고 판단하면 맨 아래의 ‘과업 종료’를 누르세요.';
     run.currentTaskLogger?.setModalState({
       open: false,
       containerSelector: null,
@@ -1447,7 +1447,7 @@ function confirmCancelFromModal() {
       closedAt: performance.now(),
     });
 
-    run.liveStatus = '기존 예약을 취소했습니다. 새 예약 시간을 선택하십시오.';
+    run.liveStatus = '기존 예약을 취소했습니다. 새로 예약할 시간을 선택해 주세요.';
 
     if (state.conditionId === 'variantB') {
       requestFocus('#booking-summary');
@@ -1476,22 +1476,22 @@ function getEndTaskOutcome(task, run) {
     return {
       success: true,
       reason: 'participant-ended-after-service-action',
-      message: '과업 수행에 성공했습니다.',
+      message: '과업을 완료했습니다.',
     };
   }
 
-  let message = '예약 완료 화면에 진입하지 못했습니다.';
+  let message = '예약을 마치기 전에 과업을 종료했습니다.';
   const activeBookings = getActiveBookings(run);
   const hasTargetBooking = activeBookings.some((booking) => booking.slotId === task.targetSlotId);
   const hasOtherNewBooking = run.booking?.slotId && run.booking.slotId !== task.targetSlotId;
   if (hasOtherNewBooking) {
-    message = '요청한 상담 예약 시간과 다른 시간을 예약했습니다.';
+    message = '요청한 시간 대신 다른 일정이 예약되었습니다.';
   } else if (hasTargetBooking && task.requiresCancellation && !run.cancelPerformedThisTask) {
-    message = '기존 예약 취소가 완료되지 않았습니다.';
+    message = '기존 예약을 취소한 기록이 없습니다.';
   } else if (hasTargetBooking && !hasRequiredBookingOptions(task, run, task.targetSlotId)) {
-    message = '요청한 상담 옵션을 맞추지 못했습니다.';
+    message = '선택한 상담 옵션이 요청한 내용과 다릅니다.';
   } else if (hasTargetBooking && run.bookingCompletion?.slotId !== task.targetSlotId) {
-    message = '예약 완료 화면에 진입하지 못했습니다.';
+    message = '예약 완료 화면을 확인한 기록이 없습니다.';
   }
 
   return {
@@ -1716,7 +1716,7 @@ function renderRunnerPage() {
     return `
       <div class="runner-shell">
         <main class="runner-main card">
-          <h1 id="runner-error-heading" tabindex="-1">수행 창을 준비할 수 없습니다.</h1>
+          <h1 id="runner-error-heading" tabindex="-1">과업 수행 페이지를 열 수 없습니다</h1>
           <p>${escapeHtml(state.error)}</p>
           <div class="button-row" data-runner-footer data-measurement-exempt="true">
             <button class="button button-primary" data-action="close-runner">이 창 닫기</button>
@@ -1751,8 +1751,8 @@ function renderRunnerPage() {
       ${run.modal ? renderModal(run.modal, run, task) : ''}
       ${state.completed
         ? renderRunnerCompletionDialogHtml({
-          title: run.lastOutcomeMessage || '과업 결과를 저장했습니다.',
-          description: '기록을 원래 창으로 전달했습니다. 확인 버튼을 누르면 이 탭이 닫힙니다.',
+          title: run.lastOutcomeMessage || '수행 기록을 저장했습니다.',
+          description: '수행 기록을 과업 요청이 있는 창으로 보냈습니다. ‘확인’을 누르면 이 탭이 닫힙니다.',
         })
         : ''}
     </div>
@@ -1764,7 +1764,7 @@ function renderHomeView() {
     <header class="hero card">
       <p class="eyebrow">테스트 시작 준비</p>
       <h1 id="page-title" tabindex="-1">서비스 유형 선택</h1>
-      <p>테스트할 서비스 유형을 고르십시오. 서비스별 진행 상태는 각 카드에서 확인할 수 있습니다.</p>
+      <p>먼저 테스트할 서비스 유형을 골라 주세요. 각 카드에서 완료 여부를 확인할 수 있습니다.</p>
     </header>
     ${renderStudySurveyTransferPanel()}
     <section class="service-grid" aria-label="서비스 유형 목록">
@@ -1779,10 +1779,10 @@ function renderHomeServiceCard(service) {
     conditionCount: service.conditionCount,
   });
   const progressDetail = progress.status === 'completed'
-    ? '모든 과업 기록이 저장되었습니다.'
+    ? '모든 과업을 마쳤습니다.'
     : progress.status === 'in-progress'
-      ? `${progress.completedTaskCount}개 기록이 저장되었습니다.`
-      : '저장된 과업 기록이 없습니다.';
+      ? `${progress.completedTaskCount}개 과업을 마쳤습니다.`
+      : '아직 시작하지 않았습니다.';
   return `
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
@@ -1794,7 +1794,7 @@ function renderHomeServiceCard(service) {
       <p>${escapeHtml(service.summary)}</p>
       <dl class="meta-list compact service-progress-list">
         <div><dt>진행 상태</dt><dd>${escapeHtml(progress.label)}</dd></div>
-        <div><dt>저장 상태</dt><dd>${escapeHtml(progressDetail)}</dd></div>
+        <div><dt>진행 내용</dt><dd>${escapeHtml(progressDetail)}</dd></div>
       </dl>
       <div class="button-row">
         <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
@@ -1827,9 +1827,9 @@ function renderTaskPreparationView() {
   return `
     <section class="card review-hero">
       <div>
-        <p class="eyebrow">수행 준비</p>
+        <p class="eyebrow">과업 시작 준비</p>
         <h1 id="task-prep-heading" tabindex="-1">과업 ${state.currentTaskIndex + 1} 준비</h1>
-        <p>아래의 요청을 확인하고 예약 캘린더 과업 수행 페이지를 여십시오.</p>
+        <p>아래 요청을 확인한 뒤 예약 캘린더 과업 수행 페이지를 열어 주세요.</p>
       </div>
       <div class="pill-group">
         <span class="pill">화면 ${screenIndex} / ${state.order.length}</span>
@@ -1845,25 +1845,25 @@ function renderTaskPreparationView() {
       </article>
 
       <article class="card">
-        <h2>진행 방법</h2>
-        <ul>
-          <li>과업 수행 페이지는 새 탭으로 열립니다. 과업 요청을 다시 확인해야 하면 이 창으로 돌아오십시오.</li>
-          <li><strong>과업을 모두 수행했다고 판단하면 과업 수행 페이지 하단의 과업 종료 버튼을 누르십시오.</strong></li>
-          <li>과업 종료 버튼을 누르면 종료 확인 대화상자가 열립니다. 예를 누르면 기록을 저장하고, 아니요를 누르면 계속 진행합니다.</li>
-          <li>수행할 수 없다고 판단해도 최하단의 과업 종료 버튼을 실행하여 다음 단계로 건너뛸 수 있습니다.</li>
-          <li>중간 결과는 표시하지 않고, 두 화면을 모두 마친 뒤 한 번에 결과를 보여 줍니다.</li>
-        </ul>
+        <h2>진행 순서</h2>
+        <ol>
+          <li>‘과업 수행 페이지 열기’를 누르면 새 탭이 열립니다. 요청을 다시 보려면 이 창으로 돌아오세요.</li>
+          <li><strong>과업을 마쳤다고 판단하면 새 탭 맨 아래의 ‘과업 종료’를 누르세요.</strong></li>
+          <li>종료 확인 창에서 ‘예, 종료합니다’를 누르면 현재 기록을 저장합니다. ‘아니요, 계속합니다’를 누르면 과업으로 돌아갑니다.</li>
+          <li>과업을 완료하기 어렵더라도 ‘과업 종료’를 눌러 현재 상태를 저장하고 다음 단계로 이동할 수 있습니다.</li>
+          <li>두 화면을 모두 마치면 결과를 한 번에 확인할 수 있습니다.</li>
+        </ol>
         <div class="status-box" role="status" aria-live="polite" aria-atomic="true">
           ${escapeHtml(renderLaunchStatusMessage(activeLaunch, isRunning))}
         </div>
       </article>
 
       <article class="card">
-        <h2>실행</h2>
-        <p class="muted">새 탭에서 첫 조작이 들어간 뒤부터 수행 기록이 시작됩니다.</p>
+        <h2>과업 열기</h2>
+        <p class="muted">새 탭에서 처음 키를 누르거나 화면을 클릭하면 수행 기록이 시작됩니다.</p>
         <div class="button-row">
           <button class="button button-primary" data-action="launch-runner">
-            ${isRunning ? '과업 수행 페이지 다시 열기(새 탭 열림)' : '과업 수행 페이지 열기(새 탭 열림)'}
+            ${isRunning ? '과업 수행 페이지 다시 열기(새 탭)' : '과업 수행 페이지 열기(새 탭)'}
           </button>
           ${isRunning
             ? '<button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>'
@@ -1889,15 +1889,15 @@ function renderTaskReviewView() {
   return `
     <section class="card review-hero">
       <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
-      <h1 id="review-heading" tabindex="-1">과업 완료</h1>
-      <p>${escapeHtml(task.title)}를 완료했습니다. 실제 기록과 사전 계산 기준을 함께 확인하십시오.</p>
+      <h1 id="review-heading" tabindex="-1">과업 수행 기록</h1>
+      <p>${escapeHtml(task.title)}의 수행 기록과 사전 예상 기준을 확인할 수 있습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
-        <h2>실제 기록 요약</h2>
+        <h2>수행 기록 요약</h2>
         <dl class="meta-list compact">
-          <div><dt>완료 시간</dt><dd>${formatSeconds(result.durationSeconds)}</dd></div>
-          <div><dt>숨김 탭 제외 시간</dt><dd>${formatSeconds(result.hiddenDurationSeconds ?? 0)}</dd></div>
+          <div><dt>수행 시간</dt><dd>${formatSeconds(result.durationSeconds)}</dd></div>
+          <div><dt>수행 페이지가 보이지 않았던 시간</dt><dd>${formatSeconds(result.hiddenDurationSeconds ?? 0)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${result.totalKeyInputs}</dd></div>
           <div><dt>초점 이동</dt><dd>${result.focusChanges}</dd></div>
           <div><dt>되돌아간 입력</dt><dd>${result.backtrackInputs}</dd></div>
@@ -1905,19 +1905,19 @@ function renderTaskReviewView() {
           <div><dt>위치 다시 찾기</dt><dd>${result.contextResets ?? 0}</dd></div>
           <div><dt>클릭 입력</dt><dd>${result.pointerActivations}</dd></div>
         </dl>
-        <p class="muted">과업 설명을 읽는 시간과 과업 수행 페이지가 보이지 않는 시간은 실제 완료 시간에서 제외했습니다.</p>
+        <p class="muted">과업 요청을 확인한 시간과 수행 페이지가 보이지 않았던 시간은 수행 시간에 포함하지 않았습니다.</p>
       </article>
       <article class="card">
-        <h2>사전 계산 기준</h2>
+        <h2>사전 예상 기준</h2>
         ${renderProfileBenchmarkTable(benchmark)}
       </article>
       <article class="card">
-        <h2>왜 조작 부담 차이가 나는가</h2>
+        <h2>조작 부담이 달라지는 이유</h2>
         <ul>
           ${benchmark.assumptions.map((assumption) => `<li>${escapeHtml(assumption)}</li>`).join('')}
         </ul>
         <div class="benchmark-delta">
-          <h3>비교안 B 예상 개선폭</h3>
+          <h3>비교안 B의 예상 시간 감소</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
               <li><strong>${escapeHtml(benchmarkResultsCalendar.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
@@ -1928,7 +1928,7 @@ function renderTaskReviewView() {
     </section>
     <div class="button-row">
       <button class="button button-primary" data-action="continue-after-task">
-        ${state.currentTaskIndex < calendarTasks.length - 1 ? '다음 과업 준비' : '현재 비교안 요약 보기'}
+        ${state.currentTaskIndex < calendarTasks.length - 1 ? '다음 과업 준비하기' : '현재 비교안 요약 보기'}
       </button>
       <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
     </div>
@@ -1947,16 +1947,16 @@ function renderConditionReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 완료</p>
-      <h1 id="condition-review-heading" tabindex="-1">현재 서비스 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업을 모두 마쳤습니다.</p>
+      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 수행 기록</p>
+      <h1 id="condition-review-heading" tabindex="-1">현재 비교안 요약</h1>
+      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업별 기록을 모두 저장했습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
-        <h2>실제 수행 합계</h2>
+        <h2>수행 기록 합계</h2>
         <dl class="meta-list compact">
-          <div><dt>총 완료 시간</dt><dd>${formatSeconds(totals.durationSeconds)}</dd></div>
-          <div><dt>총 숨김 탭 제외 시간</dt><dd>${formatSeconds(totals.hiddenDurationSeconds)}</dd></div>
+          <div><dt>총 수행 시간</dt><dd>${formatSeconds(totals.durationSeconds)}</dd></div>
+          <div><dt>수행 페이지가 보이지 않았던 시간</dt><dd>${formatSeconds(totals.hiddenDurationSeconds)}</dd></div>
           <div><dt>총 키 입력</dt><dd>${totals.totalKeyInputs}</dd></div>
           <div><dt>총 초점 이동</dt><dd>${totals.focusChanges}</dd></div>
           <div><dt>목표와 다른 시간 선택</dt><dd>${totals.wrongSelections}</dd></div>
@@ -1982,7 +1982,7 @@ function renderConditionReviewView() {
         </table>
       </article>
       <article class="card">
-        <h2>저장된 과업 기록</h2>
+        <h2>과업별 수행 기록</h2>
         <ol>
           ${run.taskResults.map((result, index) => `<li><strong>${escapeHtml(calendarTasks[index].title)}</strong> — ${formatSeconds(result.durationSeconds)}, 키 ${result.totalKeyInputs}회, 초점 이동 ${result.focusChanges}회</li>`).join('')}
         </ol>
@@ -2005,19 +2005,19 @@ function renderFinalView() {
   return `
     <section class="card review-hero">
       <p class="eyebrow">예약 캘린더 테스트 완료</p>
-      <h1 id="final-summary-heading" tabindex="-1">비교안 A/B 최종 비교</h1>
-      <p>실제 기록과 사전 예상 기준을 비교하며 결과를 확인할 수 있습니다. 테스트 결과는 서비스 탐색 점검 방법 및 개선 기준 마련 용도로 활용됩니다.</p>
+      <h1 id="final-summary-heading" tabindex="-1">비교안 A와 B 결과 비교</h1>
+      <p>아래에서 두 화면의 수행 기록과 사전 예상 기준을 비교할 수 있습니다. 이 결과는 탐색 과정에서 부담이 생긴 지점을 찾고 개선 방법을 정하는 데 사용합니다.</p>
     </section>
     <section class="card toolbar-card">
       <label>
-        <span>비교 기준 사용자 유형</span>
+        <span>예상 시간을 확인할 사용자 유형</span>
         <select name="benchmark-profile">
           ${Object.entries(benchmarkResultsCalendar.overall).map(([profileId, profile]) => `
             <option value="${profileId}" ${profileId === selectedProfileId ? 'selected' : ''}>${escapeHtml(profile.label)}</option>
           `).join('')}
         </select>
       </label>
-      <p class="muted">테스트 중 문제가 있었다면 결과 파일을 내려받아 담당자에게 문제 내용과 함께 보내주십시오. 파일 형식은 JSON이며, 테스트 기록이 텍스트 형식으로 저장되어 있습니다.</p>
+      <p class="muted">테스트 중 예상과 다른 동작이나 오류가 있었다면 결과 파일을 내려받아 담당자에게 알려 주세요. 파일은 JSON 형식의 텍스트이며 수행 기록이 담겨 있습니다.</p>
       <div class="button-row">
         <a class="button button-secondary" download="reservation-calendar-results.json" href="${exportUrl}">결과 파일 내려받기</a>
       </div>
@@ -2028,7 +2028,7 @@ function renderFinalView() {
       ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
     </section>
     <section class="card">
-      <h2>실제 기록 비교</h2>
+      <h2>두 화면의 수행 기록 비교</h2>
       <table class="summary-table">
         <thead>
           <tr>
@@ -2039,21 +2039,21 @@ function renderFinalView() {
           </tr>
         </thead>
         <tbody>
-          <tr><th>총 완료 시간</th><td>${formatSeconds(actualA.durationSeconds)}</td><td>${formatSeconds(actualB.durationSeconds)}</td><td>${formatSigned(actualB.durationSeconds - actualA.durationSeconds, '초')}</td></tr>
-          <tr><th>총 숨김 탭 제외 시간</th><td>${formatSeconds(actualA.hiddenDurationSeconds)}</td><td>${formatSeconds(actualB.hiddenDurationSeconds)}</td><td>${formatSigned(actualB.hiddenDurationSeconds - actualA.hiddenDurationSeconds, '초')}</td></tr>
+          <tr><th>총 수행 시간</th><td>${formatSeconds(actualA.durationSeconds)}</td><td>${formatSeconds(actualB.durationSeconds)}</td><td>${formatSigned(actualB.durationSeconds - actualA.durationSeconds, '초')}</td></tr>
+          <tr><th>수행 페이지가 보이지 않았던 시간</th><td>${formatSeconds(actualA.hiddenDurationSeconds)}</td><td>${formatSeconds(actualB.hiddenDurationSeconds)}</td><td>${formatSigned(actualB.hiddenDurationSeconds - actualA.hiddenDurationSeconds, '초')}</td></tr>
           <tr><th>총 키 입력</th><td>${actualA.totalKeyInputs}</td><td>${actualB.totalKeyInputs}</td><td>${formatSigned(actualB.totalKeyInputs - actualA.totalKeyInputs)}</td></tr>
           <tr><th>총 초점 이동</th><td>${actualA.focusChanges}</td><td>${actualB.focusChanges}</td><td>${formatSigned(actualB.focusChanges - actualA.focusChanges)}</td></tr>
           <tr><th>목표와 다른 시간 선택</th><td>${actualA.wrongSelections}</td><td>${actualB.wrongSelections}</td><td>${formatSigned(actualB.wrongSelections - actualA.wrongSelections)}</td></tr>
           <tr><th>위치 다시 찾기</th><td>${actualA.contextResets}</td><td>${actualB.contextResets}</td><td>${formatSigned(actualB.contextResets - actualA.contextResets)}</td></tr>
-          <tr><th>수행 불가능 기록</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
+          <tr><th>완료하지 못한 과업</th><td>${actualA.incompleteCount}</td><td>${actualB.incompleteCount}</td><td>${formatSigned(actualB.incompleteCount - actualA.incompleteCount)}</td></tr>
         </tbody>
       </table>
     </section>
     <section class="card">
-      <h2>기록 확인 안내</h2>
+      <h2>결과를 볼 때 참고하세요</h2>
       <ul>
-        <li>과업 내용 확인 시간은 메인 창에서 분리되며, 과업 수행 페이지가 보이지 않는 동안의 시간은 실제 완료 시간에서 뺍니다.</li>
-        <li>과업 종료 버튼을 너무 일찍 누른 기록은 수행 불가능 기록으로 표시됩니다.</li>
+        <li>과업 요청을 확인한 시간과 수행 페이지가 보이지 않았던 시간은 수행 시간에 포함하지 않습니다.</li>
+        <li>요청한 동작을 끝내지 못한 상태로 과업을 종료하면 ‘완료하지 못한 과업’으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
         <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
@@ -2255,7 +2255,7 @@ function renderHomeFeaturePanel() {
         <h3>최근 공지</h3>
         <ul>
           <li>4월 셋째 주 야간 상담 일부 시간이 추가되었습니다.</li>
-          <li>비대면 상담 전 카메라와 마이크 상태를 미리 확인해 주십시오.</li>
+          <li>비대면 상담 전에 카메라와 마이크 상태를 미리 확인해 주세요.</li>
         </ul>
       </article>
       <article class="mini-card">
@@ -2415,7 +2415,7 @@ function renderSupportFeaturePanel() {
         <h3>빠른 연결</h3>
         <p>전화 상담: 02-0000-1200</p>
         <p>이메일: help@example.test</p>
-        <button class="button button-secondary" data-action="site-placeholder" data-notice="실시간 채팅 연결은 현재 점검 중입니다. 문의 접수나 전화 상담을 이용하십시오." data-focus-id="support-chat">실시간 채팅 열기</button>
+        <button class="button button-secondary" data-action="site-placeholder" data-notice="실시간 채팅은 현재 이용할 수 없습니다. 문의 접수나 전화 상담을 이용해 주세요." data-focus-id="support-chat">실시간 채팅 열기</button>
       </article>
     </div>
   `;
@@ -2481,7 +2481,7 @@ function renderUsageGuideFeaturePanel() {
       <h2 id="feature-panel-title" tabindex="-1">상담 전 준비 안내</h2>
     </div>
     <div class="feature-list">
-      <article class="mini-card"><h3>비대면 상담</h3><p>조용한 장소, 이어폰, 안정적인 인터넷 연결을 준비하십시오.</p></article>
+      <article class="mini-card"><h3>비대면 상담</h3><p>조용한 장소와 이어폰을 준비하고 인터넷 연결 상태를 확인해 주세요.</p></article>
       <article class="mini-card"><h3>대면 상담</h3><p>상담 시작 10분 전까지 센터에 도착하면 접수대에서 안내받을 수 있습니다.</p></article>
       <article class="mini-card"><h3>상담 메모</h3><p>최근에 힘들었던 일이나 상담에서 다루고 싶은 주제를 간단히 적어 두면 도움이 됩니다.</p></article>
     </div>
@@ -2750,7 +2750,7 @@ function renderPseudoOptionGroup({ name, label, options, selected }) {
   return `
     <div class="pseudo-combo pseudo-combo-a" role="group" aria-label="${escapeHtml(label)}">
       <p class="pseudo-combo-label">${escapeHtml(label)}</p>
-      <button class="button button-secondary pseudo-combo-selected" type="button" data-action="site-placeholder" data-notice="아래 선택지에서 값을 고르십시오." data-focus-id="booking-option-${escapeHtml(name)}-selected">
+      <button class="button button-secondary pseudo-combo-selected" type="button" data-action="site-placeholder" data-notice="아래에서 항목을 선택해 주세요." data-focus-id="booking-option-${escapeHtml(name)}-selected">
         선택됨: ${escapeHtml(getOptionLabel(name, selected))}
       </button>
       <div class="pseudo-combo-options visually-collapsed-options">
@@ -2881,7 +2881,7 @@ function renderModal(modal, run, task) {
       <div class="modal-backdrop">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" data-modal-dialog>
           <h2 id="dialog-title" tabindex="-1">이번 주 예약 가능 개수를 넘었습니다</h2>
-          <p id="dialog-description">한 주에는 최대 2개까지 예약할 수 있습니다. 새 시간을 예약하려면 현재 예약 내용에서 기존 예약을 먼저 취소하십시오.</p>
+          <p id="dialog-description">한 주에는 최대 2개까지 예약할 수 있습니다. 새 일정을 예약하려면 현재 예약 내용에서 기존 예약을 먼저 취소해 주세요.</p>
           <div class="button-row">
             <button class="button button-primary" data-action="dialog-close" data-dialog-primary data-focus-id="booking-limit-close">확인</button>
           </div>

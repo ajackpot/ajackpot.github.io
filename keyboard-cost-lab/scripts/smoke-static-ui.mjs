@@ -31,7 +31,7 @@ const gridButtonHasAction = /class="slot-grid-button[^`]+data-action="slot-open"
 assert(gridButtonHasAction, '예약 캘린더 B 시간표 버튼이 일반 실행 경로에도 연결됨');
 
 const utilsSource = fs.readFileSync('lib/utils.js', 'utf8');
-assert(utilsSource.includes('과업 요청 사항을 수행 페이지에서도 보기'), '공통 유틸에 요청 사항 표시 스위치 문구가 있음');
+assert(utilsSource.includes('과업 요청을 수행 페이지에도 표시'), '공통 유틸에 요청 사항 표시 스위치 문구가 있음');
 assert(!utilsSource.includes('task-outcome-message'), '종료 확인 대화상자 유틸이 결과 메시지 영역을 만들지 않음');
 
 if (failed) {

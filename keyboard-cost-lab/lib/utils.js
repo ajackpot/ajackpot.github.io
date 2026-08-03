@@ -41,7 +41,7 @@ export function getDefaultConditionOrder() {
 }
 
 export function formatServiceScreenButtonLabel(serviceLabel) {
-  return `${serviceLabel} 화면으로 이동`;
+  return `${serviceLabel} 테스트 시작`;
 }
 
 export function renderRunnerFooterHtml({ jumpLabel, endLabel = '과업 종료', beforeEndHtml = '' } = {}) {
@@ -57,8 +57,8 @@ export function renderRunnerFooterHtml({ jumpLabel, endLabel = '과업 종료', 
 }
 
 export function renderRunnerCompletionDialogHtml({
-  title = '과업 기록을 저장했습니다.',
-  description = '확인 버튼을 누르면 이 탭이 닫힙니다.',
+  title = '수행 기록을 저장했습니다.',
+  description = '수행 기록을 과업 요청이 있는 창으로 보냈습니다. ‘확인’을 누르면 이 탭이 닫힙니다.',
   confirmLabel = '확인',
 } = {}) {
   return `
@@ -83,8 +83,8 @@ export function renderRunnerCompletionDialogHtml({
 }
 
 export function renderEndTaskConfirmationDialogHtml({
-  title = '과업을 종료하시겠습니까?',
-  description = '예를 누르면 현재 상태로 기록을 저장하고 이 탭을 닫습니다. 아니요를 누르면 계속 과업을 진행합니다.',
+  title = '현재 상태로 과업을 마칠까요?',
+  description = '‘예, 종료합니다’를 누르면 현재 기록을 저장하고 이 탭을 닫습니다. ‘아니요, 계속합니다’를 누르면 과업으로 돌아갑니다.',
   confirmLabel = '예, 종료합니다',
   cancelLabel = '아니요, 계속합니다',
 } = {}) {
@@ -122,16 +122,16 @@ export function renderTaskRequestVisibilitySwitchHtml({ checked = false } = {}) 
           ${checked ? 'checked' : ''}
           aria-describedby="runner-task-request-visible-help"
         >
-        <span>과업 요청 사항을 수행 페이지에서도 보기</span>
+        <span>과업 요청을 수행 페이지에도 표시</span>
       </label>
       <p id="runner-task-request-visible-help" class="muted">
-        켜면 새로 열리는 과업 수행 페이지 맨 위에도 이번 요청이 표시됩니다. 끄면 과업 수행 페이지에는 실제 서비스 화면만 표시됩니다.
+        켜면 새 탭 맨 위에도 이번 요청이 보입니다. 끄면 서비스 화면만 표시됩니다.
       </p>
     </div>
   `;
 }
 
-export function renderRunnerTaskRequestHtml({ goalSummary, title = '과업 요청 사항' } = {}) {
+export function renderRunnerTaskRequestHtml({ goalSummary, title = '이번 과업 요청' } = {}) {
   if (!goalSummary) return '';
   return `
     <section class="card runner-task-request" data-measurement-exempt="true" aria-labelledby="runner-task-request-heading">

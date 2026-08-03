@@ -32,7 +32,7 @@ for (const [service, source] of Object.entries(files).filter(([key]) => ['calend
   assert(`${service}: 과업 기록을 공통 저장소에 보존`, source.includes('saveServiceRunSnapshot'));
 }
 
-assert('utils: 과업 요청 표시 스위치 라벨 제공', files.utils.includes('과업 요청 사항을 수행 페이지에서도 보기'));
+assert('utils: 과업 요청 표시 스위치 라벨 제공', files.utils.includes('과업 요청을 수행 페이지에도 표시'));
 assert('utils: 과업 수행 페이지 과업 요청 카드 제공', files.utils.includes('export function renderRunnerTaskRequestHtml'));
 assert('calendar: 비교안 B 시간표 클릭 실행 연결', files.calendar.includes('event.target.closest(\'[data-grid-slot="true"]\')'));
 
