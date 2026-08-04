@@ -2,6 +2,12 @@
 
 정적 웹앱으로 만드는 키보드·스위치 과도 조작 부담 평가용 테스트 프로젝트입니다. 서버 없이 GitHub Pages 같은 정적 호스팅에 올릴 수 있도록 HTML, CSS, JavaScript, 정적 데이터 파일만 사용합니다.
 
+## 권장 테스트 환경
+
+- 이 테스트는 Windows, macOS 등을 사용하는 데스크톱이나 노트북 PC 환경을 기준으로 만들었습니다.
+- 휴대전화나 태블릿이 아닌 PC에서 진행합니다.
+- 각 서비스 소개 화면의 `알아두세요` 영역에서 같은 내용을 한 번 안내합니다.
+
 ## 현재 구현 범위
 
 이번 버전은 테스트 범위를 7개 서비스에서 3개 서비스로 줄이고, 실제 사용자가 과업을 수행하는 흐름에 더 가깝게 정리한 상태입니다.
@@ -84,9 +90,10 @@ python -m http.server 4173
 
 ## 설문지 연동
 
-- `data/survey-config.js`: Google 설문지 응답 URL과 `entry.*` 자동 입력 필드 매핑을 관리합니다.
+- `data/survey-config.js`: Google 설문지 응답 URL과 수행 기록 자동 입력에 필요한 6개 `entry.*` 값만 관리합니다. 설문 문항 전체 목록은 Apps Script 실행 뒤 응답 시트의 `연동_JSON`에서 관리합니다.
 - `lib/survey-link.js`: 3개 서비스의 수행 기록이 모두 저장되었는지 확인하고, 자동 응답 영역에 들어갈 수행 기록 문장을 만들어 설문지 URL에 붙입니다.
 - 홈 화면과 각 서비스 최종 결과 화면의 `설문 작성하기(새 탭)` 링크는 위 두 파일을 기준으로 생성됩니다.
+- `scripts/google-form-step-31-update.gs`: 기존 설문 제목·설명·문항 문구를 최신 테스트 페이지와 맞추고, PC 환경 안내와 기프티콘 지급 정보용 선택 입력란을 추가합니다.
 
 ## 문서
 
@@ -109,5 +116,6 @@ python -m http.server 4173
 - `docs/step-27-test-language-simplification-report.md`: 27단계 테스트 용어 통일과 화면 설명 정리 보고서
 - `docs/step-29-search-query-and-toast-live-region-report.md`: 29단계 검색 조건과 상태 메시지 알림 개선 보고서
 - `docs/step-30-friendly-plain-language-report.md`: 30단계 친근하고 명확한 화면 문구 개선 보고서
+- `docs/step-31-survey-alignment-pc-notice-report.md`: 31단계 설문 문구 정합성 검토와 PC 환경 안내 추가 보고서
 
-이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 테스트 범위와 운영 규칙은 이 README, 수동 점검표, 30단계 보고서를 기준으로 확인합니다.
+이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 테스트 범위와 운영 규칙은 이 README, 수동 점검표, 31단계 보고서를 기준으로 확인합니다.

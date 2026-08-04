@@ -56,11 +56,17 @@ const requiredPhrases = [
   '사전 예상 기준',
   '현재 상태로 과업을 마칠까요?',
   '새 탭이 열리지 않았습니다. 브라우저에서 이 사이트의 팝업을 허용한 뒤 다시 열어 주세요.',
+  '이 테스트는 Windows, macOS 등을 사용하는 데스크톱이나 노트북 PC에서 진행해 주세요.',
 ];
 
 for (const phrase of requiredPhrases) {
   assert(combined.includes(phrase), `현재 문구 유지: ${phrase}`);
 }
+
+
+const pcEnvironmentNotice = '이 테스트는 Windows, macOS 등을 사용하는 데스크톱이나 노트북 PC에서 진행해 주세요.';
+const pcEnvironmentNoticeCount = combined.split(pcEnvironmentNotice).length - 1;
+assert(pcEnvironmentNoticeCount === 3, 'PC 환경 안내가 세 서비스 소개 화면에 한 번씩 표시됨');
 
 assert(!/앗|이런|잘하셨습니다|걱정하지 마세요/.test(combined), '불필요한 감탄·과한 격려 문구 없음');
 assert(!/사용자[^\n]{0,20}(실패|잘못)/.test(combined), '사용자를 탓하는 문구 없음');
