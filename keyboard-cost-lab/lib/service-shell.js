@@ -8,7 +8,31 @@ import {
   toQueryString,
 } from './utils.js';
 
-export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
+export function renderServiceIntroActions(savedProgress = null) {
+  const completedTaskCount = Number(savedProgress?.completedTaskCount ?? 0);
+  const expectedTaskCount = Number(savedProgress?.expectedTaskCount ?? 0);
+  const hasSavedProgress = completedTaskCount > 0;
+  const allTasksCompleted = hasSavedProgress
+    && expectedTaskCount > 0
+    && completedTaskCount >= expectedTaskCount;
+  const savedAction = allTasksCompleted
+    ? '<button class="button button-primary" data-action="view-saved-final">최종 결과 화면으로 이동</button>'
+    : hasSavedProgress
+      ? '<button class="button button-primary" data-action="resume-experiment">이전에 수행한 과업 건너뛰기</button>'
+      : '';
+  const startButtonClass = hasSavedProgress ? 'button-secondary' : 'button-primary';
+  const startButtonLabel = hasSavedProgress ? '첫 과업부터 다시 시작' : '첫 과업 준비하기';
+
+  return `
+    <div class="button-row">
+      ${savedAction}
+      <button class="button ${startButtonClass}" data-action="start-experiment">${startButtonLabel}</button>
+      <button class="button button-secondary" data-action="go-home">다른 서비스 고르기</button>
+    </div>
+  `;
+}
+
+export function renderServiceIntroView({ serviceLabel, serviceSummary, savedProgress = null }) {
   return `
     <header class="hero card">
       <p class="eyebrow">선택한 서비스 유형</p>
@@ -36,10 +60,7 @@ export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
           </ul>
         </section>
       </div>
-      <div class="button-row">
-        <button class="button button-primary" data-action="start-experiment">첫 과업 준비하기</button>
-        <button class="button button-secondary" data-action="go-home">다른 서비스 고르기</button>
-      </div>
+      ${renderServiceIntroActions(savedProgress)}
     </header>
   `;
 }

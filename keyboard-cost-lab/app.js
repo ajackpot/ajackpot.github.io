@@ -50,7 +50,11 @@ import {
   aggregateMetrics,
 } from './lib/service-shell.js';
 import {
+  clearStoredServiceProgress,
+  findNextIncompleteTaskPosition,
+  formatServiceProgressSummary,
   getServiceProgress,
+  getServiceResumePlan,
   readStoredExperimentResults,
   saveServiceRunSnapshot,
 } from './lib/experiment-store.js';
@@ -77,11 +81,6 @@ const SERVICE_ID = 'calendar';
 const SERVICE_LABEL = '예약 캘린더';
 const SERVICE_TYPES = serviceRegistry;
 
-const SERVICE_INTRO_POINTS = [
-  '예약 시간 탐색 구조에 따라 키보드 조작 부담이 얼마나 달라지는지',
-  '수행 기록과 사전 예상 기준이 비슷한 흐름을 보이는지',
-  '같은 테스트 틀을 다른 서비스 유형에도 그대로 확장할 수 있는지',
-];
 const VARIANT_META = {
   variantA: {
     subtitle: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간을 다시 찾게 되는 구조',
@@ -471,6 +470,7 @@ function goHome() {
 
 function startExperiment() {
   if (APP_MODE === 'runner') return;
+  clearStoredServiceProgress(SERVICE_ID);
   const selectedService = getSelectedService();
   if (!selectedService || !selectedService.available) return;
   state.currentConditionIndex = 0;
@@ -485,8 +485,71 @@ function startExperiment() {
   render();
 }
 
+function getSavedServiceProgress() {
+  return getServiceProgress(SERVICE_ID, {
+    taskCount: calendarTasks.length,
+    conditionCount: 2,
+  });
+}
+
+function buildLegacyCalendarRuntimeSnapshot(taskResults) {
+  const latestResult = Array.isArray(taskResults) ? taskResults.at(-1) : null;
+  if (!latestResult) return {};
+  const booking = latestResult.bookingAfterTask ? deepClone(latestResult.bookingAfterTask) : null;
+  return {
+    booking,
+    bookings: booking ? [deepClone(booking)] : [],
+    cancelPerformedThisTask: Boolean(latestResult.cancellationPerformed),
+  };
+}
+
+function restoreCalendarRunFromResumePlan(conditionId, plan) {
+  const taskResults = deepClone(plan.actualRuns?.[conditionId] ?? []);
+  const snapshot = plan.runtimeSnapshots?.[conditionId]
+    ?? buildLegacyCalendarRuntimeSnapshot(taskResults);
+  const run = hydrateConditionRuntime(conditionId, snapshot);
+  run.taskResults = taskResults;
+  return run;
+}
+
+function resumeStoredExperiment() {
+  if (APP_MODE === 'runner') return;
+  const plan = getServiceResumePlan(SERVICE_ID, {
+    taskCount: calendarTasks.length,
+    conditionCount: 2,
+  });
+  if (!plan) {
+    startExperiment();
+    return;
+  }
+
+  state.order = [...plan.order];
+  state.comparisonAssignment = plan.comparisonAssignment;
+  state.activeLaunch = null;
+  state.runnerTaskRequestVisible = false;
+  state.runs.variantA = restoreCalendarRunFromResumePlan('variantA', plan);
+  state.runs.variantB = restoreCalendarRunFromResumePlan('variantB', plan);
+
+  if (plan.isComplete) {
+    state.currentConditionIndex = 0;
+    state.currentTaskIndex = 0;
+    state.view = 'final';
+    requestFocus('#final-summary-heading');
+    render();
+    return;
+  }
+
+  state.currentConditionIndex = plan.nextConditionIndex;
+  state.currentTaskIndex = plan.nextTaskIndex;
+  prepareCurrentTaskForMain();
+  state.view = 'taskPrep';
+  requestFocus('#task-prep-heading');
+  render();
+}
+
 function restartExperiment() {
   if (APP_MODE === 'runner') return;
+  clearStoredServiceProgress(SERVICE_ID);
   resetExperimentState();
   state.view = state.selectedServiceId ? 'serviceIntro' : 'home';
   requestFocus(state.selectedServiceId ? '#service-heading' : '#page-title');
@@ -698,21 +761,19 @@ function acceptRunnerTaskCompletion(message) {
 
 function advanceAfterRunnerCompletion() {
   state.activeLaunch = null;
+  const next = findNextIncompleteTaskPosition({
+    order: state.order,
+    actualRuns: {
+      variantA: state.runs.variantA.taskResults,
+      variantB: state.runs.variantB.taskResults,
+    },
+    taskCount: calendarTasks.length,
+    conditionCount: state.order.length,
+  });
 
-  if (state.currentTaskIndex < calendarTasks.length - 1) {
-    state.currentTaskIndex += 1;
-    prepareCurrentTaskForMain();
-    state.view = 'taskPrep';
-    requestFocus('#task-prep-heading');
-    render();
-    return;
-  }
-
-  if (state.currentConditionIndex < state.order.length - 1) {
-    state.currentConditionIndex += 1;
-    state.currentTaskIndex = 0;
-    const nextVariant = getCurrentConditionId();
-    state.runs[nextVariant] = createConditionRuntime(nextVariant);
+  if (next) {
+    state.currentConditionIndex = next.conditionIndex;
+    state.currentTaskIndex = next.taskIndex;
     prepareCurrentTaskForMain();
     state.view = 'taskPrep';
     requestFocus('#task-prep-heading');
@@ -806,6 +867,12 @@ function handleRootClick(event) {
     if (action === 'start-experiment') {
       event.preventDefault();
       startExperiment();
+      return;
+    }
+
+    if (action === 'resume-experiment' || action === 'view-saved-final') {
+      event.preventDefault();
+      resumeStoredExperiment();
       return;
     }
 
@@ -1807,11 +1874,7 @@ function renderHomeServiceCard(service) {
     taskCount: service.taskCount,
     conditionCount: service.conditionCount,
   });
-  const progressDetail = progress.status === 'completed'
-    ? '모든 과업을 마쳤습니다.'
-    : progress.status === 'in-progress'
-      ? `${progress.completedTaskCount}개 과업을 마쳤습니다.`
-      : '아직 시작하지 않았습니다.';
+  const progressDetail = formatServiceProgressSummary(progress);
   return `
     <article class="card service-card ${service.available ? 'service-card-available' : 'service-card-pending'}">
       <div class="service-card-header">
@@ -1823,7 +1886,7 @@ function renderHomeServiceCard(service) {
       <p>${escapeHtml(service.summary)}</p>
       <dl class="meta-list compact service-progress-list">
         <div><dt>진행 상태</dt><dd>${escapeHtml(progress.label)}</dd></div>
-        <div><dt>진행 내용</dt><dd>${escapeHtml(progressDetail)}</dd></div>
+        <div><dt>진척률</dt><dd>${escapeHtml(progressDetail)}</dd></div>
       </dl>
       <div class="button-row">
         <button class="button ${service.available ? 'button-primary' : 'button-secondary'}" data-action="open-service" data-service-id="${service.id}" ${service.available ? '' : 'disabled'}>
@@ -1840,9 +1903,7 @@ function renderServiceIntroView() {
   return renderSharedServiceIntroView({
     serviceLabel: service.label,
     serviceSummary: service.summary,
-    introPoints: SERVICE_INTRO_POINTS,
-    order: state.order,
-    variantMeta: getDisplayVariantMeta(),
+    savedProgress: getSavedServiceProgress(),
   });
 }
 
@@ -3006,6 +3067,10 @@ function persistCurrentServiceProgress() {
     actualRuns: {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
+    },
+    runtimeSnapshots: {
+      variantA: serializeRuntimeSnapshot(state.runs.variantA),
+      variantB: serializeRuntimeSnapshot(state.runs.variantB),
     },
     benchmarkResults: benchmarkResultsCalendar,
     aggregateActualCondition,

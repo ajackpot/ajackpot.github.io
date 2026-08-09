@@ -37,6 +37,7 @@ import {
 } from './lib/experiment-bridge.js';
 import { commonMeasurementRules } from './data/measurement-rules.js';
 import {
+  renderServiceIntroActions as renderSharedServiceIntroActions,
   renderProfileBenchmarkTable as renderSharedProfileBenchmarkTable,
   renderLaunchStatusMessage as renderSharedLaunchStatusMessage,
   renderFinalConditionCard as renderSharedFinalConditionCard,
@@ -47,6 +48,10 @@ import {
   aggregateMetrics,
 } from './lib/service-shell.js';
 import {
+  clearStoredServiceProgress,
+  findNextIncompleteTaskPosition,
+  getServiceProgress,
+  getServiceResumePlan,
   readStoredExperimentResults,
   saveServiceRunSnapshot,
 } from './lib/experiment-store.js';
@@ -433,6 +438,7 @@ function goHome() {
 
 function startExperiment() {
   if (APP_MODE === 'runner') return;
+  clearStoredServiceProgress(SERVICE_ID);
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
@@ -445,8 +451,98 @@ function startExperiment() {
   render();
 }
 
+function getSavedServiceProgress() {
+  return getServiceProgress(SERVICE_ID, {
+    taskCount: searchTasks.length,
+    conditionCount: 2,
+  });
+}
+
+function getStoredPreviewCorrectValue(taskResults) {
+  for (const result of [...(Array.isArray(taskResults) ? taskResults : [])].reverse()) {
+    for (const note of Array.isArray(result?.notes) ? result.notes : []) {
+      if (typeof note === 'string' && note.startsWith('previewQuestionCorrect=')) {
+        const value = note.slice('previewQuestionCorrect='.length).trim();
+        if (value && value !== 'none') return value;
+      }
+    }
+  }
+  return '';
+}
+
+function buildLegacySearchRuntimeSnapshot(taskResults) {
+  const latestResult = Array.isArray(taskResults) ? taskResults.at(-1) : null;
+  if (!latestResult) return {};
+  const previewTask = searchTasks.find((task) => task.completion === 'previewQuestion');
+  const correctValue = getStoredPreviewCorrectValue(taskResults);
+  const fallbackAssignment = previewTask && correctValue
+    ? {
+      [previewTask.id]: {
+        taskId: previewTask.id,
+        resultId: previewTask.targetResultId,
+        correctValue,
+      },
+    }
+    : {};
+  return {
+    openedResultId: latestResult.openedResultIdAfterTask ?? null,
+    savedByResultId: deepClone(latestResult.savedByResultIdAfterTask ?? {}),
+    saveOptionsByResultId: deepClone(latestResult.saveOptionsByResultIdAfterTask ?? {}),
+    submittedPreviewAnswers: deepClone(latestResult.submittedPreviewAnswersAfterTask ?? {}),
+    previewVisitedThisTask: deepClone(latestResult.previewVisitedThisTaskAfterTask ?? {}),
+    previewQuestionAssignments: deepClone(
+      latestResult.previewQuestionAssignmentsAfterTask ?? fallbackAssignment
+    ),
+  };
+}
+
+function restoreSearchRunFromResumePlan(conditionId, plan) {
+  const taskResults = deepClone(plan.actualRuns?.[conditionId] ?? []);
+  const snapshot = plan.runtimeSnapshots?.[conditionId]
+    ?? buildLegacySearchRuntimeSnapshot(taskResults);
+  const run = hydrateConditionRuntime(conditionId, snapshot);
+  run.taskResults = taskResults;
+  return run;
+}
+
+function resumeStoredExperiment() {
+  if (APP_MODE === 'runner') return;
+  const plan = getServiceResumePlan(SERVICE_ID, {
+    taskCount: searchTasks.length,
+    conditionCount: 2,
+  });
+  if (!plan) {
+    startExperiment();
+    return;
+  }
+
+  state.order = [...plan.order];
+  state.comparisonAssignment = plan.comparisonAssignment;
+  state.activeLaunch = null;
+  state.runnerTaskRequestVisible = false;
+  state.runs.variantA = restoreSearchRunFromResumePlan('variantA', plan);
+  state.runs.variantB = restoreSearchRunFromResumePlan('variantB', plan);
+
+  if (plan.isComplete) {
+    state.currentConditionIndex = 0;
+    state.currentTaskIndex = 0;
+    state.view = 'final';
+    requestFocus('#final-summary-heading');
+    render();
+    return;
+  }
+
+  state.currentConditionIndex = plan.nextConditionIndex;
+  state.currentTaskIndex = plan.nextTaskIndex;
+  prepareCurrentTaskForMain();
+  state.view = 'taskPrep';
+  requestFocus('#task-prep-heading');
+  render();
+}
+
 function restartExperiment() {
   if (APP_MODE === 'runner') return;
+  clearStoredServiceProgress(SERVICE_ID);
   resetExperimentState();
   state.view = 'serviceIntro';
   requestFocus('#service-heading');
@@ -601,6 +697,10 @@ function acceptRunnerTaskCompletion(message) {
     targetResultId: task.targetResultId,
     openedResultIdAfterTask: run.openedResultId,
     savedByResultIdAfterTask: deepClone(run.savedByResultId),
+    saveOptionsByResultIdAfterTask: deepClone(run.saveOptionsByResultId),
+    submittedPreviewAnswersAfterTask: deepClone(run.submittedPreviewAnswers),
+    previewVisitedThisTaskAfterTask: deepClone(run.previewVisitedThisTask),
+    previewQuestionAssignmentsAfterTask: deepClone(run.previewQuestionAssignments),
     conditionId,
   });
   persistCurrentServiceProgress();
@@ -616,21 +716,19 @@ function acceptRunnerTaskCompletion(message) {
 
 function advanceAfterRunnerCompletion() {
   state.activeLaunch = null;
+  const next = findNextIncompleteTaskPosition({
+    order: state.order,
+    actualRuns: {
+      variantA: state.runs.variantA.taskResults,
+      variantB: state.runs.variantB.taskResults,
+    },
+    taskCount: searchTasks.length,
+    conditionCount: state.order.length,
+  });
 
-  if (state.currentTaskIndex < searchTasks.length - 1) {
-    state.currentTaskIndex += 1;
-    prepareCurrentTaskForMain();
-    state.view = 'taskPrep';
-    requestFocus('#task-prep-heading');
-    render();
-    return;
-  }
-
-  if (state.currentConditionIndex < state.order.length - 1) {
-    state.currentConditionIndex += 1;
-    state.currentTaskIndex = 0;
-    const nextVariant = getCurrentConditionId();
-    state.runs[nextVariant] = createConditionRuntime(nextVariant);
+  if (next) {
+    state.currentConditionIndex = next.conditionIndex;
+    state.currentTaskIndex = next.taskIndex;
     prepareCurrentTaskForMain();
     state.view = 'taskPrep';
     requestFocus('#task-prep-heading');
@@ -708,6 +806,11 @@ function handleRootClick(event) {
     if (action === 'start-experiment') {
       event.preventDefault();
       startExperiment();
+      return;
+    }
+    if (action === 'resume-experiment' || action === 'view-saved-final') {
+      event.preventDefault();
+      resumeStoredExperiment();
       return;
     }
     if (action === 'launch-runner') {
@@ -1820,10 +1923,7 @@ function renderServiceIntroView() {
           </ul>
         </section>
       </div>
-      <div class="button-row">
-        <button class="button button-primary" data-action="start-experiment">첫 과업 준비하기</button>
-        <button class="button button-secondary" data-action="go-home">다른 서비스 고르기</button>
-      </div>
+      ${renderSharedServiceIntroActions(getSavedServiceProgress())}
     </header>
   `;
 }
@@ -2664,6 +2764,10 @@ function persistCurrentServiceProgress() {
     actualRuns: {
       variantA: state.runs.variantA.taskResults,
       variantB: state.runs.variantB.taskResults,
+    },
+    runtimeSnapshots: {
+      variantA: serializeRuntimeSnapshot(state.runs.variantA),
+      variantB: serializeRuntimeSnapshot(state.runs.variantB),
     },
     benchmarkResults: benchmarkResultsSearch,
     aggregateActualCondition,
