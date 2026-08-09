@@ -7,7 +7,11 @@ import {
   formatSeconds,
   escapeHtml,
   deepClone,
+  CONDITION_PAGE_TYPE_LABELS,
   getDefaultConditionOrder,
+  getRandomComparisonAssignment,
+  getComparisonLabel,
+  getConditionIdForComparisonLabel,
   renderRunnerTaskRequestHtml,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
@@ -62,8 +66,6 @@ const SERVICE_LABEL = '검색 결과 목록';
 
 const VARIANT_META = {
   variantA: {
-    shortLabel: 'A',
-    title: '비교안 A · 조작 부담이 큰 구조',
     subtitle: '상단 보조 링크와 자료 조건 선택을 지난 뒤 검색 결과에 도달하고, 자료마다 여러 링크와 버튼을 각각 지나야 하며, 미리보기 대화상자를 닫으면 검색 결과 제목 근처부터 다시 찾아야 하는 구조',
     improvements: [
       '상단 보조 링크와 자료 조건 선택을 지난 뒤 검색 결과에 도달합니다.',
@@ -72,8 +74,6 @@ const VARIANT_META = {
     ],
   },
   variantB: {
-    shortLabel: 'B',
-    title: '비교안 B · 개선 구조',
     subtitle: '검색 결과로 바로 이동하고, 자료를 하나의 선택 항목으로 고른 뒤, 선택한 자료 작업을 한곳에서 이어서 수행하는 구조',
     improvements: [
       '검색 결과로 바로 이동해 첫 진입 부담을 줄입니다.',
@@ -82,6 +82,26 @@ const VARIANT_META = {
     ],
   },
 };
+
+function getConditionDisplayMeta(conditionId) {
+  const comparisonLabel = getComparisonLabel(state?.comparisonAssignment, conditionId);
+  return {
+    ...VARIANT_META[conditionId],
+    shortLabel: comparisonLabel,
+    title: `비교안 ${comparisonLabel} · ${CONDITION_PAGE_TYPE_LABELS[conditionId]}`,
+  };
+}
+
+function getDisplayVariantMeta() {
+  return {
+    variantA: getConditionDisplayMeta('variantA'),
+    variantB: getConditionDisplayMeta('variantB'),
+  };
+}
+
+function getImprovedComparisonLabel() {
+  return getComparisonLabel(state?.comparisonAssignment, 'variantB');
+}
 
 const RUNNER_LABELS = {
   quickJump: '검색 결과로 바로 이동',
@@ -169,6 +189,7 @@ function createMainState() {
   return {
     sessionId,
     order,
+    comparisonAssignment: getRandomComparisonAssignment(),
     currentConditionIndex: 0,
     currentTaskIndex: 0,
     view: 'serviceIntro',
@@ -399,6 +420,7 @@ function resetExperimentState() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.activeLaunch = null;
   state.runnerTaskRequestVisible = false;
   state.runs.variantA = createConditionRuntime('variantA');
@@ -414,6 +436,7 @@ function startExperiment() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
   prepareCurrentTaskForMain();
@@ -1065,12 +1088,49 @@ function buildResultSelector(resultId) {
   return `[data-result-option="true"][data-result-id="${resultId}"]`;
 }
 
-function selectResult(resultId) {
+function renderSelectedResultPanelContent(run, selectedResult) {
+  return `
+    <h3 id="selected-result-heading">선택한 자료 작업</h3>
+    ${selectedResult ? `
+      <p class="goal">${escapeHtml(selectedResult.title)} · ${escapeHtml(selectedResult.badge)}</p>
+      <p class="muted">${escapeHtml(selectedResult.summary)}</p>
+      ${renderKeywordList(selectedResult)}
+      <div class="button-row">
+        <button class="button button-secondary" data-action="open-result-preview" data-result-id="${selectedResult.id}" data-focus-id="selected-preview-${selectedResult.id}">미리보기</button>
+        <button class="button button-ghost" data-action="save-result" data-result-id="${selectedResult.id}" data-focus-id="selected-save-${selectedResult.id}">저장</button>
+        <button class="button button-ghost" data-action="open-result" data-result-id="${selectedResult.id}" data-focus-id="selected-open-${selectedResult.id}">바로 열기</button>
+      </div>
+    ` : '<p class="muted">선택된 자료가 없습니다.</p>'}
+  `;
+}
+
+function syncSelectedResultUi(resultId, { moveFocus = true } = {}) {
   const run = getCurrentRun();
   if (!run || !resultId) return;
+  const target = document.querySelector(buildResultSelector(resultId));
+  if (!(target instanceof HTMLElement)) return;
+
+  document.querySelectorAll('[data-result-option="true"]').forEach((option) => {
+    const selected = option === target;
+    option.setAttribute('aria-selected', selected ? 'true' : 'false');
+    option.tabIndex = selected ? 0 : -1;
+    option.classList.toggle('result-option-button-active', selected);
+  });
+
   run.currentResultId = resultId;
-  requestFocus(buildResultSelector(resultId));
-  render();
+  const panel = document.querySelector('.selected-result-card');
+  const selectedResult = getResultById(resultId);
+  if (panel instanceof HTMLElement) {
+    panel.innerHTML = renderSelectedResultPanelContent(run, selectedResult);
+  }
+  if (moveFocus) {
+    target.focus();
+    target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }
+}
+
+function selectResult(resultId) {
+  syncSelectedResultUi(resultId);
 }
 
 function applyResultFilters() {
@@ -1647,9 +1707,8 @@ function handleResultOptionNavigation(event, currentButton) {
 
   if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    run.currentResultId = visibleSearch[nextIndex].id;
-    requestFocus(buildResultSelector(visibleSearch[nextIndex].id));
-    render();
+    if (nextIndex === currentIndex) return;
+    syncSelectedResultUi(visibleSearch[nextIndex].id);
   }
 }
 
@@ -1840,7 +1899,7 @@ function renderTaskReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
+      <p class="eyebrow">${escapeHtml(getConditionDisplayMeta(conditionId).title)}</p>
       <h1 id="review-heading" tabindex="-1">과업 수행 기록</h1>
       <p>${escapeHtml(task.title)}의 수행 기록과 사전 예상 기준을 확인할 수 있습니다.</p>
     </section>
@@ -1869,7 +1928,7 @@ function renderTaskReviewView() {
           ${benchmark.assumptions.map((assumption) => `<li>${escapeHtml(assumption)}</li>`).join('')}
         </ul>
         <div class="benchmark-delta">
-          <h3>비교안 B의 예상 시간 감소</h3>
+          <h3>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 시간 감소</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
               <li><strong>${escapeHtml(benchmarkResultsSearch.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
@@ -1899,9 +1958,9 @@ function renderConditionReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 수행 기록</p>
+      <p class="eyebrow">비교안 ${escapeHtml(getConditionDisplayMeta(conditionId).shortLabel)} 수행 기록</p>
       <h1 id="condition-review-heading" tabindex="-1">현재 비교안 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업별 기록을 모두 저장했습니다.</p>
+      <p>${escapeHtml(getConditionDisplayMeta(conditionId).title)}의 과업별 기록을 모두 저장했습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
@@ -1920,7 +1979,7 @@ function renderConditionReviewView() {
         <h2>예상 조작 부담 합계</h2>
         <table class="summary-table">
           <thead>
-            <tr><th>사용자 유형</th><th>기준 예상</th><th>A→B 예상 감소</th></tr>
+            <tr><th>사용자 유형</th><th>기준 예상</th><th>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 감소</th></tr>
           </thead>
           <tbody>
             ${Object.entries(benchmarkOverall).map(([profileId, value]) => `
@@ -1950,8 +2009,10 @@ function renderConditionReviewView() {
 }
 
 function renderFinalView() {
-  const actualA = aggregateActualCondition(state.runs.variantA);
-  const actualB = aggregateActualCondition(state.runs.variantB);
+  const conditionIdA = getConditionIdForComparisonLabel(state.comparisonAssignment, 'A');
+  const conditionIdB = getConditionIdForComparisonLabel(state.comparisonAssignment, 'B');
+  const actualA = aggregateActualCondition(state.runs[conditionIdA]);
+  const actualB = aggregateActualCondition(state.runs[conditionIdB]);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
   return `
@@ -1976,8 +2037,8 @@ function renderFinalView() {
     </section>
     ${renderStudySurveyTransferPanel()}
     <section class="comparison-grid">
-      ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
-      ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdA, actualA, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdB, actualB, selectedProfileId)}
     </section>
     <section class="card">
       <h2>두 화면의 수행 기록 비교</h2>
@@ -2008,8 +2069,8 @@ function renderFinalView() {
         <li>요청한 동작을 끝내지 못한 상태로 과업을 종료하면 ‘완료하지 못한 과업’으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
-        <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
-        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
+        <button class="button button-primary" data-action="go-home">다른 서비스 테스트 시작하기</button>
+        <button class="button button-secondary" data-action="restart-experiment">이 서비스 처음부터 다시 시작</button>
       </div>
     </section>
   `;
@@ -2028,7 +2089,7 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
     actualTotals,
     selectedProfileId,
     benchmarkResults: benchmarkResultsSearch,
-    variantMeta: VARIANT_META,
+    variantMeta: getDisplayVariantMeta(),
   });
 }
 
@@ -2418,17 +2479,7 @@ function renderVariantBResultList(run, visibleSearch) {
         `).join('')}
       </div>
       <section class="card selected-result-card">
-        <h3 id="selected-result-heading">선택한 자료 작업</h3>
-        ${selectedResult ? `
-          <p class="goal">${escapeHtml(selectedResult.title)} · ${escapeHtml(selectedResult.badge)}</p>
-          <p class="muted">${escapeHtml(selectedResult.summary)}</p>
-          ${renderKeywordList(selectedResult)}
-          <div class="button-row">
-            <button class="button button-secondary" data-action="open-result-preview" data-result-id="${selectedResult.id}" data-focus-id="selected-preview-${selectedResult.id}">미리보기</button>
-            <button class="button button-ghost" data-action="save-result" data-result-id="${selectedResult.id}" data-focus-id="selected-save-${selectedResult.id}">저장</button>
-            <button class="button button-ghost" data-action="open-result" data-result-id="${selectedResult.id}" data-focus-id="selected-open-${selectedResult.id}">바로 열기</button>
-          </div>
-        ` : '<p class="muted">선택된 자료가 없습니다.</p>'}
+        ${renderSelectedResultPanelContent(run, selectedResult)}
       </section>
     </div>
     ${openedResult ? renderOpenedResultStatus(openedResult) : ''}
@@ -2606,6 +2657,7 @@ function persistCurrentServiceProgress() {
     serviceLabel: SERVICE_LABEL,
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     taskCount: searchTasks.length,
     conditionCount: state.order.length,
     measurementRules: MEASUREMENT_RULES,
@@ -2623,6 +2675,7 @@ function buildExportPayload() {
     serviceId: 'search',
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     measurementRules: MEASUREMENT_RULES,
     actualRuns: {
       variantA: state.runs.variantA.taskResults,

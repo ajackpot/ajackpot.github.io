@@ -1,6 +1,6 @@
 export const searchBenchmarkGraphs = {
   variantA: {
-    label: '비교안 A · 조작 부담이 큰 구조',
+    label: '조작 부담 문제가 있는 페이지',
     description: '상단 검색 기능과 조건 선택을 지나 결과에 도달하고, 결과마다 저장·열기·미리보기·정보 링크가 반복되는 구조.',
     tasks: {
       task1_newest_guide_preview_answer: {
@@ -37,7 +37,7 @@ export const searchBenchmarkGraphs = {
     },
   },
   variantB: {
-    label: '비교안 B · 개선 구조',
+    label: '조작 부담이 개선된 페이지',
     description: '검색 결과와 검색 조건으로 바로 이동하는 링크를 제공하고, 결과를 하나의 선택 항목으로 이동하며, 선택한 자료 작업을 한곳에 모은 구조.',
     tasks: {
       task1_newest_guide_preview_answer: {

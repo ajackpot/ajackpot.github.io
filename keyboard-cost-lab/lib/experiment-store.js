@@ -1,3 +1,5 @@
+import { getComparisonOrder, normalizeComparisonAssignment } from './utils.js';
+
 const STORE_KEY = 'keyboard-cost-lab-results-v1';
 
 const EMPTY_STORE = Object.freeze({
@@ -103,6 +105,7 @@ export function saveServiceRunSnapshot({
   serviceLabel,
   sessionId,
   order,
+  comparisonAssignment,
   taskCount,
   conditionCount,
   measurementRules,
@@ -116,11 +119,14 @@ export function saveServiceRunSnapshot({
     variantA: Array.isArray(actualRuns?.variantA) ? clone(actualRuns.variantA) : [],
     variantB: Array.isArray(actualRuns?.variantB) ? clone(actualRuns.variantB) : [],
   };
+  const normalizedComparisonAssignment = normalizeComparisonAssignment(comparisonAssignment);
   const record = {
     serviceId,
     serviceLabel: serviceLabel || serviceId,
     sessionId: sessionId || '',
     order: Array.isArray(order) ? [...order] : [],
+    comparisonAssignment: normalizedComparisonAssignment,
+    comparisonOrder: getComparisonOrder(order, normalizedComparisonAssignment),
     taskCount: Number(taskCount ?? 3),
     conditionCount: Number(conditionCount ?? 2),
     updatedAt: now,

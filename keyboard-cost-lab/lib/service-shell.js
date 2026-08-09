@@ -1,4 +1,12 @@
-import { escapeHtml, formatSeconds, toQueryString } from './utils.js';
+import {
+  CONDITION_PAGE_TYPE_LABELS,
+  escapeHtml,
+  formatSeconds,
+  getComparisonOrder,
+  getConditionIdForComparisonLabel,
+  normalizeComparisonAssignment,
+  toQueryString,
+} from './utils.js';
 
 export function renderServiceIntroView({ serviceLabel, serviceSummary }) {
   return `
@@ -74,11 +82,19 @@ export function renderLaunchStatusMessage(activeLaunch, isRunning) {
   return isRunning ? '과업 수행 페이지가 새 탭에 열려 있습니다.' : '과업을 시작할 준비가 되었습니다.';
 }
 
+export function formatActualVsExpectedSeconds(actualSeconds, expectedSeconds) {
+  const difference = Number((Number(actualSeconds ?? 0) - Number(expectedSeconds ?? 0)).toFixed(1));
+  if (difference > 0) return `예상보다 ${formatSeconds(difference)} 오래 걸림`;
+  if (difference < 0) return `예상보다 ${formatSeconds(Math.abs(difference))} 짧게 걸림`;
+  return '예상 시간과 같음';
+}
+
 export function renderFinalConditionCard({ conditionId, actualTotals, selectedProfileId, benchmarkResults, variantMeta }) {
   const benchmarkOverall = benchmarkResults.overall[selectedProfileId];
   const expectedSeconds = conditionId === 'variantA'
     ? benchmarkOverall.variantAExpectedSeconds
     : benchmarkOverall.variantBExpectedSeconds;
+  const actualVsExpected = formatActualVsExpectedSeconds(actualTotals.durationSeconds, expectedSeconds);
 
   return `
     <article class="card final-condition-card">
@@ -91,6 +107,7 @@ export function renderFinalConditionCard({ conditionId, actualTotals, selectedPr
         <div><dt>완료한 과업</dt><dd>${actualTotals.successCount ?? 0}개</dd></div>
         <div><dt>완료하지 못한 과업</dt><dd>${actualTotals.incompleteCount ?? 0}개</dd></div>
         <div><dt>${escapeHtml(benchmarkOverall.label)} 기준 예상 시간</dt><dd>${formatSeconds(expectedSeconds)}</dd></div>
+        <div><dt>예상 시간과의 차이</dt><dd>${escapeHtml(actualVsExpected)}</dd></div>
       </dl>
     </article>
   `;
@@ -111,14 +128,36 @@ export function aggregateBenchmarkCondition({ benchmarkResults, conditionId }) {
   return totals;
 }
 
-export function buildExportPayload({ serviceId, sessionId, order, measurementRules, actualRuns, benchmarkResults, storedServices = null }) {
+export function buildExportPayload({
+  serviceId,
+  sessionId,
+  order,
+  comparisonAssignment,
+  measurementRules,
+  actualRuns,
+  benchmarkResults,
+  storedServices = null,
+}) {
+  const normalizedAssignment = normalizeComparisonAssignment(comparisonAssignment);
+  const conditionForA = getConditionIdForComparisonLabel(normalizedAssignment, 'A');
+  const conditionForB = getConditionIdForComparisonLabel(normalizedAssignment, 'B');
   return {
     exportedAt: new Date().toISOString(),
     serviceId,
     sessionId,
     order,
+    comparisonAssignment: normalizedAssignment,
+    comparisonOrder: getComparisonOrder(order, normalizedAssignment),
+    comparisonPageTypes: {
+      A: CONDITION_PAGE_TYPE_LABELS[conditionForA],
+      B: CONDITION_PAGE_TYPE_LABELS[conditionForB],
+    },
     measurementRules,
     actual: actualRuns,
+    actualByComparison: {
+      A: actualRuns?.[conditionForA] ?? [],
+      B: actualRuns?.[conditionForB] ?? [],
+    },
     benchmark: benchmarkResults,
     storedServices,
   };

@@ -1,6 +1,6 @@
 export const commentsBenchmarkGraphs = {
   variantA: {
-    label: '비교안 A · 조작 부담이 큰 구조',
+    label: '조작 부담 문제가 있는 페이지',
     description: '상단 링크와 변형된 조건 선택을 지난 뒤 댓글 목록에 도달하고, 댓글마다 여러 작업 버튼을 지나야 하는 구조.',
     tasks: {
       task1_newest_review_open_replies: {
@@ -19,7 +19,7 @@ export const commentsBenchmarkGraphs = {
         ],
       },
       task2_popular_admin_detail_helpful: {
-        title: '운영자 안내 댓글 정보 보기 후 도움이 돼요',
+        title: '3월 25일 운영자 안내 댓글 정보 보기 후 도움이 돼요',
         assumptions: [
           '정렬 기준을 다시 맞춘 뒤 댓글 목록 맨 앞에서부터 원하는 댓글의 작업 버튼을 찾아야 한다.',
           '댓글 정보 대화상자를 닫으면 원래 댓글의 버튼으로 돌아가지 않고 댓글 목록 제목 근처부터 다시 찾아야 한다.',
@@ -35,7 +35,7 @@ export const commentsBenchmarkGraphs = {
     },
   },
   variantB: {
-    label: '비교안 B · 개선 구조',
+    label: '조작 부담이 개선된 페이지',
     description: '댓글 목록 바로 이동 링크와 하나의 선택 항목 구조, 한곳에 모은 댓글 작업으로 반복 버튼을 줄인 구조.',
     tasks: {
       task1_newest_review_open_replies: {
@@ -53,7 +53,7 @@ export const commentsBenchmarkGraphs = {
         ],
       },
       task2_popular_admin_detail_helpful: {
-        title: '운영자 안내 댓글 정보 보기 후 도움이 돼요',
+        title: '3월 25일 운영자 안내 댓글 정보 보기 후 도움이 돼요',
         assumptions: [
           '선택한 댓글 작업이 같은 카드에 있어 댓글 정보 보기와 도움이 돼요가 가까이 있다.',
           '댓글 정보 대화상자를 닫으면 원래 작업 버튼으로 돌아온다.',

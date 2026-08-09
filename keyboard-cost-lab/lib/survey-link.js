@@ -1,14 +1,16 @@
 import { serviceRegistry } from '../data/service-registry.js';
 import { surveyManifest, surveyPrefillParams } from '../data/survey-config.js';
 import { getExpectedServiceTaskCount, getServiceCompletedTaskCount } from './experiment-store.js';
-import { escapeHtml, formatSeconds } from './utils.js';
+import {
+  CONDITION_PAGE_TYPE_LABELS,
+  escapeHtml,
+  formatSeconds,
+  getConditionIdForComparisonLabel,
+  normalizeComparisonAssignment,
+} from './utils.js';
 
 const SURVEY_SERVICE_IDS = surveyManifest.services.map((service) => service.id);
-const CONDITION_IDS = ['variantA', 'variantB'];
-const CONDITION_LABELS = {
-  variantA: 'A',
-  variantB: 'B',
-};
+const COMPARISON_LABELS = ['A', 'B'];
 
 function asNumber(value, fallback = 0) {
   const number = Number(value);
@@ -23,6 +25,34 @@ function formatOptionalMetric(label, value, suffix = '회') {
   const number = asNumber(value);
   if (number <= 0) return '';
   return `${label} ${formatCount(number, suffix)}`;
+}
+
+function getExpectedSeconds(record, conditionId, profileId) {
+  const profile = record?.benchmarkSummary?.[profileId];
+  if (!profile || typeof profile !== 'object') return null;
+  const key = conditionId === 'variantA' ? 'variantAExpectedSeconds' : 'variantBExpectedSeconds';
+  const value = Number(profile[key]);
+  return Number.isFinite(value) ? value : null;
+}
+
+function formatActualExpectedDifference(actualSeconds, expectedSeconds) {
+  const difference = Number((asNumber(actualSeconds) - asNumber(expectedSeconds)).toFixed(1));
+  if (difference > 0) return `예상보다 ${formatSeconds(difference)} 오래 걸림`;
+  if (difference < 0) return `예상보다 ${formatSeconds(Math.abs(difference))} 짧게 걸림`;
+  return '예상 시간과 같음';
+}
+
+function formatBenchmarkComparisonLines(record, conditionId, actualSeconds) {
+  const profiles = record?.benchmarkSummary && typeof record.benchmarkSummary === 'object'
+    ? Object.entries(record.benchmarkSummary)
+    : [];
+  const lines = profiles.map(([profileId, profile]) => {
+    const expectedSeconds = getExpectedSeconds(record, conditionId, profileId);
+    if (expectedSeconds === null) return '';
+    const label = profile?.label || profileId;
+    return `${label}: 예상 ${formatSeconds(expectedSeconds)}, 실제 ${formatSeconds(asNumber(actualSeconds))}, ${formatActualExpectedDifference(actualSeconds, expectedSeconds)}`;
+  }).filter(Boolean);
+  return lines.length > 0 ? lines : ['사전 예상 기준 기록 없음'];
 }
 
 function getSurveyServices(services = serviceRegistry) {
@@ -133,7 +163,7 @@ function formatTaskLine(result, index) {
   return parts.concat(optional).join(', ');
 }
 
-export function formatServiceConditionRecord(record, service, conditionId) {
+export function formatServiceConditionRecord(record, service, conditionId, comparisonLabel = '') {
   const taskResults = Array.isArray(record?.actualRuns?.[conditionId]) ? record.actualRuns[conditionId] : [];
   if (!record || taskResults.length === 0) return '';
 
@@ -149,8 +179,17 @@ export function formatServiceConditionRecord(record, service, conditionId) {
     `완료하지 못한 과업 ${formatCount(totals.incompleteCount, '개')}`,
   ].filter(Boolean);
 
+  const pageType = CONDITION_PAGE_TYPE_LABELS[conditionId] ?? conditionId;
   const taskLines = taskResults.map(formatTaskLine);
-  return `${summaryParts.join(', ')}\n과업별: ${taskLines.join(' / ')}`;
+  const benchmarkLines = formatBenchmarkComparisonLines(record, conditionId, totals.durationSeconds);
+  return [
+    comparisonLabel ? `비교안: ${comparisonLabel}` : '',
+    `페이지 유형: ${pageType}`,
+    summaryParts.join(', '),
+    '사전 예상 시간과 실제 시간의 차이:',
+    ...benchmarkLines.map((line) => `- ${line}`),
+    `과업별: ${taskLines.join(' / ')}`,
+  ].filter(Boolean).join('\n');
 }
 
 export function buildStudySurveyAnswers(store, services = serviceRegistry) {
@@ -159,10 +198,13 @@ export function buildStudySurveyAnswers(store, services = serviceRegistry) {
 
   for (const service of progress.services) {
     if (!service.record) continue;
-    for (const conditionId of CONDITION_IDS) {
-      const key = `service.${service.id}.actual${CONDITION_LABELS[conditionId]}`;
+    const assignment = normalizeComparisonAssignment(service.record.comparisonAssignment);
+    for (const comparisonLabel of COMPARISON_LABELS) {
+      const conditionId = getConditionIdForComparisonLabel(assignment, comparisonLabel);
+      if (!conditionId) continue;
+      const key = `service.${service.id}.actual${comparisonLabel}`;
       const param = surveyPrefillParams[key];
-      const value = formatServiceConditionRecord(service.record, service, conditionId);
+      const value = formatServiceConditionRecord(service.record, service, conditionId, comparisonLabel);
       if (param && value) {
         answers[key] = value;
       }

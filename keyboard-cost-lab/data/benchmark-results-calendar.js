@@ -1,8 +1,8 @@
 export const benchmarkResultsCalendar = {
-  "generatedAt": "2026-08-03T20:50:37.990Z",
+  "generatedAt": "2026-08-07T09:12:29.757Z",
   "variants": {
     "variantA": {
-      "label": "비교안 A · 조작 부담이 큰 구조",
+      "label": "조작 부담 문제가 있는 페이지",
       "description": "전체 메뉴가 접힌 것처럼 보이지만 메뉴 항목이 계속 순차 탐색되고, 예약 시간과 옵션 선택이 여러 멈춤 지점으로 흩어진 구조.",
       "tasks": {
         "task1_book_remote_tuesday_options": {
@@ -480,7 +480,7 @@ export const benchmarkResultsCalendar = {
       }
     },
     "variantB": {
-      "label": "비교안 B · 개선 구조",
+      "label": "조작 부담이 개선된 페이지",
       "description": "접힌 메뉴 항목은 초점 대상에서 제외하고, 예약 가능 시간으로 바로 이동한 뒤 시간표와 옵션을 짧게 조작하는 구조.",
       "tasks": {
         "task1_book_remote_tuesday_options": {

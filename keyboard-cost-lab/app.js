@@ -8,7 +8,11 @@ import {
   escapeHtml,
   deepClone,
   formatServiceScreenButtonLabel,
+  CONDITION_PAGE_TYPE_LABELS,
   getDefaultConditionOrder,
+  getRandomComparisonAssignment,
+  getComparisonLabel,
+  getConditionIdForComparisonLabel,
   renderRunnerTaskRequestHtml,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
@@ -80,8 +84,6 @@ const SERVICE_INTRO_POINTS = [
 ];
 const VARIANT_META = {
   variantA: {
-    shortLabel: 'A',
-    title: '비교안 A · 조작 부담이 큰 구조',
     subtitle: '상단 링크와 조건 선택을 지난 뒤 결과에 도달하고, 예약 시간을 다시 찾게 되는 구조',
     improvements: [
       '상단 링크와 보조 링크를 모두 지나야 결과를 만날 수 있습니다.',
@@ -90,8 +92,6 @@ const VARIANT_META = {
     ],
   },
   variantB: {
-    shortLabel: 'B',
-    title: '비교안 B · 개선 구조',
     subtitle: '예약 가능 시간으로 바로 이동하고, 예약 시간표에 한 번만 들어가 이동하며, 대화상자 초점 복귀를 보장하는 구조',
     improvements: [
       '예약 가능 시간으로 바로 이동할 수 있어 첫 진입 부담을 낮춥니다.',
@@ -100,6 +100,26 @@ const VARIANT_META = {
     ],
   },
 };
+
+function getConditionDisplayMeta(conditionId) {
+  const comparisonLabel = getComparisonLabel(state?.comparisonAssignment, conditionId);
+  return {
+    ...VARIANT_META[conditionId],
+    shortLabel: comparisonLabel,
+    title: `비교안 ${comparisonLabel} · ${CONDITION_PAGE_TYPE_LABELS[conditionId]}`,
+  };
+}
+
+function getDisplayVariantMeta() {
+  return {
+    variantA: getConditionDisplayMeta('variantA'),
+    variantB: getConditionDisplayMeta('variantB'),
+  };
+}
+
+function getImprovedComparisonLabel() {
+  return getComparisonLabel(state?.comparisonAssignment, 'variantB');
+}
 
 const RUNNER_LABELS = {
   quickJump: '예약 가능 시간으로 바로 이동',
@@ -180,6 +200,7 @@ function createMainState() {
   return {
     sessionId,
     order,
+    comparisonAssignment: getRandomComparisonAssignment(),
     currentConditionIndex: 0,
     currentTaskIndex: 0,
     selectedServiceId: null,
@@ -412,6 +433,7 @@ function resetExperimentState() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.activeLaunch = null;
   state.runnerTaskRequestVisible = false;
   state.runs.variantA = createConditionRuntime('variantA');
@@ -454,6 +476,7 @@ function startExperiment() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
   prepareCurrentTaskForMain();
@@ -1658,9 +1681,15 @@ function handleGridNavigation(event, currentButton) {
 
   if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    run.currentGridSlotId = availableSlots[nextIndex].id;
-    requestFocus(`[data-grid-slot="true"][data-slot-id="${availableSlots[nextIndex].id}"]`);
-    render();
+    const nextSlotId = availableSlots[nextIndex].id;
+    const nextButton = document.querySelector(`[data-grid-slot="true"][data-slot-id="${nextSlotId}"]`);
+    if (!(nextButton instanceof HTMLElement)) return;
+
+    currentButton.tabIndex = -1;
+    nextButton.tabIndex = 0;
+    run.currentGridSlotId = nextSlotId;
+    nextButton.focus();
+    nextButton.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     return;
   }
 
@@ -1813,7 +1842,7 @@ function renderServiceIntroView() {
     serviceSummary: service.summary,
     introPoints: SERVICE_INTRO_POINTS,
     order: state.order,
-    variantMeta: VARIANT_META,
+    variantMeta: getDisplayVariantMeta(),
   });
 }
 
@@ -1888,7 +1917,7 @@ function renderTaskReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
+      <p class="eyebrow">${escapeHtml(getConditionDisplayMeta(conditionId).title)}</p>
       <h1 id="review-heading" tabindex="-1">과업 수행 기록</h1>
       <p>${escapeHtml(task.title)}의 수행 기록과 사전 예상 기준을 확인할 수 있습니다.</p>
     </section>
@@ -1917,7 +1946,7 @@ function renderTaskReviewView() {
           ${benchmark.assumptions.map((assumption) => `<li>${escapeHtml(assumption)}</li>`).join('')}
         </ul>
         <div class="benchmark-delta">
-          <h3>비교안 B의 예상 시간 감소</h3>
+          <h3>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 시간 감소</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
               <li><strong>${escapeHtml(benchmarkResultsCalendar.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
@@ -1947,9 +1976,9 @@ function renderConditionReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 수행 기록</p>
+      <p class="eyebrow">비교안 ${escapeHtml(getConditionDisplayMeta(conditionId).shortLabel)} 수행 기록</p>
       <h1 id="condition-review-heading" tabindex="-1">현재 비교안 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업별 기록을 모두 저장했습니다.</p>
+      <p>${escapeHtml(getConditionDisplayMeta(conditionId).title)}의 과업별 기록을 모두 저장했습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
@@ -1968,7 +1997,7 @@ function renderConditionReviewView() {
         <h2>예상 조작 부담 합계</h2>
         <table class="summary-table">
           <thead>
-            <tr><th>사용자 유형</th><th>기준 예상</th><th>A→B 예상 감소</th></tr>
+            <tr><th>사용자 유형</th><th>기준 예상</th><th>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 감소</th></tr>
           </thead>
           <tbody>
             ${Object.entries(benchmarkOverall).map(([profileId, value]) => `
@@ -1998,8 +2027,10 @@ function renderConditionReviewView() {
 }
 
 function renderFinalView() {
-  const actualA = aggregateActualCondition(state.runs.variantA);
-  const actualB = aggregateActualCondition(state.runs.variantB);
+  const conditionIdA = getConditionIdForComparisonLabel(state.comparisonAssignment, 'A');
+  const conditionIdB = getConditionIdForComparisonLabel(state.comparisonAssignment, 'B');
+  const actualA = aggregateActualCondition(state.runs[conditionIdA]);
+  const actualB = aggregateActualCondition(state.runs[conditionIdB]);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
   return `
@@ -2024,8 +2055,8 @@ function renderFinalView() {
     </section>
     ${renderStudySurveyTransferPanel()}
     <section class="comparison-grid">
-      ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
-      ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdA, actualA, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdB, actualB, selectedProfileId)}
     </section>
     <section class="card">
       <h2>두 화면의 수행 기록 비교</h2>
@@ -2056,7 +2087,8 @@ function renderFinalView() {
         <li>요청한 동작을 끝내지 못한 상태로 과업을 종료하면 ‘완료하지 못한 과업’으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
-        <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
+        <button class="button button-primary" data-action="go-home">다른 서비스 테스트 시작하기</button>
+        <button class="button button-secondary" data-action="restart-experiment">이 서비스 처음부터 다시 시작</button>
       </div>
     </section>
   `;
@@ -2075,7 +2107,7 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
     actualTotals,
     selectedProfileId,
     benchmarkResults: benchmarkResultsCalendar,
-    variantMeta: VARIANT_META,
+    variantMeta: getDisplayVariantMeta(),
   });
 }
 
@@ -2967,6 +2999,7 @@ function persistCurrentServiceProgress() {
     serviceLabel: SERVICE_LABEL,
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     taskCount: calendarTasks.length,
     conditionCount: state.order.length,
     measurementRules: MEASUREMENT_RULES,
@@ -2984,6 +3017,7 @@ function buildExportPayload() {
     serviceId: 'calendar',
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     measurementRules: MEASUREMENT_RULES,
     actualRuns: {
       variantA: state.runs.variantA.taskResults,

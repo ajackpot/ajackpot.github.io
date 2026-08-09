@@ -32,12 +32,54 @@ export function clsx(...tokens) {
   return tokens.filter(Boolean).join(' ');
 }
 
-export function getDefaultConditionOrder() {
-  const baseOrder = ['variantA', 'variantB'];
-  const randomValue = globalThis.crypto?.getRandomValues
+const CONDITION_IDS = Object.freeze(['variantA', 'variantB']);
+const DEFAULT_COMPARISON_ASSIGNMENT = Object.freeze({ variantA: 'A', variantB: 'B' });
+
+export const CONDITION_PAGE_TYPE_LABELS = Object.freeze({
+  variantA: '조작 부담 문제가 있는 페이지',
+  variantB: '조작 부담이 개선된 페이지',
+});
+
+function randomUnit() {
+  return globalThis.crypto?.getRandomValues
     ? globalThis.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
     : Math.random();
-  return randomValue < 0.5 ? baseOrder : baseOrder.slice().reverse();
+}
+
+export function getDefaultConditionOrder() {
+  const baseOrder = [...CONDITION_IDS];
+  return randomUnit() < 0.5 ? baseOrder : baseOrder.reverse();
+}
+
+export function getRandomComparisonAssignment() {
+  return randomUnit() < 0.5
+    ? { variantA: 'A', variantB: 'B' }
+    : { variantA: 'B', variantB: 'A' };
+}
+
+export function normalizeComparisonAssignment(assignment) {
+  const variantALabel = assignment?.variantA;
+  const variantBLabel = assignment?.variantB;
+  const valid = ['A', 'B'].includes(variantALabel)
+    && ['A', 'B'].includes(variantBLabel)
+    && variantALabel !== variantBLabel;
+  return valid
+    ? { variantA: variantALabel, variantB: variantBLabel }
+    : { ...DEFAULT_COMPARISON_ASSIGNMENT };
+}
+
+export function getComparisonLabel(assignment, conditionId) {
+  return normalizeComparisonAssignment(assignment)[conditionId] ?? '';
+}
+
+export function getConditionIdForComparisonLabel(assignment, comparisonLabel) {
+  const normalized = normalizeComparisonAssignment(assignment);
+  return CONDITION_IDS.find((conditionId) => normalized[conditionId] === comparisonLabel) ?? null;
+}
+
+export function getComparisonOrder(conditionOrder, assignment) {
+  const normalizedOrder = Array.isArray(conditionOrder) ? conditionOrder : CONDITION_IDS;
+  return normalizedOrder.map((conditionId) => getComparisonLabel(assignment, conditionId)).filter(Boolean);
 }
 
 export function formatServiceScreenButtonLabel(serviceLabel) {

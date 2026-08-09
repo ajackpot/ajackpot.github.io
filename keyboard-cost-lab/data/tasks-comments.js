@@ -18,12 +18,11 @@ export const commentsTasks = [
   {
     id: 'task-2-popular-admin-detail-helpful',
     benchmarkTaskId: 'task2_popular_admin_detail_helpful',
-    title: '과업 2. 운영자 안내 댓글 정보 보기 후 도움이 돼요',
-    goalSummary: '정렬 기준을 ‘도움이 많은 순’으로 바꾸세요. 운영자 안내 댓글의 ‘댓글 정보 보기’를 열었다가 닫은 뒤 ‘도움이 돼요’를 누르세요.',
+    title: '과업 2. 3월 25일 운영자 안내 댓글 정보 보기 후 도움이 돼요',
+    goalSummary: '정렬 기준을 ‘도움이 많은 순’으로 바꾸세요. 3월 25일에 작성된 운영자 안내 댓글의 ‘댓글 정보 보기’를 열었다가 닫은 뒤 ‘도움이 돼요’를 누르세요.',
     targetCommentId: 'comment-admin',
     completion: 'helpful',
     requiredSort: 'popular',
-    requiredCategory: 'all',
     requiresDetailVisit: true,
   },
 ];

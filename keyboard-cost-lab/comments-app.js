@@ -7,7 +7,11 @@ import {
   formatSeconds,
   escapeHtml,
   deepClone,
+  CONDITION_PAGE_TYPE_LABELS,
   getDefaultConditionOrder,
+  getRandomComparisonAssignment,
+  getComparisonLabel,
+  getConditionIdForComparisonLabel,
   renderRunnerTaskRequestHtml,
   renderRunnerFooterHtml,
   renderRunnerCompletionDialogHtml,
@@ -62,8 +66,6 @@ const SERVICE_LABEL = '댓글 목록';
 
 const VARIANT_META = {
   variantA: {
-    shortLabel: 'A',
-    title: '비교안 A · 조작 부담이 큰 구조',
     subtitle: '댓글마다 여러 링크와 버튼을 지나야 하고, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾아야 하는 구조',
     improvements: [
       '상단 링크와 정렬·범위 선택 뒤에 댓글 목록이 나옵니다.',
@@ -72,8 +74,6 @@ const VARIANT_META = {
     ],
   },
   variantB: {
-    shortLabel: 'B',
-    title: '비교안 B · 개선 구조',
     subtitle: '댓글 목록으로 바로 이동하고, 댓글을 하나의 선택 항목으로 고른 뒤, 댓글 작업을 한곳에서 이어서 수행하는 구조',
     improvements: [
       '댓글 목록으로 바로 이동해 첫 진입 부담을 줄입니다.',
@@ -82,6 +82,26 @@ const VARIANT_META = {
     ],
   },
 };
+
+function getConditionDisplayMeta(conditionId) {
+  const comparisonLabel = getComparisonLabel(state?.comparisonAssignment, conditionId);
+  return {
+    ...VARIANT_META[conditionId],
+    shortLabel: comparisonLabel,
+    title: `비교안 ${comparisonLabel} · ${CONDITION_PAGE_TYPE_LABELS[conditionId]}`,
+  };
+}
+
+function getDisplayVariantMeta() {
+  return {
+    variantA: getConditionDisplayMeta('variantA'),
+    variantB: getConditionDisplayMeta('variantB'),
+  };
+}
+
+function getImprovedComparisonLabel() {
+  return getComparisonLabel(state?.comparisonAssignment, 'variantB');
+}
 
 const RUNNER_LABELS = {
   quickJump: '댓글 목록으로 바로 이동',
@@ -169,6 +189,7 @@ function createMainState() {
   return {
     sessionId,
     order,
+    comparisonAssignment: getRandomComparisonAssignment(),
     currentConditionIndex: 0,
     currentTaskIndex: 0,
     view: 'serviceIntro',
@@ -377,6 +398,7 @@ function resetExperimentState() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.activeLaunch = null;
   state.runnerTaskRequestVisible = false;
   state.runs.variantA = createConditionRuntime('variantA');
@@ -392,6 +414,7 @@ function startExperiment() {
   state.currentConditionIndex = 0;
   state.currentTaskIndex = 0;
   state.order = getDefaultConditionOrder();
+  state.comparisonAssignment = getRandomComparisonAssignment();
   state.runs.variantA = createConditionRuntime('variantA');
   state.runs.variantB = createConditionRuntime('variantB');
   prepareCurrentTaskForMain();
@@ -1022,12 +1045,48 @@ function buildCommentSelector(commentId) {
   return `[data-comment-option="true"][data-comment-id="${commentId}"]`;
 }
 
-function selectComment(commentId) {
+function renderSelectedCommentPanelContent(run, selectedComment) {
+  return `
+    <h3 id="selected-comment-heading">선택한 댓글 작업</h3>
+    ${selectedComment ? `
+      <p class="goal">${escapeHtml(selectedComment.author)} · ${escapeHtml(selectedComment.badge)}</p>
+      <p class="muted">${escapeHtml(selectedComment.summary)}</p>
+      <div class="button-row">
+        <button class="button button-secondary" data-action="toggle-replies" data-comment-id="${selectedComment.id}" data-focus-id="selected-replies-${selectedComment.id}">${run.expandedCommentId === selectedComment.id ? `답글 ${selectedComment.replyCount}개 닫기` : `답글 ${selectedComment.replyCount}개 보기`}</button>
+        <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${selectedComment.id}" data-focus-id="selected-detail-${selectedComment.id}">댓글 정보 보기</button>
+        <button class="button button-ghost" data-action="mark-helpful" data-comment-id="${selectedComment.id}" data-focus-id="selected-helpful-${selectedComment.id}">도움이 돼요</button>
+      </div>
+    ` : '<p class="muted">선택된 댓글이 없습니다.</p>'}
+  `;
+}
+
+function syncSelectedCommentUi(commentId, { moveFocus = true } = {}) {
   const run = getCurrentRun();
   if (!run || !commentId) return;
+  const target = document.querySelector(buildCommentSelector(commentId));
+  if (!(target instanceof HTMLElement)) return;
+
+  document.querySelectorAll('[data-comment-option="true"]').forEach((option) => {
+    const selected = option === target;
+    option.setAttribute('aria-selected', selected ? 'true' : 'false');
+    option.tabIndex = selected ? 0 : -1;
+    option.classList.toggle('comment-option-button-active', selected);
+  });
+
   run.currentCommentId = commentId;
-  requestFocus(buildCommentSelector(commentId));
-  render();
+  const panel = document.querySelector('.selected-comment-card');
+  const selectedComment = getCommentById(commentId);
+  if (panel instanceof HTMLElement) {
+    panel.innerHTML = renderSelectedCommentPanelContent(run, selectedComment);
+  }
+  if (moveFocus) {
+    target.focus();
+    target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }
+}
+
+function selectComment(commentId) {
+  syncSelectedCommentUi(commentId);
 }
 
 function setCommentDraft(fieldName, fieldValue, focusId = '') {
@@ -1576,9 +1635,8 @@ function handleCommentOptionNavigation(event, currentButton) {
 
   if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    run.currentCommentId = visibleComments[nextIndex].id;
-    requestFocus(buildCommentSelector(visibleComments[nextIndex].id));
-    render();
+    if (nextIndex === currentIndex) return;
+    syncSelectedCommentUi(visibleComments[nextIndex].id);
   }
 }
 
@@ -1772,7 +1830,7 @@ function renderTaskReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">${escapeHtml(VARIANT_META[conditionId].title)}</p>
+      <p class="eyebrow">${escapeHtml(getConditionDisplayMeta(conditionId).title)}</p>
       <h1 id="review-heading" tabindex="-1">과업 수행 기록</h1>
       <p>${escapeHtml(task.title)}의 수행 기록과 사전 예상 기준을 확인할 수 있습니다.</p>
     </section>
@@ -1801,7 +1859,7 @@ function renderTaskReviewView() {
           ${benchmark.assumptions.map((assumption) => `<li>${escapeHtml(assumption)}</li>`).join('')}
         </ul>
         <div class="benchmark-delta">
-          <h3>비교안 B의 예상 시간 감소</h3>
+          <h3>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 시간 감소</h3>
           <ul>
             ${Object.entries(comparison).map(([profileId, value]) => `
               <li><strong>${escapeHtml(benchmarkResultsComments.overall[profileId].label)}</strong>: ${value.expectedReductionSeconds}초 감소 예상 (${value.expectedReductionPercent}%)</li>
@@ -1831,9 +1889,9 @@ function renderConditionReviewView() {
 
   return `
     <section class="card review-hero">
-      <p class="eyebrow">비교안 ${escapeHtml(VARIANT_META[conditionId].shortLabel)} 수행 기록</p>
+      <p class="eyebrow">비교안 ${escapeHtml(getConditionDisplayMeta(conditionId).shortLabel)} 수행 기록</p>
       <h1 id="condition-review-heading" tabindex="-1">현재 비교안 요약</h1>
-      <p>${escapeHtml(VARIANT_META[conditionId].title)}의 과업별 기록을 모두 저장했습니다.</p>
+      <p>${escapeHtml(getConditionDisplayMeta(conditionId).title)}의 과업별 기록을 모두 저장했습니다.</p>
     </section>
     <section class="review-grid">
       <article class="card">
@@ -1852,7 +1910,7 @@ function renderConditionReviewView() {
         <h2>예상 조작 부담 합계</h2>
         <table class="summary-table">
           <thead>
-            <tr><th>사용자 유형</th><th>기준 예상</th><th>A→B 예상 감소</th></tr>
+            <tr><th>사용자 유형</th><th>기준 예상</th><th>비교안 ${escapeHtml(getImprovedComparisonLabel())}의 예상 감소</th></tr>
           </thead>
           <tbody>
             ${Object.entries(benchmarkOverall).map(([profileId, value]) => `
@@ -1882,8 +1940,10 @@ function renderConditionReviewView() {
 }
 
 function renderFinalView() {
-  const actualA = aggregateActualCondition(state.runs.variantA);
-  const actualB = aggregateActualCondition(state.runs.variantB);
+  const conditionIdA = getConditionIdForComparisonLabel(state.comparisonAssignment, 'A');
+  const conditionIdB = getConditionIdForComparisonLabel(state.comparisonAssignment, 'B');
+  const actualA = aggregateActualCondition(state.runs[conditionIdA]);
+  const actualB = aggregateActualCondition(state.runs[conditionIdB]);
   const selectedProfileId = state.benchmarkProfileFocus;
   const exportUrl = buildExportDataUrl();
   return `
@@ -1908,8 +1968,8 @@ function renderFinalView() {
     </section>
     ${renderStudySurveyTransferPanel()}
     <section class="comparison-grid">
-      ${renderFinalConditionCard('variantA', actualA, selectedProfileId)}
-      ${renderFinalConditionCard('variantB', actualB, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdA, actualA, selectedProfileId)}
+      ${renderFinalConditionCard(conditionIdB, actualB, selectedProfileId)}
     </section>
     <section class="card">
       <h2>두 화면의 수행 기록 비교</h2>
@@ -1940,8 +2000,8 @@ function renderFinalView() {
         <li>요청한 동작을 끝내지 못한 상태로 과업을 종료하면 ‘완료하지 못한 과업’으로 표시됩니다.</li>
       </ul>
       <div class="button-row">
-        <button class="button button-secondary" data-action="restart-experiment">처음부터 다시 시작</button>
-        <button class="button button-secondary" data-action="go-home">서비스 선택으로 돌아가기</button>
+        <button class="button button-primary" data-action="go-home">다른 서비스 테스트 시작하기</button>
+        <button class="button button-secondary" data-action="restart-experiment">이 서비스 처음부터 다시 시작</button>
       </div>
     </section>
   `;
@@ -1960,7 +2020,7 @@ function renderFinalConditionCard(conditionId, actualTotals, selectedProfileId) 
     actualTotals,
     selectedProfileId,
     benchmarkResults: benchmarkResultsComments,
-    variantMeta: VARIANT_META,
+    variantMeta: getDisplayVariantMeta(),
   });
 }
 
@@ -2322,16 +2382,7 @@ function renderVariantBCommentList(run, visibleComments) {
         `).join('')}
       </div>
       <section class="card selected-comment-card">
-        <h3 id="selected-comment-heading">선택한 댓글 작업</h3>
-        ${selectedComment ? `
-          <p class="goal">${escapeHtml(selectedComment.author)} · ${escapeHtml(selectedComment.badge)}</p>
-          <p class="muted">${escapeHtml(selectedComment.summary)}</p>
-          <div class="button-row">
-            <button class="button button-secondary" data-action="toggle-replies" data-comment-id="${selectedComment.id}" data-focus-id="selected-replies-${selectedComment.id}">${run.expandedCommentId === selectedComment.id ? `답글 ${selectedComment.replyCount}개 닫기` : `답글 ${selectedComment.replyCount}개 보기`}</button>
-            <button class="button button-ghost" data-action="open-comment-detail" data-comment-id="${selectedComment.id}" data-focus-id="selected-detail-${selectedComment.id}">댓글 정보 보기</button>
-            <button class="button button-ghost" data-action="mark-helpful" data-comment-id="${selectedComment.id}" data-focus-id="selected-helpful-${selectedComment.id}">도움이 돼요</button>
-          </div>
-        ` : '<p class="muted">선택된 댓글이 없습니다.</p>'}
+        ${renderSelectedCommentPanelContent(run, selectedComment)}
       </section>
     </div>
     ${expandedComment ? renderReplyList(expandedComment, run) : ''}
@@ -2447,6 +2498,7 @@ function persistCurrentServiceProgress() {
     serviceLabel: SERVICE_LABEL,
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     taskCount: commentsTasks.length,
     conditionCount: state.order.length,
     measurementRules: MEASUREMENT_RULES,
@@ -2464,6 +2516,7 @@ function buildExportPayload() {
     serviceId: 'comments',
     sessionId: state.sessionId,
     order: state.order,
+    comparisonAssignment: state.comparisonAssignment,
     measurementRules: MEASUREMENT_RULES,
     actualRuns: {
       variantA: state.runs.variantA.taskResults,
