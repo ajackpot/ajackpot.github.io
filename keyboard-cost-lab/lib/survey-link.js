@@ -27,34 +27,6 @@ function formatOptionalMetric(label, value, suffix = '회') {
   return `${label} ${formatCount(number, suffix)}`;
 }
 
-function getExpectedSeconds(record, conditionId, profileId) {
-  const profile = record?.benchmarkSummary?.[profileId];
-  if (!profile || typeof profile !== 'object') return null;
-  const key = conditionId === 'variantA' ? 'variantAExpectedSeconds' : 'variantBExpectedSeconds';
-  const value = Number(profile[key]);
-  return Number.isFinite(value) ? value : null;
-}
-
-function formatActualExpectedDifference(actualSeconds, expectedSeconds) {
-  const difference = Number((asNumber(actualSeconds) - asNumber(expectedSeconds)).toFixed(1));
-  if (difference > 0) return `예상보다 ${formatSeconds(difference)} 오래 걸림`;
-  if (difference < 0) return `예상보다 ${formatSeconds(Math.abs(difference))} 짧게 걸림`;
-  return '예상 시간과 같음';
-}
-
-function formatBenchmarkComparisonLines(record, conditionId, actualSeconds) {
-  const profiles = record?.benchmarkSummary && typeof record.benchmarkSummary === 'object'
-    ? Object.entries(record.benchmarkSummary)
-    : [];
-  const lines = profiles.map(([profileId, profile]) => {
-    const expectedSeconds = getExpectedSeconds(record, conditionId, profileId);
-    if (expectedSeconds === null) return '';
-    const label = profile?.label || profileId;
-    return `${label}: 예상 ${formatSeconds(expectedSeconds)}, 실제 ${formatSeconds(asNumber(actualSeconds))}, ${formatActualExpectedDifference(actualSeconds, expectedSeconds)}`;
-  }).filter(Boolean);
-  return lines.length > 0 ? lines : ['사전 예상 기준 기록 없음'];
-}
-
 function getSurveyServices(services = serviceRegistry) {
   return SURVEY_SERVICE_IDS.map((serviceId) => {
     const manifestService = surveyManifest.services.find((service) => service.id === serviceId);
@@ -217,13 +189,10 @@ export function formatServiceConditionRecord(record, service, conditionId, compa
 
   const pageType = CONDITION_PAGE_TYPE_LABELS[conditionId] ?? conditionId;
   const taskLines = taskResults.map(formatTaskLine);
-  const benchmarkLines = formatBenchmarkComparisonLines(record, conditionId, totals.durationSeconds);
   return [
     comparisonLabel ? `비교안: ${comparisonLabel}` : '',
     `페이지 유형: ${pageType}`,
     summaryParts.join(', '),
-    '사전 예상 시간과 실제 시간의 차이:',
-    ...benchmarkLines.map((line) => `- ${line}`),
     `과업별: ${taskLines.join(' / ')}`,
   ].filter(Boolean).join('\n');
 }

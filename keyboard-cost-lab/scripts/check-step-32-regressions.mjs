@@ -152,13 +152,13 @@ const answers = buildStudySurveyAnswers(store);
 const calendarA = answers['service.calendar.actualA'] ?? '';
 const calendarB = answers['service.calendar.actualB'] ?? '';
 assert(calendarA.includes('페이지 유형: 조작 부담이 개선된 페이지'), '역배정 시 설문 비교안 A에 개선 페이지 유형을 기록함');
-assert(calendarA.includes('키보드 사용자: 예상 56.7초, 실제 50.0초, 예상보다 6.7초 짧게 걸림'), '설문 비교안 A에 개선 구조의 예상 시간과 실제 차이를 기록함');
+assert(!calendarA.includes('사전 예상 시간과 실제 시간의 차이'), '설문 비교안 A 전송값에서 예상·실제 시간 차이를 제외함');
 assert(calendarB.includes('페이지 유형: 조작 부담 문제가 있는 페이지'), '역배정 시 설문 비교안 B에 문제 페이지 유형을 기록함');
-assert(calendarB.includes('키보드 사용자: 예상 130.7초, 실제 160.0초, 예상보다 29.3초 오래 걸림'), '설문 비교안 B에 문제 구조의 예상 시간과 실제 차이를 기록함');
+assert(!calendarB.includes('사전 예상 시간과 실제 시간의 차이'), '설문 비교안 B 전송값에서 예상·실제 시간 차이를 제외함');
 const surveyUrl = buildStudySurveyUrl(store);
 assert(surveyUrl.includes('entry.384462370='), '설문 URL에 예약 캘린더 비교안 A 수행 기록이 포함됨');
 assert(surveyUrl.includes('entry.1394688977='), '설문 URL에 예약 캘린더 비교안 B 수행 기록이 포함됨');
-assert(surveyUrl.length < 20000, `모든 서비스 수행 기록을 포함한 설문 URL 길이가 과도하지 않음 (${surveyUrl.length}자)`);
+assert(surveyUrl.length < 8000, `예상·실제 시간 차이를 제외한 설문 URL이 8,000자보다 짧음 (${surveyUrl.length}자)`);
 assert(!surveyUrl.includes('session-example'), '설문 URL에 세션 식별값을 전달하지 않음');
 
 const exportPayload = buildExportPayload({

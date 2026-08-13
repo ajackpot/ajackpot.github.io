@@ -93,13 +93,13 @@ python -m http.server 4173
 - `lib/experiment-store.js`: 서비스별 진행 상태, 진척률, 수행 기록, 재개 계획과 실행 상태를 브라우저 저장소에 보존
 - `lib/utils.js`: 공통 유틸리티와 과업 수행 페이지 하단/완료/과업 종료 확인 대화상자 렌더링
 - `scripts/run-benchmark.mjs`: 서비스별 사전 계산 결과 생성 스크립트
-- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/check-comments-randomized-replies.mjs`, `scripts/smoke-render-runner.mjs`, `scripts/check-user-facing-copy.mjs`, `scripts/check-step-32-regressions.mjs`, `scripts/check-step-33-resume-progress.mjs`, `scripts/check-step-34-comments-skip-progress-copy.mjs`: 내부 식별값 비노출, 과업 수행 페이지 과업 요청 표시 옵션, 주요 실행 버튼 연결, 서비스별 진행 상태 저장, 댓글 답글 작성자 무작위화, 검색 미리보기 정답 무작위화, 보조 기능 패널, 수행 화면 렌더링, 화면 문구, A/B 배정·댓글 과업 판정·복합 위젯 초점·설문 전달값, 중단 후 재개·진척률, 댓글 공통 본문 바로가기와 동적 진행 문구 회귀를 확인하는 점검 스크립트
+- `scripts/static-quality-check.mjs`, `scripts/smoke-static-ui.mjs`, `scripts/smoke-contract.mjs`, `scripts/check-static-contracts.mjs`, `scripts/check-comments-randomized-replies.mjs`, `scripts/smoke-render-runner.mjs`, `scripts/check-user-facing-copy.mjs`, `scripts/check-step-32-regressions.mjs`, `scripts/check-step-33-resume-progress.mjs`, `scripts/check-step-34-comments-skip-progress-copy.mjs`, `scripts/check-step-35-survey-url-length.mjs`: 내부 식별값 비노출, 과업 수행 페이지 과업 요청 표시 옵션, 주요 실행 버튼 연결, 서비스별 진행 상태 저장, 댓글 답글 작성자 무작위화, 검색 미리보기 정답 무작위화, 보조 기능 패널, 수행 화면 렌더링, 화면 문구, A/B 배정·댓글 과업 판정·복합 위젯 초점·설문 전달값, 중단 후 재개·진척률, 댓글 공통 본문 바로가기, 진행 문구, 설문 URL 길이를 확인하는 점검 스크립트
 - `docs/`: 단계별 구현 보고서, 용어 가이드, 수동 점검표
 
 ## 설문지 연동
 
 - `data/survey-config.js`: Google 설문지 응답 URL과 수행 기록 자동 입력에 필요한 6개 `entry.*` 값만 관리합니다. 설문 문항 전체 목록은 Apps Script 실행 뒤 응답 시트의 `연동_JSON`에서 관리합니다.
-- `lib/survey-link.js`: 3개 서비스의 수행 기록이 모두 저장되었는지 확인하고, 각 비교안의 실제 페이지 유형과 사용자 유형별 사전 예상 시간·실제 시간·시간 차이를 포함한 수행 기록 문장을 만들어 설문지 URL에 붙입니다.
+- `lib/survey-link.js`: 3개 서비스의 수행 기록이 모두 저장되었는지 확인하고, 각 비교안의 실제 페이지 유형·실제 합계·과업별 기록만 설문지 URL에 붙입니다. 사전 예상 시간과 실제 시간의 차이는 URL 길이를 줄이기 위해 설문 전송값에서 제외하며, 최종 결과 화면과 결과 파일에는 그대로 남습니다.
 - 홈 화면과 각 서비스 최종 결과 화면의 `설문 작성하기(새 탭)` 링크는 위 두 파일을 기준으로 생성됩니다.
 - `scripts/google-form-step-31-update.gs`: 기존 설문 제목·설명·문항 문구를 최신 테스트 페이지와 맞추고, PC 환경 안내와 기프티콘 지급 정보용 선택 입력란을 추가합니다.
 
@@ -128,5 +128,6 @@ python -m http.server 4173
 - `docs/step-32-ab-task-navigation-survey-fixes-report.md`: 32단계 A/B 배정 정합성, 다음 서비스 이동, 댓글 과업 판정, 복합 위젯 방향키 탐색, 설문 전달값 수정 보고서
 - `docs/step-33-resume-progress-report.md`: 33단계 완료 과업 건너뛰기, 저장된 최종 결과 열기, 홈 진척률 표시 보고서
 - `docs/step-34-comments-skip-progress-copy-report.md`: 34단계 댓글 공통 본문 바로가기, 댓글 벤치마크 재계산, 홈 진행 상태 문구 개선 보고서
+- `docs/step-35-shorter-survey-prefill-report.md`: 35단계 설문 미리 입력 URL에서 예상·실제 시간 차이를 제외한 수정 보고서
 
-이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 테스트 범위와 운영 규칙은 이 README, 수동 점검표, 34단계 보고서를 기준으로 확인합니다.
+이전 단계 보고서는 구현 이력을 남기기 위해 `docs` 폴더에 계속 보관합니다. 다만 현재 테스트 범위와 운영 규칙은 이 README, 수동 점검표, 35단계 보고서를 기준으로 확인합니다.
