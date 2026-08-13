@@ -102,6 +102,9 @@ export function getStudySurveyProgress(store, services = serviceRegistry) {
     };
   });
 
+  const completedTaskCount = rows.reduce((sum, row) => sum + row.completedTaskCount, 0);
+  const expectedTaskCount = rows.reduce((sum, row) => sum + row.expectedTaskCount, 0);
+
   return {
     services: rows,
     completedServices: rows.filter((row) => row.completed),
@@ -109,6 +112,39 @@ export function getStudySurveyProgress(store, services = serviceRegistry) {
     allComplete: rows.every((row) => row.completed),
     completedCount: rows.filter((row) => row.completed).length,
     totalCount: rows.length,
+    completedTaskCount,
+    expectedTaskCount,
+    hasAnyProgress: completedTaskCount > 0 || rows.some((row) => row.completed),
+  };
+}
+
+export function getSurveyTransferPanelCopy(progress) {
+  const totalCount = Number(progress?.totalCount ?? 0);
+  const remainingCount = Number(progress?.remainingServices?.length ?? totalCount);
+
+  if (progress?.allComplete) {
+    return {
+      eyebrow: '테스트 완료',
+      heading: '설문 작성하기',
+      description: `${totalCount}개 서비스의 테스트를 모두 마쳤습니다. 수행 기록이 입력된 설문지로 이동해 응답해 주세요.`,
+      waitingMessage: '',
+    };
+  }
+
+  if (progress?.hasAnyProgress) {
+    return {
+      eyebrow: '테스트 진행 중',
+      heading: '테스트 진행 상태',
+      description: `${remainingCount}개 서비스의 남은 과업을 마치면 설문지로 이동할 수 있습니다.`,
+      waitingMessage: `${remainingCount}개 서비스의 남은 과업을 마치면 설문 작성 버튼이 나타납니다.`,
+    };
+  }
+
+  return {
+    eyebrow: '테스트 준비',
+    heading: '테스트 진행 상태',
+    description: `아래에서 테스트할 서비스를 골라 주세요. ${totalCount}개 서비스의 테스트를 모두 마치면 설문지로 이동할 수 있습니다.`,
+    waitingMessage: `${totalCount}개 서비스의 테스트를 모두 마치면 설문 작성 버튼이 나타납니다.`,
   };
 }
 
@@ -234,6 +270,7 @@ export function buildStudySurveyUrl(store, { services = serviceRegistry, require
 export function renderSurveyTransferPanel({ store, services = serviceRegistry, requireAllServices = true } = {}) {
   const progress = getStudySurveyProgress(store, services);
   const surveyUrl = buildStudySurveyUrl(store, { services, requireAllServices });
+  const copy = getSurveyTransferPanelCopy(progress);
   const completedLabels = progress.completedServices.map((service) => service.label).join(', ') || '아직 없음';
   const remainingLabels = progress.remainingServices.map((service) => service.label).join(', ') || '없음';
   const statusLabel = `${progress.totalCount}개 중 ${progress.completedCount}개 서비스 완료`;
@@ -242,12 +279,12 @@ export function renderSurveyTransferPanel({ store, services = serviceRegistry, r
     <section class="card survey-transfer-card">
       <div class="service-card-header">
         <div>
-          <p class="eyebrow">테스트 마무리</p>
-          <h2>테스트를 마치고 설문 작성하기</h2>
+          <p class="eyebrow">${escapeHtml(copy.eyebrow)}</p>
+          <h2>${escapeHtml(copy.heading)}</h2>
         </div>
         <span class="pill ${progress.allComplete ? 'pill-success' : ''}">${escapeHtml(statusLabel)}</span>
       </div>
-      <p class="muted">세 가지 서비스의 과업을 모두 마치면 수행 기록이 자동으로 입력된 설문으로 이동할 수 있습니다.</p>
+      <p class="muted">${escapeHtml(copy.description)}</p>
       <dl class="meta-list compact service-progress-list">
         <div><dt>완료한 서비스</dt><dd>${escapeHtml(completedLabels)}</dd></div>
         <div><dt>남은 서비스</dt><dd>${escapeHtml(remainingLabels)}</dd></div>
@@ -255,7 +292,7 @@ export function renderSurveyTransferPanel({ store, services = serviceRegistry, r
       <div class="button-row">
         ${surveyUrl
           ? `<a class="button button-primary" href="${escapeHtml(surveyUrl)}" target="_blank" rel="noreferrer">설문 작성하기(새 탭)</a>`
-          : '<span class="muted">남은 서비스를 모두 마치면 설문 버튼이 나타납니다.</span>'}
+          : `<span class="muted">${escapeHtml(copy.waitingMessage)}</span>`}
       </div>
     </section>
   `;

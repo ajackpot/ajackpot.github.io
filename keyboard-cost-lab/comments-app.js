@@ -71,17 +71,17 @@ const SERVICE_LABEL = '댓글 목록';
 
 const VARIANT_META = {
   variantA: {
-    subtitle: '댓글마다 여러 링크와 버튼을 지나야 하고, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾아야 하는 구조',
+    subtitle: '본문 바로가기 링크로 글로벌 메뉴를 건너뛴 뒤에도 댓글마다 여러 링크와 버튼을 지나야 하고, 댓글 정보 대화상자를 닫으면 댓글 목록 제목 근처부터 다시 찾아야 하는 구조',
     improvements: [
-      '상단 링크와 정렬·범위 선택 뒤에 댓글 목록이 나옵니다.',
+      '본문 바로가기 링크로 글로벌 메뉴는 건너뛸 수 있지만, 정렬·범위 선택과 댓글별 작업은 많은 초점 대상으로 나뉘어 있습니다.',
       '댓글마다 작성자, 작성 시각, 도움이 돼요, 답글 보기, 댓글 정보 보기 등이 따로 나뉘어 있어 순차 이동이 길어집니다.',
       '댓글 정보 대화상자를 닫으면 방금 보던 댓글 작업으로 돌아가지 않고 댓글 목록 제목 근처부터 다시 찾아야 합니다.',
     ],
   },
   variantB: {
-    subtitle: '댓글 목록으로 바로 이동하고, 댓글을 하나의 선택 항목으로 고른 뒤, 댓글 작업을 한곳에서 이어서 수행하는 구조',
+    subtitle: '본문 바로가기 링크로 글로벌 메뉴를 건너뛴 뒤 댓글을 하나의 선택 항목으로 고르고, 댓글 작업을 한곳에서 이어서 수행하는 구조',
     improvements: [
-      '댓글 목록으로 바로 이동해 첫 진입 부담을 줄입니다.',
+      '본문 바로가기 링크로 글로벌 메뉴를 건너뛴 뒤 정렬과 범위를 선택합니다.',
       '댓글은 한 번만 들어간 뒤 방향키로 고르고, 댓글 작업은 한곳에 모아 둡니다.',
       '댓글 정보 대화상자를 닫으면 방금 사용한 작업 버튼으로 초점이 돌아옵니다.',
     ],
@@ -109,7 +109,7 @@ function getImprovedComparisonLabel() {
 }
 
 const RUNNER_LABELS = {
-  quickJump: '댓글 목록으로 바로 이동',
+  quickJump: '본문 바로가기',
   footerJump: '댓글 목록으로 이동',
 };
 
@@ -867,6 +867,12 @@ function handleRootClick(event) {
   if (action === 'jump-results') {
     event.preventDefault();
     focusElementNow('#comments-heading');
+    return;
+  }
+
+  if (action === 'jump-main') {
+    event.preventDefault();
+    focusElementNow('#filters-heading');
     return;
   }
 
@@ -1773,6 +1779,7 @@ function renderRunnerPage() {
 
   return `
     <div class="runner-shell">
+      ${state.completed ? '' : renderCommentsMainSkipLink()}
       <main class="runner-main" aria-label="댓글 목록 수행 화면" ${state.completed ? 'inert aria-hidden="true"' : ''}>
         <h1 class="sr-only" id="runner-title" tabindex="-1">댓글 목록 수행 화면</h1>
         ${state.showTaskRequestInRunner ? renderRunnerTaskRequestHtml({ goalSummary: task.goalSummary }) : ''}
@@ -2124,6 +2131,10 @@ function renderCommentsHeader(conditionId) {
   `;
 }
 
+function renderCommentsMainSkipLink() {
+  return '<a class="skip-link" href="#filters-heading" data-action="jump-main">본문 바로가기</a>';
+}
+
 
 function renderCommunityFeaturePanel(run) {
   if (!run.featurePanel) return '';
@@ -2349,7 +2360,7 @@ function renderCommentControls(conditionId, run) {
     <section class="card filters-card ${conditionId === 'variantA' ? 'filters-a' : 'filters-b'}">
       <div class="filters-header">
         <div>
-          <h2 id="filters-heading">정렬과 범위 선택</h2>
+          <h2 id="filters-heading" tabindex="-1">정렬과 범위 선택</h2>
         </div>
       </div>
       <div class="filters-grid">
